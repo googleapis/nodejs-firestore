@@ -159,7 +159,7 @@ export class RecursiveDelete {
       | firestore.CollectionReference<unknown>
       | firestore.DocumentReference<unknown>,
     private readonly maxLimit: number,
-    private readonly minLimit: number
+    private readonly minLimit: number,
   ) {
     this.maxPendingOps = maxLimit;
     this.minPendingOps = minLimit;
@@ -190,7 +190,7 @@ export class RecursiveDelete {
     const stream = this.getAllDescendants(
       this.ref instanceof CollectionReference
         ? (this.ref as CollectionReference<unknown>)
-        : (this.ref as DocumentReference<unknown>)
+        : (this.ref as DocumentReference<unknown>),
     );
     this.streamInProgress = true;
     let streamedDocsCount = 0;
@@ -226,7 +226,7 @@ export class RecursiveDelete {
    * @return {Stream<QueryDocumentSnapshot>} Stream of descendant documents.
    */
   private getAllDescendants(
-    ref: CollectionReference<unknown> | DocumentReference<unknown>
+    ref: CollectionReference<unknown> | DocumentReference<unknown>,
   ): NodeJS.ReadableStream {
     // The parent is the closest ancestor document to the location we're
     // deleting. If we are deleting a document, the parent is the path of that
@@ -247,8 +247,8 @@ export class RecursiveDelete {
       QueryOptions.forKindlessAllDescendants(
         parentPath,
         collectionId,
-        /* requireConsistency= */ false
-      )
+        /* requireConsistency= */ false,
+      ),
     );
 
     // Query for names only to fetch empty snapshots.
@@ -287,14 +287,14 @@ export class RecursiveDelete {
     if (this.ref instanceof DocumentReference) {
       this.writer.delete(this.ref).catch(err => this.incrementErrorCount(err));
     }
-    this.writer.flush().then(async () => {
+    void this.writer.flush().then(async () => {
       if (this.lastError === undefined) {
         this.completionDeferred.resolve();
       } else {
-        let error = new (require('google-gax/build/src/fallback').GoogleError)(
+        let error = new (require('google-gax/fallback').GoogleError)(
           `${this.errorCount} ` +
             `${this.errorCount !== 1 ? 'deletes' : 'delete'} ` +
-            'failed. The last delete failed with: '
+            'failed. The last delete failed with: ',
         );
         if (this.lastError.code !== undefined) {
           error.code = this.lastError.code as number;
@@ -305,7 +305,7 @@ export class RecursiveDelete {
         this.completionDeferred.reject(
           this.lastError.stack
             ? wrapError(error, this.lastError.stack ?? '')
-            : error
+            : error,
         );
       }
     });
@@ -319,7 +319,7 @@ export class RecursiveDelete {
    */
   private deleteRef(docRef: DocumentReference): void {
     this.pendingOpsCount++;
-    this.writer
+    void this.writer
       .delete(docRef)
       .catch(err => {
         this.incrementErrorCount(err);

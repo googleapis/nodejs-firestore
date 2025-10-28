@@ -84,7 +84,7 @@ export interface TraceUtil {
   startActiveSpan<F extends (span: Span) => unknown>(
     name: string,
     fn: F,
-    attributes?: Attributes
+    attributes?: Attributes,
   ): ReturnType<F>;
   startSpan(name: string): Span;
 

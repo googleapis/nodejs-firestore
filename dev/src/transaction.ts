@@ -109,7 +109,7 @@ export class Transaction implements firestore.Transaction {
     requestTag: string,
     transactionOptions?:
       | firestore.ReadWriteTransactionOptions
-      | firestore.ReadOnlyTransactionOptions
+      | firestore.ReadOnlyTransactionOptions,
   ) {
     this._firestore = firestore;
     this._requestTag = requestTag;
@@ -135,7 +135,7 @@ export class Transaction implements firestore.Transaction {
    * @return {Promise<QuerySnapshot>} A QuerySnapshot for the retrieved data.
    */
   get<AppModelType, DbModelType extends firestore.DocumentData>(
-    query: firestore.Query<AppModelType, DbModelType>
+    query: firestore.Query<AppModelType, DbModelType>,
   ): Promise<QuerySnapshot<AppModelType, DbModelType>>;
 
   /**
@@ -146,7 +146,7 @@ export class Transaction implements firestore.Transaction {
    * @return {Promise<DocumentSnapshot>}  A DocumentSnapshot for the read data.
    */
   get<AppModelType, DbModelType extends firestore.DocumentData>(
-    documentRef: firestore.DocumentReference<AppModelType, DbModelType>
+    documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
   ): Promise<DocumentSnapshot<AppModelType, DbModelType>>;
 
   /**
@@ -165,7 +165,7 @@ export class Transaction implements firestore.Transaction {
       AggregateSpecType,
       AppModelType,
       DbModelType
-    >
+    >,
   ): Promise<
     AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
   >;
@@ -201,7 +201,7 @@ export class Transaction implements firestore.Transaction {
     refOrQuery:
       | firestore.DocumentReference<AppModelType, DbModelType>
       | firestore.Query<AppModelType, DbModelType>
-      | firestore.AggregateQuery<AggregateSpecType, AppModelType, DbModelType>
+      | firestore.AggregateQuery<AggregateSpecType, AppModelType, DbModelType>,
   ): Promise<
     | DocumentSnapshot<AppModelType, DbModelType>
     | QuerySnapshot<AppModelType, DbModelType>
@@ -216,7 +216,7 @@ export class Transaction implements firestore.Transaction {
         SPAN_NAME_TRANSACTION_GET_DOCUMENT,
         () => {
           return this.withLazyStartedTransaction(refOrQuery, this.getSingleFn);
-        }
+        },
       );
     }
 
@@ -227,12 +227,12 @@ export class Transaction implements firestore.Transaction {
           : SPAN_NAME_TRANSACTION_GET_AGGREGATION_QUERY,
         () => {
           return this.withLazyStartedTransaction(refOrQuery, this.getQueryFn);
-        }
+        },
       );
     }
 
     throw new Error(
-      'Value for argument "refOrQuery" must be a DocumentReference, Query, or AggregateQuery.'
+      'Value for argument "refOrQuery" must be a DocumentReference, Query, or AggregateQuery.',
     );
   }
 
@@ -277,12 +277,12 @@ export class Transaction implements firestore.Transaction {
     validateMinNumberOfArguments(
       'Transaction.getAll',
       documentRefsOrReadOptions,
-      1
+      1,
     );
 
     return this.withLazyStartedTransaction(
       parseGetAllArguments(documentRefsOrReadOptions),
-      this.getBatchFn
+      this.getBatchFn,
     );
   }
 
@@ -311,7 +311,7 @@ export class Transaction implements firestore.Transaction {
    */
   create<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
-    data: firestore.WithFieldValue<AppModelType>
+    data: firestore.WithFieldValue<AppModelType>,
   ): Transaction {
     if (!this._writeBatch) {
       throw new Error(READ_ONLY_WRITE_ERROR_MSG);
@@ -323,11 +323,11 @@ export class Transaction implements firestore.Transaction {
   set<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     data: firestore.PartialWithFieldValue<AppModelType>,
-    options: firestore.SetOptions
+    options: firestore.SetOptions,
   ): Transaction;
   set<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
-    data: firestore.WithFieldValue<AppModelType>
+    data: firestore.WithFieldValue<AppModelType>,
   ): Transaction;
   /**
    * Writes to the document referred to by the provided
@@ -364,7 +364,7 @@ export class Transaction implements firestore.Transaction {
   set<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     data: firestore.PartialWithFieldValue<AppModelType>,
-    options?: firestore.SetOptions
+    options?: firestore.SetOptions,
   ): Transaction {
     if (!this._writeBatch) {
       throw new Error(READ_ONLY_WRITE_ERROR_MSG);
@@ -374,7 +374,7 @@ export class Transaction implements firestore.Transaction {
     } else {
       this._writeBatch.set(
         documentRef,
-        data as firestore.WithFieldValue<AppModelType>
+        data as firestore.WithFieldValue<AppModelType>,
       );
     }
     return this;
@@ -470,7 +470,7 @@ export class Transaction implements firestore.Transaction {
   delete(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     documentRef: DocumentReference<any, any>,
-    precondition?: firestore.Precondition
+    precondition?: firestore.Precondition,
   ): this {
     if (!this._writeBatch) {
       throw new Error(READ_ONLY_WRITE_ERROR_MSG);
@@ -514,7 +514,7 @@ export class Transaction implements firestore.Transaction {
       {
         [ATTRIBUTE_KEY_IS_TRANSACTIONAL]: true,
         [ATTRIBUTE_KEY_DOC_COUNT]: this._writeBatch?._opCount,
-      }
+      },
     );
   }
 
@@ -564,10 +564,10 @@ export class Transaction implements firestore.Transaction {
               'Firestore.runTransaction',
               this._requestTag,
               'Best effort to rollback failed with error:',
-              err
+              err,
             );
           });
-      }
+      },
     );
   }
 
@@ -580,7 +580,7 @@ export class Transaction implements firestore.Transaction {
    * context.
    */
   async runTransaction<T>(
-    updateFunction: (transaction: Transaction) => Promise<T>
+    updateFunction: (transaction: Transaction) => Promise<T>,
   ): Promise<T> {
     return this._firestore._traceUtil.startActiveSpan(
       SPAN_NAME_TRANSACTION_RUN,
@@ -606,7 +606,7 @@ export class Transaction implements firestore.Transaction {
                 'Firestore.runTransaction',
                 this._requestTag,
                 'Retrying transaction after error:',
-                lastError
+                lastError,
               );
 
               span.addEvent('Initiate transaction retry');
@@ -630,11 +630,11 @@ export class Transaction implements firestore.Transaction {
           'Firestore.runTransaction',
           this._requestTag,
           'Transaction not eligible for retry, returning error: %s',
-          lastError
+          lastError,
         );
 
         return Promise.reject(lastError);
-      }
+      },
     );
   }
 
@@ -648,13 +648,13 @@ export class Transaction implements firestore.Transaction {
    * context.
    */
   async runTransactionOnce<T>(
-    updateFunction: (transaction: Transaction) => Promise<T>
+    updateFunction: (transaction: Transaction) => Promise<T>,
   ): Promise<T> {
     try {
       const promise = updateFunction(this);
       if (!(promise instanceof Promise)) {
         throw new Error(
-          'You must return a Promise in your transaction()-callback.'
+          'You must return a Promise in your transaction()-callback.',
         );
       }
       const result = await promise;
@@ -667,7 +667,7 @@ export class Transaction implements firestore.Transaction {
         'Firestore.runTransaction',
         this._requestTag,
         'Rolling back transaction after callback error:',
-        err
+        err,
       );
       await this.rollback();
       return Promise.reject(err);
@@ -684,8 +684,8 @@ export class Transaction implements firestore.Transaction {
     resultFn: (
       this: typeof this,
       param: TParam,
-      opts: Uint8Array | api.ITransactionOptions | Timestamp
-    ) => Promise<{transaction?: Uint8Array; result: TResult}>
+      opts: Uint8Array | api.ITransactionOptions | Timestamp,
+    ) => Promise<{transaction?: Uint8Array; result: TResult}>,
   ): Promise<TResult> {
     if (this._transactionIdPromise) {
       // Simply queue this subsequent read operation after the first read
@@ -737,7 +737,7 @@ export class Transaction implements firestore.Transaction {
     DbModelType extends firestore.DocumentData,
   >(
     document: DocumentReference<AppModelType, DbModelType>,
-    opts: Uint8Array | api.ITransactionOptions | Timestamp
+    opts: Uint8Array | api.ITransactionOptions | Timestamp,
   ): Promise<{
     transaction?: Uint8Array;
     result: DocumentSnapshot<AppModelType, DbModelType>;
@@ -746,7 +746,7 @@ export class Transaction implements firestore.Transaction {
       this._firestore,
       [document],
       undefined,
-      opts
+      opts,
     );
     const {
       transaction,
@@ -766,7 +766,7 @@ export class Transaction implements firestore.Transaction {
       documents: Array<DocumentReference<AppModelType, DbModelType>>;
       fieldMask?: FieldPath[];
     },
-    opts: Uint8Array | api.ITransactionOptions | Timestamp
+    opts: Uint8Array | api.ITransactionOptions | Timestamp,
   ): Promise<{
     transaction?: Uint8Array;
     result: DocumentSnapshot<AppModelType, DbModelType>[];
@@ -778,10 +778,10 @@ export class Transaction implements firestore.Transaction {
           this._firestore,
           documents,
           fieldMask,
-          opts
+          opts,
         );
         return documentReader._get(this._requestTag);
-      }
+      },
     );
   }
 
@@ -790,7 +790,7 @@ export class Transaction implements firestore.Transaction {
     TQuery extends Query<any, any> | AggregateQuery<any, any>,
   >(
     query: TQuery,
-    opts: Uint8Array | api.ITransactionOptions | Timestamp
+    opts: Uint8Array | api.ITransactionOptions | Timestamp,
   ): Promise<{
     transaction?: Uint8Array;
     result: Awaited<ReturnType<TQuery['_get']>>['result'];
@@ -815,7 +815,7 @@ export function parseGetAllArguments<
   documentRefsOrReadOptions: Array<
     | firestore.DocumentReference<AppModelType, DbModelType>
     | firestore.ReadOptions
-  >
+  >,
 ): {
   documents: Array<DocumentReference<AppModelType, DbModelType>>;
   fieldMask: FieldPath[] | undefined;
@@ -826,14 +826,14 @@ export function parseGetAllArguments<
   if (Array.isArray(documentRefsOrReadOptions[0])) {
     throw new Error(
       'getAll() no longer accepts an array as its first argument. ' +
-        'Please unpack your array and call getAll() with individual arguments.'
+        'Please unpack your array and call getAll() with individual arguments.',
     );
   }
 
   if (
     documentRefsOrReadOptions.length > 0 &&
     isPlainObject(
-      documentRefsOrReadOptions[documentRefsOrReadOptions.length - 1]
+      documentRefsOrReadOptions[documentRefsOrReadOptions.length - 1],
     )
   ) {
     readOptions = documentRefsOrReadOptions.pop() as firestore.ReadOptions;
@@ -854,7 +854,7 @@ export function parseGetAllArguments<
   const fieldMask =
     readOptions && readOptions.fieldMask
       ? readOptions.fieldMask.map(fieldPath =>
-          FieldPath.fromArgument(fieldPath)
+          FieldPath.fromArgument(fieldPath),
         )
       : undefined;
   return {fieldMask, documents};
@@ -873,12 +873,12 @@ export function parseGetAllArguments<
 function validateReadOptions(
   arg: number | string,
   value: unknown,
-  options?: RequiredArgumentOptions
+  options?: RequiredArgumentOptions,
 ): void {
   if (!validateOptional(value, options)) {
     if (!isObject(value)) {
       throw new Error(
-        `${invalidArgumentMessage(arg, 'read option')} Input is not an object.'`
+        `${invalidArgumentMessage(arg, 'read option')} Input is not an object.'`,
       );
     }
 
@@ -889,8 +889,8 @@ function validateReadOptions(
         throw new Error(
           `${invalidArgumentMessage(
             arg,
-            'read option'
-          )} "fieldMask" is not an array.`
+            'read option',
+          )} "fieldMask" is not an array.`,
         );
       }
 
@@ -901,8 +901,8 @@ function validateReadOptions(
           throw new Error(
             `${invalidArgumentMessage(
               arg,
-              'read option'
-            )} "fieldMask" is not valid: ${err.message}`
+              'read option',
+            )} "fieldMask" is not valid: ${err.message}`,
           );
         }
       }
@@ -915,6 +915,7 @@ function isRetryableTransactionError(error: GoogleError): boolean {
     // This list is based on https://github.com/firebase/firebase-js-sdk/blob/master/packages/firestore/src/core/transaction_runner.ts#L112
     switch (error.code as number) {
       case StatusCode.ABORTED:
+      case 409: // GAXIOS may now return HTTP 409 instead of Aborted
       case StatusCode.CANCELLED:
       case StatusCode.UNKNOWN:
       case StatusCode.DEADLINE_EXCEEDED:
@@ -944,9 +945,12 @@ function isRetryableTransactionError(error: GoogleError): boolean {
  */
 async function maybeBackoff(
   backoff: ExponentialBackoff,
-  error?: GoogleError
+  error?: GoogleError,
 ): Promise<void> {
-  if ((error?.code as number | undefined) === StatusCode.RESOURCE_EXHAUSTED) {
+  if (
+    (error?.code as number | undefined) === StatusCode.RESOURCE_EXHAUSTED ||
+    (error?.code as number | undefined) === 409
+  ) {
     backoff.resetToMax();
   }
   await backoff.backoffAndWait();

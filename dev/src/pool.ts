@@ -98,7 +98,7 @@ export class ClientPool<T extends object> {
     private readonly maxIdleClients: number,
     private readonly clientFactory: (requiresGrpc: boolean) => T,
     private readonly clientDestructor: (client: T) => Promise<void> = () =>
-      Promise.resolve()
+      Promise.resolve(),
   ) {
     this.lazyLogStringForAllClientIds = new LazyLogStringForAllClientIds({
       activeClients: this.activeClients,
@@ -146,7 +146,7 @@ export class ClientPool<T extends object> {
         requestTag,
         'Re-using existing client [%s] with %s remaining operations',
         selectedClientId,
-        this.concurrentOperationLimit - selectedClientRequestCount
+        this.concurrentOperationLimit - selectedClientRequestCount,
       );
     } else {
       const newClientId = 'cli' + generateTag();
@@ -155,14 +155,14 @@ export class ClientPool<T extends object> {
         requestTag,
         'Creating a new client [%s] (requiresGrpc: %s)',
         newClientId,
-        requiresGrpc
+        requiresGrpc,
       );
       selectedClient = this.clientFactory(requiresGrpc);
       this.clientIdByClient.set(selectedClient, newClientId);
       selectedClientRequestCount = 0;
       assert(
         !this.activeClients.has(selectedClient),
-        'The provided client factory returned an existing instance'
+        'The provided client factory returned an existing instance',
       );
     }
 
@@ -199,7 +199,7 @@ export class ClientPool<T extends object> {
       requestTag,
       'Releasing client [%s] (gc=%s)',
       clientId,
-      gcDetermination
+      gcDetermination,
     );
 
     if (!gcDetermination.shouldGarbageCollectClient) {
@@ -211,7 +211,7 @@ export class ClientPool<T extends object> {
       requestTag,
       'Garbage collecting client [%s] (%s)',
       clientId,
-      this.lazyLogStringForAllClientIds
+      this.lazyLogStringForAllClientIds,
     );
 
     const activeClientDeleted = this.activeClients.delete(client);
@@ -224,7 +224,7 @@ export class ClientPool<T extends object> {
       'Garbage collected client [%s] activeClientDeleted=%s (%s)',
       clientId,
       activeClientDeleted,
-      this.lazyLogStringForAllClientIds
+      this.lazyLogStringForAllClientIds,
     );
   }
 
@@ -235,7 +235,7 @@ export class ClientPool<T extends object> {
    * @internal
    */
   private shouldGarbageCollectClient(
-    client: T
+    client: T,
   ): ShouldGarbageCollectClientResult {
     const clientMetadata = this.activeClients.get(client)!;
 
@@ -309,7 +309,7 @@ export class ClientPool<T extends object> {
   get opCount(): number {
     let activeOperationCount = 0;
     this.activeClients.forEach(
-      metadata => (activeOperationCount += metadata.activeRequestCount)
+      metadata => (activeOperationCount += metadata.activeRequestCount),
     );
     return activeOperationCount;
   }
@@ -344,7 +344,7 @@ export class ClientPool<T extends object> {
   run<V>(
     requestTag: string,
     requiresGrpc: boolean,
-    op: (client: T) => Promise<V>
+    op: (client: T) => Promise<V>,
   ): Promise<V> {
     if (this.terminated) {
       return Promise.reject(new Error(CLIENT_TERMINATED_ERROR_MSG));
@@ -378,7 +378,7 @@ export class ClientPool<T extends object> {
         /* requestTag= */ null,
         'Waiting for %s pending operations to complete before terminating (%s)',
         this.opCount,
-        this.lazyLogStringForAllClientIds
+        this.lazyLogStringForAllClientIds,
       );
       await this.terminateDeferred.promise;
     }
@@ -386,7 +386,7 @@ export class ClientPool<T extends object> {
       `ClientPool[${this.instanceId}].terminate`,
       /* requestTag= */ null,
       'Closing all active clients (%s)',
-      this.lazyLogStringForAllClientIds
+      this.lazyLogStringForAllClientIds,
     );
     for (const [client] of this.activeClients) {
       this.activeClients.delete(client);
@@ -419,7 +419,7 @@ class LazyLogStringForAllClientIds<T extends object> {
     const activeClientsDescription = Array.from(this.activeClients.entries())
       .map(
         ([client, metadata]) =>
-          `${this.clientIdByClient.get(client)}=${metadata.activeRequestCount}`
+          `${this.clientIdByClient.get(client)}=${metadata.activeRequestCount}`,
       )
       .sort()
       .join(', ');

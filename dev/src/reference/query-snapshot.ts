@@ -68,7 +68,7 @@ export class QuerySnapshot<
     private readonly _readTime: Timestamp,
     private readonly _size: number,
     docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
-    changes: () => Array<DocumentChange<AppModelType, DbModelType>>
+    changes: () => Array<DocumentChange<AppModelType, DbModelType>>,
   ) {
     this._docs = docs;
     this._changes = changes;
@@ -240,9 +240,9 @@ export class QuerySnapshot<
    */
   forEach(
     callback: (
-      result: firestore.QueryDocumentSnapshot<AppModelType, DbModelType>
+      result: firestore.QueryDocumentSnapshot<AppModelType, DbModelType>,
     ) => void,
-    thisArg?: unknown
+    thisArg?: unknown,
   ): void {
     validateFunction('callback', callback);
 

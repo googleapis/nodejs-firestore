@@ -65,22 +65,21 @@ setLogFunction(null);
 
 use(chaiAsPromised);
 
-function snapshot(
+async function snapshot(
   relativePath: string,
-  data: DocumentData
+  data: DocumentData,
 ): Promise<DocumentSnapshot> {
-  return createInstance().then(firestore => {
-    const path = QualifiedResourcePath.fromSlashSeparatedString(
-      `${DATABASE_ROOT}/documents/${relativePath}`
-    );
-    const ref = new DocumentReference(firestore, path);
-    const snapshot = new DocumentSnapshotBuilder(ref);
-    snapshot.fieldsProto = firestore['_serializer']!.encodeFields(data);
-    snapshot.readTime = Timestamp.fromMillis(0);
-    snapshot.createTime = Timestamp.fromMillis(0);
-    snapshot.updateTime = Timestamp.fromMillis(0);
-    return snapshot.build();
-  });
+  const firestore = await createInstance();
+  const path = QualifiedResourcePath.fromSlashSeparatedString(
+    `${DATABASE_ROOT}/documents/${relativePath}`,
+  );
+  const ref = new DocumentReference(firestore, path);
+  const snapshot = new DocumentSnapshotBuilder(ref);
+  snapshot.fieldsProto = firestore['_serializer']!.encodeFields(data);
+  snapshot.readTime = Timestamp.fromMillis(0);
+  snapshot.createTime = Timestamp.fromMillis(0);
+  snapshot.updateTime = Timestamp.fromMillis(0);
+  return snapshot.build();
 }
 
 function where(filter: api.StructuredQuery.IFilter): api.IStructuredQuery {
@@ -154,7 +153,7 @@ export function fieldFilters(
 export function fieldFilter(
   fieldPath: string,
   op: api.StructuredQuery.FieldFilter.Operator,
-  value: string | api.IValue
+  value: string | api.IValue,
 ): api.StructuredQuery.IFilter {
   return fieldFilters(fieldPath, op, value);
 }
@@ -353,7 +352,7 @@ function endAt(
  */
 export function readTime(
   seconds?: number,
-  nanos?: number
+  nanos?: number,
 ): protobuf.ITimestamp {
   if (seconds === undefined && nanos === undefined) {
     return {seconds: '5', nanos: 6};
@@ -437,7 +436,7 @@ function bundledQueryEquals(
 
 export function result(
   documentId: string,
-  setDone?: boolean
+  setDone?: boolean,
 ): api.IRunQueryResponse {
   if (setDone) {
     return {
@@ -461,11 +460,9 @@ export function heartbeat(count: number): api.IRunQueryResponse {
 describe('query interface', () => {
   let firestore: Firestore;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     setTimeoutHandler(setImmediate);
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
+    firestore = await createInstance();
   });
 
   afterEach(async () => {
@@ -493,7 +490,7 @@ describe('query interface', () => {
 
     queryEquals(
       [queryA.where('a', '==', '1'), queryB.where('a', '==', '1')],
-      [queryA.where('a', '=' as InvalidApiUsage, 1)]
+      [queryA.where('a', '=' as InvalidApiUsage, 1)],
     );
 
     queryEquals(
@@ -501,7 +498,7 @@ describe('query interface', () => {
         queryA.where('a', '==', '1').where('b', '==', 2),
         queryB.where('a', '==', '1').where('b', '==', 2),
       ],
-      []
+      [],
     );
 
     queryEquals(
@@ -511,17 +508,17 @@ describe('query interface', () => {
         queryB.orderBy('__name__', 'ASC' as InvalidApiUsage),
         queryB.orderBy(FieldPath.documentId()),
       ],
-      [queryA.orderBy('foo'), queryB.orderBy(FieldPath.documentId(), 'desc')]
+      [queryA.orderBy('foo'), queryB.orderBy(FieldPath.documentId(), 'desc')],
     );
 
     queryEquals(
       [queryA.limit(0), queryB.limit(0).limit(0)],
-      [queryA, queryB.limit(10)]
+      [queryA, queryB.limit(10)],
     );
 
     queryEquals(
       [queryA.offset(0), queryB.offset(0).offset(0)],
-      [queryA, queryB.offset(10)]
+      [queryA, queryB.offset(10)],
     );
 
     queryEquals(
@@ -532,7 +529,7 @@ describe('query interface', () => {
         queryA.orderBy('foo').endBefore('a'),
         queryB.orderBy('foo').startAt('b'),
         queryA.orderBy('bar').startAt('a'),
-      ]
+      ],
     );
 
     queryEquals(
@@ -543,7 +540,7 @@ describe('query interface', () => {
       [
         queryA.orderBy('foo').startAfter('b'),
         queryB.orderBy('bar').startAfter('a'),
-      ]
+      ],
     );
 
     queryEquals(
@@ -554,12 +551,12 @@ describe('query interface', () => {
       [
         queryA.orderBy('foo').endBefore('b'),
         queryB.orderBy('bar').endBefore('a'),
-      ]
+      ],
     );
 
     queryEquals(
       [queryA.orderBy('foo').endAt('a'), queryB.orderBy('foo').endAt('a')],
-      [queryA.orderBy('foo').endAt('b'), queryB.orderBy('bar').endAt('a')]
+      [queryA.orderBy('foo').endAt('b'), queryB.orderBy('bar').endAt('a')],
     );
 
     queryEquals(
@@ -567,39 +564,36 @@ describe('query interface', () => {
         queryA.orderBy('foo').orderBy('__name__').startAt('b', 'c'),
         queryB.orderBy('foo').orderBy('__name__').startAt('b', 'c'),
       ],
-      []
+      [],
     );
   });
 
-  it('accepts all variations', () => {
+  it('accepts all variations', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
           request,
           fieldFiltersQuery('foo', 'EQUAL', 'bar'),
           orderBy('foo', 'ASCENDING'),
-          limit(10)
+          limit(10),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.where('foo', '==', 'bar');
-      query = query.orderBy('foo');
-      query = query.limit(10);
-      return query.get().then(results => {
-        expect(results.query).to.equal(query);
-        expect(results.size).to.equal(0);
-        expect(results.empty).to.be.true;
-      });
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.where('foo', '==', 'bar');
+    query = query.orderBy('foo');
+    query = query.limit(10);
+    const results = await query.get();
+    expect(results.query).to.equal(query);
+    expect(results.size).to.equal(0);
+    expect(results.empty).to.be.true;
   });
 
-  it('supports empty gets', () => {
+  it('supports empty gets', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request);
@@ -607,18 +601,15 @@ describe('query interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      const query = firestore.collection('collectionId');
-      return query.get().then(results => {
-        expect(results.size).to.equal(0);
-        expect(results.empty).to.be.true;
-        expect(results.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
-      });
-    });
+    firestore = await createInstance(overrides);
+    const query = firestore.collection('collectionId');
+    const results = await query.get();
+    expect(results.size).to.equal(0);
+    expect(results.empty).to.be.true;
+    expect(results.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
   });
 
-  it('retries on stream failure', () => {
+  it('retries on stream failure', async () => {
     let attempts = 0;
     const overrides: ApiOverride = {
       runQuery: () => {
@@ -627,21 +618,13 @@ describe('query interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      const query = firestore.collection('collectionId');
-      return query
-        .get()
-        .then(() => {
-          throw new Error('Unexpected success');
-        })
-        .catch(() => {
-          expect(attempts).to.equal(5);
-        });
-    });
+    firestore = await createInstance(overrides);
+    const query = firestore.collection('collectionId');
+    await expect(query.get()).to.eventually.be.rejected;
+    expect(attempts).to.equal(5);
   });
 
-  it('supports empty streams', callback => {
+  it('supports empty streams', done => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request);
@@ -649,21 +632,21 @@ describe('query interface', () => {
       },
     };
 
-    createInstance(overrides).then(firestoreInstance => {
+    void createInstance(overrides).then(firestoreInstance => {
       firestore = firestoreInstance;
       const query = firestore.collection('collectionId');
       query
         .stream()
         .on('data', () => {
-          callback(Error('Unexpected document'));
+          done(Error('Unexpected document'));
         })
         .on('end', () => {
-          callback();
+          done();
         });
     });
   });
 
-  it('returns results', () => {
+  it('returns results', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request);
@@ -671,34 +654,31 @@ describe('query interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      const query = firestore.collection('collectionId');
-      return query.get().then(results => {
-        expect(results.size).to.equal(2);
-        expect(results.empty).to.be.false;
-        expect(results.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
-        expect(results.docs[0].id).to.equal('first');
-        expect(results.docs[1].id).to.equal('second');
-        expect(results.docChanges()).to.have.length(2);
+    firestore = await createInstance(overrides);
+    const query = firestore.collection('collectionId');
+    const results = await query.get();
+    expect(results.size).to.equal(2);
+    expect(results.empty).to.be.false;
+    expect(results.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
+    expect(results.docs[0].id).to.equal('first');
+    expect(results.docs[1].id).to.equal('second');
+    expect(results.docChanges()).to.have.length(2);
 
-        let count = 0;
+    let count = 0;
 
-        results.forEach(doc => {
-          expect(doc instanceof DocumentSnapshot).to.be.true;
-          expect(doc.createTime.isEqual(new Timestamp(1, 2))).to.be.true;
-          expect(doc.updateTime.isEqual(new Timestamp(3, 4))).to.be.true;
-          expect(doc.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
-          ++count;
-        });
-
-        expect(2).to.equal(count);
-      });
+    results.forEach(doc => {
+      expect(doc instanceof DocumentSnapshot).to.be.true;
+      expect(doc.createTime.isEqual(new Timestamp(1, 2))).to.be.true;
+      expect(doc.updateTime.isEqual(new Timestamp(3, 4))).to.be.true;
+      expect(doc.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
+      ++count;
     });
+
+    expect(2).to.equal(count);
   });
 
   // Test Logical Termination on get()
-  it('successful return without ending the stream on get()', () => {
+  it('successful return without ending the stream on get()', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request);
@@ -707,22 +687,19 @@ describe('query interface', () => {
     };
 
     let counter = 0;
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      const query = firestore.collection('collectionId');
-      return query.get().then(results => {
-        expect(++counter).to.equal(1);
-        expect(results.size).to.equal(2);
-        expect(results.empty).to.be.false;
-        expect(results.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
-        expect(results.docs[0].id).to.equal('first');
-        expect(results.docs[1].id).to.equal('second');
-        expect(results.docChanges()).to.have.length(2);
-      });
-    });
+    firestore = await createInstance(overrides);
+    const query = firestore.collection('collectionId');
+    const results = await query.get();
+    expect(++counter).to.equal(1);
+    expect(results.size).to.equal(2);
+    expect(results.empty).to.be.false;
+    expect(results.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
+    expect(results.docs[0].id).to.equal('first');
+    expect(results.docs[1].id).to.equal('second');
+    expect(results.docChanges()).to.have.length(2);
   });
 
-  it('handles stream exception at initialization', () => {
+  it('handles stream exception at initialization', async () => {
     let attempts = 0;
     const query = firestore.collection('collectionId');
 
@@ -731,18 +708,11 @@ describe('query interface', () => {
       throw new Error('Expected error');
     };
 
-    return query
-      .get()
-      .then(() => {
-        throw new Error('Unexpected success in Promise');
-      })
-      .catch(err => {
-        expect(err.message).to.equal('Expected error');
-        expect(attempts).to.equal(1);
-      });
+    await expect(query.get()).to.eventually.be.rejectedWith('Expected error');
+    expect(attempts).to.equal(1);
   });
 
-  it('handles stream exception during initialization', () => {
+  it('handles stream exception during initialization', async () => {
     let attempts = 0;
 
     const overrides: ApiOverride = {
@@ -752,22 +722,14 @@ describe('query interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      return firestore
-        .collection('collectionId')
-        .get()
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          expect(err.message).to.equal('Expected error');
-          expect(attempts).to.equal(5);
-        });
-    });
+    firestore = await createInstance(overrides);
+    await expect(
+      firestore.collection('collectionId').get(),
+    ).to.eventually.be.rejectedWith('Expected error');
+    expect(attempts).to.equal(5);
   });
 
-  it('handles stream exception after initialization (with get())', () => {
+  it('handles stream exception after initialization (with get())', async () => {
     const responses = [
       () => stream(result('first'), new Error('Expected error')),
       () => stream(result('second')),
@@ -776,20 +738,14 @@ describe('query interface', () => {
       runQuery: () => responses.shift()!(),
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      return firestore
-        .collection('collectionId')
-        .get()
-        .then(snap => {
-          expect(snap.size).to.equal(2);
-          expect(snap.docs[0].id).to.equal('first');
-          expect(snap.docs[1].id).to.equal('second');
-        });
-    });
+    firestore = await createInstance(overrides);
+    const snap = await firestore.collection('collectionId').get();
+    expect(snap.size).to.equal(2);
+    expect(snap.docs[0].id).to.equal('first');
+    expect(snap.docs[1].id).to.equal('second');
   });
 
-  it('handles stream exception after initialization and heartbeat', () => {
+  it('handles stream exception after initialization and heartbeat', async () => {
     const deadlineExceededErr = new GoogleError();
     deadlineExceededErr.code = Status.DEADLINE_EXCEEDED;
     deadlineExceededErr.message = 'DEADLINE_EXCEEDED error message';
@@ -806,26 +762,17 @@ describe('query interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      return firestore
-        .collection('collectionId')
-        .get()
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          expect(err.message).to.equal('DEADLINE_EXCEEDED error message');
-
-          // The heartbeat initialized the stream before there was a stream
-          // exception, so we only expect a single attempt at streaming.
-          expect(attempts).to.equal(1);
-        });
-    });
+    firestore = await createInstance(overrides);
+    await expect(
+      firestore.collection('collectionId').get(),
+    ).to.eventually.be.rejectedWith('DEADLINE_EXCEEDED error message');
+    // The heartbeat initialized the stream before there was a stream
+    // exception, so we only expect a single attempt at streaming.
+    expect(attempts).to.equal(1);
   });
 
-  function handlesRetryableExceptionUntilProgressStops(
-    withHeartbeat: boolean
+  async function handlesRetryableExceptionUntilProgressStops(
+    withHeartbeat: boolean,
   ): Promise<void> {
     let attempts = 0;
 
@@ -853,11 +800,11 @@ describe('query interface', () => {
             x?.structuredQuery?.startAt?.values?.[0].referenceValue || '';
           const docId = docPath.substring(docPath.lastIndexOf('/'));
           expect(docId).to.equal(
-            `/id-${Math.min(initializationsWithProgress, attempts - 1)}`
+            `/id-${Math.min(initializationsWithProgress, attempts - 1)}`,
           );
           expect(x?.structuredQuery?.orderBy?.length).to.equal(1);
           expect(x?.structuredQuery?.orderBy?.[0].field?.fieldPath).to.equal(
-            '__name__'
+            '__name__',
           );
         }
 
@@ -894,35 +841,28 @@ describe('query interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      const query = firestore.collection('collectionId');
-      query._queryUtil._hasRetryTimedOut = () => false;
-      return query
-        .get()
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          expect(err.message).to.equal('test error message');
+    firestore = await createInstance(overrides);
+    const query = firestore.collection('collectionId');
+    query._queryUtil._hasRetryTimedOut = () => false;
+    await expect(query.get()).to.eventually.be.rejectedWith(
+      'test error message',
+    );
 
-          // Assert that runQuery was retried the expected number
-          // of times based on the test configuration.
-          //
-          // If the test is running with heartbeat messages, then
-          // the test will always validate retry logic for an
-          // initialized stream.
-          //
-          // If the test is running without heartbeat messages,
-          // then the test will validate retry logic for both
-          // initialized and uninitialized streams. Specifically,
-          // the last retry will fail with an uninitialized stream.
-          const initilizationRetries = withHeartbeat ? 1 : 5;
-          expect(attempts).to.equal(
-            initializationsWithProgress + initilizationRetries
-          );
-        });
-    });
+    // Assert that runQuery was retried the expected number
+    // of times based on the test configuration.
+    //
+    // If the test is running with heartbeat messages, then
+    // the test will always validate retry logic for an
+    // initialized stream.
+    //
+    // If the test is running without heartbeat messages,
+    // then the test will validate retry logic for both
+    // initialized and uninitialized streams. Specifically,
+    // the last retry will fail with an uninitialized stream.
+    const initilizationRetries = withHeartbeat ? 1 : 5;
+    expect(attempts).to.equal(
+      initializationsWithProgress + initilizationRetries,
+    );
   }
 
   it('handles retryable exception until progress stops with heartbeat', async () => {
@@ -953,30 +893,22 @@ describe('query interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      const query = firestore.collection('collectionId');
-      // Fake our timeout check to fail after 10 retry attempts
-      query._queryUtil._hasRetryTimedOut = (methodName, startTime) => {
-        expect(methodName).to.equal('runQuery');
-        expect(startTime).to.be.lessThanOrEqual(Date.now());
-        return attempts >= 10;
-      };
+    firestore = await createInstance(overrides);
+    const query = firestore.collection('collectionId');
+    // Fake our timeout check to fail after 10 retry attempts
+    query._queryUtil._hasRetryTimedOut = (methodName, startTime) => {
+      expect(methodName).to.equal('runQuery');
+      expect(startTime).to.be.lessThanOrEqual(Date.now());
+      return attempts >= 10;
+    };
 
-      return query
-        .get()
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          expect(err.message).to.equal('test error message');
-
-          expect(attempts).to.equal(10);
-        });
-    });
+    await expect(query.get()).to.eventually.be.rejectedWith(
+      'test error message',
+    );
+    expect(attempts).to.equal(10);
   });
 
-  it('handles non-retryable after recieving data (with get())', () => {
+  it('handles non-retryable after recieving data (with get())', async () => {
     let attempts = 0;
 
     const overrides: ApiOverride = {
@@ -996,19 +928,11 @@ describe('query interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      return firestore
-        .collection('collectionId')
-        .get()
-        .then(() => {
-          throw new Error('Unexpected success in Promise');
-        })
-        .catch(err => {
-          expect(err.message).to.equal('test error message');
-          expect(attempts).to.equal(1);
-        });
-    });
+    firestore = await createInstance(overrides);
+    await expect(
+      firestore.collection('collectionId').get(),
+    ).to.eventually.be.rejectedWith('test error message');
+    expect(attempts).to.equal(1);
   });
 
   it('handles stream exception after initialization (with stream())', done => {
@@ -1020,7 +944,7 @@ describe('query interface', () => {
       runQuery: () => responses.shift()!(),
     };
 
-    createInstance(overrides).then(firestoreInstance => {
+    void createInstance(overrides).then(firestoreInstance => {
       firestore = firestoreInstance;
       const result = firestore.collection('collectionId').stream();
 
@@ -1036,7 +960,7 @@ describe('query interface', () => {
     });
   });
 
-  it('streams results', callback => {
+  it('streams results', done => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request);
@@ -1044,7 +968,7 @@ describe('query interface', () => {
       },
     };
 
-    createInstance(overrides).then(firestoreInstance => {
+    void createInstance(overrides).then(firestoreInstance => {
       firestore = firestoreInstance;
       const query = firestore.collection('collectionId');
       let received = 0;
@@ -1057,13 +981,13 @@ describe('query interface', () => {
         })
         .on('end', () => {
           expect(received).to.equal(2);
-          callback();
+          done();
         });
     });
   });
 
   // Test Logical Termination on stream()
-  it('successful return without ending the stream on stream()', callback => {
+  it('successful return without ending the stream on stream()', done => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request);
@@ -1072,7 +996,7 @@ describe('query interface', () => {
     };
 
     let endCounter = 0;
-    createInstance(overrides).then(firestore => {
+    void createInstance(overrides).then(firestore => {
       const query = firestore.collection('collectionId');
       let received = 0;
 
@@ -1087,7 +1011,7 @@ describe('query interface', () => {
           ++endCounter;
           setImmediate(() => {
             expect(endCounter).to.equal(1);
-            callback();
+            done();
           });
         });
     });
@@ -1178,28 +1102,28 @@ describe('query interface', () => {
             compositeFilter(
               'OR',
               fieldFilter('a', 'GREATER_THAN', {integerValue: 10}),
-              unaryFilters('b', 'IS_NOT_NULL')
-            )
+              unaryFilters('b', 'IS_NOT_NULL'),
+            ),
           ),
           limit(3),
           orderBy('a', 'ASCENDING'),
-          startAt(true, {integerValue: 1})
+          startAt(true, {integerValue: 1}),
         );
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
+    return createInstance(overrides).then(async firestoreInstance => {
       firestore = firestoreInstance;
       let query: Query = firestore.collection('collectionId');
       query = query
         .where(
-          Filter.or(Filter.where('a', '>', 10), Filter.where('b', '!=', null))
+          Filter.or(Filter.where('a', '>', 10), Filter.where('b', '!=', null)),
         )
         .orderBy('a')
         .startAt(1)
         .limit(3);
-      return query.get();
+      await query.get();
     });
   });
 });
@@ -1207,15 +1131,13 @@ describe('query interface', () => {
 describe('where() interface', () => {
   let firestore: Firestore;
 
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
+  beforeEach(async () => {
+    firestore = await createInstance();
   });
 
   afterEach(() => verifyInstance(firestore));
 
-  it('generates proto', () => {
+  it('generates proto', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, fieldFiltersQuery('foo', 'EQUAL', 'bar'));
@@ -1223,15 +1145,13 @@ describe('where() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.where('foo', '==', 'bar');
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.where('foo', '==', 'bar');
+    await query.get();
   });
 
-  it('concatenates all accepted filters', () => {
+  it('concatenates all accepted filters', async () => {
     const arrValue: api.IValue = {
       arrayValue: {
         values: [
@@ -1278,33 +1198,31 @@ describe('where() interface', () => {
             'barEqualsLong',
             'fooNotIn',
             'NOT_IN',
-            arrValue
-          )
+            arrValue,
+          ),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.where('fooSmaller', '<', 'barSmaller');
-      query = query.where('fooSmallerOrEquals', '<=', 'barSmallerOrEquals');
-      query = query.where('fooEquals', '=' as InvalidApiUsage, 'barEquals');
-      query = query.where('fooEqualsLong', '==', 'barEqualsLong');
-      query = query.where('fooGreaterOrEquals', '>=', 'barGreaterOrEquals');
-      query = query.where('fooGreater', '>', 'barGreater');
-      query = query.where('fooContains', 'array-contains', 'barContains');
-      query = query.where('fooIn', 'in', ['barArray']);
-      query = query.where('fooContainsAny', 'array-contains-any', ['barArray']);
-      query = query.where('fooNotEqual', '!=', 'barEqualsLong');
-      query = query.where('fooNotIn', 'not-in', ['barArray']);
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.where('fooSmaller', '<', 'barSmaller');
+    query = query.where('fooSmallerOrEquals', '<=', 'barSmallerOrEquals');
+    query = query.where('fooEquals', '=' as InvalidApiUsage, 'barEquals');
+    query = query.where('fooEqualsLong', '==', 'barEqualsLong');
+    query = query.where('fooGreaterOrEquals', '>=', 'barGreaterOrEquals');
+    query = query.where('fooGreater', '>', 'barGreater');
+    query = query.where('fooContains', 'array-contains', 'barContains');
+    query = query.where('fooIn', 'in', ['barArray']);
+    query = query.where('fooContainsAny', 'array-contains-any', ['barArray']);
+    query = query.where('fooNotEqual', '!=', 'barEqualsLong');
+    query = query.where('fooNotIn', 'not-in', ['barArray']);
+    await query.get();
   });
 
-  it('accepts object', () => {
+  it('accepts object', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -1315,22 +1233,20 @@ describe('where() interface', () => {
                 foo: {stringValue: 'bar'},
               },
             },
-          })
+          }),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.where('foo', '==', {foo: 'bar'});
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.where('foo', '==', {foo: 'bar'});
+    await query.get();
   });
 
-  it('supports field path objects for field paths', () => {
+  it('supports field path objects for field paths', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -1341,23 +1257,21 @@ describe('where() interface', () => {
             'foobar',
             'bar.foo',
             'EQUAL',
-            'foobar'
-          )
+            'foobar',
+          ),
         );
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.where('foo.bar', '==', 'foobar');
-      query = query.where(new FieldPath('bar', 'foo'), '==', 'foobar');
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.where('foo.bar', '==', 'foobar');
+    query = query.where(new FieldPath('bar', 'foo'), '==', 'foobar');
+    await query.get();
   });
 
-  it('supports strings for FieldPath.documentId()', () => {
+  it('supports strings for FieldPath.documentId()', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -1366,22 +1280,20 @@ describe('where() interface', () => {
             referenceValue:
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/foo',
-          })
+          }),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.where(FieldPath.documentId(), '==', 'foo');
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.where(FieldPath.documentId(), '==', 'foo');
+    await query.get();
   });
 
-  it('supports reference array for IN queries', () => {
+  it('supports reference array for IN queries', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -1397,22 +1309,20 @@ describe('where() interface', () => {
                 },
               ],
             },
-          })
+          }),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      const collection = firestore.collection('collectionId');
-      const query = collection.where(FieldPath.documentId(), 'in', [
-        'foo',
-        collection.doc('bar'),
-      ]);
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    const collection = firestore.collection('collectionId');
+    const query = collection.where(FieldPath.documentId(), 'in', [
+      'foo',
+      collection.doc('bar'),
+    ]);
+    await query.get();
   });
 
   it('Fields of IN queries are not used in implicit order by', async () => {
@@ -1434,21 +1344,19 @@ describe('where() interface', () => {
             referenceValue:
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc1',
-          })
+          }),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(async firestoreInstance => {
-      firestore = firestoreInstance;
-      const collection = firestore.collection('collectionId');
-      const query = collection
-        .where('foo', 'in', ['bar'])
-        .startAt(await snapshot('collectionId/doc1', {}));
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    const collection = firestore.collection('collectionId');
+    const query = collection
+      .where('foo', 'in', ['bar'])
+      .startAt(await snapshot('collectionId/doc1', {}));
+    await query.get();
   });
 
   it('validates references for in/not-in queries', () => {
@@ -1457,37 +1365,37 @@ describe('where() interface', () => {
     expect(() => {
       query.where(FieldPath.documentId(), 'in', ['foo', 42]);
     }).to.throw(
-      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference, but was "42".'
+      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference, but was "42".',
     );
 
     expect(() => {
       query.where(FieldPath.documentId(), 'in', 42);
     }).to.throw(
-      "Invalid Query. A non-empty array is required for 'in' filters."
+      "Invalid Query. A non-empty array is required for 'in' filters.",
     );
 
     expect(() => {
       query.where(FieldPath.documentId(), 'in', []);
     }).to.throw(
-      "Invalid Query. A non-empty array is required for 'in' filters."
+      "Invalid Query. A non-empty array is required for 'in' filters.",
     );
 
     expect(() => {
       query.where(FieldPath.documentId(), 'not-in', ['foo', 42]);
     }).to.throw(
-      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference, but was "42".'
+      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference, but was "42".',
     );
 
     expect(() => {
       query.where(FieldPath.documentId(), 'not-in', 42);
     }).to.throw(
-      "Invalid Query. A non-empty array is required for 'not-in' filters."
+      "Invalid Query. A non-empty array is required for 'not-in' filters.",
     );
 
     expect(() => {
       query.where(FieldPath.documentId(), 'not-in', []);
     }).to.throw(
-      "Invalid Query. A non-empty array is required for 'not-in' filters."
+      "Invalid Query. A non-empty array is required for 'not-in' filters.",
     );
   });
 
@@ -1497,52 +1405,52 @@ describe('where() interface', () => {
     expect(() => {
       query.where(FieldPath.documentId(), 'array-contains', query.doc());
     }).to.throw(
-      "Invalid Query. You can't perform 'array-contains' queries on FieldPath.documentId()."
+      "Invalid Query. You can't perform 'array-contains' queries on FieldPath.documentId().",
     );
 
     expect(() => {
       query.where(FieldPath.documentId(), 'array-contains-any', query.doc());
     }).to.throw(
-      "Invalid Query. You can't perform 'array-contains-any' queries on FieldPath.documentId()."
+      "Invalid Query. You can't perform 'array-contains-any' queries on FieldPath.documentId().",
     );
   });
 
-  it('rejects custom objects for field paths', () => {
+  it('rejects custom objects for field paths', async () => {
     expect(() => {
       let query: Query = firestore.collection('collectionId');
       query = query.where({} as InvalidApiUsage, '==', 'bar');
-      return query.get();
+      void query.get();
     }).to.throw(
-      'Value for argument "fieldPath" is not a valid field path. Paths can only be specified as strings or via a FieldPath object.'
+      'Value for argument "fieldPath" is not a valid field path. Paths can only be specified as strings or via a FieldPath object.',
     );
 
     class FieldPath {}
     expect(() => {
       let query: Query = firestore.collection('collectionId');
       query = query.where(new FieldPath() as InvalidApiUsage, '==', 'bar');
-      return query.get();
+      void query.get();
     }).to.throw(
-      'Detected an object of type "FieldPath" that doesn\'t match the expected instance.'
+      'Detected an object of type "FieldPath" that doesn\'t match the expected instance.',
     );
   });
 
-  it('rejects field paths as value', () => {
+  it('rejects field paths as value', async () => {
     expect(() => {
       let query: Query = firestore.collection('collectionId');
       query = query.where('foo', '==', new FieldPath('bar'));
-      return query.get();
+      void query.get();
     }).to.throw(
-      'Value for argument "value" is not a valid query constraint. Cannot use object of type "FieldPath" as a Firestore value.'
+      'Value for argument "value" is not a valid query constraint. Cannot use object of type "FieldPath" as a Firestore value.',
     );
   });
 
-  it('rejects field delete as value', () => {
+  it('rejects field delete as value', async () => {
     expect(() => {
       let query: Query = firestore.collection('collectionId');
       query = query.where('foo', '==', FieldValue.delete());
-      return query.get();
+      void query.get();
     }).to.throw(
-      'FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true}.'
+      'FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true}.',
     );
   });
 
@@ -1556,76 +1464,72 @@ describe('where() interface', () => {
     const query = firestore.collection('collectionId');
 
     expect(() => {
-      query.where('foo', '==', new Foo()).get();
+      void query.where('foo', '==', new Foo()).get();
     }).to.throw(
-      'Value for argument "value" is not a valid Firestore document. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).'
+      'Value for argument "value" is not a valid Firestore document. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).',
     );
 
     expect(() => {
-      query.where('foo', '==', new FieldPath()).get();
+      void query.where('foo', '==', new FieldPath()).get();
     }).to.throw(
-      'Detected an object of type "FieldPath" that doesn\'t match the expected instance.'
+      'Detected an object of type "FieldPath" that doesn\'t match the expected instance.',
     );
 
     expect(() => {
-      query.where('foo', '==', new FieldValue()).get();
+      void query.where('foo', '==', new FieldValue()).get();
     }).to.throw(
-      'Detected an object of type "FieldValue" that doesn\'t match the expected instance.'
+      'Detected an object of type "FieldValue" that doesn\'t match the expected instance.',
     );
 
     expect(() => {
-      query.where('foo', '==', new DocumentReference()).get();
+      void query.where('foo', '==', new DocumentReference()).get();
     }).to.throw(
-      'Detected an object of type "DocumentReference" that doesn\'t match the expected instance.'
+      'Detected an object of type "DocumentReference" that doesn\'t match the expected instance.',
     );
 
     expect(() => {
-      query.where('foo', '==', new GeoPoint()).get();
+      void query.where('foo', '==', new GeoPoint()).get();
     }).to.throw(
-      'Detected an object of type "GeoPoint" that doesn\'t match the expected instance.'
+      'Detected an object of type "GeoPoint" that doesn\'t match the expected instance.',
     );
   });
 
-  it('supports unary filters', () => {
+  it('supports unary filters', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
           request,
-          unaryFiltersQuery('foo', 'IS_NAN', 'bar', 'IS_NULL')
+          unaryFiltersQuery('foo', 'IS_NAN', 'bar', 'IS_NULL'),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.where('foo', '==', NaN);
-      query = query.where('bar', '==', null);
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.where('foo', '==', NaN);
+    query = query.where('bar', '==', null);
+    await query.get();
   });
 
-  it('supports unary filters', () => {
+  it('supports unary filters', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
           request,
-          unaryFiltersQuery('foo', 'IS_NOT_NAN', 'bar', 'IS_NOT_NULL')
+          unaryFiltersQuery('foo', 'IS_NOT_NAN', 'bar', 'IS_NOT_NULL'),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.where('foo', '!=', NaN);
-      query = query.where('bar', '!=', null);
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.where('foo', '!=', NaN);
+    query = query.where('bar', '!=', null);
+    await query.get();
   });
 
   it('rejects invalid NaN filter', () => {
@@ -1634,7 +1538,7 @@ describe('where() interface', () => {
       query = query.where('foo', '>', NaN);
       return query.get();
     }).to.throw(
-      "Invalid query. You can only perform '==' and '!=' comparisons on NaN."
+      "Invalid query. You can only perform '==' and '!=' comparisons on NaN.",
     );
   });
 
@@ -1644,7 +1548,7 @@ describe('where() interface', () => {
       query = query.where('foo', '>', null);
       return query.get();
     }).to.throw(
-      "Invalid query. You can only perform '==' and '!=' comparisons on Null."
+      "Invalid query. You can only perform '==' and '!=' comparisons on Null.",
     );
   });
 
@@ -1653,7 +1557,7 @@ describe('where() interface', () => {
     expect(() => {
       query = query.where('foo.', '==', 'foobar');
     }).to.throw(
-      'Value for argument "fieldPath" is not a valid field path. Paths must not start or end with ".".'
+      'Value for argument "fieldPath" is not a valid field path. Paths must not start or end with ".".',
     );
   });
 
@@ -1662,11 +1566,11 @@ describe('where() interface', () => {
     expect(() => {
       query = query.where('foo', '@' as InvalidApiUsage, 'foobar');
     }).to.throw(
-      'Value for argument "opStr" is invalid. Acceptable values are: <, <=, ==, !=, >, >=, array-contains, in, not-in, array-contains-any'
+      'Value for argument "opStr" is invalid. Acceptable values are: <, <=, ==, !=, >, >=, array-contains, in, not-in, array-contains-any',
     );
   });
 
-  it('supports composite filters - outer OR', () => {
+  it('supports composite filters - outer OR', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -1682,37 +1586,35 @@ describe('where() interface', () => {
                 compositeFilter(
                   'OR',
                   fieldFilter('d', 'EQUAL', {integerValue: 40}),
-                  fieldFilter('e', 'GREATER_THAN', {integerValue: 50})
+                  fieldFilter('e', 'GREATER_THAN', {integerValue: 50}),
                 ),
-                unaryFilters('f', 'IS_NAN')
-              )
-            )
-          )
+                unaryFilters('f', 'IS_NAN'),
+              ),
+            ),
+          ),
         );
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.where(
-        Filter.or(
-          Filter.where('a', '==', 10),
-          Filter.and(
-            Filter.where('b', '==', 20),
-            Filter.where('c', '==', 30),
-            Filter.or(Filter.where('d', '==', 40), Filter.where('e', '>', 50)),
-            Filter.or(Filter.where('f', '==', NaN)),
-            Filter.and(Filter.or())
-          )
-        )
-      );
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.where(
+      Filter.or(
+        Filter.where('a', '==', 10),
+        Filter.and(
+          Filter.where('b', '==', 20),
+          Filter.where('c', '==', 30),
+          Filter.or(Filter.where('d', '==', 40), Filter.where('e', '>', 50)),
+          Filter.or(Filter.where('f', '==', NaN)),
+          Filter.and(Filter.or()),
+        ),
+      ),
+    );
+    await query.get();
   });
 
-  it('supports composite filters - outer AND', () => {
+  it('supports composite filters - outer AND', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -1728,37 +1630,35 @@ describe('where() interface', () => {
                 compositeFilter(
                   'AND',
                   fieldFilter('d', 'EQUAL', {integerValue: 40}),
-                  fieldFilter('e', 'GREATER_THAN', {integerValue: 50})
+                  fieldFilter('e', 'GREATER_THAN', {integerValue: 50}),
                 ),
-                unaryFilters('f', 'IS_NAN')
-              )
-            )
-          )
+                unaryFilters('f', 'IS_NAN'),
+              ),
+            ),
+          ),
         );
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.where(
-        Filter.and(
-          Filter.where('a', '==', 10),
-          Filter.or(
-            Filter.where('b', '==', 20),
-            Filter.where('c', '==', 30),
-            Filter.and(Filter.where('d', '==', 40), Filter.where('e', '>', 50)),
-            Filter.and(Filter.where('f', '==', NaN)),
-            Filter.or(Filter.and())
-          )
-        )
-      );
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.where(
+      Filter.and(
+        Filter.where('a', '==', 10),
+        Filter.or(
+          Filter.where('b', '==', 20),
+          Filter.where('c', '==', 30),
+          Filter.and(Filter.where('d', '==', 40), Filter.where('e', '>', 50)),
+          Filter.and(Filter.where('f', '==', NaN)),
+          Filter.or(Filter.and()),
+        ),
+      ),
+    );
+    await query.get();
   });
 
-  it('supports implicit AND filters', () => {
+  it('supports implicit AND filters', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -1771,34 +1671,32 @@ describe('where() interface', () => {
               fieldFilter('c', 'EQUAL', {integerValue: 30}),
               fieldFilter('d', 'EQUAL', {integerValue: 40}),
               fieldFilter('e', 'GREATER_THAN', {integerValue: 50}),
-              unaryFilters('f', 'IS_NAN')
-            )
-          )
+              unaryFilters('f', 'IS_NAN'),
+            ),
+          ),
         );
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query
-        .where('a', '==', 10)
-        .where('b', '==', 20)
-        .where('c', '==', 30)
-        .where('d', '==', 40)
-        .where('e', '>', 50)
-        .where('f', '==', NaN);
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query
+      .where('a', '==', 10)
+      .where('b', '==', 20)
+      .where('c', '==', 30)
+      .where('d', '==', 40)
+      .where('e', '>', 50)
+      .where('f', '==', NaN);
+    await query.get();
   });
 
-  it('supports single filter composite filters', () => {
+  it('supports single filter composite filters', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
           request,
-          where(fieldFilter('a', 'GREATER_THAN', {integerValue: 10}))
+          where(fieldFilter('a', 'GREATER_THAN', {integerValue: 10})),
         );
         return emptyQueryStream();
       },
@@ -1810,31 +1708,25 @@ describe('where() interface', () => {
       Filter.or(Filter.and(Filter.or(Filter.and(Filter.where('a', '>', 10))))),
     ];
 
-    return Promise.all(
-      filters.map(filter =>
-        createInstance(overrides).then(firestoreInstance => {
-          firestore = firestoreInstance;
-          let query: Query = firestore.collection('collectionId');
-          query = query.where(filter);
-          return query.get();
-        })
-      )
-    );
+    for (const filter of filters) {
+      firestore = await createInstance(overrides);
+      let query: Query = firestore.collection('collectionId');
+      query = query.where(filter);
+      await query.get();
+    }
   });
 });
 
 describe('orderBy() interface', () => {
   let firestore: Firestore;
 
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
+  beforeEach(async () => {
+    firestore = await createInstance();
   });
 
   afterEach(() => verifyInstance(firestore));
 
-  it('accepts empty string', () => {
+  it('accepts empty string', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, orderBy('foo', 'ASCENDING'));
@@ -1843,15 +1735,13 @@ describe('orderBy() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.orderBy('foo');
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo');
+    await query.get();
   });
 
-  it('accepts asc', () => {
+  it('accepts asc', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, orderBy('foo', 'ASCENDING'));
@@ -1860,15 +1750,13 @@ describe('orderBy() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.orderBy('foo', 'asc');
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo', 'asc');
+    await query.get();
   });
 
-  it('accepts desc', () => {
+  it('accepts desc', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, orderBy('foo', 'DESCENDING'));
@@ -1877,12 +1765,10 @@ describe('orderBy() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.orderBy('foo', 'desc');
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo', 'desc');
+    await query.get();
   });
 
   it('verifies order', () => {
@@ -1890,29 +1776,27 @@ describe('orderBy() interface', () => {
     expect(() => {
       query = query.orderBy('foo', 'foo' as InvalidApiUsage);
     }).to.throw(
-      'Value for argument "directionStr" is invalid. Acceptable values are: asc, desc'
+      'Value for argument "directionStr" is invalid. Acceptable values are: asc, desc',
     );
   });
 
-  it('accepts field path', () => {
+  it('accepts field path', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
           request,
-          orderBy('foo.bar', 'ASCENDING', 'bar.foo', 'ASCENDING')
+          orderBy('foo.bar', 'ASCENDING', 'bar.foo', 'ASCENDING'),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.orderBy('foo.bar');
-      query = query.orderBy(new FieldPath('bar', 'foo'));
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo.bar');
+    query = query.orderBy(new FieldPath('bar', 'foo'));
+    await query.get();
   });
 
   it('verifies field path', () => {
@@ -1920,47 +1804,46 @@ describe('orderBy() interface', () => {
     expect(() => {
       query = query.orderBy('foo.');
     }).to.throw(
-      'Value for argument "fieldPath" is not a valid field path. Paths must not start or end with ".".'
+      'Value for argument "fieldPath" is not a valid field path. Paths must not start or end with ".".',
     );
   });
 
-  it('rejects call after cursor', () => {
+  it('rejects call after cursor', async () => {
     let query: Query = firestore.collection('collectionId');
 
-    return snapshot('collectionId/doc', {foo: 'bar'}).then(snapshot => {
-      expect(() => {
-        query = query.orderBy('foo').startAt('foo').orderBy('foo');
-      }).to.throw(
-        'Cannot specify an orderBy() constraint after calling startAt(), startAfter(), endBefore() or endAt().'
-      );
+    const doc = await snapshot('collectionId/doc', {foo: 'bar'});
+    expect(() => {
+      query = query.orderBy('foo').startAt('foo').orderBy('foo');
+    }).to.throw(
+      'Cannot specify an orderBy() constraint after calling startAt(), startAfter(), endBefore() or endAt().',
+    );
 
-      expect(() => {
-        query = query
-          .where('foo', '>', 'bar')
-          .startAt(snapshot)
-          .where('foo', '>', 'bar');
-      }).to.throw(
-        'Cannot specify a where() filter after calling startAt(), startAfter(), endBefore() or endAt().'
-      );
+    expect(() => {
+      query = query
+        .where('foo', '>', 'bar')
+        .startAt(doc)
+        .where('foo', '>', 'bar');
+    }).to.throw(
+      'Cannot specify a where() filter after calling startAt(), startAfter(), endBefore() or endAt().',
+    );
 
-      expect(() => {
-        query = query.orderBy('foo').endAt('foo').orderBy('foo');
-      }).to.throw(
-        'Cannot specify an orderBy() constraint after calling startAt(), startAfter(), endBefore() or endAt().'
-      );
+    expect(() => {
+      query = query.orderBy('foo').endAt('foo').orderBy('foo');
+    }).to.throw(
+      'Cannot specify an orderBy() constraint after calling startAt(), startAfter(), endBefore() or endAt().',
+    );
 
-      expect(() => {
-        query = query
-          .where('foo', '>', 'bar')
-          .endAt(snapshot)
-          .where('foo', '>', 'bar');
-      }).to.throw(
-        'Cannot specify a where() filter after calling startAt(), startAfter(), endBefore() or endAt().'
-      );
-    });
+    expect(() => {
+      query = query
+        .where('foo', '>', 'bar')
+        .endAt(doc)
+        .where('foo', '>', 'bar');
+    }).to.throw(
+      'Cannot specify a where() filter after calling startAt(), startAfter(), endBefore() or endAt().',
+    );
   });
 
-  it('concatenates orders', () => {
+  it('concatenates orders', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -1971,38 +1854,34 @@ describe('orderBy() interface', () => {
             'bar',
             'DESCENDING',
             'foobar',
-            'ASCENDING'
-          )
+            'ASCENDING',
+          ),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query
-        .orderBy('foo', 'asc')
-        .orderBy('bar', 'desc')
-        .orderBy('foobar');
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query
+      .orderBy('foo', 'asc')
+      .orderBy('bar', 'desc')
+      .orderBy('foobar');
+    await query.get();
   });
 });
 
 describe('limit() interface', () => {
   let firestore: Firestore;
 
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
+  beforeEach(async () => {
+    firestore = await createInstance();
   });
 
   afterEach(() => verifyInstance(firestore));
 
-  it('generates proto', () => {
+  it('generates proto', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, limit(10));
@@ -2010,22 +1889,20 @@ describe('limit() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.limit(10);
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.limit(10);
+    await query.get();
   });
 
   it('expects number', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.limit(Infinity)).to.throw(
-      'Value for argument "limit" is not a valid integer.'
+      'Value for argument "limit" is not a valid integer.',
     );
   });
 
-  it('uses latest limit', () => {
+  it('uses latest limit', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, limit(3));
@@ -2033,27 +1910,23 @@ describe('limit() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.limit(1).limit(2).limit(3);
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.limit(1).limit(2).limit(3);
+    await query.get();
   });
 });
 
 describe('limitToLast() interface', () => {
   let firestore: Firestore;
 
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
+  beforeEach(async () => {
+    firestore = await createInstance();
   });
 
   afterEach(() => verifyInstance(firestore));
 
-  it('reverses order constraints', () => {
+  it('reverses order constraints', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, orderBy('foo', 'DESCENDING'), limit(10));
@@ -2061,15 +1934,13 @@ describe('limitToLast() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.orderBy('foo').limitToLast(10);
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo').limitToLast(10);
+    await query.get();
   });
 
-  it('reverses cursors', () => {
+  it('reverses cursors', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -2077,22 +1948,16 @@ describe('limitToLast() interface', () => {
           orderBy('foo', 'DESCENDING'),
           startAt(true, 'end'),
           endAt(false, 'start'),
-          limit(10)
+          limit(10),
         );
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query
-        .orderBy('foo')
-        .startAt('start')
-        .endAt('end')
-        .limitToLast(10);
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo').startAt('start').endAt('end').limitToLast(10);
+    await query.get();
   });
 
   it('reverses results', () => {
@@ -2116,7 +1981,7 @@ describe('limitToLast() interface', () => {
   it('expects number', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.limitToLast(Infinity)).to.throw(
-      'Value for argument "limitToLast" is not a valid integer.'
+      'Value for argument "limitToLast" is not a valid integer.',
     );
   });
 
@@ -2124,18 +1989,18 @@ describe('limitToLast() interface', () => {
     const query = firestore.collection('collectionId');
     const result = query.limitToLast(1).get();
     return expect(result).to.eventually.be.rejectedWith(
-      'limitToLast() queries require specifying at least one orderBy() clause.'
+      'limitToLast() queries require specifying at least one orderBy() clause.',
     );
   });
 
   it('rejects Query.stream()', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.limitToLast(1).stream()).to.throw(
-      'Query results for queries that include limitToLast() constraints cannot be streamed. Use Query.get() instead.'
+      'Query results for queries that include limitToLast() constraints cannot be streamed. Use Query.get() instead.',
     );
   });
 
-  it('uses latest limitToLast', () => {
+  it('uses latest limitToLast', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, orderBy('foo', 'DESCENDING'), limit(3));
@@ -2143,95 +2008,79 @@ describe('limitToLast() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.orderBy('foo').limitToLast(1).limitToLast(2).limitToLast(3);
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo').limitToLast(1).limitToLast(2).limitToLast(3);
+    await query.get();
   });
 
-  it('converts to bundled query without order reversing', () => {
-    return createInstance().then(firestore => {
-      let query: Query = firestore.collection('collectionId');
-      query = query.orderBy('foo').limitToLast(10);
-      const bundledQuery = query._toBundledQuery();
-      bundledQueryEquals(
-        bundledQuery,
-        'LAST',
-        orderBy('foo', 'ASCENDING'),
-        limit(10)
-      );
-    });
+  it('converts to bundled query without order reversing', async () => {
+    const firestore = await createInstance();
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo').limitToLast(10);
+    const bundledQuery = query._toBundledQuery();
+    bundledQueryEquals(
+      bundledQuery,
+      'LAST',
+      orderBy('foo', 'ASCENDING'),
+      limit(10),
+    );
   });
 
-  it('converts to bundled query without cursor flipping', () => {
-    return createInstance().then(firestore => {
-      let query: Query = firestore.collection('collectionId');
-      query = query
-        .orderBy('foo')
-        .startAt('start')
-        .endAt('end')
-        .limitToLast(10);
-      const bundledQuery = query._toBundledQuery();
-      bundledQueryEquals(
-        bundledQuery,
-        'LAST',
-        orderBy('foo', 'ASCENDING'),
-        limit(10),
-        startAt(true, 'start'),
-        endAt(false, 'end')
-      );
-    });
+  it('converts to bundled query without cursor flipping', async () => {
+    const firestore = await createInstance();
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo').startAt('start').endAt('end').limitToLast(10);
+    const bundledQuery = query._toBundledQuery();
+    bundledQueryEquals(
+      bundledQuery,
+      'LAST',
+      orderBy('foo', 'ASCENDING'),
+      limit(10),
+      startAt(true, 'start'),
+      endAt(false, 'end'),
+    );
   });
 
-  it('converts to bundled query without order reversing', () => {
-    return createInstance().then(firestore => {
-      let query: Query = firestore.collection('collectionId');
-      query = query.orderBy('foo').limitToLast(10);
-      const bundledQuery = query._toBundledQuery();
-      bundledQueryEquals(
-        bundledQuery,
-        'LAST',
-        orderBy('foo', 'ASCENDING'),
-        limit(10)
-      );
-    });
+  it('converts to bundled query without order reversing', async () => {
+    const firestore = await createInstance();
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo').limitToLast(10);
+    const bundledQuery = query._toBundledQuery();
+    bundledQueryEquals(
+      bundledQuery,
+      'LAST',
+      orderBy('foo', 'ASCENDING'),
+      limit(10),
+    );
   });
 
-  it('converts to bundled query without cursor flipping', () => {
-    return createInstance().then(firestore => {
-      let query: Query = firestore.collection('collectionId');
-      query = query
-        .orderBy('foo')
-        .startAt('start')
-        .endAt('end')
-        .limitToLast(10);
-      const bundledQuery = query._toBundledQuery();
-      bundledQueryEquals(
-        bundledQuery,
-        'LAST',
-        orderBy('foo', 'ASCENDING'),
-        limit(10),
-        startAt(true, 'start'),
-        endAt(false, 'end')
-      );
-    });
+  it('converts to bundled query without cursor flipping', async () => {
+    const firestore = await createInstance();
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo').startAt('start').endAt('end').limitToLast(10);
+    const bundledQuery = query._toBundledQuery();
+    bundledQueryEquals(
+      bundledQuery,
+      'LAST',
+      orderBy('foo', 'ASCENDING'),
+      limit(10),
+      startAt(true, 'start'),
+      endAt(false, 'end'),
+    );
   });
 });
 
 describe('offset() interface', () => {
   let firestore: Firestore;
 
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
+  beforeEach(async () => {
+    firestore = await createInstance();
   });
 
   afterEach(() => verifyInstance(firestore));
 
-  it('generates proto', () => {
+  it('generates proto', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, offset(10));
@@ -2239,22 +2088,20 @@ describe('offset() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.offset(10);
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.offset(10);
+    await query.get();
   });
 
   it('expects number', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.offset(Infinity)).to.throw(
-      'Value for argument "offset" is not a valid integer.'
+      'Value for argument "offset" is not a valid integer.',
     );
   });
 
-  it('uses latest offset', () => {
+  it('uses latest offset', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, offset(3));
@@ -2262,27 +2109,23 @@ describe('offset() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.offset(1).offset(2).offset(3);
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.offset(1).offset(2).offset(3);
+    await query.get();
   });
 });
 
 describe('select() interface', () => {
   let firestore: Firestore;
 
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
+  beforeEach(async () => {
+    firestore = await createInstance();
   });
 
   afterEach(() => verifyInstance(firestore));
 
-  it('generates proto', () => {
+  it('generates proto', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, select('a', 'b.c'));
@@ -2290,29 +2133,26 @@ describe('select() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      const collection = firestore.collection('collectionId');
-      const query = collection.select('a', new FieldPath('b', 'c'));
+    firestore = await createInstance(overrides);
+    const collection = firestore.collection('collectionId');
+    const query = collection.select('a', new FieldPath('b', 'c'));
 
-      return query.get().then(() => {
-        return collection.select('a', 'b.c').get();
-      });
-    });
+    await query.get();
+    await collection.select('a', 'b.c').get();
   });
 
   it('validates field path', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.select(1 as InvalidApiUsage)).to.throw(
-      'Element at index 0 is not a valid field path. Paths can only be specified as strings or via a FieldPath object.'
+      'Element at index 0 is not a valid field path. Paths can only be specified as strings or via a FieldPath object.',
     );
 
     expect(() => query.select('.')).to.throw(
-      'Element at index 0 is not a valid field path. Paths must not start or end with ".".'
+      'Element at index 0 is not a valid field path. Paths must not start or end with ".".',
     );
   });
 
-  it('uses latest field mask', () => {
+  it('uses latest field mask', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, select('bar'));
@@ -2320,15 +2160,13 @@ describe('select() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.select('foo').select('bar');
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.select('foo').select('bar');
+    await query.get();
   });
 
-  it('implicitly adds FieldPath.documentId()', () => {
+  it('implicitly adds FieldPath.documentId()', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, select('__name__'));
@@ -2336,48 +2174,42 @@ describe('select() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.select();
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.select();
+    await query.get();
   });
 });
 
 describe('startAt() interface', () => {
   let firestore: Firestore;
 
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
+  beforeEach(async () => {
+    firestore = await createInstance();
   });
 
   afterEach(() => verifyInstance(firestore));
 
-  it('accepts fields', () => {
+  it('accepts fields', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
           request,
           orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-          startAt(true, 'foo', 'bar')
+          startAt(true, 'foo', 'bar'),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.orderBy('foo').orderBy('bar').startAt('foo', 'bar');
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo').orderBy('bar').startAt('foo', 'bar');
+    await query.get();
   });
 
-  it('accepts FieldPath.documentId()', () => {
+  it('accepts FieldPath.documentId()', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -2387,24 +2219,21 @@ describe('startAt() interface', () => {
             referenceValue:
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc',
-          })
+          }),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
-        const query = firestore.collection('collectionId');
+    firestore = await createInstance(overrides);
+    const doc = await snapshot('collectionId/doc', {foo: 'bar'});
+    const query = firestore.collection('collectionId');
 
-        return Promise.all([
-          query.orderBy(FieldPath.documentId()).startAt(doc.id).get(),
-          query.orderBy(FieldPath.documentId()).startAt(doc.ref).get(),
-        ]);
-      });
-    });
+    await Promise.all([
+      query.orderBy(FieldPath.documentId()).startAt(doc.id).get(),
+      query.orderBy(FieldPath.documentId()).startAt(doc.ref).get(),
+    ]);
   });
 
   it('validates value for FieldPath.documentId()', () => {
@@ -2413,7 +2242,7 @@ describe('startAt() interface', () => {
     expect(() => {
       query.orderBy(FieldPath.documentId()).startAt(42);
     }).to.throw(
-      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference, but was "42".'
+      'The corresponding value for FieldPath.documentId() must be a string or a DocumentReference, but was "42".',
     );
 
     expect(() => {
@@ -2421,7 +2250,7 @@ describe('startAt() interface', () => {
         .orderBy(FieldPath.documentId())
         .startAt(firestore.doc('coll/doc/other/doc'));
     }).to.throw(
-      '"coll/doc/other/doc" is not part of the query result set and cannot be used as a query boundary.'
+      '"coll/doc/other/doc" is not part of the query result set and cannot be used as a query boundary.',
     );
 
     expect(() => {
@@ -2429,13 +2258,13 @@ describe('startAt() interface', () => {
         .orderBy(FieldPath.documentId())
         .startAt(firestore.doc('coll/doc/coll_suffix/doc'));
     }).to.throw(
-      '"coll/doc/coll_suffix/doc" is not part of the query result set and cannot be used as a query boundary.'
+      '"coll/doc/coll_suffix/doc" is not part of the query result set and cannot be used as a query boundary.',
     );
 
     expect(() => {
       query.orderBy(FieldPath.documentId()).startAt(firestore.doc('coll/doc'));
     }).to.throw(
-      '"coll/doc" is not part of the query result set and cannot be used as a query boundary.'
+      '"coll/doc" is not part of the query result set and cannot be used as a query boundary.',
     );
 
     expect(() => {
@@ -2443,7 +2272,7 @@ describe('startAt() interface', () => {
         .orderBy(FieldPath.documentId())
         .startAt(firestore.doc('coll/doc/coll/doc/coll/doc'));
     }).to.throw(
-      'Only a direct child can be used as a query boundary. Found: "coll/doc/coll/doc/coll/doc".'
+      'Only a direct child can be used as a query boundary. Found: "coll/doc/coll/doc/coll/doc".',
     );
 
     // Validate that we can't pass a reference to a collection.
@@ -2452,7 +2281,7 @@ describe('startAt() interface', () => {
     }).to.throw(
       'When querying a collection and ordering by FieldPath.documentId(), ' +
         'the corresponding value must be a plain document ID, but ' +
-        "'doc/coll' contains a slash."
+        "'doc/coll' contains a slash.",
     );
   });
 
@@ -2464,7 +2293,7 @@ describe('startAt() interface', () => {
     }).to.throw('Function "Query.startAt()" requires at least 1 argument.');
   });
 
-  it('can specify document snapshot', () => {
+  it('can specify document snapshot', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -2474,23 +2303,20 @@ describe('startAt() interface', () => {
             referenceValue:
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc',
-          })
+          }),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      return snapshot('collectionId/doc', {}).then(doc => {
-        const query = firestore.collection('collectionId').startAt(doc);
-        return query.get();
-      });
-    });
+    firestore = await createInstance(overrides);
+    const doc = await snapshot('collectionId/doc', {});
+    const query = firestore.collection('collectionId').startAt(doc);
+    await query.get();
   });
 
-  it("doesn't append documentId() twice", () => {
+  it("doesn't append documentId() twice", async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -2500,26 +2326,23 @@ describe('startAt() interface', () => {
             referenceValue:
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc',
-          })
+          }),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      return snapshot('collectionId/doc', {}).then(doc => {
-        const query = firestore
-          .collection('collectionId')
-          .orderBy(FieldPath.documentId())
-          .startAt(doc);
-        return query.get();
-      });
-    });
+    firestore = await createInstance(overrides);
+    const doc = await snapshot('collectionId/doc', {});
+    const query = firestore
+      .collection('collectionId')
+      .orderBy(FieldPath.documentId())
+      .startAt(doc);
+    await query.get();
   });
 
-  it('appends orderBy for DocumentReference cursors', () => {
+  it('appends orderBy for DocumentReference cursors', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -2529,24 +2352,21 @@ describe('startAt() interface', () => {
             referenceValue:
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc',
-          })
+          }),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
-        let query: Query = firestore.collection('collectionId');
-        query = query.startAt(doc);
-        return query.get();
-      });
-    });
+    firestore = await createInstance(overrides);
+    const doc = await snapshot('collectionId/doc', {foo: 'bar'});
+    let query: Query = firestore.collection('collectionId');
+    query = query.startAt(doc);
+    await query.get();
   });
 
-  it('can extract implicit direction for document snapshot', () => {
+  it('can extract implicit direction for document snapshot', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -2556,24 +2376,21 @@ describe('startAt() interface', () => {
             referenceValue:
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc',
-          })
+          }),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
-        let query: Query = firestore.collection('collectionId').orderBy('foo');
-        query = query.startAt(doc);
-        return query.get();
-      });
-    });
+    firestore = await createInstance(overrides);
+    const doc = await snapshot('collectionId/doc', {foo: 'bar'});
+    let query: Query = firestore.collection('collectionId').orderBy('foo');
+    query = query.startAt(doc);
+    await query.get();
   });
 
-  it('can extract explicit direction for document snapshot', () => {
+  it('can extract explicit direction for document snapshot', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -2583,26 +2400,23 @@ describe('startAt() interface', () => {
             referenceValue:
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc',
-          })
+          }),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
-        let query: Query = firestore
-          .collection('collectionId')
-          .orderBy('foo', 'desc');
-        query = query.startAt(doc);
-        return query.get();
-      });
-    });
+    firestore = await createInstance(overrides);
+    const doc = await snapshot('collectionId/doc', {foo: 'bar'});
+    let query: Query = firestore
+      .collection('collectionId')
+      .orderBy('foo', 'desc');
+    query = query.startAt(doc);
+    await query.get();
   });
 
-  it('can specify document snapshot with inequality filter', () => {
+  it('can specify document snapshot with inequality filter', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -2625,30 +2439,27 @@ describe('startAt() interface', () => {
             'c',
             'd',
             'EQUAL',
-            'd'
-          )
+            'd',
+          ),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      return snapshot('collectionId/doc', {c: 'c'}).then(doc => {
-        const query = firestore
-          .collection('collectionId')
-          .where('a', '==', 'a')
-          .where('b', 'array-contains', 'b')
-          .where('c', '>=', 'c')
-          .where('d', '==', 'd')
-          .startAt(doc);
-        return query.get();
-      });
-    });
+    firestore = await createInstance(overrides);
+    const doc = await snapshot('collectionId/doc', {c: 'c'});
+    const query = firestore
+      .collection('collectionId')
+      .where('a', '==', 'a')
+      .where('b', 'array-contains', 'b')
+      .where('c', '>=', 'c')
+      .where('d', '==', 'd')
+      .startAt(doc);
+    await query.get();
   });
 
-  it('ignores equality filter with document snapshot cursor', () => {
+  it('ignores equality filter with document snapshot cursor', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
@@ -2659,27 +2470,24 @@ describe('startAt() interface', () => {
               `projects/${PROJECT_ID}/databases/(default)/` +
               'documents/collectionId/doc',
           }),
-          fieldFiltersQuery('foo', 'EQUAL', 'bar')
+          fieldFiltersQuery('foo', 'EQUAL', 'bar'),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      return snapshot('collectionId/doc', {foo: 'bar'}).then(doc => {
-        const query = firestore
-          .collection('collectionId')
-          .where('foo', '==', 'bar')
-          .startAt(doc);
-        return query.get();
-      });
-    });
+    firestore = await createInstance(overrides);
+    const doc = await snapshot('collectionId/doc', {foo: 'bar'});
+    const query = firestore
+      .collection('collectionId')
+      .where('foo', '==', 'bar')
+      .startAt(doc);
+    await query.get();
   });
 
   describe('inequality fields are implicitly ordered lexicographically for cursors', () => {
-    it('upper and lower case characters', () => {
+    it('upper and lower case characters', async () => {
       const overrides: ApiOverride = {
         runQuery: request => {
           queryEquals(
@@ -2694,7 +2502,7 @@ describe('startAt() interface', () => {
               'b',
               'ASCENDING',
               '__name__',
-              'ASCENDING'
+              'ASCENDING',
             ),
             startAt(true, 'A', 'a', 'aa', 'b', {
               referenceValue:
@@ -2716,35 +2524,32 @@ describe('startAt() interface', () => {
               'value',
               'A',
               'GREATER_THAN',
-              'value'
-            )
+              'value',
+            ),
           );
           return emptyQueryStream();
         },
       };
 
-      return createInstance(overrides).then(firestoreInstance => {
-        firestore = firestoreInstance;
-        return snapshot('collectionId/doc', {
-          a: 'a',
-          aa: 'aa',
-          b: 'b',
-          A: 'A',
-        }).then(doc => {
-          const query = firestore
-            .collection('collectionId')
-            .where('a', '<', 'value')
-            .where('a', '>=', 'value')
-            .where('aa', '>', 'value')
-            .where('b', '>', 'value')
-            .where('A', '>', 'value')
-            .startAt(doc);
-          return query.get();
-        });
+      firestore = await createInstance(overrides);
+      const doc = await snapshot('collectionId/doc', {
+        a: 'a',
+        aa: 'aa',
+        b: 'b',
+        A: 'A',
       });
+      const query = firestore
+        .collection('collectionId')
+        .where('a', '<', 'value')
+        .where('a', '>=', 'value')
+        .where('aa', '>', 'value')
+        .where('b', '>', 'value')
+        .where('A', '>', 'value')
+        .startAt(doc);
+      await query.get();
     });
 
-    it('characters and numbers', () => {
+    it('characters and numbers', async () => {
       const overrides: ApiOverride = {
         runQuery: request => {
           queryEquals(
@@ -2759,7 +2564,7 @@ describe('startAt() interface', () => {
               'a',
               'ASCENDING',
               '__name__',
-              'ASCENDING'
+              'ASCENDING',
             ),
             startAt(true, '1', '19', '2', 'a', {
               referenceValue:
@@ -2778,34 +2583,31 @@ describe('startAt() interface', () => {
               'value',
               '`2`',
               'GREATER_THAN',
-              'value'
-            )
+              'value',
+            ),
           );
           return emptyQueryStream();
         },
       };
 
-      return createInstance(overrides).then(firestoreInstance => {
-        firestore = firestoreInstance;
-        return snapshot('collectionId/doc', {
-          a: 'a',
-          1: '1',
-          19: '19',
-          2: '2',
-        }).then(doc => {
-          const query = firestore
-            .collection('collectionId')
-            .where('a', '<', 'value')
-            .where('1', '>', 'value')
-            .where('19', '>', 'value')
-            .where('2', '>', 'value')
-            .startAt(doc);
-          return query.get();
-        });
+      firestore = await createInstance(overrides);
+      const doc = await snapshot('collectionId/doc', {
+        a: 'a',
+        1: '1',
+        19: '19',
+        2: '2',
       });
+      const query = firestore
+        .collection('collectionId')
+        .where('a', '<', 'value')
+        .where('1', '>', 'value')
+        .where('19', '>', 'value')
+        .where('2', '>', 'value')
+        .startAt(doc);
+      await query.get();
     });
 
-    it('nested fields', () => {
+    it('nested fields', async () => {
       const overrides: ApiOverride = {
         runQuery: request => {
           queryEquals(
@@ -2818,7 +2620,7 @@ describe('startAt() interface', () => {
               'aa',
               'ASCENDING',
               '__name__',
-              'ASCENDING'
+              'ASCENDING',
             ),
             startAt(
               true,
@@ -2837,7 +2639,7 @@ describe('startAt() interface', () => {
                 referenceValue:
                   `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/doc',
-              }
+              },
             ),
             fieldFiltersQuery(
               'a',
@@ -2848,30 +2650,25 @@ describe('startAt() interface', () => {
               'value',
               'aa',
               'GREATER_THAN',
-              'value'
-            )
+              'value',
+            ),
           );
           return emptyQueryStream();
         },
       };
 
-      return createInstance(overrides).then(firestoreInstance => {
-        firestore = firestoreInstance;
-        return snapshot('collectionId/doc', {a: {a: 'a.a'}, aa: 'aa'}).then(
-          doc => {
-            const query = firestore
-              .collection('collectionId')
-              .where('a', '<', 'value')
-              .where('a.a', '>', 'value')
-              .where('aa', '>', 'value')
-              .startAt(doc);
-            return query.get();
-          }
-        );
-      });
+      firestore = await createInstance(overrides);
+      const doc = await snapshot('collectionId/doc', {a: {a: 'a.a'}, aa: 'aa'});
+      const query = firestore
+        .collection('collectionId')
+        .where('a', '<', 'value')
+        .where('a.a', '>', 'value')
+        .where('aa', '>', 'value')
+        .startAt(doc);
+      await query.get();
     });
 
-    it('special characters', () => {
+    it('special characters', async () => {
       const overrides: ApiOverride = {
         runQuery: request => {
           queryEquals(
@@ -2884,7 +2681,7 @@ describe('startAt() interface', () => {
               'a.a',
               'ASCENDING',
               '__name__',
-              'ASCENDING'
+              'ASCENDING',
             ),
             startAt(
               true,
@@ -2903,7 +2700,7 @@ describe('startAt() interface', () => {
                 referenceValue:
                   `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/doc',
-              }
+              },
             ),
             fieldFiltersQuery(
               'a',
@@ -2914,30 +2711,25 @@ describe('startAt() interface', () => {
               '_a',
               'a.a',
               'GREATER_THAN',
-              'a.a'
-            )
+              'a.a',
+            ),
           );
           return emptyQueryStream();
         },
       };
 
-      return createInstance(overrides).then(firestoreInstance => {
-        firestore = firestoreInstance;
-        return snapshot('collectionId/doc', {a: {a: 'a.a'}, _a: '_a'}).then(
-          doc => {
-            const query = firestore
-              .collection('collectionId')
-              .where('a', '<', 'a')
-              .where('_a', '>', '_a')
-              .where('a.a', '>', 'a.a')
-              .startAt(doc);
-            return query.get();
-          }
-        );
-      });
+      firestore = await createInstance(overrides);
+      const doc = await snapshot('collectionId/doc', {a: {a: 'a.a'}, _a: '_a'});
+      const query = firestore
+        .collection('collectionId')
+        .where('a', '<', 'a')
+        .where('_a', '>', '_a')
+        .where('a.a', '>', 'a.a')
+        .startAt(doc);
+      await query.get();
     });
 
-    it('field name with dot', () => {
+    it('field name with dot', async () => {
       const overrides: ApiOverride = {
         runQuery: request => {
           queryEquals(
@@ -2950,7 +2742,7 @@ describe('startAt() interface', () => {
               '`a.a`',
               'ASCENDING',
               '__name__',
-              'ASCENDING'
+              'ASCENDING',
             ),
             startAt(
               true,
@@ -2969,7 +2761,7 @@ describe('startAt() interface', () => {
                 referenceValue:
                   `projects/${PROJECT_ID}/databases/(default)/` +
                   'documents/collectionId/doc',
-              }
+              },
             ),
             fieldFiltersQuery(
               'a',
@@ -2980,30 +2772,28 @@ describe('startAt() interface', () => {
               'value',
               'a.z',
               'GREATER_THAN',
-              'value'
-            )
+              'value',
+            ),
           );
           return emptyQueryStream();
         },
       };
 
-      return createInstance(overrides).then(firestoreInstance => {
-        firestore = firestoreInstance;
-        return snapshot('collectionId/doc', {a: {z: 'a.z'}, 'a.a': 'a.a'}).then(
-          doc => {
-            const query = firestore
-              .collection('collectionId')
-              .where('a', '<', 'value')
-              .where(new FieldPath('a.a'), '>', 'value') // field name with dot
-              .where('a.z', '>', 'value') // nested field
-              .startAt(doc);
-            return query.get();
-          }
-        );
+      firestore = await createInstance(overrides);
+      const doc = await snapshot('collectionId/doc', {
+        a: {z: 'a.z'},
+        'a.a': 'a.a',
       });
+      const query = firestore
+        .collection('collectionId')
+        .where('a', '<', 'value')
+        .where(new FieldPath('a.a'), '>', 'value') // field name with dot
+        .where('a.z', '>', 'value') // nested field
+        .startAt(doc);
+      await query.get();
     });
 
-    it('composite filter', () => {
+    it('composite filter', async () => {
       const overrides: ApiOverride = {
         runQuery: request => {
           queryEquals(
@@ -3018,7 +2808,7 @@ describe('startAt() interface', () => {
               'd',
               'ASCENDING',
               '__name__',
-              'ASCENDING'
+              'ASCENDING',
             ),
             startAt(true, 'a', 'b', 'c', 'd', {
               referenceValue:
@@ -3035,52 +2825,49 @@ describe('startAt() interface', () => {
                   compositeFilter(
                     'OR',
                     fieldFilter('b', 'GREATER_THAN_OR_EQUAL', 'value'),
-                    fieldFilter('c', 'LESS_THAN_OR_EQUAL', 'value')
+                    fieldFilter('c', 'LESS_THAN_OR_EQUAL', 'value'),
                   ),
                   compositeFilter(
                     'OR',
                     fieldFilter('d', 'GREATER_THAN', 'value'),
-                    fieldFilter('e', 'EQUAL', 'value')
-                  )
-                )
-              )
-            )
-          );
-          return emptyQueryStream();
-        },
-      };
-
-      return createInstance(overrides).then(firestoreInstance => {
-        firestore = firestoreInstance;
-        return snapshot('collectionId/doc', {
-          a: 'a',
-          b: 'b',
-          c: 'c',
-          d: 'd',
-          e: 'e',
-        }).then(doc => {
-          const query = firestore
-            .collection('collectionId')
-            .where('a', '<', 'value')
-            .where(
-              Filter.and(
-                Filter.or(
-                  Filter.where('b', '>=', 'value'),
-                  Filter.where('c', '<=', 'value')
+                    fieldFilter('e', 'EQUAL', 'value'),
+                  ),
                 ),
-                Filter.or(
-                  Filter.where('d', '>', 'value'),
-                  Filter.where('e', '==', 'value')
-                )
-              )
-            )
-            .startAt(doc);
-          return query.get();
-        });
+              ),
+            ),
+          );
+          return emptyQueryStream();
+        },
+      };
+
+      firestore = await createInstance(overrides);
+      const doc = await snapshot('collectionId/doc', {
+        a: 'a',
+        b: 'b',
+        c: 'c',
+        d: 'd',
+        e: 'e',
       });
+      const query = firestore
+        .collection('collectionId')
+        .where('a', '<', 'value')
+        .where(
+          Filter.and(
+            Filter.or(
+              Filter.where('b', '>=', 'value'),
+              Filter.where('c', '<=', 'value'),
+            ),
+            Filter.or(
+              Filter.where('d', '>', 'value'),
+              Filter.where('e', '==', 'value'),
+            ),
+          ),
+        )
+        .startAt(doc);
+      await query.get();
     });
 
-    it('explicit orderby', () => {
+    it('explicit orderby', async () => {
       const overrides: ApiOverride = {
         runQuery: request => {
           queryEquals(
@@ -3093,7 +2880,7 @@ describe('startAt() interface', () => {
               'b',
               'ASCENDING',
               '__name__',
-              'ASCENDING'
+              'ASCENDING',
             ),
             startAt(true, 'z', 'a', 'b', {
               referenceValue:
@@ -3109,33 +2896,30 @@ describe('startAt() interface', () => {
               'value',
               'z',
               'GREATER_THAN',
-              'value'
-            )
+              'value',
+            ),
           );
           return emptyQueryStream();
         },
       };
 
-      return createInstance(overrides).then(firestoreInstance => {
-        firestore = firestoreInstance;
-        return snapshot('collectionId/doc', {
-          a: 'a',
-          b: 'b',
-          z: 'z',
-        }).then(doc => {
-          const query = firestore
-            .collection('collectionId')
-            .where('b', '<', 'value')
-            .where('a', '>', 'value')
-            .where('z', '>', 'value')
-            .orderBy('z')
-            .startAt(doc);
-          return query.get();
-        });
+      firestore = await createInstance(overrides);
+      const doc = await snapshot('collectionId/doc', {
+        a: 'a',
+        b: 'b',
+        z: 'z',
       });
+      const query = firestore
+        .collection('collectionId')
+        .where('b', '<', 'value')
+        .where('a', '>', 'value')
+        .where('z', '>', 'value')
+        .orderBy('z')
+        .startAt(doc);
+      await query.get();
     });
 
-    it('explicit order by direction', () => {
+    it('explicit order by direction', async () => {
       const overrides: ApiOverride = {
         runQuery: request => {
           queryEquals(
@@ -3148,7 +2932,7 @@ describe('startAt() interface', () => {
               'b',
               'DESCENDING',
               '__name__',
-              'DESCENDING'
+              'DESCENDING',
             ),
             startAt(true, 'z', 'a', 'b', {
               referenceValue:
@@ -3161,32 +2945,29 @@ describe('startAt() interface', () => {
               'value',
               'a',
               'GREATER_THAN',
-              'value'
-            )
+              'value',
+            ),
           );
           return emptyQueryStream();
         },
       };
 
-      return createInstance(overrides).then(firestoreInstance => {
-        firestore = firestoreInstance;
-        return snapshot('collectionId/doc', {
-          a: 'a',
-          b: 'b',
-          z: 'z',
-        }).then(doc => {
-          const query = firestore
-            .collection('collectionId')
-            .where('b', '<', 'value')
-            .where('a', '>', 'value')
-            .orderBy('z', 'desc')
-            .startAt(doc);
-          return query.get();
-        });
+      firestore = await createInstance(overrides);
+      const doc = await snapshot('collectionId/doc', {
+        a: 'a',
+        b: 'b',
+        z: 'z',
       });
+      const query = firestore
+        .collection('collectionId')
+        .where('b', '<', 'value')
+        .where('a', '>', 'value')
+        .orderBy('z', 'desc')
+        .startAt(doc);
+      await query.get();
     });
 
-    it('last explicit order by direction', () => {
+    it('last explicit order by direction', async () => {
       const overrides: ApiOverride = {
         runQuery: request => {
           queryEquals(
@@ -3201,7 +2982,7 @@ describe('startAt() interface', () => {
               'b',
               'ASCENDING',
               '__name__',
-              'ASCENDING'
+              'ASCENDING',
             ),
             startAt(true, 'z', 'c', 'a', 'b', {
               referenceValue:
@@ -3214,42 +2995,38 @@ describe('startAt() interface', () => {
               'value',
               'a',
               'GREATER_THAN',
-              'value'
-            )
+              'value',
+            ),
           );
           return emptyQueryStream();
         },
       };
 
-      return createInstance(overrides).then(firestoreInstance => {
-        firestore = firestoreInstance;
-        return snapshot('collectionId/doc', {
-          a: 'a',
-          b: 'b',
-          c: 'c',
-          z: 'z',
-        }).then(doc => {
-          const query = firestore
-            .collection('collectionId')
-            .where('b', '<', 'value')
-            .where('a', '>', 'value')
-            .orderBy('z', 'desc')
-            .orderBy('c')
-            .startAt(doc);
-          return query.get();
-        });
+      firestore = await createInstance(overrides);
+      const doc = await snapshot('collectionId/doc', {
+        a: 'a',
+        b: 'b',
+        c: 'c',
+        z: 'z',
       });
+      const query = firestore
+        .collection('collectionId')
+        .where('b', '<', 'value')
+        .where('a', '>', 'value')
+        .orderBy('z', 'desc')
+        .orderBy('c')
+        .startAt(doc);
+      await query.get();
     });
   });
 
-  it('validates field exists in document snapshot', () => {
+  it('validates field exists in document snapshot', async () => {
     const query = firestore.collection('collectionId').orderBy('foo', 'desc');
 
-    return snapshot('collectionId/doc', {}).then(doc => {
-      expect(() => query.startAt(doc)).to.throw(
-        'Field "foo" is missing in the provided DocumentSnapshot. Please provide a document that contains values for all specified orderBy() and where() constraints.'
-      );
-    });
+    const doc = await snapshot('collectionId/doc', {});
+    expect(() => query.startAt(doc)).to.throw(
+      'Field "foo" is missing in the provided DocumentSnapshot. Please provide a document that contains values for all specified orderBy() and where() constraints.',
+    );
   });
 
   it('does not accept field deletes', () => {
@@ -3258,7 +3035,7 @@ describe('startAt() interface', () => {
     expect(() => {
       query.orderBy('foo').startAt('foo', FieldValue.delete());
     }).to.throw(
-      'Element at index 1 is not a valid query constraint. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true}.'
+      'Element at index 1 is not a valid query constraint. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true}.',
     );
   });
 
@@ -3267,39 +3044,37 @@ describe('startAt() interface', () => {
     query = query.orderBy('foo');
 
     expect(() => query.startAt('foo', 'bar')).to.throw(
-      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.'
+      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.',
     );
   });
 
-  it('can overspecify order by', () => {
+  it('can overspecify order by', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
           request,
           orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-          startAt(true, 'foo')
+          startAt(true, 'foo'),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.orderBy('foo').orderBy('bar').startAt('foo');
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo').orderBy('bar').startAt('foo');
+    await query.get();
   });
 
   it('validates input', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.startAt(123)).to.throw(
-      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.'
+      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.',
     );
   });
 
-  it('uses latest value', () => {
+  it('uses latest value', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, orderBy('foo', 'ASCENDING'), startAt(true, 'bar'));
@@ -3308,116 +3083,104 @@ describe('startAt() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.orderBy('foo').startAt('foo').startAt('bar');
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo').startAt('foo').startAt('bar');
+    await query.get();
   });
 });
 
 describe('startAfter() interface', () => {
   let firestore: Firestore;
 
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
+  beforeEach(async () => {
+    firestore = await createInstance();
   });
 
   afterEach(() => verifyInstance(firestore));
 
-  it('accepts fields', () => {
+  it('accepts fields', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
           request,
           orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-          startAt(false, 'foo', 'bar')
+          startAt(false, 'foo', 'bar'),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.orderBy('foo').orderBy('bar').startAfter('foo', 'bar');
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo').orderBy('bar').startAfter('foo', 'bar');
+    await query.get();
   });
 
   it('validates input', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.startAfter(123)).to.throw(
-      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.'
+      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.',
     );
   });
 
-  it('uses latest value', () => {
+  it('uses latest value', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
           request,
           orderBy('foo', 'ASCENDING'),
-          startAt(false, 'bar')
+          startAt(false, 'bar'),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.orderBy('foo').startAfter('foo').startAfter('bar');
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo').startAfter('foo').startAfter('bar');
+    await query.get();
   });
 });
 
 describe('endAt() interface', () => {
   let firestore: Firestore;
 
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
+  beforeEach(async () => {
+    firestore = await createInstance();
   });
 
   afterEach(() => verifyInstance(firestore));
 
-  it('accepts fields', () => {
+  it('accepts fields', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
           request,
           orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-          endAt(false, 'foo', 'bar')
+          endAt(false, 'foo', 'bar'),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.orderBy('foo').orderBy('bar').endAt('foo', 'bar');
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo').orderBy('bar').endAt('foo', 'bar');
+    await query.get();
   });
 
   it('validates input', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.endAt(123)).to.throw(
-      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.'
+      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.',
     );
   });
 
-  it('uses latest value', () => {
+  it('uses latest value', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, orderBy('foo', 'ASCENDING'), endAt(false, 'bar'));
@@ -3426,55 +3189,49 @@ describe('endAt() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.orderBy('foo').endAt('foo').endAt('bar');
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo').endAt('foo').endAt('bar');
+    await query.get();
   });
 });
 
 describe('endBefore() interface', () => {
   let firestore: Firestore;
 
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
+  beforeEach(async () => {
+    firestore = await createInstance();
   });
 
   afterEach(() => verifyInstance(firestore));
 
-  it('accepts fields', () => {
+  it('accepts fields', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
           request,
           orderBy('foo', 'ASCENDING', 'bar', 'ASCENDING'),
-          endAt(true, 'foo', 'bar')
+          endAt(true, 'foo', 'bar'),
         );
 
         return emptyQueryStream();
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.orderBy('foo').orderBy('bar').endBefore('foo', 'bar');
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo').orderBy('bar').endBefore('foo', 'bar');
+    await query.get();
   });
 
   it('validates input', () => {
     const query = firestore.collection('collectionId');
     expect(() => query.endBefore(123)).to.throw(
-      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.'
+      'Too many cursor values specified. The specified values must match the orderBy() constraints of the query.',
     );
   });
 
-  it('uses latest value', () => {
+  it('uses latest value', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(request, orderBy('foo', 'ASCENDING'), endAt(true, 'bar'));
@@ -3483,15 +3240,13 @@ describe('endBefore() interface', () => {
       },
     };
 
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      let query: Query = firestore.collection('collectionId');
-      query = query.orderBy('foo').endBefore('foo').endBefore('bar');
-      return query.get();
-    });
+    firestore = await createInstance(overrides);
+    let query: Query = firestore.collection('collectionId');
+    query = query.orderBy('foo').endBefore('foo').endBefore('bar');
+    await query.get();
   });
 
-  it('is immutable', () => {
+  it('is immutable', async () => {
     let expectedComponents = [limit(10)];
 
     const overrides: ApiOverride = {
@@ -3500,76 +3255,68 @@ describe('endBefore() interface', () => {
         return emptyQueryStream();
       },
     };
-    return createInstance(overrides).then(firestoreInstance => {
-      firestore = firestoreInstance;
-      const query = firestore.collection('collectionId').limit(10);
-      const adjustedQuery = query.orderBy('foo').endBefore('foo');
+    firestore = await createInstance(overrides);
+    const query = firestore.collection('collectionId').limit(10);
+    const adjustedQuery = query.orderBy('foo').endBefore('foo');
 
-      return query.get().then(() => {
-        expectedComponents = [
-          limit(10),
-          orderBy('foo', 'ASCENDING'),
-          endAt(true, 'foo'),
-        ];
+    await query.get();
+    expectedComponents = [
+      limit(10),
+      orderBy('foo', 'ASCENDING'),
+      endAt(true, 'foo'),
+    ];
 
-        return adjustedQuery.get();
-      });
-    });
+    await adjustedQuery.get();
   });
 });
 
 describe('collectionGroup queries', () => {
-  it('serialize correctly', () => {
+  it('serialize correctly', async () => {
     const overrides: ApiOverride = {
       runQuery: request => {
         queryEquals(
           request,
           allDescendants(),
-          fieldFiltersQuery('foo', 'EQUAL', 'bar')
+          fieldFiltersQuery('foo', 'EQUAL', 'bar'),
         );
         return emptyQueryStream();
       },
     };
-    return createInstance(overrides).then(firestore => {
-      const query = firestore
-        .collectionGroup('collectionId')
-        .where('foo', '==', 'bar');
-      return query.get();
-    });
+    const firestore = await createInstance(overrides);
+    const query = firestore
+      .collectionGroup('collectionId')
+      .where('foo', '==', 'bar');
+    await query.get();
   });
 
-  it('rejects slashes', () => {
-    return createInstance().then(firestore => {
-      expect(() => firestore.collectionGroup('foo/bar')).to.throw(
-        "Invalid collectionId 'foo/bar'. Collection IDs must not contain '/'."
-      );
-    });
+  it('rejects slashes', async () => {
+    const firestore = await createInstance();
+    expect(() => firestore.collectionGroup('foo/bar')).to.throw(
+      "Invalid collectionId 'foo/bar'. Collection IDs must not contain '/'.",
+    );
   });
 
-  it('rejects slashes', () => {
-    return createInstance().then(firestore => {
-      const query = firestore.collectionGroup('collectionId');
+  it('rejects slashes', async () => {
+    const firestore = await createInstance();
+    const query = firestore.collectionGroup('collectionId');
 
-      expect(() => {
-        query.orderBy(FieldPath.documentId()).startAt('coll');
-      }).to.throw(
-        'When querying a collection group and ordering by ' +
-          'FieldPath.documentId(), the corresponding value must result in a ' +
-          "valid document path, but 'coll' is not because it contains an odd " +
-          'number of segments.'
-      );
-    });
+    expect(() => {
+      query.orderBy(FieldPath.documentId()).startAt('coll');
+    }).to.throw(
+      'When querying a collection group and ordering by ' +
+        'FieldPath.documentId(), the corresponding value must result in a ' +
+        "valid document path, but 'coll' is not because it contains an odd " +
+        'number of segments.',
+    );
   });
 });
 
 describe('query resumption', () => {
   let firestore: Firestore;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     setTimeoutHandler(setImmediate);
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
+    firestore = await createInstance();
   });
 
   afterEach(async () => {
@@ -3582,7 +3329,7 @@ describe('query resumption', () => {
     documentIds: string[],
     numDocs: number,
     error: Error,
-    startAtEnd?: boolean
+    startAtEnd?: boolean,
   ): Generator<api.IRunQueryResponse | Error> {
     assert(numDocs <= documentIds.length);
     const sliced = startAtEnd
@@ -3609,7 +3356,7 @@ describe('query resumption', () => {
     options?: {
       numDocs?: number;
       error?: Error;
-    }
+    },
   ): Generator<api.IRunQueryResponse | Error> {
     let begin: number | null | undefined;
     let end: number | null | undefined;
@@ -3666,7 +3413,7 @@ describe('query resumption', () => {
   // "startAt" of the given request. Returns `null` if it cannot find one.
   function getStartAtDocumentIndex(
     request: api.IRunQueryRequest,
-    documentIds: string[]
+    documentIds: string[],
   ): number | null {
     const startAt = request.structuredQuery?.startAt;
     const startAtValue = startAt?.values?.[0]?.referenceValue;
@@ -3686,7 +3433,7 @@ describe('query resumption', () => {
   // "endAt" of the given request. Returns `null` if it cannot find one.
   function getEndAtDocumentIndex(
     request: api.IRunQueryRequest,
-    documentIds: string[]
+    documentIds: string[],
   ): number | null {
     const endAt = request.structuredQuery?.endAt;
     const endAtValue = endAt?.values?.[0]?.referenceValue;
@@ -3720,8 +3467,8 @@ describe('query resumption', () => {
               ...getDocResponsesFollowedByError(
                 documentIds,
                 documentIds.length / 2,
-                new GoogleError('simulated retryable error')
-              )
+                new GoogleError('simulated retryable error'),
+              ),
             );
           case 2:
             // Return the remaining documents.
@@ -3762,8 +3509,8 @@ describe('query resumption', () => {
               ...getDocResponsesFollowedByError(
                 documentIds,
                 documentIds.length / 2,
-                new GoogleError('simulated retryable error')
-              )
+                new GoogleError('simulated retryable error'),
+              ),
             );
           case 2:
             return stream(...getDocResponsesForRequest(request!, documentIds));
@@ -3806,8 +3553,8 @@ describe('query resumption', () => {
                 documentIds,
                 documentIds.length / 2,
                 new GoogleError('simulated retryable error'),
-                /*startAtEnd*/ true
-              )
+                /*startAtEnd*/ true,
+              ),
             );
           case 2:
             return stream(...getDocResponsesForRequest(request!, documentIds));
@@ -3852,8 +3599,8 @@ describe('query resumption', () => {
               ...getDocResponsesFollowedByError(
                 documentIds,
                 documentIds.length / 10,
-                new GoogleError('simulated retryable error')
-              )
+                new GoogleError('simulated retryable error'),
+              ),
             );
           case 2:
             // Get the another 120 documents followed by a retryable error.
@@ -3861,7 +3608,7 @@ describe('query resumption', () => {
               ...getDocResponsesForRequest(request!, documentIds, {
                 numDocs: documentIds.length / 5,
                 error: new GoogleError('simulated retryable error'),
-              })
+              }),
             );
           case 3:
             // Get the rest of the documents.
@@ -3906,8 +3653,8 @@ describe('query resumption', () => {
                 documentIds,
                 documentIds.length / 10,
                 new GoogleError('simulated retryable error'),
-                /*startAtEnd*/ true
-              )
+                /*startAtEnd*/ true,
+              ),
             );
           case 2:
             // Get the another 120 documents followed by a retryable error.
@@ -3915,7 +3662,7 @@ describe('query resumption', () => {
               ...getDocResponsesForRequest(request!, documentIds, {
                 numDocs: documentIds.length / 5,
                 error: new GoogleError('simulated retryable error'),
-              })
+              }),
             );
           case 3:
             // Get the rest of the documents.

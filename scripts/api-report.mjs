@@ -14,10 +14,10 @@
   limitations under the License.
 */
 
-const execaNode = require('execa');
-const fs = require('fs-extra');
-const path = require('path');
-const {join} = path;
+import { execaNode } from 'execa';
+import fs from 'fs-extra';
+import { join } from 'path';
+import { createRequire } from 'module';
 
 async function apiReport(opts) {
   const cwd = opts.cwd;
@@ -35,7 +35,7 @@ async function apiReport(opts) {
   // is the sme.
   const apiExtractorConfig = {
     extends: join(opts.cloudRadApiExtractorConfigPath),
-    mainEntryPointFilePath: join(cwd, 'build', 'src', 'index.d.ts'),
+    mainEntryPointFilePath: join(cwd, 'build', 'types', 'src', 'index.d.ts'),
     projectFolder: cwd,
     docModel: {
       enabled: false,
@@ -58,7 +58,7 @@ async function apiReport(opts) {
   const apiExtractorConfigPath = join(cwd, 'api-extractor.json');
   await fs.writeFile(
     apiExtractorConfigPath,
-    JSON.stringify(apiExtractorConfig, null, 2)
+    JSON.stringify(apiExtractorConfig, null, 2),
   );
 
   // Run API Extractor
@@ -66,7 +66,7 @@ async function apiReport(opts) {
     process.cwd(),
     'node_modules',
     '.bin',
-    'api-extractor'
+    'api-extractor',
   );
   await withLogs(execaNode)(apiExtractorCmd, ['run', '--local']);
 
@@ -87,9 +87,10 @@ function withLogs(execaFn) {
   };
 }
 
+const require = createRequire(import.meta.url);
 apiReport({
   cloudRadApiExtractorConfigPath: require.resolve(
-    '@google-cloud/cloud-rad/api-extractor.json'
+    '@google-cloud/cloud-rad/api-extractor.json',
   ),
   cwd: process.cwd(),
 })
