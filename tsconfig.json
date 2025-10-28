@@ -11,6 +11,9 @@
     "useUnknownInCatchVariables": false,
     "composite": false,
     "incremental": false,
+    "declaration": true,
+    "declarationDir": "build/types",
+    "stripInternal": false,
   },
   "include": [
     "dev/src/*.d.ts",

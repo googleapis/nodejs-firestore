@@ -31,7 +31,7 @@
     "precloud-rad": "npm run compile",
     "cloud-rad": "NO_UPLOAD=1 npx @google-cloud/cloud-rad",
     "preapi-report": "npm run compile",
-    "api-report": "node scripts/api-report.js",
+    "api-report": "node scripts/api-report.mjs",
     "predocs": "npm run compile",
     "docs": "jsdoc -c .jsdoc.js",
     "system-test:rest": "FIRESTORE_PREFER_REST=true mocha build/system-test --timeout 1200000",
