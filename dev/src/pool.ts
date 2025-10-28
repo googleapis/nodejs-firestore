@@ -199,7 +199,7 @@ export class ClientPool<T extends object> {
       requestTag,
       'Releasing client [%s] (gc=%s)',
       clientId,
-      gcDetermination
+      gcDetermination,
     );
 
     if (!gcDetermination.shouldGarbageCollectClient) {
@@ -211,7 +211,7 @@ export class ClientPool<T extends object> {
       requestTag,
       'Garbage collecting client [%s] (%s)',
       clientId,
-      this.lazyLogStringForAllClientIds
+      this.lazyLogStringForAllClientIds,
     );
 
     const activeClientDeleted = this.activeClients.delete(client);
@@ -224,7 +224,7 @@ export class ClientPool<T extends object> {
       'Garbage collected client [%s] activeClientDeleted=%s (%s)',
       clientId,
       activeClientDeleted,
-      this.lazyLogStringForAllClientIds
+      this.lazyLogStringForAllClientIds,
     );
   }
 
@@ -235,7 +235,7 @@ export class ClientPool<T extends object> {
    * @internal
    */
   private shouldGarbageCollectClient(
-    client: T
+    client: T,
   ): ShouldGarbageCollectClientResult {
     const clientMetadata = this.activeClients.get(client)!;
 
@@ -386,7 +386,7 @@ export class ClientPool<T extends object> {
       `ClientPool[${this.instanceId}].terminate`,
       /* requestTag= */ null,
       'Closing all active clients (%s)',
-      this.lazyLogStringForAllClientIds
+      this.lazyLogStringForAllClientIds,
     );
     for (const [client] of this.activeClients) {
       this.activeClients.delete(client);
@@ -419,7 +419,7 @@ class LazyLogStringForAllClientIds<T extends object> {
     const activeClientsDescription = Array.from(this.activeClients.entries())
       .map(
         ([client, metadata]) =>
-          `${this.clientIdByClient.get(client)}=${metadata.activeRequestCount}`
+          `${this.clientIdByClient.get(client)}=${metadata.activeRequestCount}`,
       )
       .sort()
       .join(', ');
