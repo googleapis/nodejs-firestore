@@ -18,7 +18,7 @@ import {GoogleError} from 'google-gax';
 import * as assert from 'assert';
 
 import {logger} from './logger';
-import {Deferred, requestTag as generateClientId} from './util';
+import {Deferred, requestTag as generateTag} from './util';
 
 export const CLIENT_TERMINATED_ERROR_MSG =
   'The client has already been terminated';
@@ -79,6 +79,11 @@ export class ClientPool<T extends object> {
   private readonly terminateDeferred = new Deferred<void>();
 
   /**
+   * A unique identifier for this object, for inclusion in log messages.
+   */
+  private readonly instanceId = 'cpl' + generateTag();
+
+  /**
    * @param concurrentOperationLimit The number of operations that each client
    * can handle.
    * @param maxIdleClients The maximum number of idle clients to keep before
@@ -137,16 +142,16 @@ export class ClientPool<T extends object> {
     if (selectedClient) {
       const selectedClientId = this.clientIdByClient.get(selectedClient);
       logger(
-        'ClientPool.acquire',
+        `ClientPool[${this.instanceId}].acquire`,
         requestTag,
         'Re-using existing client [%s] with %s remaining operations',
         selectedClientId,
         this.concurrentOperationLimit - selectedClientRequestCount,
       );
     } else {
-      const newClientId = 'cli' + generateClientId();
+      const newClientId = 'cli' + generateTag();
       logger(
-        'ClientPool.acquire',
+        `ClientPool[${this.instanceId}].acquire`,
         requestTag,
         'Creating a new client [%s] (requiresGrpc: %s)',
         newClientId,
@@ -176,8 +181,10 @@ export class ClientPool<T extends object> {
    * @internal
    */
   private async release(requestTag: string, client: T): Promise<void> {
+    const clientId = this.clientIdByClient.get(client);
     const metadata = this.activeClients.get(client);
     assert(metadata && metadata.activeRequestCount > 0, 'No active requests');
+
     this.activeClients.set(client, {
       grpcEnabled: metadata.grpcEnabled,
       activeRequestCount: metadata.activeRequestCount - 1,
@@ -186,26 +193,39 @@ export class ClientPool<T extends object> {
       this.terminateDeferred.resolve();
     }
 
-    if (this.shouldGarbageCollectClient(client)) {
-      const clientId = this.clientIdByClient.get(client);
-      logger(
-        'ClientPool.release',
-        requestTag,
-        'Garbage collecting client [%s] (%s)',
-        clientId,
-        this.lazyLogStringForAllClientIds,
-      );
-      this.activeClients.delete(client);
-      this.failedClients.delete(client);
-      await this.clientDestructor(client);
-      logger(
-        'ClientPool.release',
-        requestTag,
-        'Garbage collected client [%s] (%s)',
-        clientId,
-        this.lazyLogStringForAllClientIds,
-      );
+    const gcDetermination = this.shouldGarbageCollectClient(client);
+    logger(
+      `ClientPool[${this.instanceId}].release`,
+      requestTag,
+      'Releasing client [%s] (gc=%s)',
+      clientId,
+      gcDetermination
+    );
+
+    if (!gcDetermination.shouldGarbageCollectClient) {
+      return;
     }
+
+    logger(
+      `ClientPool[${this.instanceId}].release`,
+      requestTag,
+      'Garbage collecting client [%s] (%s)',
+      clientId,
+      this.lazyLogStringForAllClientIds
+    );
+
+    const activeClientDeleted = this.activeClients.delete(client);
+    this.failedClients.delete(client);
+    await this.clientDestructor(client);
+
+    logger(
+      `ClientPool[${this.instanceId}].release`,
+      requestTag,
+      'Garbage collected client [%s] activeClientDeleted=%s (%s)',
+      clientId,
+      activeClientDeleted,
+      this.lazyLogStringForAllClientIds
+    );
   }
 
   /**
@@ -214,23 +234,36 @@ export class ClientPool<T extends object> {
    * @private
    * @internal
    */
-  private shouldGarbageCollectClient(client: T): boolean {
+  private shouldGarbageCollectClient(
+    client: T
+  ): ShouldGarbageCollectClientResult {
     const clientMetadata = this.activeClients.get(client)!;
 
     if (clientMetadata.activeRequestCount !== 0) {
       // Don't garbage collect clients that have active requests.
-      return false;
+      return new ClientHasActiveRequests({
+        shouldGarbageCollectClient: false,
+        clientActiveRequestCount: clientMetadata.activeRequestCount,
+      });
     }
 
     if (this.grpcEnabled !== clientMetadata.grpcEnabled) {
       // We are transitioning to GRPC. Garbage collect REST clients.
-      return true;
+      return new PoolIsTransitioningToGrpc({
+        shouldGarbageCollectClient: true,
+        clientActiveRequestCount: clientMetadata.activeRequestCount,
+        poolGrpcEnabled: this.grpcEnabled,
+        clientGrpcEnabled: clientMetadata.grpcEnabled,
+      });
     }
 
     // Idle clients that have received RST_STREAM errors are always garbage
     // collected.
     if (this.failedClients.has(client)) {
-      return true;
+      return new ClientIsFailed({
+        shouldGarbageCollectClient: true,
+        clientActiveRequestCount: clientMetadata.activeRequestCount,
+      });
     }
 
     // Otherwise, only garbage collect if we have too much idle capacity (e.g.
@@ -240,9 +273,17 @@ export class ClientPool<T extends object> {
       idleCapacityCount +=
         this.concurrentOperationLimit - metadata.activeRequestCount;
     }
-    return (
-      idleCapacityCount > this.maxIdleClients * this.concurrentOperationLimit
-    );
+
+    const maxIdleCapacityCount =
+      this.maxIdleClients * this.concurrentOperationLimit;
+    return new IdleCapacity({
+      shouldGarbageCollectClient: idleCapacityCount > maxIdleCapacityCount,
+      clientActiveRequestCount: clientMetadata.activeRequestCount,
+      idleCapacityCount: idleCapacityCount,
+      maxIdleCapacityCount: maxIdleCapacityCount,
+      maxIdleClients: this.maxIdleClients,
+      concurrentOperationLimit: this.concurrentOperationLimit,
+    });
   }
 
   /**
@@ -333,7 +374,7 @@ export class ClientPool<T extends object> {
     // Wait for all pending operations to complete before terminating.
     if (this.opCount > 0) {
       logger(
-        'ClientPool.terminate',
+        `ClientPool[${this.instanceId}].terminate`,
         /* requestTag= */ null,
         'Waiting for %s pending operations to complete before terminating (%s)',
         this.opCount,
@@ -341,6 +382,12 @@ export class ClientPool<T extends object> {
       );
       await this.terminateDeferred.promise;
     }
+    logger(
+      `ClientPool[${this.instanceId}].terminate`,
+      /* requestTag= */ null,
+      'Closing all active clients (%s)',
+      this.lazyLogStringForAllClientIds
+    );
     for (const [client] of this.activeClients) {
       this.activeClients.delete(client);
       await this.clientDestructor(client);
@@ -354,12 +401,12 @@ export class ClientPool<T extends object> {
  * failed clients.
  */
 class LazyLogStringForAllClientIds<T extends object> {
-  private readonly activeClients: Map<T, unknown>;
+  private readonly activeClients: Map<T, {activeRequestCount: number}>;
   private readonly failedClients: Set<T>;
   private readonly clientIdByClient: WeakMap<T, string>;
 
   constructor(config: {
-    activeClients: Map<T, unknown>;
+    activeClients: Map<T, {activeRequestCount: number}>;
     failedClients: Set<T>;
     clientIdByClient: WeakMap<T, string>;
   }) {
@@ -369,20 +416,135 @@ class LazyLogStringForAllClientIds<T extends object> {
   }
 
   toString(): string {
+    const activeClientsDescription = Array.from(this.activeClients.entries())
+      .map(
+        ([client, metadata]) =>
+          `${this.clientIdByClient.get(client)}=${metadata.activeRequestCount}`
+      )
+      .sort()
+      .join(', ');
+    const failedClientsDescription = Array.from(this.failedClients)
+      .map(client => `${this.clientIdByClient.get(client)}`)
+      .sort()
+      .join(', ');
+
     return (
       `${this.activeClients.size} active clients: {` +
-      this.logStringFromClientIds(this.activeClients.keys()) +
+      activeClientsDescription +
       '}, ' +
       `${this.failedClients.size} failed clients: {` +
-      this.logStringFromClientIds(this.failedClients) +
+      failedClientsDescription +
       '}'
     );
   }
+}
 
-  private logStringFromClientIds(clients: Iterable<T>): string {
-    return Array.from(clients)
-      .map(client => this.clientIdByClient.get(client) ?? '<unknown>')
-      .sort()
-      .join(', ');
+/**
+ * Minimum data to be included in the objects returned from
+ * ClientPool.shouldGarbageCollectClient().
+ */
+abstract class BaseShouldGarbageCollectClientResult {
+  abstract readonly name: string;
+  abstract readonly shouldGarbageCollectClient: boolean;
+  abstract readonly clientActiveRequestCount: number;
+
+  /**
+   * Return a terse, one-line string representation. This makes it easy to
+   * grep through log output to find the logged values.
+   */
+  toString(): string {
+    const propertyStrings: string[] = [];
+    for (const propertyName of Object.getOwnPropertyNames(this)) {
+      const propertyValue = this[propertyName as keyof typeof this];
+      propertyStrings.push(`${propertyName}=${propertyValue}`);
+    }
+    return '{' + propertyStrings.join(', ') + '}';
   }
 }
+
+class ClientHasActiveRequests extends BaseShouldGarbageCollectClientResult {
+  override readonly name = 'ClientHasActiveRequests' as const;
+  override readonly shouldGarbageCollectClient: false;
+  override readonly clientActiveRequestCount: number;
+
+  constructor(args: {
+    shouldGarbageCollectClient: false;
+    clientActiveRequestCount: number;
+  }) {
+    super();
+    this.shouldGarbageCollectClient = args.shouldGarbageCollectClient;
+    this.clientActiveRequestCount = args.clientActiveRequestCount;
+  }
+}
+
+class PoolIsTransitioningToGrpc extends BaseShouldGarbageCollectClientResult {
+  override readonly name = 'PoolIsTransitioningToGrpc' as const;
+  override readonly shouldGarbageCollectClient: true;
+  override readonly clientActiveRequestCount: 0;
+  readonly poolGrpcEnabled: boolean;
+  readonly clientGrpcEnabled: boolean;
+
+  constructor(args: {
+    shouldGarbageCollectClient: true;
+    clientActiveRequestCount: 0;
+    poolGrpcEnabled: boolean;
+    clientGrpcEnabled: boolean;
+  }) {
+    super();
+    this.shouldGarbageCollectClient = args.shouldGarbageCollectClient;
+    this.clientActiveRequestCount = args.clientActiveRequestCount;
+    this.poolGrpcEnabled = args.poolGrpcEnabled;
+    this.clientGrpcEnabled = args.clientGrpcEnabled;
+  }
+}
+
+class ClientIsFailed extends BaseShouldGarbageCollectClientResult {
+  override readonly name = 'ClientIsFailed' as const;
+  override readonly shouldGarbageCollectClient: true;
+  override readonly clientActiveRequestCount: 0;
+
+  constructor(args: {
+    shouldGarbageCollectClient: true;
+    clientActiveRequestCount: 0;
+  }) {
+    super();
+    this.shouldGarbageCollectClient = args.shouldGarbageCollectClient;
+    this.clientActiveRequestCount = args.clientActiveRequestCount;
+  }
+}
+
+class IdleCapacity extends BaseShouldGarbageCollectClientResult {
+  override readonly name = 'IdleCapacity' as const;
+  override readonly shouldGarbageCollectClient: boolean;
+  override readonly clientActiveRequestCount: 0;
+  readonly idleCapacityCount: number;
+  readonly maxIdleCapacityCount: number;
+  readonly maxIdleClients: number;
+  readonly concurrentOperationLimit: number;
+
+  constructor(args: {
+    shouldGarbageCollectClient: boolean;
+    clientActiveRequestCount: 0;
+    idleCapacityCount: number;
+    maxIdleCapacityCount: number;
+    maxIdleClients: number;
+    concurrentOperationLimit: number;
+  }) {
+    super();
+    this.shouldGarbageCollectClient = args.shouldGarbageCollectClient;
+    this.clientActiveRequestCount = args.clientActiveRequestCount;
+    this.idleCapacityCount = args.idleCapacityCount;
+    this.maxIdleCapacityCount = args.maxIdleCapacityCount;
+    this.maxIdleClients = args.maxIdleClients;
+    this.concurrentOperationLimit = args.concurrentOperationLimit;
+  }
+}
+
+/**
+ * The set of return types from ClientPool.shouldGarbageCollectClient().
+ */
+type ShouldGarbageCollectClientResult =
+  | ClientHasActiveRequests
+  | PoolIsTransitioningToGrpc
+  | ClientIsFailed
+  | IdleCapacity;
