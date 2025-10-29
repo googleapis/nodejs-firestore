@@ -80,27 +80,28 @@ declare namespace FirebaseFirestore {
   export type UpdateData<T> = T extends Primitive
     ? T
     : T extends {}
-    ? {
-        // If `string extends K`, this is an index signature like
-        // `{[key: string]: { foo: bool }}`. In the generated UpdateData
-        // indexed properties can match their type or any child types.
-        [K in keyof T]?: string extends K
-          ? PartialWithFieldValue<ChildTypes<T[K]>>
-          : UpdateData<T[K]> | FieldValue;
-      } & NestedUpdateFields<T>
-    : Partial<T>;
+      ? {
+          // If `string extends K`, this is an index signature like
+          // `{[key: string]: { foo: bool }}`. In the generated UpdateData
+          // indexed properties can match their type or any child types.
+          [K in keyof T]?: string extends K
+            ? PartialWithFieldValue<ChildTypes<T[K]>>
+            : UpdateData<T[K]> | FieldValue;
+        } & NestedUpdateFields<T>
+      : Partial<T>;
 
   /**
    * For the given type, return a union type of T
    * and the types of all child properties of T.
    */
-  export type ChildTypes<T> = T extends Record<string, unknown>
-    ?
-        | {
-            [K in keyof T & string]: ChildTypes<T[K]>;
-          }[keyof T & string]
-        | T
-    : T;
+  export type ChildTypes<T> =
+    T extends Record<string, unknown>
+      ?
+          | {
+              [K in keyof T & string]: ChildTypes<T[K]>;
+            }[keyof T & string]
+          | T
+      : T;
 
   /** Primitive types. */
   export type Primitive = string | number | boolean | undefined | null;

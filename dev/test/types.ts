@@ -23,6 +23,7 @@ import {
   UpdateData,
   Firestore,
 } from '@google-cloud/firestore';
+import {expect} from 'chai';
 
 describe('FirestoreTypeConverter', () => {
   it('converter has the minimal typing information', () => {
@@ -1048,7 +1049,7 @@ describe('UpdateData type', () => {
       // The intent of the function below is to test TypeScript compile and not execute.
       async function _(docRef: DocumentReference<TestType>): Promise<void> {
         const key = 'aKey';
-        docRef.update({
+        void docRef.update({
           [`foo.${key}.bar`]: 'test',
         });
       }
@@ -1080,13 +1081,13 @@ describe('UpdateData type', () => {
         const goodKey = 'nestedA.test';
         const badKey = 'nestedA.' + 'test';
 
-        db.runTransaction(async t => {
+        void db.runTransaction(async t => {
           t.update(docRef, {
             [goodKey]: 3,
           });
         });
 
-        db.runTransaction(async t => {
+        void db.runTransaction(async t => {
           t.update(docRef, {
             [badKey]: 3,
           });
