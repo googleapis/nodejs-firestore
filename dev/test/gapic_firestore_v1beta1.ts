@@ -480,7 +480,9 @@ describe('v1beta1.FirestoreClient', () => {
         ['document', 'name'],
       );
       request.document.name = defaultValue1;
-      const expectedHeaderRequestParams = `document.name=${defaultValue1 ?? ''}`;
+      const expectedHeaderRequestParams = `document.name=${
+        defaultValue1 ?? ''
+      }`;
       const expectedResponse = generateSampleMessage(
         new protos.google.firestore.v1beta1.Document(),
       );
@@ -512,7 +514,9 @@ describe('v1beta1.FirestoreClient', () => {
         ['document', 'name'],
       );
       request.document.name = defaultValue1;
-      const expectedHeaderRequestParams = `document.name=${defaultValue1 ?? ''}`;
+      const expectedHeaderRequestParams = `document.name=${
+        defaultValue1 ?? ''
+      }`;
       const expectedResponse = generateSampleMessage(
         new protos.google.firestore.v1beta1.Document(),
       );
@@ -560,7 +564,9 @@ describe('v1beta1.FirestoreClient', () => {
         ['document', 'name'],
       );
       request.document.name = defaultValue1;
-      const expectedHeaderRequestParams = `document.name=${defaultValue1 ?? ''}`;
+      const expectedHeaderRequestParams = `document.name=${
+        defaultValue1 ?? ''
+      }`;
       const expectedError = new Error('expected');
       client.innerApiCalls.updateDocument = stubSimpleCall(
         undefined,
@@ -1262,7 +1268,9 @@ describe('v1beta1.FirestoreClient', () => {
         ['collectionId'],
       );
       request.collectionId = defaultValue2;
-      const expectedHeaderRequestParams = `parent=${defaultValue1 ?? ''}&collection_id=${defaultValue2 ?? ''}`;
+      const expectedHeaderRequestParams = `parent=${
+        defaultValue1 ?? ''
+      }&collection_id=${defaultValue2 ?? ''}`;
       const expectedResponse = generateSampleMessage(
         new protos.google.firestore.v1beta1.Document(),
       );
@@ -1298,7 +1306,9 @@ describe('v1beta1.FirestoreClient', () => {
         ['collectionId'],
       );
       request.collectionId = defaultValue2;
-      const expectedHeaderRequestParams = `parent=${defaultValue1 ?? ''}&collection_id=${defaultValue2 ?? ''}`;
+      const expectedHeaderRequestParams = `parent=${
+        defaultValue1 ?? ''
+      }&collection_id=${defaultValue2 ?? ''}`;
       const expectedResponse = generateSampleMessage(
         new protos.google.firestore.v1beta1.Document(),
       );
@@ -1350,7 +1360,9 @@ describe('v1beta1.FirestoreClient', () => {
         ['collectionId'],
       );
       request.collectionId = defaultValue2;
-      const expectedHeaderRequestParams = `parent=${defaultValue1 ?? ''}&collection_id=${defaultValue2 ?? ''}`;
+      const expectedHeaderRequestParams = `parent=${
+        defaultValue1 ?? ''
+      }&collection_id=${defaultValue2 ?? ''}`;
       const expectedError = new Error('expected');
       client.innerApiCalls.createDocument = stubSimpleCall(
         undefined,
@@ -1922,7 +1934,9 @@ describe('v1beta1.FirestoreClient', () => {
         ['collectionId'],
       );
       request.collectionId = defaultValue2;
-      const expectedHeaderRequestParams = `parent=${defaultValue1 ?? ''}&collection_id=${defaultValue2 ?? ''}`;
+      const expectedHeaderRequestParams = `parent=${
+        defaultValue1 ?? ''
+      }&collection_id=${defaultValue2 ?? ''}`;
       const expectedResponse = [
         generateSampleMessage(new protos.google.firestore.v1beta1.Document()),
         generateSampleMessage(new protos.google.firestore.v1beta1.Document()),
@@ -1960,7 +1974,9 @@ describe('v1beta1.FirestoreClient', () => {
         ['collectionId'],
       );
       request.collectionId = defaultValue2;
-      const expectedHeaderRequestParams = `parent=${defaultValue1 ?? ''}&collection_id=${defaultValue2 ?? ''}`;
+      const expectedHeaderRequestParams = `parent=${
+        defaultValue1 ?? ''
+      }&collection_id=${defaultValue2 ?? ''}`;
       const expectedResponse = [
         generateSampleMessage(new protos.google.firestore.v1beta1.Document()),
         generateSampleMessage(new protos.google.firestore.v1beta1.Document()),
@@ -2014,7 +2030,9 @@ describe('v1beta1.FirestoreClient', () => {
         ['collectionId'],
       );
       request.collectionId = defaultValue2;
-      const expectedHeaderRequestParams = `parent=${defaultValue1 ?? ''}&collection_id=${defaultValue2 ?? ''}`;
+      const expectedHeaderRequestParams = `parent=${
+        defaultValue1 ?? ''
+      }&collection_id=${defaultValue2 ?? ''}`;
       const expectedError = new Error('expected');
       client.innerApiCalls.listDocuments = stubSimpleCall(
         undefined,
@@ -2050,7 +2068,9 @@ describe('v1beta1.FirestoreClient', () => {
         ['collectionId'],
       );
       request.collectionId = defaultValue2;
-      const expectedHeaderRequestParams = `parent=${defaultValue1 ?? ''}&collection_id=${defaultValue2 ?? ''}`;
+      const expectedHeaderRequestParams = `parent=${
+        defaultValue1 ?? ''
+      }&collection_id=${defaultValue2 ?? ''}`;
       const expectedResponse = [
         generateSampleMessage(new protos.google.firestore.v1beta1.Document()),
         generateSampleMessage(new protos.google.firestore.v1beta1.Document()),
@@ -2109,7 +2129,9 @@ describe('v1beta1.FirestoreClient', () => {
         ['collectionId'],
       );
       request.collectionId = defaultValue2;
-      const expectedHeaderRequestParams = `parent=${defaultValue1 ?? ''}&collection_id=${defaultValue2 ?? ''}`;
+      const expectedHeaderRequestParams = `parent=${
+        defaultValue1 ?? ''
+      }&collection_id=${defaultValue2 ?? ''}`;
       const expectedError = new Error('expected');
       client.descriptors.page.listDocuments.createStream =
         stubPageStreamingCall(undefined, expectedError);
@@ -2163,7 +2185,9 @@ describe('v1beta1.FirestoreClient', () => {
         ['collectionId'],
       );
       request.collectionId = defaultValue2;
-      const expectedHeaderRequestParams = `parent=${defaultValue1 ?? ''}&collection_id=${defaultValue2 ?? ''}`;
+      const expectedHeaderRequestParams = `parent=${
+        defaultValue1 ?? ''
+      }&collection_id=${defaultValue2 ?? ''}`;
       const expectedResponse = [
         generateSampleMessage(new protos.google.firestore.v1beta1.Document()),
         generateSampleMessage(new protos.google.firestore.v1beta1.Document()),
@@ -2211,7 +2235,9 @@ describe('v1beta1.FirestoreClient', () => {
         ['collectionId'],
       );
       request.collectionId = defaultValue2;
-      const expectedHeaderRequestParams = `parent=${defaultValue1 ?? ''}&collection_id=${defaultValue2 ?? ''}`;
+      const expectedHeaderRequestParams = `parent=${
+        defaultValue1 ?? ''
+      }&collection_id=${defaultValue2 ?? ''}`;
       const expectedError = new Error('expected');
       client.descriptors.page.listDocuments.asyncIterate =
         stubAsyncIterationCall(undefined, expectedError);
