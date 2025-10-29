@@ -56,7 +56,7 @@ const PROJECT_ID = 'test-project';
 const INVALID_ARGUMENTS_TO_UPDATE = new RegExp(
   'Update\\(\\) requires either ' +
     'a single JavaScript object or an alternating list of field/value pairs ' +
-    'that can be followed by an optional precondition.'
+    'that can be followed by an optional precondition.',
 );
 
 // Change the argument to 'console.log' to enable debug output.
@@ -77,14 +77,14 @@ describe('DocumentReference interface', () => {
 
   it('has collection() method', () => {
     expect(() => documentRef.collection(42 as InvalidApiUsage)).to.throw(
-      'Value for argument "collectionPath" is not a valid resource path. Path must be a non-empty string.'
+      'Value for argument "collectionPath" is not a valid resource path. Path must be a non-empty string.',
     );
 
     let collection = documentRef.collection('col');
     expect(collection.id).to.equal('col');
 
     expect(() => documentRef.collection('col/doc')).to.throw(
-      'Value for argument "collectionPath" must point to a collection, but was "col/doc". Your path does not contain an odd number of components.'
+      'Value for argument "collectionPath" must point to a collection, but was "col/doc". Your path does not contain an odd number of components.',
     );
 
     collection = documentRef.collection('col/doc/col');
@@ -128,7 +128,7 @@ describe('serialize document', () => {
             document: document('documentId', 'bytes', {
               bytesValue: Buffer.from('AG=', 'base64'),
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -143,43 +143,43 @@ describe('serialize document', () => {
 
   it("doesn't serialize unsupported types", () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').set({foo: undefined});
+      void firestore.doc('collectionId/documentId').set({foo: undefined});
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Cannot use "undefined" as a Firestore value (found in field "foo").'
+      'Value for argument "data" is not a valid Firestore document. Cannot use "undefined" as a Firestore value (found in field "foo").',
     );
 
     expect(() => {
-      firestore.doc('collectionId/documentId').set({
+      void firestore.doc('collectionId/documentId').set({
         foo: FieldPath.documentId(),
       });
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Cannot use object of type "FieldPath" as a Firestore value (found in field "foo").'
+      'Value for argument "data" is not a valid Firestore document. Cannot use object of type "FieldPath" as a Firestore value (found in field "foo").',
     );
 
     expect(() => {
       class Foo {}
-      firestore.doc('collectionId/documentId').set({foo: new Foo()});
+      void firestore.doc('collectionId/documentId').set({foo: new Foo()});
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Foo" (found in field "foo"). Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).'
+      'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Foo" (found in field "foo"). Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).',
     );
 
     expect(() => {
       class Foo {}
-      firestore
+      void firestore
         .doc('collectionId/documentId')
         .set(new Foo() as InvalidApiUsage);
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).'
+      'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Foo". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).',
     );
 
     expect(() => {
       class Foo {}
       class Bar extends Foo {}
-      firestore
+      void firestore
         .doc('collectionId/documentId')
         .set(new Bar() as InvalidApiUsage);
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Bar". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).'
+      'Value for argument "data" is not a valid Firestore document. Couldn\'t serialize object of type "Bar". Firestore doesn\'t support JavaScript objects with custom prototypes (i.e. objects that were created via the "new" operator).',
     );
   });
 
@@ -192,17 +192,17 @@ describe('serialize document', () => {
 
     for (const customClass of customClasses) {
       expect(() => {
-        firestore
+        void firestore
           .doc('collectionId/documentId')
           .set(customClass as InvalidApiUsage);
       }).to.throw(
         'Value for argument "data" is not a valid Firestore document. ' +
-          `Detected an object of type "${customClass.constructor.name}" that doesn't match the expected instance.`
+          `Detected an object of type "${customClass.constructor.name}" that doesn't match the expected instance.`,
       );
     }
   });
 
-  it('serializes large numbers into doubles', () => {
+  it('serializes large numbers into doubles', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -211,21 +211,20 @@ describe('serialize document', () => {
             document: document('documentId', 'largeNumber', {
               doubleValue: 18014398509481984,
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').set({
-        // Set to 2^54, which should be stored as a double.
-        largeNumber: 18014398509481984,
-      });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').set({
+      // Set to 2^54, which should be stored as a double.
+      largeNumber: 18014398509481984,
     });
   });
 
-  it('serializes negative zero into double', () => {
+  it('serializes negative zero into double', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -234,21 +233,20 @@ describe('serialize document', () => {
             document: document('documentId', 'negativeZero', {
               doubleValue: -0,
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').set({
-        // Set to -0, which should be stored as a double.
-        negativeZero: -0,
-      });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').set({
+      // Set to -0, which should be stored as a double.
+      negativeZero: -0,
     });
   });
 
-  it('serializes date before 1970', () => {
+  it('serializes date before 1970', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -260,20 +258,19 @@ describe('serialize document', () => {
                 seconds: -14182920,
               },
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').set({
-        moonLanding: new Date('Jul 20 1969 20:18:00.123 UTC'),
-      });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').set({
+      moonLanding: new Date('Jul 20 1969 20:18:00.123 UTC'),
     });
   });
 
-  it('supports Moment.js', () => {
+  it('supports Moment.js', async () => {
     class Moment {
       toDate(): Date {
         return new Date('Jul 20 1969 20:18:00.123 UTC');
@@ -291,20 +288,19 @@ describe('serialize document', () => {
                 seconds: -14182920,
               },
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').set({
-        moonLanding: new Moment(),
-      });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').set({
+      moonLanding: new Moment(),
     });
   });
 
-  it('supports BigInt', () => {
+  it('supports BigInt', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -313,40 +309,38 @@ describe('serialize document', () => {
             document: document('documentId', 'bigIntValue', {
               integerValue: '9007199254740992',
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').set({
-        bigIntValue: BigInt(Number.MAX_SAFE_INTEGER) + BigInt(1),
-      });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').set({
+      bigIntValue: BigInt(Number.MAX_SAFE_INTEGER) + BigInt(1),
     });
   });
 
-  it('serializes unicode keys', () => {
+  it('serializes unicode keys', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
           request,
           set({
             document: document('documentId', '😀', '😜'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').set({
-        '😀': '😜',
-      });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').set({
+      '😀': '😜',
     });
   });
 
-  it('accepts both blob formats', () => {
+  it('accepts both blob formats', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -359,23 +353,22 @@ describe('serialize document', () => {
               'blob2',
               {
                 bytesValue: Buffer.from([0, 1, 2]),
-              }
+              },
             ),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').set({
-        blob1: new Uint8Array([0, 1, 2]),
-        blob2: Buffer.from([0, 1, 2]),
-      });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').set({
+      blob1: new Uint8Array([0, 1, 2]),
+      blob2: Buffer.from([0, 1, 2]),
     });
   });
 
-  it('supports NaN and Infinity', () => {
+  it('supports NaN and Infinity', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         const fields = request.writes![0].update!.fields!;
@@ -388,12 +381,11 @@ describe('serialize document', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').set({
-        nanValue: NaN,
-        posInfinity: Infinity,
-        negInfinity: -Infinity,
-      });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').set({
+      nanValue: NaN,
+      posInfinity: Infinity,
+      negInfinity: -Infinity,
     });
   });
 
@@ -417,19 +409,19 @@ describe('serialize document', () => {
     expect(() => {
       new GeoPoint(Infinity, 0);
     }).to.throw(
-      'Value for argument "latitude" must be within [-90, 90] inclusive, but was: Infinity'
+      'Value for argument "latitude" must be within [-90, 90] inclusive, but was: Infinity',
     );
 
     expect(() => {
       new GeoPoint(91, 0);
     }).to.throw(
-      'Value for argument "latitude" must be within [-90, 90] inclusive, but was: 91'
+      'Value for argument "latitude" must be within [-90, 90] inclusive, but was: 91',
     );
 
     expect(() => {
       new GeoPoint(90, 181);
     }).to.throw(
-      'Value for argument "longitude" must be within [-180, 180] inclusive, but was: 181'
+      'Value for argument "longitude" must be within [-180, 180] inclusive, but was: 181',
     );
   });
 
@@ -438,13 +430,13 @@ describe('serialize document', () => {
     obj.foo = obj;
 
     expect(() => {
-      firestore.doc('collectionId/documentId').update(obj);
+      void firestore.doc('collectionId/documentId').update(obj);
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid Firestore value. Input object is deeper than 20 levels or contains a cycle.'
+      'Value for argument "dataOrField" is not a valid Firestore value. Input object is deeper than 20 levels or contains a cycle.',
     );
   });
 
-  it('is able to write a document reference with cycles', () => {
+  it('is able to write a document reference with cycles', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -453,51 +445,81 @@ describe('serialize document', () => {
             document: document('documentId', 'ref', {
               referenceValue: `projects/${PROJECT_ID}/databases/(default)/documents/collectionId/documentId`,
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      // The Firestore Admin SDK adds a cyclic reference to the 'Firestore'
-      // member of 'DocumentReference'. We emulate this behavior in this
-      // test to verify that we can properly serialize DocumentReference
-      // instances, even if they have cyclic references (we shouldn't try to
-      // validate them beyond the instanceof check).
-      const ref = firestore.doc('collectionId/documentId');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (ref.firestore as any).firestore = firestore;
-      return ref.set({ref});
+    const firestore = await createInstance(overrides);
+    // The Firestore Admin SDK adds a cyclic reference to the 'Firestore'
+    // member of 'DocumentReference'. We emulate this behavior in this
+    // test to verify that we can properly serialize DocumentReference
+    // instances, even if they have cyclic references (we shouldn't try to
+    // validate them beyond the instanceof check).
+    const ref = firestore.doc('collectionId/documentId');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (ref.firestore as any).firestore = firestore;
+    await ref.set({ref});
+  });
+
+  it('is able to translate FirestoreVector to internal representation with set', async () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          set({
+            document: document('documentId', 'embedding1', {
+              mapValue: {
+                fields: {
+                  __type__: {
+                    stringValue: '__vector__',
+                  },
+                  value: {
+                    arrayValue: {
+                      values: [
+                        {doubleValue: 0},
+                        {doubleValue: 1},
+                        {doubleValue: 2},
+                      ],
+                    },
+                  },
+                },
+              },
+            }),
+          }),
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').set({
+      embedding1: FieldValue.vector([0, 1, 2]),
     });
   });
 });
 
 describe('deserialize document', () => {
-  it('deserializes Protobuf JS', () => {
+  it('deserializes Protobuf JS', async () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(
           found(
             document('documentId', 'foo', {
               bytesValue: Buffer.from('AG=', 'base64'),
-            })
-          )
+            }),
+          ),
         );
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .get()
-        .then(res => {
-          expect(res.data()).to.deep.eq({foo: Buffer.from('AG=', 'base64')});
-        });
-    });
+    const firestore = await createInstance(overrides);
+    const res = await firestore.doc('collectionId/documentId').get();
+    expect(res.data()).to.deep.eq({foo: Buffer.from('AG=', 'base64')});
   });
 
-  it('deserializes date before 1970', () => {
+  it('deserializes date before 1970', async () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(
@@ -507,43 +529,33 @@ describe('deserialize document', () => {
                 nanos: 123000000,
                 seconds: -14182920,
               },
-            })
-          )
+            }),
+          ),
         );
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .get()
-        .then(res => {
-          expect(res.get('moonLanding').toMillis()).to.equal(
-            new Date('Jul 20 1969 20:18:00.123 UTC').getTime()
-          );
-        });
-    });
+    const firestore = await createInstance(overrides);
+    const res = await firestore.doc('collectionId/documentId').get();
+    expect(res.get('moonLanding').toMillis()).to.equal(
+      new Date('Jul 20 1969 20:18:00.123 UTC').getTime(),
+    );
   });
 
-  it('returns undefined for unknown fields', () => {
+  it('returns undefined for unknown fields', async () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(found(document('documentId')));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .get()
-        .then(res => {
-          expect(res.get('bar')).to.not.exist;
-          expect(res.get('bar.foo')).to.not.exist;
-        });
-    });
+    const firestore = await createInstance(overrides);
+    const res = await firestore.doc('collectionId/documentId').get();
+    expect(res.get('bar')).to.not.exist;
+    expect(res.get('bar.foo')).to.not.exist;
   });
 
-  it('supports NaN and Infinity', () => {
+  it('supports NaN and Infinity', async () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(
@@ -555,78 +567,96 @@ describe('deserialize document', () => {
               'posInfinity',
               {doubleValue: Infinity},
               'negInfinity',
-              {doubleValue: -Infinity}
-            )
-          )
+              {doubleValue: -Infinity},
+            ),
+          ),
         );
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .get()
-        .then(res => {
-          expect(res.get('nanValue')).to.be.a('number');
-          expect(res.get('nanValue')).to.be.NaN;
-          expect(res.get('posInfinity')).to.equal(Infinity);
-          expect(res.get('negInfinity')).to.equal(-Infinity);
-        });
-    });
+    const firestore = await createInstance(overrides);
+    const res = await firestore.doc('collectionId/documentId').get();
+    expect(res.get('nanValue')).to.be.a('number');
+    expect(res.get('nanValue')).to.be.NaN;
+    expect(res.get('posInfinity')).to.equal(Infinity);
+    expect(res.get('negInfinity')).to.equal(-Infinity);
   });
 
-  it('deserializes BigInt', () => {
+  it('deserializes BigInt', async () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(
           found(
             document('documentId', 'bigIntValue', {
               integerValue: '9007199254740992',
-            })
-          )
+            }),
+          ),
         );
       },
     };
 
-    return createInstance(overrides, {useBigInt: true}).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .get()
-        .then(res => {
-          expect(res.get('bigIntValue')).to.be.a('bigint');
-          expect(res.get('bigIntValue')).to.equal(BigInt('9007199254740992'));
-        });
-    });
+    const firestore = await createInstance(overrides, {useBigInt: true});
+    const res = await firestore.doc('collectionId/documentId').get();
+    expect(res.get('bigIntValue')).to.be.a('bigint');
+    expect(res.get('bigIntValue')).to.equal(BigInt('9007199254740992'));
   });
 
-  it("doesn't deserialize unsupported types", () => {
+  it('deserializes FirestoreVector', async () => {
+    const overrides: ApiOverride = {
+      batchGetDocuments: () => {
+        return stream(
+          found(
+            document('documentId', 'embedding', {
+              mapValue: {
+                fields: {
+                  __type__: {
+                    stringValue: '__vector__',
+                  },
+                  value: {
+                    arrayValue: {
+                      values: [
+                        {doubleValue: -41.0},
+                        {doubleValue: 0},
+                        {doubleValue: 42},
+                      ],
+                    },
+                  },
+                },
+              },
+            }),
+          ),
+        );
+      },
+    };
+
+    const firestore = await createInstance(overrides);
+    const res = await firestore.doc('collectionId/documentId').get();
+    expect(res.get('embedding')).to.deep.equal(
+      FieldValue.vector([-41.0, 0, 42]),
+    );
+  });
+
+  it("doesn't deserialize unsupported types", async () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(
           found(
             document('documentId', 'moonLanding', {
               valueType: 'foo',
-            } as InvalidApiUsage)
-          )
+            } as InvalidApiUsage),
+          ),
         );
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .get()
-        .then(doc => {
-          expect(() => {
-            doc.data();
-          }).to.throw(
-            'Cannot decode type from Firestore Value: {"valueType":"foo"}'
-          );
-        });
-    });
+    const firestore = await createInstance(overrides);
+    const doc = await firestore.doc('collectionId/documentId').get();
+    expect(() => {
+      doc.data();
+    }).to.throw('Cannot decode type from Firestore Value: {"valueType":"foo"}');
   });
 
-  it("doesn't deserialize invalid latitude", () => {
+  it("doesn't deserialize invalid latitude", async () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(
@@ -636,25 +666,20 @@ describe('deserialize document', () => {
                 latitude: 'foo' as InvalidApiUsage,
                 longitude: -122.947778,
               },
-            })
-          )
+            }),
+          ),
         );
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .get()
-        .then(doc => {
-          expect(() => doc.data()).to.throw(
-            'Value for argument "latitude" is not a valid number.'
-          );
-        });
-    });
+    const firestore = await createInstance(overrides);
+    const doc = await firestore.doc('collectionId/documentId').get();
+    expect(() => doc.data()).to.throw(
+      'Value for argument "latitude" is not a valid number.',
+    );
   });
 
-  it("doesn't deserialize invalid longitude", () => {
+  it("doesn't deserialize invalid longitude", async () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(
@@ -664,27 +689,22 @@ describe('deserialize document', () => {
                 latitude: 50.1430847,
                 longitude: 'foo' as InvalidApiUsage,
               },
-            })
-          )
+            }),
+          ),
         );
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .get()
-        .then(doc => {
-          expect(() => doc.data()).to.throw(
-            'Value for argument "longitude" is not a valid number.'
-          );
-        });
-    });
+    const firestore = await createInstance(overrides);
+    const doc = await firestore.doc('collectionId/documentId').get();
+    expect(() => doc.data()).to.throw(
+      'Value for argument "longitude" is not a valid number.',
+    );
   });
 });
 
 describe('get document', () => {
-  it('returns document', () => {
+  it('returns document', async () => {
     const overrides: ApiOverride = {
       batchGetDocuments: request => {
         requestEquals(request, retrieve('documentId'));
@@ -699,63 +719,48 @@ describe('get document', () => {
                   },
                 },
               },
-            })
-          )
+            }),
+          ),
         );
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .get()
-        .then(result => {
-          expect(result.data()).to.deep.eq({foo: {bar: 'foobar'}});
-          expect(result.get('foo')).to.deep.eq({bar: 'foobar'});
-          expect(result.get('foo.bar')).to.equal('foobar');
-          expect(result.get(new FieldPath('foo', 'bar'))).to.equal('foobar');
-          expect(result.ref.id).to.equal('documentId');
-        });
-    });
+    const firestore = await createInstance(overrides);
+    const result = await firestore.doc('collectionId/documentId').get();
+    expect(result.data()).to.deep.eq({foo: {bar: 'foobar'}});
+    expect(result.get('foo')).to.deep.eq({bar: 'foobar'});
+    expect(result.get('foo.bar')).to.equal('foobar');
+    expect(result.get(new FieldPath('foo', 'bar'))).to.equal('foobar');
+    expect(result.ref.id).to.equal('documentId');
   });
 
-  it('returns read, update and create times', () => {
+  it('returns read, update and create times', async () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(found(document('documentId')));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .get()
-        .then(result => {
-          expect(result.createTime!.isEqual(new Timestamp(1, 2))).to.be.true;
-          expect(result.updateTime!.isEqual(new Timestamp(3, 4))).to.be.true;
-          expect(result.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
-        });
-    });
+    const firestore = await createInstance(overrides);
+    const result = await firestore.doc('collectionId/documentId').get();
+    expect(result.createTime!.isEqual(new Timestamp(1, 2))).to.be.true;
+    expect(result.updateTime!.isEqual(new Timestamp(3, 4))).to.be.true;
+    expect(result.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
   });
 
-  it('returns not found', () => {
+  it('returns not found', async () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(missing('documentId'));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .get()
-        .then(result => {
-          expect(result.exists).to.be.false;
-          expect(result.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
-          expect(result.data()).to.not.exist;
-          expect(result.get('foo')).to.not.exist;
-        });
-    });
+    const firestore = await createInstance(overrides);
+    const result = await firestore.doc('collectionId/documentId').get();
+    expect(result.exists).to.be.false;
+    expect(result.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
+    expect(result.data()).to.not.exist;
+    expect(result.get('foo')).to.not.exist;
   });
 
   it('throws error', done => {
@@ -767,7 +772,7 @@ describe('get document', () => {
       },
     };
 
-    createInstance(overrides).then(firestore => {
+    void createInstance(overrides).then(firestore => {
       firestore
         .doc('collectionId/documentId')
         .get()
@@ -778,7 +783,7 @@ describe('get document', () => {
     });
   });
 
-  it('cannot obtain field value without field path', () => {
+  it('cannot obtain field value without field path', async () => {
     const overrides: ApiOverride = {
       batchGetDocuments: () => {
         return stream(
@@ -791,22 +796,17 @@ describe('get document', () => {
                   },
                 },
               },
-            })
-          )
+            }),
+          ),
         );
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .get()
-        .then(doc => {
-          expect(() => (doc as InvalidApiUsage).get()).to.throw(
-            'Value for argument "field" is not a valid field path. The path cannot be omitted.'
-          );
-        });
-    });
+    const firestore = await createInstance(overrides);
+    const doc = await firestore.doc('collectionId/documentId').get();
+    expect(() => (doc as InvalidApiUsage).get()).to.throw(
+      'Value for argument "field" is not a valid field path. The path cannot be omitted.',
+    );
   });
 });
 
@@ -821,7 +821,7 @@ describe('delete document', () => {
 
   afterEach(() => verifyInstance(firestore));
 
-  it('generates proto', () => {
+  it('generates proto', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(request, remove('documentId'));
@@ -830,12 +830,11 @@ describe('delete document', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').delete();
-    });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').delete();
   });
 
-  it('returns update time', () => {
+  it('returns update time', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(request, remove('documentId'));
@@ -850,18 +849,13 @@ describe('delete document', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .delete()
-        .then(res => {
-          expect(res.writeTime.isEqual(new Timestamp(479978400, 123000000))).to
-            .be.true;
-        });
-    });
+    const firestore = await createInstance(overrides);
+    const res = await firestore.doc('collectionId/documentId').delete();
+    expect(res.writeTime.isEqual(new Timestamp(479978400, 123000000))).to.be
+      .true;
   });
 
-  it('with last update time precondition', () => {
+  it('with last update time precondition', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -871,28 +865,27 @@ describe('delete document', () => {
               nanos: 123000000,
               seconds: '479978400',
             },
-          })
+          }),
         );
 
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      const docRef = firestore.doc('collectionId/documentId');
+    const firestore = await createInstance(overrides);
+    const docRef = firestore.doc('collectionId/documentId');
 
-      return Promise.all([
-        docRef.delete({
-          lastUpdateTime: new Timestamp(479978400, 123000000),
-        }),
-        docRef.delete({
-          lastUpdateTime: Timestamp.fromMillis(479978400123),
-        }),
-        docRef.delete({
-          lastUpdateTime: Timestamp.fromDate(new Date(479978400123)),
-        }),
-      ]);
-    });
+    await Promise.all([
+      docRef.delete({
+        lastUpdateTime: new Timestamp(479978400, 123000000),
+      }),
+      docRef.delete({
+        lastUpdateTime: Timestamp.fromMillis(479978400123),
+      }),
+      docRef.delete({
+        lastUpdateTime: Timestamp.fromDate(new Date(479978400123)),
+      }),
+    ]);
   });
 
   it('with invalid last update time precondition', () => {
@@ -947,7 +940,7 @@ describe('set document', () => {
           request,
           set({
             document: document('documentId'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -958,7 +951,7 @@ describe('set document', () => {
     });
   });
 
-  it('supports nested empty map', () => {
+  it('supports nested empty map', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -967,7 +960,7 @@ describe('set document', () => {
             document: document('documentId', 'a', {
               mapValue: {},
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -987,7 +980,7 @@ describe('set document', () => {
             document: document('documentId'),
             transforms: [serverTimestamp('a'), serverTimestamp('b.c')],
             mask: updateMask(),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -999,7 +992,7 @@ describe('set document', () => {
           a: FieldValue.serverTimestamp(),
           b: {c: FieldValue.serverTimestamp()},
         },
-        {merge: true}
+        {merge: true},
       );
     });
   });
@@ -1012,7 +1005,7 @@ describe('set document', () => {
           set({
             document: document('documentId'),
             transforms: [serverTimestamp('a'), serverTimestamp('b.c')],
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1042,7 +1035,7 @@ describe('set document', () => {
               },
             }),
             mask: updateMask('a', 'c.d', 'f'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1084,10 +1077,10 @@ describe('set document', () => {
                     },
                   },
                 },
-              }
+              },
             ),
             mask: updateMask('a', 'b', 'd.e', 'f'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1103,7 +1096,7 @@ describe('set document', () => {
           ignore: 'foo',
           ignoreMap: {a: 'foo'},
         },
-        {mergeFields: ['a', new FieldPath('b'), 'd.e', 'f']}
+        {mergeFields: ['a', new FieldPath('b'), 'd.e', 'f']},
       );
     });
   });
@@ -1116,7 +1109,7 @@ describe('set document', () => {
           set({
             document: document('documentId'),
             mask: updateMask(),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1127,7 +1120,7 @@ describe('set document', () => {
         {},
         {
           mergeFields: [],
-        }
+        },
       );
     });
   });
@@ -1159,10 +1152,10 @@ describe('set document', () => {
                     },
                   },
                 },
-              }
+              },
             ),
             mask: updateMask('a', 'c.d'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1174,7 +1167,7 @@ describe('set document', () => {
           a: {b: {}},
           c: {d: {}},
         },
-        {mergeFields: ['a', new FieldPath('c', 'd')]}
+        {mergeFields: ['a', new FieldPath('c', 'd')]},
       );
     });
   });
@@ -1192,7 +1185,7 @@ describe('set document', () => {
               serverTimestamp('b.c'),
               serverTimestamp('d.e'),
             ],
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -1211,12 +1204,12 @@ describe('set document', () => {
           ignore: FieldValue.serverTimestamp(),
           ignoreMap: {a: FieldValue.serverTimestamp()},
         },
-        {mergeFields: ['a', new FieldPath('b'), 'd.e', 'f']}
+        {mergeFields: ['a', new FieldPath('b'), 'd.e', 'f']},
       );
     });
   });
 
-  it('supports empty merge', () => {
+  it('supports empty merge', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -1224,18 +1217,17 @@ describe('set document', () => {
           set({
             document: document('documentId'),
             mask: updateMask(),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').set({}, {merge: true});
-    });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').set({}, {merge: true});
   });
 
-  it('supports nested empty merge', () => {
+  it('supports nested empty merge', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -1245,23 +1237,22 @@ describe('set document', () => {
               mapValue: {},
             }),
             mask: updateMask('a'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').set(
-        {a: {}},
-        {
-          merge: true,
-        }
-      );
-    });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').set(
+      {a: {}},
+      {
+        merge: true,
+      },
+    );
   });
 
-  it('supports partials with merge', () => {
+  it('supports partials with merge', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -1271,23 +1262,22 @@ describe('set document', () => {
               stringValue: 'story',
             }),
             mask: updateMask('title'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .withConverter(postConverterMerge)
-        .set({title: 'story'} as Partial<Post>, {
-          merge: true,
-        });
-    });
+    const firestore = await createInstance(overrides);
+    await firestore
+      .doc('collectionId/documentId')
+      .withConverter(postConverterMerge)
+      .set({title: 'story'} as Partial<Post>, {
+        merge: true,
+      });
   });
 
-  it('supports partials with mergeFields', () => {
+  it('supports partials with mergeFields', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -1297,93 +1287,97 @@ describe('set document', () => {
               stringValue: 'story',
             }),
             mask: updateMask('title'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .withConverter(postConverterMerge)
-        .set({title: 'story', author: 'writer'} as Partial<Post>, {
-          mergeFields: ['title'],
-        });
-    });
+    const firestore = await createInstance(overrides);
+    await firestore
+      .doc('collectionId/documentId')
+      .withConverter(postConverterMerge)
+      .set({title: 'story', author: 'writer'} as Partial<Post>, {
+        mergeFields: ['title'],
+      });
   });
 
-  it("doesn't split on dots", () => {
+  it("doesn't split on dots", async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
           request,
           set({
             document: document('documentId', 'a.b', 'c'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').set({'a.b': 'c'});
-    });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').set({'a.b': 'c'});
   });
 
   it('validates merge option', () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').set(
+      void firestore.doc('collectionId/documentId').set(
         {foo: 'bar'},
         {
           mergeFields: ['foobar'],
-        }
+        },
       );
     }).to.throw('Input data is missing for field "foobar".');
 
     expect(() => {
-      firestore.doc('collectionId/documentId').set(
+      void firestore.doc('collectionId/documentId').set(
         {foo: 'bar'},
         {
           mergeFields: ['foobar..'],
-        }
+        },
       );
     }).to.throw(
       'Value for argument "options" is not a valid set() options argument. ' +
         '"mergeFields" is not valid: Element at index 0 is not a valid ' +
-        'field path. Paths must not contain ".." in them.'
+        'field path. Paths must not contain ".." in them.',
     );
 
     expect(() => {
-      firestore
+      void firestore
         .doc('collectionId/documentId')
         .set({foo: 'bar'}, {merge: true, mergeFields: []});
     }).to.throw(
-      'Value for argument "options" is not a valid set() options argument. You cannot specify both "merge" and "mergeFields".'
+      'Value for argument "options" is not a valid set() options argument. You cannot specify both "merge" and "mergeFields".',
     );
   });
 
   it('requires an object', () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').set(null as InvalidApiUsage);
+      void firestore
+        .doc('collectionId/documentId')
+        .set(null as InvalidApiUsage);
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.'
+      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
   });
 
   it("doesn't support non-merge deletes", () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').set({foo: FieldValue.delete()});
+      void firestore
+        .doc('collectionId/documentId')
+        .set({foo: FieldValue.delete()});
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field "foo").'
+      'Value for argument "data" is not a valid Firestore document. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field "foo").',
     );
   });
 
   it("doesn't accept arrays", () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').set([42] as InvalidApiUsage);
+      void firestore
+        .doc('collectionId/documentId')
+        .set([42] as InvalidApiUsage);
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.'
+      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
   });
 });
@@ -1399,7 +1393,7 @@ describe('create document', () => {
 
   afterEach(() => verifyInstance(firestore));
 
-  it('creates document', () => {
+  it('generates proto', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(request, create({document: document('documentId')}));
@@ -1407,12 +1401,11 @@ describe('create document', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').create({});
-    });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').create({});
   });
 
-  it('returns update time', () => {
+  it('returns update time', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(request, create({document: document('documentId')}));
@@ -1434,18 +1427,13 @@ describe('create document', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .create({})
-        .then(res => {
-          expect(res.writeTime.isEqual(new Timestamp(479978400, 123000000))).to
-            .be.true;
-        });
-    });
+    const firestore = await createInstance(overrides);
+    const res = await firestore.doc('collectionId/documentId').create({});
+    expect(res.writeTime.isEqual(new Timestamp(479978400, 123000000))).to.be
+      .true;
   });
 
-  it('supports field transform', () => {
+  it('supports field transform', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -1456,21 +1444,20 @@ describe('create document', () => {
               serverTimestamp('field'),
               serverTimestamp('map.field'),
             ],
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').create({
-        field: FieldValue.serverTimestamp(),
-        map: {field: FieldValue.serverTimestamp()},
-      });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').create({
+      field: FieldValue.serverTimestamp(),
+      map: {field: FieldValue.serverTimestamp()},
     });
   });
 
-  it('supports nested empty map', () => {
+  it('supports nested empty map', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -1485,30 +1472,33 @@ describe('create document', () => {
                 },
               },
             }),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').create({a: {b: {}}});
-    });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').create({a: {b: {}}});
   });
 
   it('requires an object', () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').create(null as InvalidApiUsage);
+      void firestore
+        .doc('collectionId/documentId')
+        .create(null as InvalidApiUsage);
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.'
+      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
   });
 
   it("doesn't accept arrays", () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').create([42] as InvalidApiUsage);
+      void firestore
+        .doc('collectionId/documentId')
+        .create([42] as InvalidApiUsage);
     }).to.throw(
-      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.'
+      'Value for argument "data" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
   });
 });
@@ -1524,7 +1514,7 @@ describe('update document', () => {
 
   afterEach(() => verifyInstance(firestore));
 
-  it('generates proto', () => {
+  it('generates proto', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -1532,18 +1522,17 @@ describe('update document', () => {
           update({
             document: document('documentId', 'foo', 'bar'),
             mask: updateMask('foo'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').update({foo: 'bar'});
-    });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').update({foo: 'bar'});
   });
 
-  it('supports nested field transform', () => {
+  it('supports nested field transform', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -1554,22 +1543,21 @@ describe('update document', () => {
             }),
             transforms: [serverTimestamp('a.b'), serverTimestamp('c.d')],
             mask: updateMask('a', 'foo'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').update({
-        foo: {},
-        a: {b: FieldValue.serverTimestamp()},
-        'c.d': FieldValue.serverTimestamp(),
-      });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').update({
+      foo: {},
+      a: {b: FieldValue.serverTimestamp()},
+      'c.d': FieldValue.serverTimestamp(),
     });
   });
 
-  it('skips write for single field transform', () => {
+  it('skips write for single field transform', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -1577,20 +1565,19 @@ describe('update document', () => {
           update({
             document: document('documentId'),
             transforms: [serverTimestamp('a')],
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .update('a', FieldValue.serverTimestamp());
-    });
+    const firestore = await createInstance(overrides);
+    await firestore
+      .doc('collectionId/documentId')
+      .update('a', FieldValue.serverTimestamp());
   });
 
-  it('supports nested empty map', () => {
+  it('supports nested empty map', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -1600,36 +1587,34 @@ describe('update document', () => {
               mapValue: {},
             }),
             mask: updateMask('a'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').update({a: {}});
-    });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').update({a: {}});
   });
 
-  it('supports nested delete', () => {
+  it('supports nested delete', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
           request,
-          update({document: document('documentId'), mask: updateMask('a.b')})
+          update({document: document('documentId'), mask: updateMask('a.b')}),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').update({
-        'a.b': FieldValue.delete(),
-      });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').update({
+      'a.b': FieldValue.delete(),
     });
   });
 
-  it('returns update time', () => {
+  it('allows explicitly specifying {exists:true} precondition', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -1637,7 +1622,27 @@ describe('update document', () => {
           update({
             document: document('documentId', 'foo', 'bar'),
             mask: updateMask('foo'),
-          })
+          }),
+        );
+        return response(writeResult(1));
+      },
+    };
+
+    const firestore = await createInstance(overrides);
+    await firestore
+      .doc('collectionId/documentId')
+      .update('foo', 'bar', {exists: true});
+  });
+
+  it('returns update time', async () => {
+    const overrides: ApiOverride = {
+      commit: request => {
+        requestEquals(
+          request,
+          update({
+            document: document('documentId', 'foo', 'bar'),
+            mask: updateMask('foo'),
+          }),
         );
         return response({
           commitTime: {
@@ -1656,18 +1661,15 @@ describe('update document', () => {
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .update({foo: 'bar'})
-        .then(res => {
-          expect(res.writeTime.isEqual(new Timestamp(479978400, 123000000))).to
-            .be.true;
-        });
-    });
+    const firestore = await createInstance(overrides);
+    const res = await firestore
+      .doc('collectionId/documentId')
+      .update({foo: 'bar'});
+    expect(res.writeTime.isEqual(new Timestamp(479978400, 123000000))).to.be
+      .true;
   });
 
-  it('with last update time precondition', () => {
+  it('with last update time precondition', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -1681,25 +1683,24 @@ describe('update document', () => {
                 seconds: '479978400',
               },
             },
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return Promise.all([
-        firestore.doc('collectionId/documentId').update(
-          {foo: 'bar'},
-          {
-            lastUpdateTime: new Timestamp(479978400, 123000000),
-          }
-        ),
-        firestore.doc('collectionId/documentId').update('foo', 'bar', {
+    const firestore = await createInstance(overrides);
+    await Promise.all([
+      firestore.doc('collectionId/documentId').update(
+        {foo: 'bar'},
+        {
           lastUpdateTime: new Timestamp(479978400, 123000000),
-        }),
-      ]);
-    });
+        },
+      ),
+      firestore.doc('collectionId/documentId').update('foo', 'bar', {
+        lastUpdateTime: new Timestamp(479978400, 123000000),
+      }),
+    ]);
   });
 
   it('with invalid last update time precondition', () => {
@@ -1707,7 +1708,7 @@ describe('update document', () => {
       const malformedPrecondition: Precondition = {
         lastUpdateTime: 'foo',
       } as unknown as Precondition;
-      firestore
+      void firestore
         .doc('collectionId/documentId')
         .update({foo: 'bar'}, malformedPrecondition);
     }).to.throw('"lastUpdateTime" is not a Firestore Timestamp.');
@@ -1715,43 +1716,43 @@ describe('update document', () => {
 
   it('requires at least one field', () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').update({});
+      void firestore.doc('collectionId/documentId').update({});
     }).to.throw('At least one field must be updated.');
 
     expect(() => {
       (firestore.doc('collectionId/documentId') as InvalidApiUsage).update();
     }).to.throw(
-      'Function "DocumentReference.update()" requires at least 1 argument.'
+      'Function "DocumentReference.update()" requires at least 1 argument.',
     );
   });
 
   it('rejects nested deletes', () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').update({
+      void firestore.doc('collectionId/documentId').update({
         a: {b: FieldValue.delete()},
       });
     }).to.throw(
-      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Value for argument "dataOrField" is not a valid Firestore value. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field "a.b").'
+      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Value for argument "dataOrField" is not a valid Firestore value. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field "a.b").',
     );
 
     expect(() => {
-      firestore.doc('collectionId/documentId').update('a', {
+      void firestore.doc('collectionId/documentId').update('a', {
         b: FieldValue.delete(),
       });
     }).to.throw(
-      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Element at index 1 is not a valid Firestore value. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field "a.b").'
+      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Element at index 1 is not a valid Firestore value. FieldValue.delete() must appear at the top-level and can only be used in update() or set() with {merge:true} (found in field "a.b").',
     );
 
     expect(() => {
-      firestore
+      void firestore
         .doc('collectionId/documentId')
         .update('a', FieldValue.arrayUnion(FieldValue.delete()));
     }).to.throw(
-      'Element at index 0 is not a valid array element. FieldValue.delete() cannot be used inside of an array.'
+      'Element at index 0 is not a valid array element. FieldValue.delete() cannot be used inside of an array.',
     );
   });
 
-  it('with top-level document', () => {
+  it('with top-level document', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -1759,20 +1760,19 @@ describe('update document', () => {
           update({
             document: document('documentId', 'foo', 'bar'),
             mask: updateMask('foo'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').update({
-        foo: 'bar',
-      });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').update({
+      foo: 'bar',
     });
   });
 
-  it('with nested document', () => {
+  it('with nested document', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -1805,29 +1805,28 @@ describe('update document', () => {
                     },
                   },
                 },
-              }
+              },
             ),
             mask: updateMask('a.b.c', 'foo.bar'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return Promise.all([
-        firestore.doc('collectionId/documentId').update({
-          'foo.bar': 'foobar',
-          'a.b.c': 'foobar',
-        }),
-        firestore
-          .doc('collectionId/documentId')
-          .update('foo.bar', 'foobar', new FieldPath('a', 'b', 'c'), 'foobar'),
-      ]);
-    });
+    const firestore = await createInstance(overrides);
+    await Promise.all([
+      firestore.doc('collectionId/documentId').update({
+        'foo.bar': 'foobar',
+        'a.b.c': 'foobar',
+      }),
+      firestore
+        .doc('collectionId/documentId')
+        .update('foo.bar', 'foobar', new FieldPath('a', 'b', 'c'), 'foobar'),
+    ]);
   });
 
-  it('with two nested fields ', () => {
+  it('with two nested fields ', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -1853,39 +1852,38 @@ describe('update document', () => {
               'foo.bar',
               'foo.deep.bar',
               'foo.deep.foo',
-              'foo.foo'
+              'foo.foo',
             ),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return Promise.all([
-        firestore.doc('collectionId/documentId').update({
-          'foo.foo': 'one',
-          'foo.bar': 'two',
-          'foo.deep.foo': 'one',
-          'foo.deep.bar': 'two',
-        }),
-        firestore
-          .doc('collectionId/documentId')
-          .update(
-            'foo.foo',
-            'one',
-            'foo.bar',
-            'two',
-            'foo.deep.foo',
-            'one',
-            'foo.deep.bar',
-            'two'
-          ),
-      ]);
-    });
+    const firestore = await createInstance(overrides);
+    await Promise.all([
+      firestore.doc('collectionId/documentId').update({
+        'foo.foo': 'one',
+        'foo.bar': 'two',
+        'foo.deep.foo': 'one',
+        'foo.deep.bar': 'two',
+      }),
+      firestore
+        .doc('collectionId/documentId')
+        .update(
+          'foo.foo',
+          'one',
+          'foo.bar',
+          'two',
+          'foo.deep.foo',
+          'one',
+          'foo.deep.bar',
+          'two',
+        ),
+    ]);
   });
 
-  it('with nested field and document transform ', () => {
+  it('with nested field and document transform ', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -1919,25 +1917,24 @@ describe('update document', () => {
               'a.b.delete',
               'a.b.keep',
               'a.c.delete',
-              'a.c.keep'
+              'a.c.keep',
             ),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
 
-    return createInstance(overrides).then(firestore => {
-      return firestore.doc('collectionId/documentId').update({
-        'a.b.delete': FieldValue.delete(),
-        'a.b.keep': 'keep',
-        'a.c.delete': FieldValue.delete(),
-        'a.c.keep': 'keep',
-      });
+    const firestore = await createInstance(overrides);
+    await firestore.doc('collectionId/documentId').update({
+      'a.b.delete': FieldValue.delete(),
+      'a.b.keep': 'keep',
+      'a.c.delete': FieldValue.delete(),
+      'a.c.keep': 'keep',
     });
   });
 
-  it('with field with dot ', () => {
+  it('with field with dot ', async () => {
     const overrides: ApiOverride = {
       commit: request => {
         requestEquals(
@@ -1945,86 +1942,85 @@ describe('update document', () => {
           update({
             document: document('documentId', 'a.b', 'c'),
             mask: updateMask('`a.b`'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
     };
-    return createInstance(overrides).then(firestore => {
-      return firestore
-        .doc('collectionId/documentId')
-        .update(new FieldPath('a.b'), 'c');
-    });
+    const firestore = await createInstance(overrides);
+    await firestore
+      .doc('collectionId/documentId')
+      .update(new FieldPath('a.b'), 'c');
   });
 
   it('with conflicting update', () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').update({
+      void firestore.doc('collectionId/documentId').update({
         foo: 'foobar',
         'foo.bar': 'foobar',
       });
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.'
+      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.',
     );
 
     expect(() => {
-      firestore.doc('collectionId/documentId').update({
+      void firestore.doc('collectionId/documentId').update({
         foo: 'foobar',
         'foo.bar.foobar': 'foobar',
       });
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.'
+      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.',
     );
 
     expect(() => {
-      firestore.doc('collectionId/documentId').update({
+      void firestore.doc('collectionId/documentId').update({
         'foo.bar': 'foobar',
         foo: 'foobar',
       });
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.'
+      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.',
     );
 
     expect(() => {
-      firestore.doc('collectionId/documentId').update({
+      void firestore.doc('collectionId/documentId').update({
         'foo.bar': 'foobar',
         'foo.bar.foo': 'foobar',
       });
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid update map. Field "foo.bar" was specified multiple times.'
+      'Value for argument "dataOrField" is not a valid update map. Field "foo.bar" was specified multiple times.',
     );
 
     expect(() => {
-      firestore.doc('collectionId/documentId').update({
+      void firestore.doc('collectionId/documentId').update({
         'foo.bar': {foo: 'foobar'},
         'foo.bar.foo': 'foobar',
       });
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid update map. Field "foo.bar" was specified multiple times.'
+      'Value for argument "dataOrField" is not a valid update map. Field "foo.bar" was specified multiple times.',
     );
 
     expect(() => {
-      firestore
+      void firestore
         .doc('collectionId/documentId')
         .update('foo.bar', 'foobar', 'foo', 'foobar');
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.'
+      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.',
     );
 
     expect(() => {
-      firestore
+      void firestore
         .doc('collectionId/documentId')
         .update('foo', {foobar: 'foobar'}, 'foo.bar', {foobar: 'foobar'});
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.'
+      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.',
     );
 
     expect(() => {
-      firestore
+      void firestore
         .doc('collectionId/documentId')
         .update('foo', {foobar: 'foobar'}, 'foo.bar', {foobar: 'foobar'});
     }).to.throw(
-      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.'
+      'Value for argument "dataOrField" is not a valid update map. Field "foo" was specified multiple times.',
     );
   });
 
@@ -2039,9 +2035,9 @@ describe('update document', () => {
   it('with empty field path', () => {
     expect(() => {
       const doc = {'': 'foo'};
-      firestore.doc('col/doc').update(doc);
+      void firestore.doc('col/doc').update(doc);
     }).to.throw(
-      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Element at index 0 should not be an empty string.'
+      'Update() requires either a single JavaScript object or an alternating list of field/value pairs that can be followed by an optional precondition. Element at index 0 should not be an empty string.',
     );
   });
 
@@ -2061,20 +2057,20 @@ describe('update document', () => {
       expect(() => {
         const doc: {[k: string]: string} = {};
         doc[invalidFields[i]] = 'foo';
-        firestore.doc('col/doc').update(doc);
+        void firestore.doc('col/doc').update(doc);
       }).to.throw(/Value for argument ".*" is not a valid field path/);
     }
   });
 
   it("doesn't accept argument after precondition", () => {
     expect(() => {
-      firestore.doc('collectionId/documentId').update('foo', 'bar', {
-        exists: true,
+      void firestore.doc('collectionId/documentId').update('foo', 'bar', {
+        exists: false,
       });
     }).to.throw(INVALID_ARGUMENTS_TO_UPDATE);
 
     expect(() => {
-      firestore
+      void firestore
         .doc('collectionId/documentId')
         .update({foo: 'bar'}, {exists: true}, 'foo');
     }).to.throw(INVALID_ARGUMENTS_TO_UPDATE);
@@ -2082,17 +2078,17 @@ describe('update document', () => {
 
   it('accepts an object', () => {
     expect(() =>
-      firestore.doc('collectionId/documentId').update(null as InvalidApiUsage)
+      firestore.doc('collectionId/documentId').update(null as InvalidApiUsage),
     ).to.throw(
-      'Value for argument "dataOrField" is not a valid Firestore document. Input is not a plain JavaScript object.'
+      'Value for argument "dataOrField" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
   });
 
   it("doesn't accept arrays", () => {
     expect(() =>
-      firestore.doc('collectionId/documentId').update([42] as InvalidApiUsage)
+      firestore.doc('collectionId/documentId').update([42] as InvalidApiUsage),
     ).to.throw(
-      'Value for argument "dataOrField" is not a valid Firestore document. Input is not a plain JavaScript object.'
+      'Value for argument "dataOrField" is not a valid Firestore document. Input is not a plain JavaScript object.',
     );
   });
 
@@ -2104,7 +2100,7 @@ describe('update document', () => {
           update({
             document: document('documentId', 'bar', 'foobar'),
             mask: updateMask('bar', 'foo'),
-          })
+          }),
         );
         return response(writeResult(1));
       },
@@ -2125,7 +2121,6 @@ describe('listCollections() method', () => {
       listCollectionIds: request => {
         expect(request).to.deep.eq({
           parent: `projects/${PROJECT_ID}/databases/(default)/documents/coll/doc`,
-          pageSize: 65535,
         });
 
         return response(['second', 'first']);

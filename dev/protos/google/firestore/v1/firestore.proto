@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import "google/firestore/v1/aggregation_result.proto";
 import "google/firestore/v1/common.proto";
 import "google/firestore/v1/document.proto";
 import "google/firestore/v1/query.proto";
+import "google/firestore/v1/query_profile.proto";
 import "google/firestore/v1/write.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
@@ -576,6 +577,10 @@ message RunQueryRequest {
     // minute timestamp within the past 7 days.
     google.protobuf.Timestamp read_time = 7;
   }
+
+  // Optional. Explain options for the query. If set, additional query
+  // statistics will be returned. If not, only query results will be returned.
+  ExplainOptions explain_options = 10 [(google.api.field_behavior) = OPTIONAL];
 }
 
 // The response for
@@ -612,6 +617,11 @@ message RunQueryResponse {
     // documents will be returned.
     bool done = 6;
   }
+
+  // Query explain metrics. This is only present when the
+  // [RunQueryRequest.explain_options][google.firestore.v1.RunQueryRequest.explain_options]
+  // is provided, and it is sent only once with the last response in the stream.
+  ExplainMetrics explain_metrics = 11;
 }
 
 // The request for
@@ -651,6 +661,10 @@ message RunAggregationQueryRequest {
     // minute timestamp within the past 7 days.
     google.protobuf.Timestamp read_time = 6;
   }
+
+  // Optional. Explain options for the query. If set, additional query
+  // statistics will be returned. If not, only query results will be returned.
+  ExplainOptions explain_options = 8 [(google.api.field_behavior) = OPTIONAL];
 }
 
 // The response for
@@ -676,6 +690,11 @@ message RunAggregationQueryResponse {
   // `result` will be sent, and this represents the time at which the query
   // was run.
   google.protobuf.Timestamp read_time = 3;
+
+  // Query explain metrics. This is only present when the
+  // [RunAggregationQueryRequest.explain_options][google.firestore.v1.RunAggregationQueryRequest.explain_options]
+  // is provided, and it is sent only once with the last response in the stream.
+  ExplainMetrics explain_metrics = 10;
 }
 
 // The request for
@@ -761,7 +780,7 @@ message PartitionQueryResponse {
   //  * query, start_at B
   //
   // An empty result may indicate that the query has too few results to be
-  // partitioned.
+  // partitioned, or that the query is not yet supported for partitioning.
   repeated Cursor partitions = 1;
 
   // A page token that may be used to request an additional set of results, up
@@ -944,6 +963,21 @@ message Target {
 
   // The target ID that identifies the target on the stream. Must be a positive
   // number and non-zero.
+  //
+  // If `target_id` is 0 (or unspecified), the server will assign an ID for this
+  // target and return that in a `TargetChange::ADD` event. Once a target with
+  // `target_id=0` is added, all subsequent targets must also have
+  // `target_id=0`. If an `AddTarget` request with `target_id != 0` is
+  // sent to the server after a target with `target_id=0` is added, the server
+  // will immediately send a response with a `TargetChange::Remove` event.
+  //
+  // Note that if the client sends multiple `AddTarget` requests
+  // without an ID, the order of IDs returned in `TargetChage.target_ids` are
+  // undefined. Therefore, clients should provide a target ID instead of relying
+  // on the server to assign one.
+  //
+  // If `target_id` is non-zero, there must not be an existing active target on
+  // this stream with the same ID.
   int32 target_id = 5;
 
   // If the target should be removed once it is current and consistent.

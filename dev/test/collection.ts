@@ -56,19 +56,19 @@ describe('Collection interface', () => {
     expect(documentRef.id).to.equal('docId');
 
     expect(() => collectionRef.doc(false as InvalidApiUsage)).to.throw(
-      'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.'
+      'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.',
     );
     expect(() => collectionRef.doc(null as InvalidApiUsage)).to.throw(
-      'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.'
+      'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.',
     );
     expect(() => collectionRef.doc('')).to.throw(
-      'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.'
+      'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.',
     );
     expect(() => (collectionRef as InvalidApiUsage).doc(undefined)).to.throw(
-      'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.'
+      'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.',
     );
     expect(() => collectionRef.doc('doc/coll')).to.throw(
-      'Value for argument "documentPath" must point to a document, but was "doc/coll". Your path does not contain an even number of components.'
+      'Value for argument "documentPath" must point to a document, but was "doc/coll". Your path does not contain an even number of components.',
     );
 
     documentRef = collectionRef.doc('docId/colId/docId');
@@ -156,7 +156,6 @@ describe('Collection interface', () => {
           parent: `${DATABASE_ROOT}/documents/a/b`,
           collectionId: 'c',
           showMissing: true,
-          pageSize: 65535,
           mask: {fieldPaths: []},
         });
 
@@ -230,7 +229,7 @@ describe('Collection interface', () => {
           'author',
           'author',
           'title',
-          'post'
+          'post',
         );
         expect(request).to.deep.equal({
           database: DATABASE_ROOT,

@@ -4,6 +4,207 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.11.6](https://github.com/googleapis/nodejs-firestore/compare/v7.11.5...v7.11.6) (2025-09-26)
+
+
+### Bug Fixes
+
+* Pool.ts: add even more logging ([c508d1b](https://github.com/googleapis/nodejs-firestore/commit/c508d1bd653f5d2b9bbe78236fac15e999c27e69))
+
+## [7.11.5](https://github.com/googleapis/nodejs-firestore/compare/v7.11.4...v7.11.5) (2025-09-22)
+
+
+### Bug Fixes
+
+* Pool.ts: add more detailed logging for client garbage collection ([#2420](https://github.com/googleapis/nodejs-firestore/issues/2420)) ([1bbca46](https://github.com/googleapis/nodejs-firestore/commit/1bbca46ff2a6ea98b52a83ff7dae6092e69b044d))
+
+## [7.11.4](https://github.com/googleapis/nodejs-firestore/compare/v7.11.3...v7.11.4) (2025-09-16)
+
+
+### Bug Fixes
+
+* Improve debug logging for the internal client pool. Added client IDs to debug log statements for client management. ([99918f1](https://github.com/googleapis/nodejs-firestore/commit/99918f1794adee706c4f2685cd3f8aea6dff895e))
+
+## [7.11.3](https://github.com/googleapis/nodejs-firestore/compare/v7.11.2...v7.11.3) (2025-07-09)
+
+
+### Bug Fixes
+
+* Improve performance of the UTF-8 string comparison logic ([#2380](https://github.com/googleapis/nodejs-firestore/issues/2380)) ([bc6a03e](https://github.com/googleapis/nodejs-firestore/commit/bc6a03e2b44e740b32676d7d0bec07feaa509b5b))
+
+## [7.11.2](https://github.com/googleapis/nodejs-firestore/compare/v7.11.1...v7.11.2) (2025-06-19)
+
+
+### Bug Fixes
+
+* Firestore Client caching stub in bad state issue ([#2365](https://github.com/googleapis/nodejs-firestore/issues/2365)) ([04ad0a4](https://github.com/googleapis/nodejs-firestore/commit/04ad0a4c0fb370db8aeae87dc6ab8bd06eafedd4))
+
+## [7.11.1](https://github.com/googleapis/nodejs-firestore/compare/v7.11.0...v7.11.1) (2025-05-02)
+
+
+### Bug Fixes
+
+* Aggregate query readtime bug ([#2331](https://github.com/googleapis/nodejs-firestore/issues/2331)) ([9ac0394](https://github.com/googleapis/nodejs-firestore/commit/9ac0394df78619bf1d6b7907a364342796a4f0fb))
+* Bump default deadline on CreateDatabase and RestoreDatabase to 2 minutes ([#2274](https://github.com/googleapis/nodejs-firestore/issues/2274)) ([d559080](https://github.com/googleapis/nodejs-firestore/commit/d559080a0f436927108ec69c2910af4e8246a8b0))
+* Close default BulkWriter upon terminate. ([#2276](https://github.com/googleapis/nodejs-firestore/issues/2276)) ([1e714a8](https://github.com/googleapis/nodejs-firestore/commit/1e714a8b7952b65872e65533cfe74d303dfabe20))
+* Correctly escape field paths with multiple backslashes or backticks ([#2259](https://github.com/googleapis/nodejs-firestore/issues/2259)) ([#2261](https://github.com/googleapis/nodejs-firestore/issues/2261)) ([7056ba7](https://github.com/googleapis/nodejs-firestore/commit/7056ba76040b9369d86c57838ef938c9d9ef73d8))
+* Do not send page size with auto-paginate. Fixes warnings in listCollections and listDocuments. ([#2336](https://github.com/googleapis/nodejs-firestore/issues/2336)) ([844b4ca](https://github.com/googleapis/nodejs-firestore/commit/844b4ca9c209e649565d122940858409d808baa6))
+* Finalize fixing typings for headers in generator ([#2287](https://github.com/googleapis/nodejs-firestore/issues/2287)) ([c6c85b6](https://github.com/googleapis/nodejs-firestore/commit/c6c85b66a25b56bd23c19285302a740b0ca85d25))
+* Prevent crashes if an inactive stream receives an error. ([#2283](https://github.com/googleapis/nodejs-firestore/issues/2283)) ([f58fe79](https://github.com/googleapis/nodejs-firestore/commit/f58fe791c7afc59087e2555f7208cdb611470d80))
+* Remove unused "long" dependency from firestore proto ([#2324](https://github.com/googleapis/nodejs-firestore/issues/2324)) ([5937b93](https://github.com/googleapis/nodejs-firestore/commit/5937b93aa1aacd2f63bf1678ec569c504cf0b186))
+* Sort document reference by long type id  ([#2257](https://github.com/googleapis/nodejs-firestore/issues/2257)) ([3fd0de9](https://github.com/googleapis/nodejs-firestore/commit/3fd0de93076adfe17aaae9e0a9b732bcae52d594))
+* Sort strings in UTF-8 encoded byte order ([#2275](https://github.com/googleapis/nodejs-firestore/issues/2275)) ([a2950e0](https://github.com/googleapis/nodejs-firestore/commit/a2950e0b6464012f0e6c5703d0d28c2175cd35a2))
+* Use lazy encoding for utf-8 encoded string comparison ([#2299](https://github.com/googleapis/nodejs-firestore/issues/2299)) ([e8777e1](https://github.com/googleapis/nodejs-firestore/commit/e8777e12db41096c3945afd3be7905c1c029493c))
+
+## [7.11.0](https://github.com/googleapis/nodejs-firestore/compare/v7.10.0...v7.11.0) (2024-12-05)
+
+
+### Features
+
+* [proto] add Database.CmekConfig and Database.cmek_config (information about CMEK enablement) ([2779896](https://github.com/googleapis/nodejs-firestore/commit/27798966c5d72616fc0cee109e1d28f693c9f5f1))
+* [proto] add Database.delete_time (the time a database was deleted, if it ever was) ([2779896](https://github.com/googleapis/nodejs-firestore/commit/27798966c5d72616fc0cee109e1d28f693c9f5f1))
+* [proto] add Database.previous_id (if a database was deleted, what ID it was using beforehand) ([2779896](https://github.com/googleapis/nodejs-firestore/commit/27798966c5d72616fc0cee109e1d28f693c9f5f1))
+* [proto] add Database.SourceInfo and Database.source_info (information about database provenance, specifically for restored databases) ([2779896](https://github.com/googleapis/nodejs-firestore/commit/27798966c5d72616fc0cee109e1d28f693c9f5f1))
+* [proto] allow specifying an encryption_config when restoring a database ([2779896](https://github.com/googleapis/nodejs-firestore/commit/27798966c5d72616fc0cee109e1d28f693c9f5f1))
+* Enable tracing via OpenTelemetry. ([#2218](https://github.com/googleapis/nodejs-firestore/issues/2218)) ([1ddb62e](https://github.com/googleapis/nodejs-firestore/commit/1ddb62ed67e93ca2c265556bb5e504d207a639a8))
+* Support `fire-admin` tag for Admin Node SDK ([#2238](https://github.com/googleapis/nodejs-firestore/issues/2238)) ([#2252](https://github.com/googleapis/nodejs-firestore/issues/2252)) ([1339dc2](https://github.com/googleapis/nodejs-firestore/commit/1339dc20e3ffc065f5f79a82baaa67deda76fb36))
+
+
+### Bug Fixes
+
+* Use correct limit when retrying a limit query stream with a cursor ([#2203](https://github.com/googleapis/nodejs-firestore/issues/2203)) ([ab94092](https://github.com/googleapis/nodejs-firestore/commit/ab94092c2375501dd2998a458fc8a449793c9e69))
+
+## [7.10.0](https://github.com/googleapis/nodejs-firestore/compare/v7.9.0...v7.10.0) (2024-09-05)
+
+
+### Features
+
+* Expose proto changes for the bulk delete api ([23ce891](https://github.com/googleapis/nodejs-firestore/commit/23ce89175ce315648ce9af3994cba0decc48ba47))
+* Expose the proto changes to support FindNearest.distance_result_field parameter and the FindNearest.distance_threshold parameter ([23ce891](https://github.com/googleapis/nodejs-firestore/commit/23ce89175ce315648ce9af3994cba0decc48ba47))
+* Return computed distance and set distance thresholds on VectorQueries ([#2090](https://github.com/googleapis/nodejs-firestore/issues/2090)) ([b5ca84f](https://github.com/googleapis/nodejs-firestore/commit/b5ca84f076ca0668e90ca3fc7dd878f732ccd956))
+
+## [7.9.0](https://github.com/googleapis/nodejs-firestore/compare/v7.8.0...v7.9.0) (2024-06-25)
+
+
+### Features
+
+* Update FirebaseFirestore.v1 and FirebaseFirestore.v1beta1 auto-gen types ([6732d4d](https://github.com/googleapis/nodejs-firestore/commit/6732d4da3c5ea851dccb0515757fbfb521f21410))
+
+## [7.8.0](https://github.com/googleapis/nodejs-firestore/compare/v7.7.0...v7.8.0) (2024-05-28)
+
+
+### Features
+
+* Query profiling for VectorQuery ([d406f14](https://github.com/googleapis/nodejs-firestore/commit/d406f14612a4890e405913aadc75c7ee22993f2b))
+* Update Nodejs generator to send API versions in headers for GAPICs ([#2041](https://github.com/googleapis/nodejs-firestore/issues/2041)) ([6dbe4b0](https://github.com/googleapis/nodejs-firestore/commit/6dbe4b0baac261f03f9032765b375938ce5e46d7))
+
+## [7.7.0](https://github.com/googleapis/nodejs-firestore/compare/v7.6.0...v7.7.0) (2024-05-07)
+
+
+### Features
+
+* Add several fields to manage state of database encryption update ([5811492](https://github.com/googleapis/nodejs-firestore/commit/5811492357c7b66324839c02bcbf45a5b6d6d7e7))
+* Lazy-started transactions ([#2017](https://github.com/googleapis/nodejs-firestore/issues/2017)) ([2c726a1](https://github.com/googleapis/nodejs-firestore/commit/2c726a176407c45f519846052469e1bbbbc24750))
+
+
+### Bug Fixes
+
+* Nonblocking rollback ([#2039](https://github.com/googleapis/nodejs-firestore/issues/2039)) ([52099c8](https://github.com/googleapis/nodejs-firestore/commit/52099c8eb8ce8aba0ab5aee9f3dd4c4a59c2afd4))
+* Upgrade the `google-gax` dependency version. ([#2040](https://github.com/googleapis/nodejs-firestore/issues/2040)) ([0b9efa6](https://github.com/googleapis/nodejs-firestore/commit/0b9efa6d5a3d46ad2f084aef58c529e710c7f596))
+
+## [7.6.0](https://github.com/googleapis/nodejs-firestore/compare/v7.5.0...v7.6.0) (2024-04-02)
+
+
+### Features
+
+* Vector Search ([#2006](https://github.com/googleapis/nodejs-firestore/issues/2006)) ([e906b42](https://github.com/googleapis/nodejs-firestore/commit/e906b4260da11fe5a1c34ae5f68d9f5717a99dab))
+
+## [7.5.0](https://github.com/googleapis/nodejs-firestore/compare/v7.4.0...v7.5.0) (2024-03-25)
+
+
+### Features
+
+* Protos and autogen client for vector ([#2027](https://github.com/googleapis/nodejs-firestore/issues/2027)) ([c65cef0](https://github.com/googleapis/nodejs-firestore/commit/c65cef04332e20be82129d0c49396485be683585))
+* Query Profile ([#2014](https://github.com/googleapis/nodejs-firestore/issues/2014)) ([9a45ec8](https://github.com/googleapis/nodejs-firestore/commit/9a45ec89fb3a8d9814bc186d7d494f5859946ffa))
+
+## [7.4.0](https://github.com/googleapis/nodejs-firestore/compare/v7.3.1...v7.4.0) (2024-03-15)
+
+
+### Features
+
+* A new message `Backup` is added ([#2021](https://github.com/googleapis/nodejs-firestore/issues/2021)) ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `BackupSchedule` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `CreateBackupScheduleRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `DailyRecurrence` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `DeleteBackupRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `DeleteBackupScheduleRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `GetBackupRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `GetBackupScheduleRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `ListBackupSchedulesRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `ListBackupSchedulesResponse` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `ListBackupsRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `ListBackupsResponse` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `RestoreDatabaseMetadata` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `RestoreDatabaseRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `UpdateBackupScheduleRequest` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new message `WeeklyRecurrence` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `CreateBackupSchedule` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `DeleteBackup` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `DeleteBackupSchedule` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `GetBackup` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `GetBackupSchedule` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `ListBackups` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `ListBackupSchedules` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `RestoreDatabase` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new method `UpdateBackupSchedule` is added to service `FirestoreAdmin` ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new resource_definition `firestore.googleapis.com/Backup` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* A new resource_definition `firestore.googleapis.com/BackupSchedule` is added ([6bced86](https://github.com/googleapis/nodejs-firestore/commit/6bced86eabd143947e94e83872f20d7ed9d964dc))
+* Add new types ExplainOptions, ExplainMetrics, PlanSummary, ExecutionStats ([#2013](https://github.com/googleapis/nodejs-firestore/issues/2013)) ([e598b9d](https://github.com/googleapis/nodejs-firestore/commit/e598b9daf628cbc54dc10dab80bb0f46e2a3e2a2))
+
+
+### Bug Fixes
+
+* ReadOnly transaction do not need to commit not rollback. ([#2007](https://github.com/googleapis/nodejs-firestore/issues/2007)) ([6a220a6](https://github.com/googleapis/nodejs-firestore/commit/6a220a6f6563903673066576f09ecf405c53f87b))
+* Update service definitions ([#2016](https://github.com/googleapis/nodejs-firestore/issues/2016)) ([ea4b6d0](https://github.com/googleapis/nodejs-firestore/commit/ea4b6d05383751f9a089958a20c1dd56419bc66d))
+
+## [7.3.1](https://github.com/googleapis/nodejs-firestore/compare/v7.3.0...v7.3.1) (2024-03-04)
+
+
+### Bug Fixes
+
+* Add client library version to headers ([#2003](https://github.com/googleapis/nodejs-firestore/issues/2003)) ([8799032](https://github.com/googleapis/nodejs-firestore/commit/8799032d8cc39adc774fe21b7eb70f96a3a18fda))
+* Add missing type for exposed database id ([#1996](https://github.com/googleapis/nodejs-firestore/issues/1996)) ([e967279](https://github.com/googleapis/nodejs-firestore/commit/e967279cfe532ae3375ae9dcb94f4a65af5ffb42))
+* Optimize Transaction PITR ([#2002](https://github.com/googleapis/nodejs-firestore/issues/2002)) ([2f08612](https://github.com/googleapis/nodejs-firestore/commit/2f0861296151f7b0094501e4a9ff6fc4154d52a4))
+* Revert changes to streaming retries ([d964a13](https://github.com/googleapis/nodejs-firestore/commit/d964a13818e6bc4be6547e88ffbe16be1a6ceeeb))
+
+## [7.3.0](https://github.com/googleapis/nodejs-firestore/compare/v7.2.0...v7.3.0) (2024-01-31)
+
+
+### Features
+
+* Expose the undeliverable_first_gen_event.proto ([b4f7d60](https://github.com/googleapis/nodejs-firestore/commit/b4f7d6015b50f1da6afeae0b4215be416596cc69))
+
+
+### Bug Fixes
+
+* Allow an explicit MustExist precondition for update ([#1985](https://github.com/googleapis/nodejs-firestore/issues/1985)) ([99d60a6](https://github.com/googleapis/nodejs-firestore/commit/99d60a6f87b70c942ac2bd9464cc6d64323f9dfb))
+* Fix redaction of credentials in Firestore settings ([#1989](https://github.com/googleapis/nodejs-firestore/issues/1989)) ([98e668b](https://github.com/googleapis/nodejs-firestore/commit/98e668bb9ce7feb090f65fc61d92af433bc23094))
+* Improve retry logic for streaming API calls ([b4f7d60](https://github.com/googleapis/nodejs-firestore/commit/b4f7d6015b50f1da6afeae0b4215be416596cc69))
+* Removed unsupported QueryMode, QueryPlan, and ResultSetStats protos ([b4f7d60](https://github.com/googleapis/nodejs-firestore/commit/b4f7d6015b50f1da6afeae0b4215be416596cc69))
+
+## [7.2.0](https://github.com/googleapis/nodejs-firestore/compare/v7.1.1...v7.2.0) (2024-01-16)
+
+
+### Features
+
+* Add new types QueryMode, QueryPlan, ResultSetStats ([#1911](https://github.com/googleapis/nodejs-firestore/issues/1911)) ([8f77b68](https://github.com/googleapis/nodejs-firestore/commit/8f77b68bf70b04a66e982067aa246de0596e4ea2))
+* Expose databaseId and projectId getter on Firestore class ([#1937](https://github.com/googleapis/nodejs-firestore/issues/1937)) ([d9c867f](https://github.com/googleapis/nodejs-firestore/commit/d9c867fc5048748e5af378fd8465303224668781)), closes [#1936](https://github.com/googleapis/nodejs-firestore/issues/1936)
+
+
+### Bug Fixes
+
+* Make transaction rollback best effort. ([#1967](https://github.com/googleapis/nodejs-firestore/issues/1967)) ([1d76546](https://github.com/googleapis/nodejs-firestore/commit/1d76546a781527ef5b9085fc9f189c024355ae9f))
+
 ## [7.1.1](https://github.com/googleapis/nodejs-firestore/compare/v7.1.0...v7.1.1) (2023-11-20)
 
 

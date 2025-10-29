@@ -17,7 +17,6 @@ import {
   ApiOverride,
   createInstance,
   stream,
-  streamWithoutEnd,
   verifyInstance,
 } from './util/helpers';
 import {Firestore, Query, Timestamp} from '../src';
@@ -72,7 +71,7 @@ describe('aggregate query interface', () => {
       [
         queryA.orderBy('foo').endBefore('b'),
         queryB.orderBy('bar').endBefore('a'),
-      ]
+      ],
     );
   });
 
@@ -89,31 +88,6 @@ describe('aggregate query interface', () => {
     };
     const overrides: ApiOverride = {
       runAggregationQuery: () => stream(result),
-    };
-
-    firestore = await createInstance(overrides);
-
-    const query = firestore.collection('collectionId').count();
-    return query.get().then(results => {
-      expect(results.data().count).to.be.equal(99);
-      expect(results.readTime.isEqual(new Timestamp(5, 6))).to.be.true;
-      expect(results.query).to.be.equal(query);
-    });
-  });
-
-  it('successful return without ending the stream on get()', async () => {
-    // Here we are mocking the response from the server. The client uses
-    // `aggregate_$i` aliases in requests and will receive these in responses.
-    const result: api.IRunAggregationQueryResponse = {
-      result: {
-        aggregateFields: {
-          aggregate_0: {integerValue: '99'},
-        },
-      },
-      readTime: {seconds: 5, nanos: 6},
-    };
-    const overrides: ApiOverride = {
-      runAggregationQuery: () => streamWithoutEnd(result),
     };
 
     firestore = await createInstance(overrides);
@@ -185,9 +159,7 @@ describe('aggregate query interface', () => {
         throw new Error('Unexpected success in Promise');
       })
       .catch(err => {
-        expect(err.message).to.equal(
-          'RunAggregationQueryResponse is missing result'
-        );
+        expect(err.message).to.equal('No AggregateQuery results');
         expect(attempts).to.equal(1);
       });
   });

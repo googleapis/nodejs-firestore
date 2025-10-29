@@ -22,6 +22,7 @@ import * as proto from '../protos/firestore_v1_proto_api';
 
 import {FieldPath} from './path';
 import {Serializer, validateUserInput} from './serializer';
+import {isPrimitiveArrayEqual} from './util';
 import {
   invalidArgumentMessage,
   validateMinNumberOfArguments,
@@ -29,6 +30,58 @@ import {
 } from './validate';
 
 import api = proto.google.firestore.v1;
+
+/**
+ * Represent a vector type in Firestore documents.
+ * Create an instance with {@link FieldValue.vector}.
+ *
+ * @class VectorValue
+ */
+export class VectorValue implements firestore.VectorValue {
+  private readonly _values: number[];
+
+  /**
+   * @private
+   * @internal
+   */
+  constructor(values: number[] | undefined) {
+    // Making a copy of the parameter.
+    this._values = (values || []).map(n => n);
+  }
+
+  /**
+   * Returns a copy of the raw number array form of the vector.
+   */
+  public toArray(): number[] {
+    return this._values.map(n => n);
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  _toProto(serializer: Serializer): api.IValue {
+    return serializer.encodeVector(this._values);
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  static _fromProto(valueArray: api.IValue): VectorValue {
+    const values = valueArray.arrayValue?.values?.map(v => {
+      return v.doubleValue!;
+    });
+    return new VectorValue(values);
+  }
+
+  /**
+   * Returns `true` if the two VectorValue has the same raw number arrays, returns `false` otherwise.
+   */
+  isEqual(other: VectorValue): boolean {
+    return isPrimitiveArrayEqual(this._values, other._values);
+  }
+}
 
 /**
  * Sentinel values that can be used when writing documents with set(), create()
@@ -39,6 +92,17 @@ import api = proto.google.firestore.v1;
 export class FieldValue implements firestore.FieldValue {
   /** @private */
   constructor() {}
+
+  /**
+   * Creates a new `VectorValue` constructed with a copy of the given array of numbers.
+   *
+   * @param values - Create a `VectorValue` instance with a copy of this array of numbers.
+   *
+   * @returns A new `VectorValue` constructed with a copy of the given array of numbers.
+   */
+  static vector(values?: number[]): VectorValue {
+    return new VectorValue(values);
+  }
 
   /**
    * Returns a sentinel for use with update() or set() with {merge:true} to mark
@@ -256,7 +320,7 @@ export abstract class FieldTransform extends FieldValue {
    */
   abstract toProto(
     serializer: Serializer,
-    fieldPath: FieldPath
+    fieldPath: FieldPath,
   ): api.DocumentTransform.IFieldTransform;
 }
 
@@ -304,7 +368,7 @@ export class DeleteTransform extends FieldTransform {
 
   toProto(): never {
     throw new Error(
-      'FieldValue.delete() should not be included in a FieldTransform'
+      'FieldValue.delete() should not be included in a FieldTransform',
     );
   }
 }
@@ -356,7 +420,7 @@ class ServerTimestampTransform extends FieldTransform {
 
   toProto(
     serializer: Serializer,
-    fieldPath: FieldPath
+    fieldPath: FieldPath,
   ): api.DocumentTransform.IFieldTransform {
     return {
       fieldPath: fieldPath.formattedName,
@@ -406,7 +470,7 @@ class NumericIncrementTransform extends FieldTransform {
 
   toProto(
     serializer: Serializer,
-    fieldPath: FieldPath
+    fieldPath: FieldPath,
   ): api.DocumentTransform.IFieldTransform {
     const encodedOperand = serializer.encodeValue(this.operand)!;
     return {fieldPath: fieldPath.formattedName, increment: encodedOperand};
@@ -462,7 +526,7 @@ class ArrayUnionTransform extends FieldTransform {
 
   toProto(
     serializer: Serializer,
-    fieldPath: FieldPath
+    fieldPath: FieldPath,
   ): api.DocumentTransform.IFieldTransform {
     const encodedElements = serializer.encodeValue(this.elements)!.arrayValue!;
     return {
@@ -521,7 +585,7 @@ class ArrayRemoveTransform extends FieldTransform {
 
   toProto(
     serializer: Serializer,
-    fieldPath: FieldPath
+    fieldPath: FieldPath,
   ): api.DocumentTransform.IFieldTransform {
     const encodedElements = serializer.encodeValue(this.elements)!.arrayValue!;
     return {
@@ -553,14 +617,14 @@ class ArrayRemoveTransform extends FieldTransform {
 function validateArrayElement(
   arg: string | number,
   value: unknown,
-  allowUndefined: boolean
+  allowUndefined: boolean,
 ): void {
   if (Array.isArray(value)) {
     throw new Error(
       `${invalidArgumentMessage(
         arg,
-        'array element'
-      )} Nested arrays are not supported.`
+        'array element',
+      )} Nested arrays are not supported.`,
     );
   }
   validateUserInput(
@@ -570,6 +634,6 @@ function validateArrayElement(
     /*path=*/ {allowDeletes: 'none', allowTransforms: false, allowUndefined},
     /*path=*/ undefined,
     /*level=*/ 0,
-    /*inArray=*/ true
+    /*inArray=*/ true,
   );
 }

@@ -1,5 +1,5 @@
 /*!
- * Copyright 2022 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 
 import * as $protobuf from "protobufjs";
-import Long = require("long");
 /** Namespace google. */
 export namespace google {
 
@@ -28,11 +27,174 @@ export namespace google {
             /** Namespace v1. */
             namespace v1 {
 
+                /** Properties of a Backup. */
+                interface IBackup {
+
+                    /** Backup name */
+                    name?: (string|null);
+
+                    /** Backup database */
+                    database?: (string|null);
+
+                    /** Backup databaseUid */
+                    databaseUid?: (string|null);
+
+                    /** Backup snapshotTime */
+                    snapshotTime?: (google.protobuf.ITimestamp|null);
+
+                    /** Backup expireTime */
+                    expireTime?: (google.protobuf.ITimestamp|null);
+
+                    /** Backup stats */
+                    stats?: (google.firestore.admin.v1.Backup.IStats|null);
+
+                    /** Backup state */
+                    state?: (google.firestore.admin.v1.Backup.State|null);
+                }
+
+                /** Represents a Backup. */
+                class Backup implements IBackup {
+
+                    /**
+                     * Constructs a new Backup.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IBackup);
+
+                    /** Backup name. */
+                    public name: string;
+
+                    /** Backup database. */
+                    public database: string;
+
+                    /** Backup databaseUid. */
+                    public databaseUid: string;
+
+                    /** Backup snapshotTime. */
+                    public snapshotTime?: (google.protobuf.ITimestamp|null);
+
+                    /** Backup expireTime. */
+                    public expireTime?: (google.protobuf.ITimestamp|null);
+
+                    /** Backup stats. */
+                    public stats?: (google.firestore.admin.v1.Backup.IStats|null);
+
+                    /** Backup state. */
+                    public state: google.firestore.admin.v1.Backup.State;
+
+                    /**
+                     * Creates a Backup message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns Backup
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Backup;
+
+                    /**
+                     * Creates a plain object from a Backup message. Also converts values to other types if specified.
+                     * @param message Backup
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.Backup, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this Backup to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for Backup
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                namespace Backup {
+
+                    /** Properties of a Stats. */
+                    interface IStats {
+
+                        /** Stats sizeBytes */
+                        sizeBytes?: (number|string|null);
+
+                        /** Stats documentCount */
+                        documentCount?: (number|string|null);
+
+                        /** Stats indexCount */
+                        indexCount?: (number|string|null);
+                    }
+
+                    /** Represents a Stats. */
+                    class Stats implements IStats {
+
+                        /**
+                         * Constructs a new Stats.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.admin.v1.Backup.IStats);
+
+                        /** Stats sizeBytes. */
+                        public sizeBytes: (number|string);
+
+                        /** Stats documentCount. */
+                        public documentCount: (number|string);
+
+                        /** Stats indexCount. */
+                        public indexCount: (number|string);
+
+                        /**
+                         * Creates a Stats message from a plain object. Also converts values to their respective internal types.
+                         * @param object Plain object
+                         * @returns Stats
+                         */
+                        public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Backup.Stats;
+
+                        /**
+                         * Creates a plain object from a Stats message. Also converts values to other types if specified.
+                         * @param message Stats
+                         * @param [options] Conversion options
+                         * @returns Plain object
+                         */
+                        public static toObject(message: google.firestore.admin.v1.Backup.Stats, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                        /**
+                         * Converts this Stats to JSON.
+                         * @returns JSON object
+                         */
+                        public toJSON(): { [k: string]: any };
+
+                        /**
+                         * Gets the default type url for Stats
+                         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns The default type url
+                         */
+                        public static getTypeUrl(typeUrlPrefix?: string): string;
+                    }
+
+                    /** State enum. */
+                    type State =
+                        "STATE_UNSPECIFIED"| "CREATING"| "READY"| "NOT_AVAILABLE";
+                }
+
                 /** Properties of a Database. */
                 interface IDatabase {
 
                     /** Database name */
                     name?: (string|null);
+
+                    /** Database uid */
+                    uid?: (string|null);
+
+                    /** Database createTime */
+                    createTime?: (google.protobuf.ITimestamp|null);
+
+                    /** Database updateTime */
+                    updateTime?: (google.protobuf.ITimestamp|null);
+
+                    /** Database deleteTime */
+                    deleteTime?: (google.protobuf.ITimestamp|null);
 
                     /** Database locationId */
                     locationId?: (string|null);
@@ -43,11 +205,32 @@ export namespace google {
                     /** Database concurrencyMode */
                     concurrencyMode?: (google.firestore.admin.v1.Database.ConcurrencyMode|null);
 
+                    /** Database versionRetentionPeriod */
+                    versionRetentionPeriod?: (google.protobuf.IDuration|null);
+
+                    /** Database earliestVersionTime */
+                    earliestVersionTime?: (google.protobuf.ITimestamp|null);
+
+                    /** Database pointInTimeRecoveryEnablement */
+                    pointInTimeRecoveryEnablement?: (google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement|null);
+
                     /** Database appEngineIntegrationMode */
                     appEngineIntegrationMode?: (google.firestore.admin.v1.Database.AppEngineIntegrationMode|null);
 
                     /** Database keyPrefix */
                     keyPrefix?: (string|null);
+
+                    /** Database deleteProtectionState */
+                    deleteProtectionState?: (google.firestore.admin.v1.Database.DeleteProtectionState|null);
+
+                    /** Database cmekConfig */
+                    cmekConfig?: (google.firestore.admin.v1.Database.ICmekConfig|null);
+
+                    /** Database previousId */
+                    previousId?: (string|null);
+
+                    /** Database sourceInfo */
+                    sourceInfo?: (google.firestore.admin.v1.Database.ISourceInfo|null);
 
                     /** Database etag */
                     etag?: (string|null);
@@ -65,6 +248,18 @@ export namespace google {
                     /** Database name. */
                     public name: string;
 
+                    /** Database uid. */
+                    public uid: string;
+
+                    /** Database createTime. */
+                    public createTime?: (google.protobuf.ITimestamp|null);
+
+                    /** Database updateTime. */
+                    public updateTime?: (google.protobuf.ITimestamp|null);
+
+                    /** Database deleteTime. */
+                    public deleteTime?: (google.protobuf.ITimestamp|null);
+
                     /** Database locationId. */
                     public locationId: string;
 
@@ -74,11 +269,32 @@ export namespace google {
                     /** Database concurrencyMode. */
                     public concurrencyMode: google.firestore.admin.v1.Database.ConcurrencyMode;
 
+                    /** Database versionRetentionPeriod. */
+                    public versionRetentionPeriod?: (google.protobuf.IDuration|null);
+
+                    /** Database earliestVersionTime. */
+                    public earliestVersionTime?: (google.protobuf.ITimestamp|null);
+
+                    /** Database pointInTimeRecoveryEnablement. */
+                    public pointInTimeRecoveryEnablement: google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement;
+
                     /** Database appEngineIntegrationMode. */
                     public appEngineIntegrationMode: google.firestore.admin.v1.Database.AppEngineIntegrationMode;
 
                     /** Database keyPrefix. */
                     public keyPrefix: string;
+
+                    /** Database deleteProtectionState. */
+                    public deleteProtectionState: google.firestore.admin.v1.Database.DeleteProtectionState;
+
+                    /** Database cmekConfig. */
+                    public cmekConfig?: (google.firestore.admin.v1.Database.ICmekConfig|null);
+
+                    /** Database previousId. */
+                    public previousId: string;
+
+                    /** Database sourceInfo. */
+                    public sourceInfo?: (google.firestore.admin.v1.Database.ISourceInfo|null);
 
                     /** Database etag. */
                     public etag: string;
@@ -122,9 +338,377 @@ export namespace google {
                     type ConcurrencyMode =
                         "CONCURRENCY_MODE_UNSPECIFIED"| "OPTIMISTIC"| "PESSIMISTIC"| "OPTIMISTIC_WITH_ENTITY_GROUPS";
 
+                    /** PointInTimeRecoveryEnablement enum. */
+                    type PointInTimeRecoveryEnablement =
+                        "POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED"| "POINT_IN_TIME_RECOVERY_ENABLED"| "POINT_IN_TIME_RECOVERY_DISABLED";
+
                     /** AppEngineIntegrationMode enum. */
                     type AppEngineIntegrationMode =
                         "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED"| "ENABLED"| "DISABLED";
+
+                    /** DeleteProtectionState enum. */
+                    type DeleteProtectionState =
+                        "DELETE_PROTECTION_STATE_UNSPECIFIED"| "DELETE_PROTECTION_DISABLED"| "DELETE_PROTECTION_ENABLED";
+
+                    /** Properties of a CmekConfig. */
+                    interface ICmekConfig {
+
+                        /** CmekConfig kmsKeyName */
+                        kmsKeyName?: (string|null);
+
+                        /** CmekConfig activeKeyVersion */
+                        activeKeyVersion?: (string[]|null);
+                    }
+
+                    /** Represents a CmekConfig. */
+                    class CmekConfig implements ICmekConfig {
+
+                        /**
+                         * Constructs a new CmekConfig.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.admin.v1.Database.ICmekConfig);
+
+                        /** CmekConfig kmsKeyName. */
+                        public kmsKeyName: string;
+
+                        /** CmekConfig activeKeyVersion. */
+                        public activeKeyVersion: string[];
+
+                        /**
+                         * Creates a CmekConfig message from a plain object. Also converts values to their respective internal types.
+                         * @param object Plain object
+                         * @returns CmekConfig
+                         */
+                        public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Database.CmekConfig;
+
+                        /**
+                         * Creates a plain object from a CmekConfig message. Also converts values to other types if specified.
+                         * @param message CmekConfig
+                         * @param [options] Conversion options
+                         * @returns Plain object
+                         */
+                        public static toObject(message: google.firestore.admin.v1.Database.CmekConfig, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                        /**
+                         * Converts this CmekConfig to JSON.
+                         * @returns JSON object
+                         */
+                        public toJSON(): { [k: string]: any };
+
+                        /**
+                         * Gets the default type url for CmekConfig
+                         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns The default type url
+                         */
+                        public static getTypeUrl(typeUrlPrefix?: string): string;
+                    }
+
+                    /** Properties of a SourceInfo. */
+                    interface ISourceInfo {
+
+                        /** SourceInfo backup */
+                        backup?: (google.firestore.admin.v1.Database.SourceInfo.IBackupSource|null);
+
+                        /** SourceInfo operation */
+                        operation?: (string|null);
+                    }
+
+                    /** Represents a SourceInfo. */
+                    class SourceInfo implements ISourceInfo {
+
+                        /**
+                         * Constructs a new SourceInfo.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.admin.v1.Database.ISourceInfo);
+
+                        /** SourceInfo backup. */
+                        public backup?: (google.firestore.admin.v1.Database.SourceInfo.IBackupSource|null);
+
+                        /** SourceInfo operation. */
+                        public operation: string;
+
+                        /** SourceInfo source. */
+                        public source?: "backup";
+
+                        /**
+                         * Creates a SourceInfo message from a plain object. Also converts values to their respective internal types.
+                         * @param object Plain object
+                         * @returns SourceInfo
+                         */
+                        public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Database.SourceInfo;
+
+                        /**
+                         * Creates a plain object from a SourceInfo message. Also converts values to other types if specified.
+                         * @param message SourceInfo
+                         * @param [options] Conversion options
+                         * @returns Plain object
+                         */
+                        public static toObject(message: google.firestore.admin.v1.Database.SourceInfo, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                        /**
+                         * Converts this SourceInfo to JSON.
+                         * @returns JSON object
+                         */
+                        public toJSON(): { [k: string]: any };
+
+                        /**
+                         * Gets the default type url for SourceInfo
+                         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns The default type url
+                         */
+                        public static getTypeUrl(typeUrlPrefix?: string): string;
+                    }
+
+                    namespace SourceInfo {
+
+                        /** Properties of a BackupSource. */
+                        interface IBackupSource {
+
+                            /** BackupSource backup */
+                            backup?: (string|null);
+                        }
+
+                        /** Represents a BackupSource. */
+                        class BackupSource implements IBackupSource {
+
+                            /**
+                             * Constructs a new BackupSource.
+                             * @param [properties] Properties to set
+                             */
+                            constructor(properties?: google.firestore.admin.v1.Database.SourceInfo.IBackupSource);
+
+                            /** BackupSource backup. */
+                            public backup: string;
+
+                            /**
+                             * Creates a BackupSource message from a plain object. Also converts values to their respective internal types.
+                             * @param object Plain object
+                             * @returns BackupSource
+                             */
+                            public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Database.SourceInfo.BackupSource;
+
+                            /**
+                             * Creates a plain object from a BackupSource message. Also converts values to other types if specified.
+                             * @param message BackupSource
+                             * @param [options] Conversion options
+                             * @returns Plain object
+                             */
+                            public static toObject(message: google.firestore.admin.v1.Database.SourceInfo.BackupSource, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                            /**
+                             * Converts this BackupSource to JSON.
+                             * @returns JSON object
+                             */
+                            public toJSON(): { [k: string]: any };
+
+                            /**
+                             * Gets the default type url for BackupSource
+                             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns The default type url
+                             */
+                            public static getTypeUrl(typeUrlPrefix?: string): string;
+                        }
+                    }
+
+                    /** Properties of an EncryptionConfig. */
+                    interface IEncryptionConfig {
+
+                        /** EncryptionConfig googleDefaultEncryption */
+                        googleDefaultEncryption?: (google.firestore.admin.v1.Database.EncryptionConfig.IGoogleDefaultEncryptionOptions|null);
+
+                        /** EncryptionConfig useSourceEncryption */
+                        useSourceEncryption?: (google.firestore.admin.v1.Database.EncryptionConfig.ISourceEncryptionOptions|null);
+
+                        /** EncryptionConfig customerManagedEncryption */
+                        customerManagedEncryption?: (google.firestore.admin.v1.Database.EncryptionConfig.ICustomerManagedEncryptionOptions|null);
+                    }
+
+                    /** Represents an EncryptionConfig. */
+                    class EncryptionConfig implements IEncryptionConfig {
+
+                        /**
+                         * Constructs a new EncryptionConfig.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.admin.v1.Database.IEncryptionConfig);
+
+                        /** EncryptionConfig googleDefaultEncryption. */
+                        public googleDefaultEncryption?: (google.firestore.admin.v1.Database.EncryptionConfig.IGoogleDefaultEncryptionOptions|null);
+
+                        /** EncryptionConfig useSourceEncryption. */
+                        public useSourceEncryption?: (google.firestore.admin.v1.Database.EncryptionConfig.ISourceEncryptionOptions|null);
+
+                        /** EncryptionConfig customerManagedEncryption. */
+                        public customerManagedEncryption?: (google.firestore.admin.v1.Database.EncryptionConfig.ICustomerManagedEncryptionOptions|null);
+
+                        /** EncryptionConfig encryptionType. */
+                        public encryptionType?: ("googleDefaultEncryption"|"useSourceEncryption"|"customerManagedEncryption");
+
+                        /**
+                         * Creates an EncryptionConfig message from a plain object. Also converts values to their respective internal types.
+                         * @param object Plain object
+                         * @returns EncryptionConfig
+                         */
+                        public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Database.EncryptionConfig;
+
+                        /**
+                         * Creates a plain object from an EncryptionConfig message. Also converts values to other types if specified.
+                         * @param message EncryptionConfig
+                         * @param [options] Conversion options
+                         * @returns Plain object
+                         */
+                        public static toObject(message: google.firestore.admin.v1.Database.EncryptionConfig, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                        /**
+                         * Converts this EncryptionConfig to JSON.
+                         * @returns JSON object
+                         */
+                        public toJSON(): { [k: string]: any };
+
+                        /**
+                         * Gets the default type url for EncryptionConfig
+                         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns The default type url
+                         */
+                        public static getTypeUrl(typeUrlPrefix?: string): string;
+                    }
+
+                    namespace EncryptionConfig {
+
+                        /** Properties of a GoogleDefaultEncryptionOptions. */
+                        interface IGoogleDefaultEncryptionOptions {
+                        }
+
+                        /** Represents a GoogleDefaultEncryptionOptions. */
+                        class GoogleDefaultEncryptionOptions implements IGoogleDefaultEncryptionOptions {
+
+                            /**
+                             * Constructs a new GoogleDefaultEncryptionOptions.
+                             * @param [properties] Properties to set
+                             */
+                            constructor(properties?: google.firestore.admin.v1.Database.EncryptionConfig.IGoogleDefaultEncryptionOptions);
+
+                            /**
+                             * Creates a GoogleDefaultEncryptionOptions message from a plain object. Also converts values to their respective internal types.
+                             * @param object Plain object
+                             * @returns GoogleDefaultEncryptionOptions
+                             */
+                            public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions;
+
+                            /**
+                             * Creates a plain object from a GoogleDefaultEncryptionOptions message. Also converts values to other types if specified.
+                             * @param message GoogleDefaultEncryptionOptions
+                             * @param [options] Conversion options
+                             * @returns Plain object
+                             */
+                            public static toObject(message: google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                            /**
+                             * Converts this GoogleDefaultEncryptionOptions to JSON.
+                             * @returns JSON object
+                             */
+                            public toJSON(): { [k: string]: any };
+
+                            /**
+                             * Gets the default type url for GoogleDefaultEncryptionOptions
+                             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns The default type url
+                             */
+                            public static getTypeUrl(typeUrlPrefix?: string): string;
+                        }
+
+                        /** Properties of a SourceEncryptionOptions. */
+                        interface ISourceEncryptionOptions {
+                        }
+
+                        /** Represents a SourceEncryptionOptions. */
+                        class SourceEncryptionOptions implements ISourceEncryptionOptions {
+
+                            /**
+                             * Constructs a new SourceEncryptionOptions.
+                             * @param [properties] Properties to set
+                             */
+                            constructor(properties?: google.firestore.admin.v1.Database.EncryptionConfig.ISourceEncryptionOptions);
+
+                            /**
+                             * Creates a SourceEncryptionOptions message from a plain object. Also converts values to their respective internal types.
+                             * @param object Plain object
+                             * @returns SourceEncryptionOptions
+                             */
+                            public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions;
+
+                            /**
+                             * Creates a plain object from a SourceEncryptionOptions message. Also converts values to other types if specified.
+                             * @param message SourceEncryptionOptions
+                             * @param [options] Conversion options
+                             * @returns Plain object
+                             */
+                            public static toObject(message: google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                            /**
+                             * Converts this SourceEncryptionOptions to JSON.
+                             * @returns JSON object
+                             */
+                            public toJSON(): { [k: string]: any };
+
+                            /**
+                             * Gets the default type url for SourceEncryptionOptions
+                             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns The default type url
+                             */
+                            public static getTypeUrl(typeUrlPrefix?: string): string;
+                        }
+
+                        /** Properties of a CustomerManagedEncryptionOptions. */
+                        interface ICustomerManagedEncryptionOptions {
+
+                            /** CustomerManagedEncryptionOptions kmsKeyName */
+                            kmsKeyName?: (string|null);
+                        }
+
+                        /** Represents a CustomerManagedEncryptionOptions. */
+                        class CustomerManagedEncryptionOptions implements ICustomerManagedEncryptionOptions {
+
+                            /**
+                             * Constructs a new CustomerManagedEncryptionOptions.
+                             * @param [properties] Properties to set
+                             */
+                            constructor(properties?: google.firestore.admin.v1.Database.EncryptionConfig.ICustomerManagedEncryptionOptions);
+
+                            /** CustomerManagedEncryptionOptions kmsKeyName. */
+                            public kmsKeyName: string;
+
+                            /**
+                             * Creates a CustomerManagedEncryptionOptions message from a plain object. Also converts values to their respective internal types.
+                             * @param object Plain object
+                             * @returns CustomerManagedEncryptionOptions
+                             */
+                            public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions;
+
+                            /**
+                             * Creates a plain object from a CustomerManagedEncryptionOptions message. Also converts values to other types if specified.
+                             * @param message CustomerManagedEncryptionOptions
+                             * @param [options] Conversion options
+                             * @returns Plain object
+                             */
+                            public static toObject(message: google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                            /**
+                             * Converts this CustomerManagedEncryptionOptions to JSON.
+                             * @returns JSON object
+                             */
+                            public toJSON(): { [k: string]: any };
+
+                            /**
+                             * Gets the default type url for CustomerManagedEncryptionOptions
+                             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns The default type url
+                             */
+                            public static getTypeUrl(typeUrlPrefix?: string): string;
+                        }
+                    }
                 }
 
                 /** Properties of a Field. */
@@ -311,6 +895,275 @@ export namespace google {
                     }
                 }
 
+                /** Properties of an Index. */
+                interface IIndex {
+
+                    /** Index name */
+                    name?: (string|null);
+
+                    /** Index queryScope */
+                    queryScope?: (google.firestore.admin.v1.Index.QueryScope|null);
+
+                    /** Index apiScope */
+                    apiScope?: (google.firestore.admin.v1.Index.ApiScope|null);
+
+                    /** Index fields */
+                    fields?: (google.firestore.admin.v1.Index.IIndexField[]|null);
+
+                    /** Index state */
+                    state?: (google.firestore.admin.v1.Index.State|null);
+                }
+
+                /** Represents an Index. */
+                class Index implements IIndex {
+
+                    /**
+                     * Constructs a new Index.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IIndex);
+
+                    /** Index name. */
+                    public name: string;
+
+                    /** Index queryScope. */
+                    public queryScope: google.firestore.admin.v1.Index.QueryScope;
+
+                    /** Index apiScope. */
+                    public apiScope: google.firestore.admin.v1.Index.ApiScope;
+
+                    /** Index fields. */
+                    public fields: google.firestore.admin.v1.Index.IIndexField[];
+
+                    /** Index state. */
+                    public state: google.firestore.admin.v1.Index.State;
+
+                    /**
+                     * Creates an Index message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns Index
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Index;
+
+                    /**
+                     * Creates a plain object from an Index message. Also converts values to other types if specified.
+                     * @param message Index
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.Index, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this Index to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for Index
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                namespace Index {
+
+                    /** QueryScope enum. */
+                    type QueryScope =
+                        "QUERY_SCOPE_UNSPECIFIED"| "COLLECTION"| "COLLECTION_GROUP"| "COLLECTION_RECURSIVE";
+
+                    /** ApiScope enum. */
+                    type ApiScope =
+                        "ANY_API"| "DATASTORE_MODE_API";
+
+                    /** Properties of an IndexField. */
+                    interface IIndexField {
+
+                        /** IndexField fieldPath */
+                        fieldPath?: (string|null);
+
+                        /** IndexField order */
+                        order?: (google.firestore.admin.v1.Index.IndexField.Order|null);
+
+                        /** IndexField arrayConfig */
+                        arrayConfig?: (google.firestore.admin.v1.Index.IndexField.ArrayConfig|null);
+
+                        /** IndexField vectorConfig */
+                        vectorConfig?: (google.firestore.admin.v1.Index.IndexField.IVectorConfig|null);
+                    }
+
+                    /** Represents an IndexField. */
+                    class IndexField implements IIndexField {
+
+                        /**
+                         * Constructs a new IndexField.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.admin.v1.Index.IIndexField);
+
+                        /** IndexField fieldPath. */
+                        public fieldPath: string;
+
+                        /** IndexField order. */
+                        public order?: (google.firestore.admin.v1.Index.IndexField.Order|null);
+
+                        /** IndexField arrayConfig. */
+                        public arrayConfig?: (google.firestore.admin.v1.Index.IndexField.ArrayConfig|null);
+
+                        /** IndexField vectorConfig. */
+                        public vectorConfig?: (google.firestore.admin.v1.Index.IndexField.IVectorConfig|null);
+
+                        /** IndexField valueMode. */
+                        public valueMode?: ("order"|"arrayConfig"|"vectorConfig");
+
+                        /**
+                         * Creates an IndexField message from a plain object. Also converts values to their respective internal types.
+                         * @param object Plain object
+                         * @returns IndexField
+                         */
+                        public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Index.IndexField;
+
+                        /**
+                         * Creates a plain object from an IndexField message. Also converts values to other types if specified.
+                         * @param message IndexField
+                         * @param [options] Conversion options
+                         * @returns Plain object
+                         */
+                        public static toObject(message: google.firestore.admin.v1.Index.IndexField, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                        /**
+                         * Converts this IndexField to JSON.
+                         * @returns JSON object
+                         */
+                        public toJSON(): { [k: string]: any };
+
+                        /**
+                         * Gets the default type url for IndexField
+                         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns The default type url
+                         */
+                        public static getTypeUrl(typeUrlPrefix?: string): string;
+                    }
+
+                    namespace IndexField {
+
+                        /** Order enum. */
+                        type Order =
+                            "ORDER_UNSPECIFIED"| "ASCENDING"| "DESCENDING";
+
+                        /** ArrayConfig enum. */
+                        type ArrayConfig =
+                            "ARRAY_CONFIG_UNSPECIFIED"| "CONTAINS";
+
+                        /** Properties of a VectorConfig. */
+                        interface IVectorConfig {
+
+                            /** VectorConfig dimension */
+                            dimension?: (number|null);
+
+                            /** VectorConfig flat */
+                            flat?: (google.firestore.admin.v1.Index.IndexField.VectorConfig.IFlatIndex|null);
+                        }
+
+                        /** Represents a VectorConfig. */
+                        class VectorConfig implements IVectorConfig {
+
+                            /**
+                             * Constructs a new VectorConfig.
+                             * @param [properties] Properties to set
+                             */
+                            constructor(properties?: google.firestore.admin.v1.Index.IndexField.IVectorConfig);
+
+                            /** VectorConfig dimension. */
+                            public dimension: number;
+
+                            /** VectorConfig flat. */
+                            public flat?: (google.firestore.admin.v1.Index.IndexField.VectorConfig.IFlatIndex|null);
+
+                            /** VectorConfig type. */
+                            public type?: "flat";
+
+                            /**
+                             * Creates a VectorConfig message from a plain object. Also converts values to their respective internal types.
+                             * @param object Plain object
+                             * @returns VectorConfig
+                             */
+                            public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Index.IndexField.VectorConfig;
+
+                            /**
+                             * Creates a plain object from a VectorConfig message. Also converts values to other types if specified.
+                             * @param message VectorConfig
+                             * @param [options] Conversion options
+                             * @returns Plain object
+                             */
+                            public static toObject(message: google.firestore.admin.v1.Index.IndexField.VectorConfig, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                            /**
+                             * Converts this VectorConfig to JSON.
+                             * @returns JSON object
+                             */
+                            public toJSON(): { [k: string]: any };
+
+                            /**
+                             * Gets the default type url for VectorConfig
+                             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns The default type url
+                             */
+                            public static getTypeUrl(typeUrlPrefix?: string): string;
+                        }
+
+                        namespace VectorConfig {
+
+                            /** Properties of a FlatIndex. */
+                            interface IFlatIndex {
+                            }
+
+                            /** Represents a FlatIndex. */
+                            class FlatIndex implements IFlatIndex {
+
+                                /**
+                                 * Constructs a new FlatIndex.
+                                 * @param [properties] Properties to set
+                                 */
+                                constructor(properties?: google.firestore.admin.v1.Index.IndexField.VectorConfig.IFlatIndex);
+
+                                /**
+                                 * Creates a FlatIndex message from a plain object. Also converts values to their respective internal types.
+                                 * @param object Plain object
+                                 * @returns FlatIndex
+                                 */
+                                public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex;
+
+                                /**
+                                 * Creates a plain object from a FlatIndex message. Also converts values to other types if specified.
+                                 * @param message FlatIndex
+                                 * @param [options] Conversion options
+                                 * @returns Plain object
+                                 */
+                                public static toObject(message: google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                                /**
+                                 * Converts this FlatIndex to JSON.
+                                 * @returns JSON object
+                                 */
+                                public toJSON(): { [k: string]: any };
+
+                                /**
+                                 * Gets the default type url for FlatIndex
+                                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                                 * @returns The default type url
+                                 */
+                                public static getTypeUrl(typeUrlPrefix?: string): string;
+                            }
+                        }
+                    }
+
+                    /** State enum. */
+                    type State =
+                        "STATE_UNSPECIFIED"| "CREATING"| "READY"| "NEEDS_REPAIR";
+                }
+
                 /** Represents a FirestoreAdmin */
                 class FirestoreAdmin extends $protobuf.rpc.Service {
 
@@ -449,6 +1302,20 @@ export namespace google {
                     public importDocuments(request: google.firestore.admin.v1.IImportDocumentsRequest): Promise<google.longrunning.Operation>;
 
                     /**
+                     * Calls BulkDeleteDocuments.
+                     * @param request BulkDeleteDocumentsRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Operation
+                     */
+                    public bulkDeleteDocuments(request: google.firestore.admin.v1.IBulkDeleteDocumentsRequest, callback: google.firestore.admin.v1.FirestoreAdmin.BulkDeleteDocumentsCallback): void;
+
+                    /**
+                     * Calls BulkDeleteDocuments.
+                     * @param request BulkDeleteDocumentsRequest message or plain object
+                     * @returns Promise
+                     */
+                    public bulkDeleteDocuments(request: google.firestore.admin.v1.IBulkDeleteDocumentsRequest): Promise<google.longrunning.Operation>;
+
+                    /**
                      * Calls CreateDatabase.
                      * @param request CreateDatabaseRequest message or plain object
                      * @param callback Node-style callback called with the error, if any, and Operation
@@ -503,6 +1370,146 @@ export namespace google {
                      * @returns Promise
                      */
                     public updateDatabase(request: google.firestore.admin.v1.IUpdateDatabaseRequest): Promise<google.longrunning.Operation>;
+
+                    /**
+                     * Calls DeleteDatabase.
+                     * @param request DeleteDatabaseRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Operation
+                     */
+                    public deleteDatabase(request: google.firestore.admin.v1.IDeleteDatabaseRequest, callback: google.firestore.admin.v1.FirestoreAdmin.DeleteDatabaseCallback): void;
+
+                    /**
+                     * Calls DeleteDatabase.
+                     * @param request DeleteDatabaseRequest message or plain object
+                     * @returns Promise
+                     */
+                    public deleteDatabase(request: google.firestore.admin.v1.IDeleteDatabaseRequest): Promise<google.longrunning.Operation>;
+
+                    /**
+                     * Calls GetBackup.
+                     * @param request GetBackupRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Backup
+                     */
+                    public getBackup(request: google.firestore.admin.v1.IGetBackupRequest, callback: google.firestore.admin.v1.FirestoreAdmin.GetBackupCallback): void;
+
+                    /**
+                     * Calls GetBackup.
+                     * @param request GetBackupRequest message or plain object
+                     * @returns Promise
+                     */
+                    public getBackup(request: google.firestore.admin.v1.IGetBackupRequest): Promise<google.firestore.admin.v1.Backup>;
+
+                    /**
+                     * Calls ListBackups.
+                     * @param request ListBackupsRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and ListBackupsResponse
+                     */
+                    public listBackups(request: google.firestore.admin.v1.IListBackupsRequest, callback: google.firestore.admin.v1.FirestoreAdmin.ListBackupsCallback): void;
+
+                    /**
+                     * Calls ListBackups.
+                     * @param request ListBackupsRequest message or plain object
+                     * @returns Promise
+                     */
+                    public listBackups(request: google.firestore.admin.v1.IListBackupsRequest): Promise<google.firestore.admin.v1.ListBackupsResponse>;
+
+                    /**
+                     * Calls DeleteBackup.
+                     * @param request DeleteBackupRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Empty
+                     */
+                    public deleteBackup(request: google.firestore.admin.v1.IDeleteBackupRequest, callback: google.firestore.admin.v1.FirestoreAdmin.DeleteBackupCallback): void;
+
+                    /**
+                     * Calls DeleteBackup.
+                     * @param request DeleteBackupRequest message or plain object
+                     * @returns Promise
+                     */
+                    public deleteBackup(request: google.firestore.admin.v1.IDeleteBackupRequest): Promise<google.protobuf.Empty>;
+
+                    /**
+                     * Calls RestoreDatabase.
+                     * @param request RestoreDatabaseRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Operation
+                     */
+                    public restoreDatabase(request: google.firestore.admin.v1.IRestoreDatabaseRequest, callback: google.firestore.admin.v1.FirestoreAdmin.RestoreDatabaseCallback): void;
+
+                    /**
+                     * Calls RestoreDatabase.
+                     * @param request RestoreDatabaseRequest message or plain object
+                     * @returns Promise
+                     */
+                    public restoreDatabase(request: google.firestore.admin.v1.IRestoreDatabaseRequest): Promise<google.longrunning.Operation>;
+
+                    /**
+                     * Calls CreateBackupSchedule.
+                     * @param request CreateBackupScheduleRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and BackupSchedule
+                     */
+                    public createBackupSchedule(request: google.firestore.admin.v1.ICreateBackupScheduleRequest, callback: google.firestore.admin.v1.FirestoreAdmin.CreateBackupScheduleCallback): void;
+
+                    /**
+                     * Calls CreateBackupSchedule.
+                     * @param request CreateBackupScheduleRequest message or plain object
+                     * @returns Promise
+                     */
+                    public createBackupSchedule(request: google.firestore.admin.v1.ICreateBackupScheduleRequest): Promise<google.firestore.admin.v1.BackupSchedule>;
+
+                    /**
+                     * Calls GetBackupSchedule.
+                     * @param request GetBackupScheduleRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and BackupSchedule
+                     */
+                    public getBackupSchedule(request: google.firestore.admin.v1.IGetBackupScheduleRequest, callback: google.firestore.admin.v1.FirestoreAdmin.GetBackupScheduleCallback): void;
+
+                    /**
+                     * Calls GetBackupSchedule.
+                     * @param request GetBackupScheduleRequest message or plain object
+                     * @returns Promise
+                     */
+                    public getBackupSchedule(request: google.firestore.admin.v1.IGetBackupScheduleRequest): Promise<google.firestore.admin.v1.BackupSchedule>;
+
+                    /**
+                     * Calls ListBackupSchedules.
+                     * @param request ListBackupSchedulesRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and ListBackupSchedulesResponse
+                     */
+                    public listBackupSchedules(request: google.firestore.admin.v1.IListBackupSchedulesRequest, callback: google.firestore.admin.v1.FirestoreAdmin.ListBackupSchedulesCallback): void;
+
+                    /**
+                     * Calls ListBackupSchedules.
+                     * @param request ListBackupSchedulesRequest message or plain object
+                     * @returns Promise
+                     */
+                    public listBackupSchedules(request: google.firestore.admin.v1.IListBackupSchedulesRequest): Promise<google.firestore.admin.v1.ListBackupSchedulesResponse>;
+
+                    /**
+                     * Calls UpdateBackupSchedule.
+                     * @param request UpdateBackupScheduleRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and BackupSchedule
+                     */
+                    public updateBackupSchedule(request: google.firestore.admin.v1.IUpdateBackupScheduleRequest, callback: google.firestore.admin.v1.FirestoreAdmin.UpdateBackupScheduleCallback): void;
+
+                    /**
+                     * Calls UpdateBackupSchedule.
+                     * @param request UpdateBackupScheduleRequest message or plain object
+                     * @returns Promise
+                     */
+                    public updateBackupSchedule(request: google.firestore.admin.v1.IUpdateBackupScheduleRequest): Promise<google.firestore.admin.v1.BackupSchedule>;
+
+                    /**
+                     * Calls DeleteBackupSchedule.
+                     * @param request DeleteBackupScheduleRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Empty
+                     */
+                    public deleteBackupSchedule(request: google.firestore.admin.v1.IDeleteBackupScheduleRequest, callback: google.firestore.admin.v1.FirestoreAdmin.DeleteBackupScheduleCallback): void;
+
+                    /**
+                     * Calls DeleteBackupSchedule.
+                     * @param request DeleteBackupScheduleRequest message or plain object
+                     * @returns Promise
+                     */
+                    public deleteBackupSchedule(request: google.firestore.admin.v1.IDeleteBackupScheduleRequest): Promise<google.protobuf.Empty>;
                 }
 
                 namespace FirestoreAdmin {
@@ -571,6 +1578,13 @@ export namespace google {
                     type ImportDocumentsCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
 
                     /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#bulkDeleteDocuments}.
+                     * @param error Error, if any
+                     * @param [response] Operation
+                     */
+                    type BulkDeleteDocumentsCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
+
+                    /**
                      * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#createDatabase}.
                      * @param error Error, if any
                      * @param [response] Operation
@@ -597,6 +1611,76 @@ export namespace google {
                      * @param [response] Operation
                      */
                     type UpdateDatabaseCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#deleteDatabase}.
+                     * @param error Error, if any
+                     * @param [response] Operation
+                     */
+                    type DeleteDatabaseCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#getBackup}.
+                     * @param error Error, if any
+                     * @param [response] Backup
+                     */
+                    type GetBackupCallback = (error: (Error|null), response?: google.firestore.admin.v1.Backup) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#listBackups}.
+                     * @param error Error, if any
+                     * @param [response] ListBackupsResponse
+                     */
+                    type ListBackupsCallback = (error: (Error|null), response?: google.firestore.admin.v1.ListBackupsResponse) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#deleteBackup}.
+                     * @param error Error, if any
+                     * @param [response] Empty
+                     */
+                    type DeleteBackupCallback = (error: (Error|null), response?: google.protobuf.Empty) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#restoreDatabase}.
+                     * @param error Error, if any
+                     * @param [response] Operation
+                     */
+                    type RestoreDatabaseCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#createBackupSchedule}.
+                     * @param error Error, if any
+                     * @param [response] BackupSchedule
+                     */
+                    type CreateBackupScheduleCallback = (error: (Error|null), response?: google.firestore.admin.v1.BackupSchedule) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#getBackupSchedule}.
+                     * @param error Error, if any
+                     * @param [response] BackupSchedule
+                     */
+                    type GetBackupScheduleCallback = (error: (Error|null), response?: google.firestore.admin.v1.BackupSchedule) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#listBackupSchedules}.
+                     * @param error Error, if any
+                     * @param [response] ListBackupSchedulesResponse
+                     */
+                    type ListBackupSchedulesCallback = (error: (Error|null), response?: google.firestore.admin.v1.ListBackupSchedulesResponse) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#updateBackupSchedule}.
+                     * @param error Error, if any
+                     * @param [response] BackupSchedule
+                     */
+                    type UpdateBackupScheduleCallback = (error: (Error|null), response?: google.firestore.admin.v1.BackupSchedule) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#deleteBackupSchedule}.
+                     * @param error Error, if any
+                     * @param [response] Empty
+                     */
+                    type DeleteBackupScheduleCallback = (error: (Error|null), response?: google.protobuf.Empty) => void;
                 }
 
                 /** Properties of a ListDatabasesRequest. */
@@ -604,6 +1688,9 @@ export namespace google {
 
                     /** ListDatabasesRequest parent */
                     parent?: (string|null);
+
+                    /** ListDatabasesRequest showDeleted */
+                    showDeleted?: (boolean|null);
                 }
 
                 /** Represents a ListDatabasesRequest. */
@@ -617,6 +1704,9 @@ export namespace google {
 
                     /** ListDatabasesRequest parent. */
                     public parent: string;
+
+                    /** ListDatabasesRequest showDeleted. */
+                    public showDeleted: boolean;
 
                     /**
                      * Creates a ListDatabasesRequest message from a plain object. Also converts values to their respective internal types.
@@ -754,6 +1844,9 @@ export namespace google {
 
                     /** ListDatabasesResponse databases */
                     databases?: (google.firestore.admin.v1.IDatabase[]|null);
+
+                    /** ListDatabasesResponse unreachable */
+                    unreachable?: (string[]|null);
                 }
 
                 /** Represents a ListDatabasesResponse. */
@@ -767,6 +1860,9 @@ export namespace google {
 
                     /** ListDatabasesResponse databases. */
                     public databases: google.firestore.admin.v1.IDatabase[];
+
+                    /** ListDatabasesResponse unreachable. */
+                    public unreachable: string[];
 
                     /**
                      * Creates a ListDatabasesResponse message from a plain object. Also converts values to their respective internal types.
@@ -935,6 +2031,402 @@ export namespace google {
 
                     /**
                      * Gets the default type url for UpdateDatabaseMetadata
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a DeleteDatabaseRequest. */
+                interface IDeleteDatabaseRequest {
+
+                    /** DeleteDatabaseRequest name */
+                    name?: (string|null);
+
+                    /** DeleteDatabaseRequest etag */
+                    etag?: (string|null);
+                }
+
+                /** Represents a DeleteDatabaseRequest. */
+                class DeleteDatabaseRequest implements IDeleteDatabaseRequest {
+
+                    /**
+                     * Constructs a new DeleteDatabaseRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IDeleteDatabaseRequest);
+
+                    /** DeleteDatabaseRequest name. */
+                    public name: string;
+
+                    /** DeleteDatabaseRequest etag. */
+                    public etag: string;
+
+                    /**
+                     * Creates a DeleteDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns DeleteDatabaseRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.DeleteDatabaseRequest;
+
+                    /**
+                     * Creates a plain object from a DeleteDatabaseRequest message. Also converts values to other types if specified.
+                     * @param message DeleteDatabaseRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.DeleteDatabaseRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this DeleteDatabaseRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for DeleteDatabaseRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a DeleteDatabaseMetadata. */
+                interface IDeleteDatabaseMetadata {
+                }
+
+                /** Represents a DeleteDatabaseMetadata. */
+                class DeleteDatabaseMetadata implements IDeleteDatabaseMetadata {
+
+                    /**
+                     * Constructs a new DeleteDatabaseMetadata.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IDeleteDatabaseMetadata);
+
+                    /**
+                     * Creates a DeleteDatabaseMetadata message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns DeleteDatabaseMetadata
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.DeleteDatabaseMetadata;
+
+                    /**
+                     * Creates a plain object from a DeleteDatabaseMetadata message. Also converts values to other types if specified.
+                     * @param message DeleteDatabaseMetadata
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.DeleteDatabaseMetadata, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this DeleteDatabaseMetadata to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for DeleteDatabaseMetadata
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a CreateBackupScheduleRequest. */
+                interface ICreateBackupScheduleRequest {
+
+                    /** CreateBackupScheduleRequest parent */
+                    parent?: (string|null);
+
+                    /** CreateBackupScheduleRequest backupSchedule */
+                    backupSchedule?: (google.firestore.admin.v1.IBackupSchedule|null);
+                }
+
+                /** Represents a CreateBackupScheduleRequest. */
+                class CreateBackupScheduleRequest implements ICreateBackupScheduleRequest {
+
+                    /**
+                     * Constructs a new CreateBackupScheduleRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.ICreateBackupScheduleRequest);
+
+                    /** CreateBackupScheduleRequest parent. */
+                    public parent: string;
+
+                    /** CreateBackupScheduleRequest backupSchedule. */
+                    public backupSchedule?: (google.firestore.admin.v1.IBackupSchedule|null);
+
+                    /**
+                     * Creates a CreateBackupScheduleRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns CreateBackupScheduleRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.CreateBackupScheduleRequest;
+
+                    /**
+                     * Creates a plain object from a CreateBackupScheduleRequest message. Also converts values to other types if specified.
+                     * @param message CreateBackupScheduleRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.CreateBackupScheduleRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this CreateBackupScheduleRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for CreateBackupScheduleRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a GetBackupScheduleRequest. */
+                interface IGetBackupScheduleRequest {
+
+                    /** GetBackupScheduleRequest name */
+                    name?: (string|null);
+                }
+
+                /** Represents a GetBackupScheduleRequest. */
+                class GetBackupScheduleRequest implements IGetBackupScheduleRequest {
+
+                    /**
+                     * Constructs a new GetBackupScheduleRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IGetBackupScheduleRequest);
+
+                    /** GetBackupScheduleRequest name. */
+                    public name: string;
+
+                    /**
+                     * Creates a GetBackupScheduleRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns GetBackupScheduleRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.GetBackupScheduleRequest;
+
+                    /**
+                     * Creates a plain object from a GetBackupScheduleRequest message. Also converts values to other types if specified.
+                     * @param message GetBackupScheduleRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.GetBackupScheduleRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this GetBackupScheduleRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for GetBackupScheduleRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of an UpdateBackupScheduleRequest. */
+                interface IUpdateBackupScheduleRequest {
+
+                    /** UpdateBackupScheduleRequest backupSchedule */
+                    backupSchedule?: (google.firestore.admin.v1.IBackupSchedule|null);
+
+                    /** UpdateBackupScheduleRequest updateMask */
+                    updateMask?: (google.protobuf.IFieldMask|null);
+                }
+
+                /** Represents an UpdateBackupScheduleRequest. */
+                class UpdateBackupScheduleRequest implements IUpdateBackupScheduleRequest {
+
+                    /**
+                     * Constructs a new UpdateBackupScheduleRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IUpdateBackupScheduleRequest);
+
+                    /** UpdateBackupScheduleRequest backupSchedule. */
+                    public backupSchedule?: (google.firestore.admin.v1.IBackupSchedule|null);
+
+                    /** UpdateBackupScheduleRequest updateMask. */
+                    public updateMask?: (google.protobuf.IFieldMask|null);
+
+                    /**
+                     * Creates an UpdateBackupScheduleRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns UpdateBackupScheduleRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.UpdateBackupScheduleRequest;
+
+                    /**
+                     * Creates a plain object from an UpdateBackupScheduleRequest message. Also converts values to other types if specified.
+                     * @param message UpdateBackupScheduleRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.UpdateBackupScheduleRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this UpdateBackupScheduleRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for UpdateBackupScheduleRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a ListBackupSchedulesRequest. */
+                interface IListBackupSchedulesRequest {
+
+                    /** ListBackupSchedulesRequest parent */
+                    parent?: (string|null);
+                }
+
+                /** Represents a ListBackupSchedulesRequest. */
+                class ListBackupSchedulesRequest implements IListBackupSchedulesRequest {
+
+                    /**
+                     * Constructs a new ListBackupSchedulesRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IListBackupSchedulesRequest);
+
+                    /** ListBackupSchedulesRequest parent. */
+                    public parent: string;
+
+                    /**
+                     * Creates a ListBackupSchedulesRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns ListBackupSchedulesRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.ListBackupSchedulesRequest;
+
+                    /**
+                     * Creates a plain object from a ListBackupSchedulesRequest message. Also converts values to other types if specified.
+                     * @param message ListBackupSchedulesRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.ListBackupSchedulesRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this ListBackupSchedulesRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for ListBackupSchedulesRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a ListBackupSchedulesResponse. */
+                interface IListBackupSchedulesResponse {
+
+                    /** ListBackupSchedulesResponse backupSchedules */
+                    backupSchedules?: (google.firestore.admin.v1.IBackupSchedule[]|null);
+                }
+
+                /** Represents a ListBackupSchedulesResponse. */
+                class ListBackupSchedulesResponse implements IListBackupSchedulesResponse {
+
+                    /**
+                     * Constructs a new ListBackupSchedulesResponse.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IListBackupSchedulesResponse);
+
+                    /** ListBackupSchedulesResponse backupSchedules. */
+                    public backupSchedules: google.firestore.admin.v1.IBackupSchedule[];
+
+                    /**
+                     * Creates a ListBackupSchedulesResponse message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns ListBackupSchedulesResponse
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.ListBackupSchedulesResponse;
+
+                    /**
+                     * Creates a plain object from a ListBackupSchedulesResponse message. Also converts values to other types if specified.
+                     * @param message ListBackupSchedulesResponse
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.ListBackupSchedulesResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this ListBackupSchedulesResponse to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for ListBackupSchedulesResponse
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a DeleteBackupScheduleRequest. */
+                interface IDeleteBackupScheduleRequest {
+
+                    /** DeleteBackupScheduleRequest name */
+                    name?: (string|null);
+                }
+
+                /** Represents a DeleteBackupScheduleRequest. */
+                class DeleteBackupScheduleRequest implements IDeleteBackupScheduleRequest {
+
+                    /**
+                     * Constructs a new DeleteBackupScheduleRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IDeleteBackupScheduleRequest);
+
+                    /** DeleteBackupScheduleRequest name. */
+                    public name: string;
+
+                    /**
+                     * Creates a DeleteBackupScheduleRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns DeleteBackupScheduleRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.DeleteBackupScheduleRequest;
+
+                    /**
+                     * Creates a plain object from a DeleteBackupScheduleRequest message. Also converts values to other types if specified.
+                     * @param message DeleteBackupScheduleRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.DeleteBackupScheduleRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this DeleteBackupScheduleRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for DeleteBackupScheduleRequest
                      * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                      * @returns The default type url
                      */
@@ -1444,6 +2936,12 @@ export namespace google {
 
                     /** ExportDocumentsRequest outputUriPrefix */
                     outputUriPrefix?: (string|null);
+
+                    /** ExportDocumentsRequest namespaceIds */
+                    namespaceIds?: (string[]|null);
+
+                    /** ExportDocumentsRequest snapshotTime */
+                    snapshotTime?: (google.protobuf.ITimestamp|null);
                 }
 
                 /** Represents an ExportDocumentsRequest. */
@@ -1463,6 +2961,12 @@ export namespace google {
 
                     /** ExportDocumentsRequest outputUriPrefix. */
                     public outputUriPrefix: string;
+
+                    /** ExportDocumentsRequest namespaceIds. */
+                    public namespaceIds: string[];
+
+                    /** ExportDocumentsRequest snapshotTime. */
+                    public snapshotTime?: (google.protobuf.ITimestamp|null);
 
                     /**
                      * Creates an ExportDocumentsRequest message from a plain object. Also converts values to their respective internal types.
@@ -1504,6 +3008,9 @@ export namespace google {
 
                     /** ImportDocumentsRequest inputUriPrefix */
                     inputUriPrefix?: (string|null);
+
+                    /** ImportDocumentsRequest namespaceIds */
+                    namespaceIds?: (string[]|null);
                 }
 
                 /** Represents an ImportDocumentsRequest. */
@@ -1523,6 +3030,9 @@ export namespace google {
 
                     /** ImportDocumentsRequest inputUriPrefix. */
                     public inputUriPrefix: string;
+
+                    /** ImportDocumentsRequest namespaceIds. */
+                    public namespaceIds: string[];
 
                     /**
                      * Creates an ImportDocumentsRequest message from a plain object. Also converts values to their respective internal types.
@@ -1553,203 +3063,372 @@ export namespace google {
                     public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
 
-                /** Properties of an Index. */
-                interface IIndex {
+                /** Properties of a BulkDeleteDocumentsRequest. */
+                interface IBulkDeleteDocumentsRequest {
 
-                    /** Index name */
+                    /** BulkDeleteDocumentsRequest name */
                     name?: (string|null);
 
-                    /** Index queryScope */
-                    queryScope?: (google.firestore.admin.v1.Index.QueryScope|null);
+                    /** BulkDeleteDocumentsRequest collectionIds */
+                    collectionIds?: (string[]|null);
 
-                    /** Index apiScope */
-                    apiScope?: (google.firestore.admin.v1.Index.ApiScope|null);
-
-                    /** Index fields */
-                    fields?: (google.firestore.admin.v1.Index.IIndexField[]|null);
-
-                    /** Index state */
-                    state?: (google.firestore.admin.v1.Index.State|null);
+                    /** BulkDeleteDocumentsRequest namespaceIds */
+                    namespaceIds?: (string[]|null);
                 }
 
-                /** Represents an Index. */
-                class Index implements IIndex {
+                /** Represents a BulkDeleteDocumentsRequest. */
+                class BulkDeleteDocumentsRequest implements IBulkDeleteDocumentsRequest {
 
                     /**
-                     * Constructs a new Index.
+                     * Constructs a new BulkDeleteDocumentsRequest.
                      * @param [properties] Properties to set
                      */
-                    constructor(properties?: google.firestore.admin.v1.IIndex);
+                    constructor(properties?: google.firestore.admin.v1.IBulkDeleteDocumentsRequest);
 
-                    /** Index name. */
+                    /** BulkDeleteDocumentsRequest name. */
                     public name: string;
 
-                    /** Index queryScope. */
-                    public queryScope: google.firestore.admin.v1.Index.QueryScope;
+                    /** BulkDeleteDocumentsRequest collectionIds. */
+                    public collectionIds: string[];
 
-                    /** Index apiScope. */
-                    public apiScope: google.firestore.admin.v1.Index.ApiScope;
-
-                    /** Index fields. */
-                    public fields: google.firestore.admin.v1.Index.IIndexField[];
-
-                    /** Index state. */
-                    public state: google.firestore.admin.v1.Index.State;
+                    /** BulkDeleteDocumentsRequest namespaceIds. */
+                    public namespaceIds: string[];
 
                     /**
-                     * Creates an Index message from a plain object. Also converts values to their respective internal types.
+                     * Creates a BulkDeleteDocumentsRequest message from a plain object. Also converts values to their respective internal types.
                      * @param object Plain object
-                     * @returns Index
+                     * @returns BulkDeleteDocumentsRequest
                      */
-                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Index;
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.BulkDeleteDocumentsRequest;
 
                     /**
-                     * Creates a plain object from an Index message. Also converts values to other types if specified.
-                     * @param message Index
+                     * Creates a plain object from a BulkDeleteDocumentsRequest message. Also converts values to other types if specified.
+                     * @param message BulkDeleteDocumentsRequest
                      * @param [options] Conversion options
                      * @returns Plain object
                      */
-                    public static toObject(message: google.firestore.admin.v1.Index, options?: $protobuf.IConversionOptions): { [k: string]: any };
+                    public static toObject(message: google.firestore.admin.v1.BulkDeleteDocumentsRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
 
                     /**
-                     * Converts this Index to JSON.
+                     * Converts this BulkDeleteDocumentsRequest to JSON.
                      * @returns JSON object
                      */
                     public toJSON(): { [k: string]: any };
 
                     /**
-                     * Gets the default type url for Index
+                     * Gets the default type url for BulkDeleteDocumentsRequest
                      * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                      * @returns The default type url
                      */
                     public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
 
-                namespace Index {
-
-                    /** QueryScope enum. */
-                    type QueryScope =
-                        "QUERY_SCOPE_UNSPECIFIED"| "COLLECTION"| "COLLECTION_GROUP"| "COLLECTION_RECURSIVE";
-
-                    /** ApiScope enum. */
-                    type ApiScope =
-                        "ANY_API"| "DATASTORE_MODE_API";
-
-                    /** Properties of an IndexField. */
-                    interface IIndexField {
-
-                        /** IndexField fieldPath */
-                        fieldPath?: (string|null);
-
-                        /** IndexField order */
-                        order?: (google.firestore.admin.v1.Index.IndexField.Order|null);
-
-                        /** IndexField arrayConfig */
-                        arrayConfig?: (google.firestore.admin.v1.Index.IndexField.ArrayConfig|null);
-                    }
-
-                    /** Represents an IndexField. */
-                    class IndexField implements IIndexField {
-
-                        /**
-                         * Constructs a new IndexField.
-                         * @param [properties] Properties to set
-                         */
-                        constructor(properties?: google.firestore.admin.v1.Index.IIndexField);
-
-                        /** IndexField fieldPath. */
-                        public fieldPath: string;
-
-                        /** IndexField order. */
-                        public order?: (google.firestore.admin.v1.Index.IndexField.Order|null);
-
-                        /** IndexField arrayConfig. */
-                        public arrayConfig?: (google.firestore.admin.v1.Index.IndexField.ArrayConfig|null);
-
-                        /** IndexField valueMode. */
-                        public valueMode?: ("order"|"arrayConfig");
-
-                        /**
-                         * Creates an IndexField message from a plain object. Also converts values to their respective internal types.
-                         * @param object Plain object
-                         * @returns IndexField
-                         */
-                        public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.Index.IndexField;
-
-                        /**
-                         * Creates a plain object from an IndexField message. Also converts values to other types if specified.
-                         * @param message IndexField
-                         * @param [options] Conversion options
-                         * @returns Plain object
-                         */
-                        public static toObject(message: google.firestore.admin.v1.Index.IndexField, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-                        /**
-                         * Converts this IndexField to JSON.
-                         * @returns JSON object
-                         */
-                        public toJSON(): { [k: string]: any };
-
-                        /**
-                         * Gets the default type url for IndexField
-                         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                         * @returns The default type url
-                         */
-                        public static getTypeUrl(typeUrlPrefix?: string): string;
-                    }
-
-                    namespace IndexField {
-
-                        /** Order enum. */
-                        type Order =
-                            "ORDER_UNSPECIFIED"| "ASCENDING"| "DESCENDING";
-
-                        /** ArrayConfig enum. */
-                        type ArrayConfig =
-                            "ARRAY_CONFIG_UNSPECIFIED"| "CONTAINS";
-                    }
-
-                    /** State enum. */
-                    type State =
-                        "STATE_UNSPECIFIED"| "CREATING"| "READY"| "NEEDS_REPAIR";
+                /** Properties of a BulkDeleteDocumentsResponse. */
+                interface IBulkDeleteDocumentsResponse {
                 }
 
-                /** Properties of a LocationMetadata. */
-                interface ILocationMetadata {
-                }
-
-                /** Represents a LocationMetadata. */
-                class LocationMetadata implements ILocationMetadata {
+                /** Represents a BulkDeleteDocumentsResponse. */
+                class BulkDeleteDocumentsResponse implements IBulkDeleteDocumentsResponse {
 
                     /**
-                     * Constructs a new LocationMetadata.
+                     * Constructs a new BulkDeleteDocumentsResponse.
                      * @param [properties] Properties to set
                      */
-                    constructor(properties?: google.firestore.admin.v1.ILocationMetadata);
+                    constructor(properties?: google.firestore.admin.v1.IBulkDeleteDocumentsResponse);
 
                     /**
-                     * Creates a LocationMetadata message from a plain object. Also converts values to their respective internal types.
+                     * Creates a BulkDeleteDocumentsResponse message from a plain object. Also converts values to their respective internal types.
                      * @param object Plain object
-                     * @returns LocationMetadata
+                     * @returns BulkDeleteDocumentsResponse
                      */
-                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.LocationMetadata;
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.BulkDeleteDocumentsResponse;
 
                     /**
-                     * Creates a plain object from a LocationMetadata message. Also converts values to other types if specified.
-                     * @param message LocationMetadata
+                     * Creates a plain object from a BulkDeleteDocumentsResponse message. Also converts values to other types if specified.
+                     * @param message BulkDeleteDocumentsResponse
                      * @param [options] Conversion options
                      * @returns Plain object
                      */
-                    public static toObject(message: google.firestore.admin.v1.LocationMetadata, options?: $protobuf.IConversionOptions): { [k: string]: any };
+                    public static toObject(message: google.firestore.admin.v1.BulkDeleteDocumentsResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
 
                     /**
-                     * Converts this LocationMetadata to JSON.
+                     * Converts this BulkDeleteDocumentsResponse to JSON.
                      * @returns JSON object
                      */
                     public toJSON(): { [k: string]: any };
 
                     /**
-                     * Gets the default type url for LocationMetadata
+                     * Gets the default type url for BulkDeleteDocumentsResponse
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a GetBackupRequest. */
+                interface IGetBackupRequest {
+
+                    /** GetBackupRequest name */
+                    name?: (string|null);
+                }
+
+                /** Represents a GetBackupRequest. */
+                class GetBackupRequest implements IGetBackupRequest {
+
+                    /**
+                     * Constructs a new GetBackupRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IGetBackupRequest);
+
+                    /** GetBackupRequest name. */
+                    public name: string;
+
+                    /**
+                     * Creates a GetBackupRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns GetBackupRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.GetBackupRequest;
+
+                    /**
+                     * Creates a plain object from a GetBackupRequest message. Also converts values to other types if specified.
+                     * @param message GetBackupRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.GetBackupRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this GetBackupRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for GetBackupRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a ListBackupsRequest. */
+                interface IListBackupsRequest {
+
+                    /** ListBackupsRequest parent */
+                    parent?: (string|null);
+
+                    /** ListBackupsRequest filter */
+                    filter?: (string|null);
+                }
+
+                /** Represents a ListBackupsRequest. */
+                class ListBackupsRequest implements IListBackupsRequest {
+
+                    /**
+                     * Constructs a new ListBackupsRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IListBackupsRequest);
+
+                    /** ListBackupsRequest parent. */
+                    public parent: string;
+
+                    /** ListBackupsRequest filter. */
+                    public filter: string;
+
+                    /**
+                     * Creates a ListBackupsRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns ListBackupsRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.ListBackupsRequest;
+
+                    /**
+                     * Creates a plain object from a ListBackupsRequest message. Also converts values to other types if specified.
+                     * @param message ListBackupsRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.ListBackupsRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this ListBackupsRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for ListBackupsRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a ListBackupsResponse. */
+                interface IListBackupsResponse {
+
+                    /** ListBackupsResponse backups */
+                    backups?: (google.firestore.admin.v1.IBackup[]|null);
+
+                    /** ListBackupsResponse unreachable */
+                    unreachable?: (string[]|null);
+                }
+
+                /** Represents a ListBackupsResponse. */
+                class ListBackupsResponse implements IListBackupsResponse {
+
+                    /**
+                     * Constructs a new ListBackupsResponse.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IListBackupsResponse);
+
+                    /** ListBackupsResponse backups. */
+                    public backups: google.firestore.admin.v1.IBackup[];
+
+                    /** ListBackupsResponse unreachable. */
+                    public unreachable: string[];
+
+                    /**
+                     * Creates a ListBackupsResponse message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns ListBackupsResponse
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.ListBackupsResponse;
+
+                    /**
+                     * Creates a plain object from a ListBackupsResponse message. Also converts values to other types if specified.
+                     * @param message ListBackupsResponse
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.ListBackupsResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this ListBackupsResponse to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for ListBackupsResponse
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a DeleteBackupRequest. */
+                interface IDeleteBackupRequest {
+
+                    /** DeleteBackupRequest name */
+                    name?: (string|null);
+                }
+
+                /** Represents a DeleteBackupRequest. */
+                class DeleteBackupRequest implements IDeleteBackupRequest {
+
+                    /**
+                     * Constructs a new DeleteBackupRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IDeleteBackupRequest);
+
+                    /** DeleteBackupRequest name. */
+                    public name: string;
+
+                    /**
+                     * Creates a DeleteBackupRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns DeleteBackupRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.DeleteBackupRequest;
+
+                    /**
+                     * Creates a plain object from a DeleteBackupRequest message. Also converts values to other types if specified.
+                     * @param message DeleteBackupRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.DeleteBackupRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this DeleteBackupRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for DeleteBackupRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a RestoreDatabaseRequest. */
+                interface IRestoreDatabaseRequest {
+
+                    /** RestoreDatabaseRequest parent */
+                    parent?: (string|null);
+
+                    /** RestoreDatabaseRequest databaseId */
+                    databaseId?: (string|null);
+
+                    /** RestoreDatabaseRequest backup */
+                    backup?: (string|null);
+
+                    /** RestoreDatabaseRequest encryptionConfig */
+                    encryptionConfig?: (google.firestore.admin.v1.Database.IEncryptionConfig|null);
+                }
+
+                /** Represents a RestoreDatabaseRequest. */
+                class RestoreDatabaseRequest implements IRestoreDatabaseRequest {
+
+                    /**
+                     * Constructs a new RestoreDatabaseRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IRestoreDatabaseRequest);
+
+                    /** RestoreDatabaseRequest parent. */
+                    public parent: string;
+
+                    /** RestoreDatabaseRequest databaseId. */
+                    public databaseId: string;
+
+                    /** RestoreDatabaseRequest backup. */
+                    public backup: string;
+
+                    /** RestoreDatabaseRequest encryptionConfig. */
+                    public encryptionConfig?: (google.firestore.admin.v1.Database.IEncryptionConfig|null);
+
+                    /**
+                     * Creates a RestoreDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns RestoreDatabaseRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.RestoreDatabaseRequest;
+
+                    /**
+                     * Creates a plain object from a RestoreDatabaseRequest message. Also converts values to other types if specified.
+                     * @param message RestoreDatabaseRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.RestoreDatabaseRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this RestoreDatabaseRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for RestoreDatabaseRequest
                      * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                      * @returns The default type url
                      */
@@ -2066,6 +3745,12 @@ export namespace google {
 
                     /** ExportDocumentsMetadata outputUriPrefix */
                     outputUriPrefix?: (string|null);
+
+                    /** ExportDocumentsMetadata namespaceIds */
+                    namespaceIds?: (string[]|null);
+
+                    /** ExportDocumentsMetadata snapshotTime */
+                    snapshotTime?: (google.protobuf.ITimestamp|null);
                 }
 
                 /** Represents an ExportDocumentsMetadata. */
@@ -2097,6 +3782,12 @@ export namespace google {
 
                     /** ExportDocumentsMetadata outputUriPrefix. */
                     public outputUriPrefix: string;
+
+                    /** ExportDocumentsMetadata namespaceIds. */
+                    public namespaceIds: string[];
+
+                    /** ExportDocumentsMetadata snapshotTime. */
+                    public snapshotTime?: (google.protobuf.ITimestamp|null);
 
                     /**
                      * Creates an ExportDocumentsMetadata message from a plain object. Also converts values to their respective internal types.
@@ -2150,6 +3841,9 @@ export namespace google {
 
                     /** ImportDocumentsMetadata inputUriPrefix */
                     inputUriPrefix?: (string|null);
+
+                    /** ImportDocumentsMetadata namespaceIds */
+                    namespaceIds?: (string[]|null);
                 }
 
                 /** Represents an ImportDocumentsMetadata. */
@@ -2182,6 +3876,9 @@ export namespace google {
                     /** ImportDocumentsMetadata inputUriPrefix. */
                     public inputUriPrefix: string;
 
+                    /** ImportDocumentsMetadata namespaceIds. */
+                    public namespaceIds: string[];
+
                     /**
                      * Creates an ImportDocumentsMetadata message from a plain object. Also converts values to their respective internal types.
                      * @param object Plain object
@@ -2205,6 +3902,96 @@ export namespace google {
 
                     /**
                      * Gets the default type url for ImportDocumentsMetadata
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a BulkDeleteDocumentsMetadata. */
+                interface IBulkDeleteDocumentsMetadata {
+
+                    /** BulkDeleteDocumentsMetadata startTime */
+                    startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** BulkDeleteDocumentsMetadata endTime */
+                    endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** BulkDeleteDocumentsMetadata operationState */
+                    operationState?: (google.firestore.admin.v1.OperationState|null);
+
+                    /** BulkDeleteDocumentsMetadata progressDocuments */
+                    progressDocuments?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** BulkDeleteDocumentsMetadata progressBytes */
+                    progressBytes?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** BulkDeleteDocumentsMetadata collectionIds */
+                    collectionIds?: (string[]|null);
+
+                    /** BulkDeleteDocumentsMetadata namespaceIds */
+                    namespaceIds?: (string[]|null);
+
+                    /** BulkDeleteDocumentsMetadata snapshotTime */
+                    snapshotTime?: (google.protobuf.ITimestamp|null);
+                }
+
+                /** Represents a BulkDeleteDocumentsMetadata. */
+                class BulkDeleteDocumentsMetadata implements IBulkDeleteDocumentsMetadata {
+
+                    /**
+                     * Constructs a new BulkDeleteDocumentsMetadata.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IBulkDeleteDocumentsMetadata);
+
+                    /** BulkDeleteDocumentsMetadata startTime. */
+                    public startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** BulkDeleteDocumentsMetadata endTime. */
+                    public endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** BulkDeleteDocumentsMetadata operationState. */
+                    public operationState: google.firestore.admin.v1.OperationState;
+
+                    /** BulkDeleteDocumentsMetadata progressDocuments. */
+                    public progressDocuments?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** BulkDeleteDocumentsMetadata progressBytes. */
+                    public progressBytes?: (google.firestore.admin.v1.IProgress|null);
+
+                    /** BulkDeleteDocumentsMetadata collectionIds. */
+                    public collectionIds: string[];
+
+                    /** BulkDeleteDocumentsMetadata namespaceIds. */
+                    public namespaceIds: string[];
+
+                    /** BulkDeleteDocumentsMetadata snapshotTime. */
+                    public snapshotTime?: (google.protobuf.ITimestamp|null);
+
+                    /**
+                     * Creates a BulkDeleteDocumentsMetadata message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns BulkDeleteDocumentsMetadata
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.BulkDeleteDocumentsMetadata;
+
+                    /**
+                     * Creates a plain object from a BulkDeleteDocumentsMetadata message. Also converts values to other types if specified.
+                     * @param message BulkDeleteDocumentsMetadata
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.BulkDeleteDocumentsMetadata, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this BulkDeleteDocumentsMetadata to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for BulkDeleteDocumentsMetadata
                      * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                      * @returns The default type url
                      */
@@ -2259,9 +4046,83 @@ export namespace google {
                     public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
 
-                /** OperationState enum. */
-                type OperationState =
-                    "OPERATION_STATE_UNSPECIFIED"| "INITIALIZING"| "PROCESSING"| "CANCELLING"| "FINALIZING"| "SUCCESSFUL"| "FAILED"| "CANCELLED";
+                /** Properties of a RestoreDatabaseMetadata. */
+                interface IRestoreDatabaseMetadata {
+
+                    /** RestoreDatabaseMetadata startTime */
+                    startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** RestoreDatabaseMetadata endTime */
+                    endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** RestoreDatabaseMetadata operationState */
+                    operationState?: (google.firestore.admin.v1.OperationState|null);
+
+                    /** RestoreDatabaseMetadata database */
+                    database?: (string|null);
+
+                    /** RestoreDatabaseMetadata backup */
+                    backup?: (string|null);
+
+                    /** RestoreDatabaseMetadata progressPercentage */
+                    progressPercentage?: (google.firestore.admin.v1.IProgress|null);
+                }
+
+                /** Represents a RestoreDatabaseMetadata. */
+                class RestoreDatabaseMetadata implements IRestoreDatabaseMetadata {
+
+                    /**
+                     * Constructs a new RestoreDatabaseMetadata.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IRestoreDatabaseMetadata);
+
+                    /** RestoreDatabaseMetadata startTime. */
+                    public startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** RestoreDatabaseMetadata endTime. */
+                    public endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** RestoreDatabaseMetadata operationState. */
+                    public operationState: google.firestore.admin.v1.OperationState;
+
+                    /** RestoreDatabaseMetadata database. */
+                    public database: string;
+
+                    /** RestoreDatabaseMetadata backup. */
+                    public backup: string;
+
+                    /** RestoreDatabaseMetadata progressPercentage. */
+                    public progressPercentage?: (google.firestore.admin.v1.IProgress|null);
+
+                    /**
+                     * Creates a RestoreDatabaseMetadata message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns RestoreDatabaseMetadata
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.RestoreDatabaseMetadata;
+
+                    /**
+                     * Creates a plain object from a RestoreDatabaseMetadata message. Also converts values to other types if specified.
+                     * @param message RestoreDatabaseMetadata
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.RestoreDatabaseMetadata, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this RestoreDatabaseMetadata to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for RestoreDatabaseMetadata
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
 
                 /** Properties of a Progress. */
                 interface IProgress {
@@ -2316,6 +4177,223 @@ export namespace google {
                      */
                     public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
+
+                /** OperationState enum. */
+                type OperationState =
+                    "OPERATION_STATE_UNSPECIFIED"| "INITIALIZING"| "PROCESSING"| "CANCELLING"| "FINALIZING"| "SUCCESSFUL"| "FAILED"| "CANCELLED";
+
+                /** Properties of a BackupSchedule. */
+                interface IBackupSchedule {
+
+                    /** BackupSchedule name */
+                    name?: (string|null);
+
+                    /** BackupSchedule createTime */
+                    createTime?: (google.protobuf.ITimestamp|null);
+
+                    /** BackupSchedule updateTime */
+                    updateTime?: (google.protobuf.ITimestamp|null);
+
+                    /** BackupSchedule retention */
+                    retention?: (google.protobuf.IDuration|null);
+
+                    /** BackupSchedule dailyRecurrence */
+                    dailyRecurrence?: (google.firestore.admin.v1.IDailyRecurrence|null);
+
+                    /** BackupSchedule weeklyRecurrence */
+                    weeklyRecurrence?: (google.firestore.admin.v1.IWeeklyRecurrence|null);
+                }
+
+                /** Represents a BackupSchedule. */
+                class BackupSchedule implements IBackupSchedule {
+
+                    /**
+                     * Constructs a new BackupSchedule.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IBackupSchedule);
+
+                    /** BackupSchedule name. */
+                    public name: string;
+
+                    /** BackupSchedule createTime. */
+                    public createTime?: (google.protobuf.ITimestamp|null);
+
+                    /** BackupSchedule updateTime. */
+                    public updateTime?: (google.protobuf.ITimestamp|null);
+
+                    /** BackupSchedule retention. */
+                    public retention?: (google.protobuf.IDuration|null);
+
+                    /** BackupSchedule dailyRecurrence. */
+                    public dailyRecurrence?: (google.firestore.admin.v1.IDailyRecurrence|null);
+
+                    /** BackupSchedule weeklyRecurrence. */
+                    public weeklyRecurrence?: (google.firestore.admin.v1.IWeeklyRecurrence|null);
+
+                    /** BackupSchedule recurrence. */
+                    public recurrence?: ("dailyRecurrence"|"weeklyRecurrence");
+
+                    /**
+                     * Creates a BackupSchedule message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns BackupSchedule
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.BackupSchedule;
+
+                    /**
+                     * Creates a plain object from a BackupSchedule message. Also converts values to other types if specified.
+                     * @param message BackupSchedule
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.BackupSchedule, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this BackupSchedule to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for BackupSchedule
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a DailyRecurrence. */
+                interface IDailyRecurrence {
+                }
+
+                /** Represents a DailyRecurrence. */
+                class DailyRecurrence implements IDailyRecurrence {
+
+                    /**
+                     * Constructs a new DailyRecurrence.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IDailyRecurrence);
+
+                    /**
+                     * Creates a DailyRecurrence message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns DailyRecurrence
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.DailyRecurrence;
+
+                    /**
+                     * Creates a plain object from a DailyRecurrence message. Also converts values to other types if specified.
+                     * @param message DailyRecurrence
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.DailyRecurrence, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this DailyRecurrence to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for DailyRecurrence
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a WeeklyRecurrence. */
+                interface IWeeklyRecurrence {
+
+                    /** WeeklyRecurrence day */
+                    day?: (google.type.DayOfWeek|null);
+                }
+
+                /** Represents a WeeklyRecurrence. */
+                class WeeklyRecurrence implements IWeeklyRecurrence {
+
+                    /**
+                     * Constructs a new WeeklyRecurrence.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IWeeklyRecurrence);
+
+                    /** WeeklyRecurrence day. */
+                    public day: google.type.DayOfWeek;
+
+                    /**
+                     * Creates a WeeklyRecurrence message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns WeeklyRecurrence
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.WeeklyRecurrence;
+
+                    /**
+                     * Creates a plain object from a WeeklyRecurrence message. Also converts values to other types if specified.
+                     * @param message WeeklyRecurrence
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.WeeklyRecurrence, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this WeeklyRecurrence to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for WeeklyRecurrence
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a LocationMetadata. */
+                interface ILocationMetadata {
+                }
+
+                /** Represents a LocationMetadata. */
+                class LocationMetadata implements ILocationMetadata {
+
+                    /**
+                     * Constructs a new LocationMetadata.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.ILocationMetadata);
+
+                    /**
+                     * Creates a LocationMetadata message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns LocationMetadata
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.LocationMetadata;
+
+                    /**
+                     * Creates a plain object from a LocationMetadata message. Also converts values to other types if specified.
+                     * @param message LocationMetadata
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.LocationMetadata, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this LocationMetadata to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for LocationMetadata
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
             }
         }
     }
@@ -2323,11 +4401,167 @@ export namespace google {
     /** Namespace api. */
     namespace api {
 
+        /** FieldBehavior enum. */
+        type FieldBehavior =
+            "FIELD_BEHAVIOR_UNSPECIFIED"| "OPTIONAL"| "REQUIRED"| "OUTPUT_ONLY"| "INPUT_ONLY"| "IMMUTABLE"| "UNORDERED_LIST"| "NON_EMPTY_DEFAULT"| "IDENTIFIER";
+
+        /** Properties of a ResourceDescriptor. */
+        interface IResourceDescriptor {
+
+            /** ResourceDescriptor type */
+            type?: (string|null);
+
+            /** ResourceDescriptor pattern */
+            pattern?: (string[]|null);
+
+            /** ResourceDescriptor nameField */
+            nameField?: (string|null);
+
+            /** ResourceDescriptor history */
+            history?: (google.api.ResourceDescriptor.History|null);
+
+            /** ResourceDescriptor plural */
+            plural?: (string|null);
+
+            /** ResourceDescriptor singular */
+            singular?: (string|null);
+
+            /** ResourceDescriptor style */
+            style?: (google.api.ResourceDescriptor.Style[]|null);
+        }
+
+        /** Represents a ResourceDescriptor. */
+        class ResourceDescriptor implements IResourceDescriptor {
+
+            /**
+             * Constructs a new ResourceDescriptor.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IResourceDescriptor);
+
+            /** ResourceDescriptor type. */
+            public type: string;
+
+            /** ResourceDescriptor pattern. */
+            public pattern: string[];
+
+            /** ResourceDescriptor nameField. */
+            public nameField: string;
+
+            /** ResourceDescriptor history. */
+            public history: google.api.ResourceDescriptor.History;
+
+            /** ResourceDescriptor plural. */
+            public plural: string;
+
+            /** ResourceDescriptor singular. */
+            public singular: string;
+
+            /** ResourceDescriptor style. */
+            public style: google.api.ResourceDescriptor.Style[];
+
+            /**
+             * Creates a ResourceDescriptor message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns ResourceDescriptor
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.ResourceDescriptor;
+
+            /**
+             * Creates a plain object from a ResourceDescriptor message. Also converts values to other types if specified.
+             * @param message ResourceDescriptor
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.ResourceDescriptor, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this ResourceDescriptor to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for ResourceDescriptor
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace ResourceDescriptor {
+
+            /** History enum. */
+            type History =
+                "HISTORY_UNSPECIFIED"| "ORIGINALLY_SINGLE_PATTERN"| "FUTURE_MULTI_PATTERN";
+
+            /** Style enum. */
+            type Style =
+                "STYLE_UNSPECIFIED"| "DECLARATIVE_FRIENDLY";
+        }
+
+        /** Properties of a ResourceReference. */
+        interface IResourceReference {
+
+            /** ResourceReference type */
+            type?: (string|null);
+
+            /** ResourceReference childType */
+            childType?: (string|null);
+        }
+
+        /** Represents a ResourceReference. */
+        class ResourceReference implements IResourceReference {
+
+            /**
+             * Constructs a new ResourceReference.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IResourceReference);
+
+            /** ResourceReference type. */
+            public type: string;
+
+            /** ResourceReference childType. */
+            public childType: string;
+
+            /**
+             * Creates a ResourceReference message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns ResourceReference
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.ResourceReference;
+
+            /**
+             * Creates a plain object from a ResourceReference message. Also converts values to other types if specified.
+             * @param message ResourceReference
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.ResourceReference, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this ResourceReference to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for ResourceReference
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
         /** Properties of a Http. */
         interface IHttp {
 
             /** Http rules */
             rules?: (google.api.IHttpRule[]|null);
+
+            /** Http fullyDecodeReservedExpansion */
+            fullyDecodeReservedExpansion?: (boolean|null);
         }
 
         /** Represents a Http. */
@@ -2341,6 +4575,9 @@ export namespace google {
 
             /** Http rules. */
             public rules: google.api.IHttpRule[];
+
+            /** Http fullyDecodeReservedExpansion. */
+            public fullyDecodeReservedExpansion: boolean;
 
             /**
              * Creates a Http message from a plain object. Also converts values to their respective internal types.
@@ -2374,6 +4611,9 @@ export namespace google {
         /** Properties of a HttpRule. */
         interface IHttpRule {
 
+            /** HttpRule selector */
+            selector?: (string|null);
+
             /** HttpRule get */
             get?: (string|null);
 
@@ -2392,11 +4632,11 @@ export namespace google {
             /** HttpRule custom */
             custom?: (google.api.ICustomHttpPattern|null);
 
-            /** HttpRule selector */
-            selector?: (string|null);
-
             /** HttpRule body */
             body?: (string|null);
+
+            /** HttpRule responseBody */
+            responseBody?: (string|null);
 
             /** HttpRule additionalBindings */
             additionalBindings?: (google.api.IHttpRule[]|null);
@@ -2410,6 +4650,9 @@ export namespace google {
              * @param [properties] Properties to set
              */
             constructor(properties?: google.api.IHttpRule);
+
+            /** HttpRule selector. */
+            public selector: string;
 
             /** HttpRule get. */
             public get?: (string|null);
@@ -2429,11 +4672,11 @@ export namespace google {
             /** HttpRule custom. */
             public custom?: (google.api.ICustomHttpPattern|null);
 
-            /** HttpRule selector. */
-            public selector: string;
-
             /** HttpRule body. */
             public body: string;
+
+            /** HttpRule responseBody. */
+            public responseBody: string;
 
             /** HttpRule additionalBindings. */
             public additionalBindings: google.api.IHttpRule[];
@@ -2532,6 +4775,9 @@ export namespace google {
 
             /** CommonLanguageSettings destinations */
             destinations?: (google.api.ClientLibraryDestination[]|null);
+
+            /** CommonLanguageSettings selectiveGapicGeneration */
+            selectiveGapicGeneration?: (google.api.ISelectiveGapicGeneration|null);
         }
 
         /** Represents a CommonLanguageSettings. */
@@ -2548,6 +4794,9 @@ export namespace google {
 
             /** CommonLanguageSettings destinations. */
             public destinations: google.api.ClientLibraryDestination[];
+
+            /** CommonLanguageSettings selectiveGapicGeneration. */
+            public selectiveGapicGeneration?: (google.api.ISelectiveGapicGeneration|null);
 
             /**
              * Creates a CommonLanguageSettings message from a plain object. Also converts values to their respective internal types.
@@ -2718,6 +4967,9 @@ export namespace google {
 
             /** Publishing protoReferenceDocumentationUri */
             protoReferenceDocumentationUri?: (string|null);
+
+            /** Publishing restReferenceDocumentationUri */
+            restReferenceDocumentationUri?: (string|null);
         }
 
         /** Represents a Publishing. */
@@ -2758,6 +5010,9 @@ export namespace google {
 
             /** Publishing protoReferenceDocumentationUri. */
             public protoReferenceDocumentationUri: string;
+
+            /** Publishing restReferenceDocumentationUri. */
+            public restReferenceDocumentationUri: string;
 
             /**
              * Creates a Publishing message from a plain object. Also converts values to their respective internal types.
@@ -2949,6 +5204,9 @@ export namespace google {
 
             /** PythonSettings common */
             common?: (google.api.ICommonLanguageSettings|null);
+
+            /** PythonSettings experimentalFeatures */
+            experimentalFeatures?: (google.api.PythonSettings.IExperimentalFeatures|null);
         }
 
         /** Represents a PythonSettings. */
@@ -2962,6 +5220,9 @@ export namespace google {
 
             /** PythonSettings common. */
             public common?: (google.api.ICommonLanguageSettings|null);
+
+            /** PythonSettings experimentalFeatures. */
+            public experimentalFeatures?: (google.api.PythonSettings.IExperimentalFeatures|null);
 
             /**
              * Creates a PythonSettings message from a plain object. Also converts values to their respective internal types.
@@ -2990,6 +5251,63 @@ export namespace google {
              * @returns The default type url
              */
             public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace PythonSettings {
+
+            /** Properties of an ExperimentalFeatures. */
+            interface IExperimentalFeatures {
+
+                /** ExperimentalFeatures restAsyncIoEnabled */
+                restAsyncIoEnabled?: (boolean|null);
+
+                /** ExperimentalFeatures protobufPythonicTypesEnabled */
+                protobufPythonicTypesEnabled?: (boolean|null);
+            }
+
+            /** Represents an ExperimentalFeatures. */
+            class ExperimentalFeatures implements IExperimentalFeatures {
+
+                /**
+                 * Constructs a new ExperimentalFeatures.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.api.PythonSettings.IExperimentalFeatures);
+
+                /** ExperimentalFeatures restAsyncIoEnabled. */
+                public restAsyncIoEnabled: boolean;
+
+                /** ExperimentalFeatures protobufPythonicTypesEnabled. */
+                public protobufPythonicTypesEnabled: boolean;
+
+                /**
+                 * Creates an ExperimentalFeatures message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ExperimentalFeatures
+                 */
+                public static fromObject(object: { [k: string]: any }): google.api.PythonSettings.ExperimentalFeatures;
+
+                /**
+                 * Creates a plain object from an ExperimentalFeatures message. Also converts values to other types if specified.
+                 * @param message ExperimentalFeatures
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.api.PythonSettings.ExperimentalFeatures, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ExperimentalFeatures to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ExperimentalFeatures
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
         }
 
         /** Properties of a NodeSettings. */
@@ -3171,6 +5489,9 @@ export namespace google {
 
             /** GoSettings common */
             common?: (google.api.ICommonLanguageSettings|null);
+
+            /** GoSettings renamedServices */
+            renamedServices?: ({ [k: string]: string }|null);
         }
 
         /** Represents a GoSettings. */
@@ -3184,6 +5505,9 @@ export namespace google {
 
             /** GoSettings common. */
             public common?: (google.api.ICommonLanguageSettings|null);
+
+            /** GoSettings renamedServices. */
+            public renamedServices: { [k: string]: string };
 
             /**
              * Creates a GoSettings message from a plain object. Also converts values to their respective internal types.
@@ -3222,6 +5546,9 @@ export namespace google {
 
             /** MethodSettings longRunning */
             longRunning?: (google.api.MethodSettings.ILongRunning|null);
+
+            /** MethodSettings autoPopulatedFields */
+            autoPopulatedFields?: (string[]|null);
         }
 
         /** Represents a MethodSettings. */
@@ -3238,6 +5565,9 @@ export namespace google {
 
             /** MethodSettings longRunning. */
             public longRunning?: (google.api.MethodSettings.ILongRunning|null);
+
+            /** MethodSettings autoPopulatedFields. */
+            public autoPopulatedFields: string[];
 
             /**
              * Creates a MethodSettings message from a plain object. Also converts values to their respective internal types.
@@ -3345,162 +5675,63 @@ export namespace google {
         type ClientLibraryDestination =
             "CLIENT_LIBRARY_DESTINATION_UNSPECIFIED"| "GITHUB"| "PACKAGE_MANAGER";
 
-        /** FieldBehavior enum. */
-        type FieldBehavior =
-            "FIELD_BEHAVIOR_UNSPECIFIED"| "OPTIONAL"| "REQUIRED"| "OUTPUT_ONLY"| "INPUT_ONLY"| "IMMUTABLE"| "UNORDERED_LIST"| "NON_EMPTY_DEFAULT";
+        /** Properties of a SelectiveGapicGeneration. */
+        interface ISelectiveGapicGeneration {
+
+            /** SelectiveGapicGeneration methods */
+            methods?: (string[]|null);
+
+            /** SelectiveGapicGeneration generateOmittedAsInternal */
+            generateOmittedAsInternal?: (boolean|null);
+        }
+
+        /** Represents a SelectiveGapicGeneration. */
+        class SelectiveGapicGeneration implements ISelectiveGapicGeneration {
+
+            /**
+             * Constructs a new SelectiveGapicGeneration.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.ISelectiveGapicGeneration);
+
+            /** SelectiveGapicGeneration methods. */
+            public methods: string[];
+
+            /** SelectiveGapicGeneration generateOmittedAsInternal. */
+            public generateOmittedAsInternal: boolean;
+
+            /**
+             * Creates a SelectiveGapicGeneration message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns SelectiveGapicGeneration
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.SelectiveGapicGeneration;
+
+            /**
+             * Creates a plain object from a SelectiveGapicGeneration message. Also converts values to other types if specified.
+             * @param message SelectiveGapicGeneration
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.SelectiveGapicGeneration, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this SelectiveGapicGeneration to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for SelectiveGapicGeneration
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
 
         /** LaunchStage enum. */
         type LaunchStage =
             "LAUNCH_STAGE_UNSPECIFIED"| "UNIMPLEMENTED"| "PRELAUNCH"| "EARLY_ACCESS"| "ALPHA"| "BETA"| "GA"| "DEPRECATED";
-
-        /** Properties of a ResourceDescriptor. */
-        interface IResourceDescriptor {
-
-            /** ResourceDescriptor type */
-            type?: (string|null);
-
-            /** ResourceDescriptor pattern */
-            pattern?: (string[]|null);
-
-            /** ResourceDescriptor nameField */
-            nameField?: (string|null);
-
-            /** ResourceDescriptor history */
-            history?: (google.api.ResourceDescriptor.History|null);
-
-            /** ResourceDescriptor plural */
-            plural?: (string|null);
-
-            /** ResourceDescriptor singular */
-            singular?: (string|null);
-
-            /** ResourceDescriptor style */
-            style?: (google.api.ResourceDescriptor.Style[]|null);
-        }
-
-        /** Represents a ResourceDescriptor. */
-        class ResourceDescriptor implements IResourceDescriptor {
-
-            /**
-             * Constructs a new ResourceDescriptor.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.api.IResourceDescriptor);
-
-            /** ResourceDescriptor type. */
-            public type: string;
-
-            /** ResourceDescriptor pattern. */
-            public pattern: string[];
-
-            /** ResourceDescriptor nameField. */
-            public nameField: string;
-
-            /** ResourceDescriptor history. */
-            public history: google.api.ResourceDescriptor.History;
-
-            /** ResourceDescriptor plural. */
-            public plural: string;
-
-            /** ResourceDescriptor singular. */
-            public singular: string;
-
-            /** ResourceDescriptor style. */
-            public style: google.api.ResourceDescriptor.Style[];
-
-            /**
-             * Creates a ResourceDescriptor message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns ResourceDescriptor
-             */
-            public static fromObject(object: { [k: string]: any }): google.api.ResourceDescriptor;
-
-            /**
-             * Creates a plain object from a ResourceDescriptor message. Also converts values to other types if specified.
-             * @param message ResourceDescriptor
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.api.ResourceDescriptor, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this ResourceDescriptor to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-
-            /**
-             * Gets the default type url for ResourceDescriptor
-             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-             * @returns The default type url
-             */
-            public static getTypeUrl(typeUrlPrefix?: string): string;
-        }
-
-        namespace ResourceDescriptor {
-
-            /** History enum. */
-            type History =
-                "HISTORY_UNSPECIFIED"| "ORIGINALLY_SINGLE_PATTERN"| "FUTURE_MULTI_PATTERN";
-
-            /** Style enum. */
-            type Style =
-                "STYLE_UNSPECIFIED"| "DECLARATIVE_FRIENDLY";
-        }
-
-        /** Properties of a ResourceReference. */
-        interface IResourceReference {
-
-            /** ResourceReference type */
-            type?: (string|null);
-
-            /** ResourceReference childType */
-            childType?: (string|null);
-        }
-
-        /** Represents a ResourceReference. */
-        class ResourceReference implements IResourceReference {
-
-            /**
-             * Constructs a new ResourceReference.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.api.IResourceReference);
-
-            /** ResourceReference type. */
-            public type: string;
-
-            /** ResourceReference childType. */
-            public childType: string;
-
-            /**
-             * Creates a ResourceReference message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns ResourceReference
-             */
-            public static fromObject(object: { [k: string]: any }): google.api.ResourceReference;
-
-            /**
-             * Creates a plain object from a ResourceReference message. Also converts values to other types if specified.
-             * @param message ResourceReference
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.api.ResourceReference, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this ResourceReference to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-
-            /**
-             * Gets the default type url for ResourceReference
-             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-             * @returns The default type url
-             */
-            public static getTypeUrl(typeUrlPrefix?: string): string;
-        }
     }
 
     /** Namespace protobuf. */
@@ -3554,6 +5785,10 @@ export namespace google {
             public static getTypeUrl(typeUrlPrefix?: string): string;
         }
 
+        /** Edition enum. */
+        type Edition =
+            "EDITION_UNKNOWN"| "EDITION_PROTO2"| "EDITION_PROTO3"| "EDITION_2023"| "EDITION_2024"| "EDITION_1_TEST_ONLY"| "EDITION_2_TEST_ONLY"| "EDITION_99997_TEST_ONLY"| "EDITION_99998_TEST_ONLY"| "EDITION_99999_TEST_ONLY"| "EDITION_MAX";
+
         /** Properties of a FileDescriptorProto. */
         interface IFileDescriptorProto {
 
@@ -3592,6 +5827,9 @@ export namespace google {
 
             /** FileDescriptorProto syntax */
             syntax?: (string|null);
+
+            /** FileDescriptorProto edition */
+            edition?: (google.protobuf.Edition|null);
         }
 
         /** Represents a FileDescriptorProto. */
@@ -3638,6 +5876,9 @@ export namespace google {
 
             /** FileDescriptorProto syntax. */
             public syntax: string;
+
+            /** FileDescriptorProto edition. */
+            public edition: google.protobuf.Edition;
 
             /**
              * Creates a FileDescriptorProto message from a plain object. Also converts values to their respective internal types.
@@ -3780,6 +6021,9 @@ export namespace google {
 
                 /** ExtensionRange end */
                 end?: (number|null);
+
+                /** ExtensionRange options */
+                options?: (google.protobuf.IExtensionRangeOptions|null);
             }
 
             /** Represents an ExtensionRange. */
@@ -3796,6 +6040,9 @@ export namespace google {
 
                 /** ExtensionRange end. */
                 public end: number;
+
+                /** ExtensionRange options. */
+                public options?: (google.protobuf.IExtensionRangeOptions|null);
 
                 /**
                  * Creates an ExtensionRange message from a plain object. Also converts values to their respective internal types.
@@ -3881,6 +6128,151 @@ export namespace google {
             }
         }
 
+        /** Properties of an ExtensionRangeOptions. */
+        interface IExtensionRangeOptions {
+
+            /** ExtensionRangeOptions uninterpretedOption */
+            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
+
+            /** ExtensionRangeOptions declaration */
+            declaration?: (google.protobuf.ExtensionRangeOptions.IDeclaration[]|null);
+
+            /** ExtensionRangeOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
+
+            /** ExtensionRangeOptions verification */
+            verification?: (google.protobuf.ExtensionRangeOptions.VerificationState|null);
+        }
+
+        /** Represents an ExtensionRangeOptions. */
+        class ExtensionRangeOptions implements IExtensionRangeOptions {
+
+            /**
+             * Constructs a new ExtensionRangeOptions.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IExtensionRangeOptions);
+
+            /** ExtensionRangeOptions uninterpretedOption. */
+            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /** ExtensionRangeOptions declaration. */
+            public declaration: google.protobuf.ExtensionRangeOptions.IDeclaration[];
+
+            /** ExtensionRangeOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
+
+            /** ExtensionRangeOptions verification. */
+            public verification: google.protobuf.ExtensionRangeOptions.VerificationState;
+
+            /**
+             * Creates an ExtensionRangeOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns ExtensionRangeOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.ExtensionRangeOptions;
+
+            /**
+             * Creates a plain object from an ExtensionRangeOptions message. Also converts values to other types if specified.
+             * @param message ExtensionRangeOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.ExtensionRangeOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this ExtensionRangeOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for ExtensionRangeOptions
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace ExtensionRangeOptions {
+
+            /** Properties of a Declaration. */
+            interface IDeclaration {
+
+                /** Declaration number */
+                number?: (number|null);
+
+                /** Declaration fullName */
+                fullName?: (string|null);
+
+                /** Declaration type */
+                type?: (string|null);
+
+                /** Declaration reserved */
+                reserved?: (boolean|null);
+
+                /** Declaration repeated */
+                repeated?: (boolean|null);
+            }
+
+            /** Represents a Declaration. */
+            class Declaration implements IDeclaration {
+
+                /**
+                 * Constructs a new Declaration.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.protobuf.ExtensionRangeOptions.IDeclaration);
+
+                /** Declaration number. */
+                public number: number;
+
+                /** Declaration fullName. */
+                public fullName: string;
+
+                /** Declaration type. */
+                public type: string;
+
+                /** Declaration reserved. */
+                public reserved: boolean;
+
+                /** Declaration repeated. */
+                public repeated: boolean;
+
+                /**
+                 * Creates a Declaration message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns Declaration
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.ExtensionRangeOptions.Declaration;
+
+                /**
+                 * Creates a plain object from a Declaration message. Also converts values to other types if specified.
+                 * @param message Declaration
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.ExtensionRangeOptions.Declaration, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this Declaration to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for Declaration
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** VerificationState enum. */
+            type VerificationState =
+                "DECLARATION"| "UNVERIFIED";
+        }
+
         /** Properties of a FieldDescriptorProto. */
         interface IFieldDescriptorProto {
 
@@ -3913,6 +6305,9 @@ export namespace google {
 
             /** FieldDescriptorProto options */
             options?: (google.protobuf.IFieldOptions|null);
+
+            /** FieldDescriptorProto proto3Optional */
+            proto3Optional?: (boolean|null);
         }
 
         /** Represents a FieldDescriptorProto. */
@@ -3954,6 +6349,9 @@ export namespace google {
             /** FieldDescriptorProto options. */
             public options?: (google.protobuf.IFieldOptions|null);
 
+            /** FieldDescriptorProto proto3Optional. */
+            public proto3Optional: boolean;
+
             /**
              * Creates a FieldDescriptorProto message from a plain object. Also converts values to their respective internal types.
              * @param object Plain object
@@ -3991,7 +6389,7 @@ export namespace google {
 
             /** Label enum. */
             type Label =
-                "LABEL_OPTIONAL"| "LABEL_REQUIRED"| "LABEL_REPEATED";
+                "LABEL_OPTIONAL"| "LABEL_REPEATED"| "LABEL_REQUIRED";
         }
 
         /** Properties of an OneofDescriptorProto. */
@@ -4059,6 +6457,12 @@ export namespace google {
 
             /** EnumDescriptorProto options */
             options?: (google.protobuf.IEnumOptions|null);
+
+            /** EnumDescriptorProto reservedRange */
+            reservedRange?: (google.protobuf.EnumDescriptorProto.IEnumReservedRange[]|null);
+
+            /** EnumDescriptorProto reservedName */
+            reservedName?: (string[]|null);
         }
 
         /** Represents an EnumDescriptorProto. */
@@ -4078,6 +6482,12 @@ export namespace google {
 
             /** EnumDescriptorProto options. */
             public options?: (google.protobuf.IEnumOptions|null);
+
+            /** EnumDescriptorProto reservedRange. */
+            public reservedRange: google.protobuf.EnumDescriptorProto.IEnumReservedRange[];
+
+            /** EnumDescriptorProto reservedName. */
+            public reservedName: string[];
 
             /**
              * Creates an EnumDescriptorProto message from a plain object. Also converts values to their respective internal types.
@@ -4106,6 +6516,63 @@ export namespace google {
              * @returns The default type url
              */
             public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace EnumDescriptorProto {
+
+            /** Properties of an EnumReservedRange. */
+            interface IEnumReservedRange {
+
+                /** EnumReservedRange start */
+                start?: (number|null);
+
+                /** EnumReservedRange end */
+                end?: (number|null);
+            }
+
+            /** Represents an EnumReservedRange. */
+            class EnumReservedRange implements IEnumReservedRange {
+
+                /**
+                 * Constructs a new EnumReservedRange.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.protobuf.EnumDescriptorProto.IEnumReservedRange);
+
+                /** EnumReservedRange start. */
+                public start: number;
+
+                /** EnumReservedRange end. */
+                public end: number;
+
+                /**
+                 * Creates an EnumReservedRange message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns EnumReservedRange
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.EnumDescriptorProto.EnumReservedRange;
+
+                /**
+                 * Creates a plain object from an EnumReservedRange message. Also converts values to other types if specified.
+                 * @param message EnumReservedRange
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.EnumDescriptorProto.EnumReservedRange, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this EnumReservedRange to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for EnumReservedRange
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
         }
 
         /** Properties of an EnumValueDescriptorProto. */
@@ -4351,6 +6818,24 @@ export namespace google {
             /** FileOptions csharpNamespace */
             csharpNamespace?: (string|null);
 
+            /** FileOptions swiftPrefix */
+            swiftPrefix?: (string|null);
+
+            /** FileOptions phpClassPrefix */
+            phpClassPrefix?: (string|null);
+
+            /** FileOptions phpNamespace */
+            phpNamespace?: (string|null);
+
+            /** FileOptions phpMetadataNamespace */
+            phpMetadataNamespace?: (string|null);
+
+            /** FileOptions rubyPackage */
+            rubyPackage?: (string|null);
+
+            /** FileOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
+
             /** FileOptions uninterpretedOption */
             uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
 
@@ -4409,6 +6894,24 @@ export namespace google {
             /** FileOptions csharpNamespace. */
             public csharpNamespace: string;
 
+            /** FileOptions swiftPrefix. */
+            public swiftPrefix: string;
+
+            /** FileOptions phpClassPrefix. */
+            public phpClassPrefix: string;
+
+            /** FileOptions phpNamespace. */
+            public phpNamespace: string;
+
+            /** FileOptions phpMetadataNamespace. */
+            public phpMetadataNamespace: string;
+
+            /** FileOptions rubyPackage. */
+            public rubyPackage: string;
+
+            /** FileOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
+
             /** FileOptions uninterpretedOption. */
             public uninterpretedOption: google.protobuf.IUninterpretedOption[];
 
@@ -4463,6 +6966,12 @@ export namespace google {
             /** MessageOptions mapEntry */
             mapEntry?: (boolean|null);
 
+            /** MessageOptions deprecatedLegacyJsonFieldConflicts */
+            deprecatedLegacyJsonFieldConflicts?: (boolean|null);
+
+            /** MessageOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
+
             /** MessageOptions uninterpretedOption */
             uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
 
@@ -4490,6 +6999,12 @@ export namespace google {
 
             /** MessageOptions mapEntry. */
             public mapEntry: boolean;
+
+            /** MessageOptions deprecatedLegacyJsonFieldConflicts. */
+            public deprecatedLegacyJsonFieldConflicts: boolean;
+
+            /** MessageOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
 
             /** MessageOptions uninterpretedOption. */
             public uninterpretedOption: google.protobuf.IUninterpretedOption[];
@@ -4538,11 +7053,29 @@ export namespace google {
             /** FieldOptions lazy */
             lazy?: (boolean|null);
 
+            /** FieldOptions unverifiedLazy */
+            unverifiedLazy?: (boolean|null);
+
             /** FieldOptions deprecated */
             deprecated?: (boolean|null);
 
             /** FieldOptions weak */
             weak?: (boolean|null);
+
+            /** FieldOptions debugRedact */
+            debugRedact?: (boolean|null);
+
+            /** FieldOptions retention */
+            retention?: (google.protobuf.FieldOptions.OptionRetention|null);
+
+            /** FieldOptions targets */
+            targets?: (google.protobuf.FieldOptions.OptionTargetType[]|null);
+
+            /** FieldOptions editionDefaults */
+            editionDefaults?: (google.protobuf.FieldOptions.IEditionDefault[]|null);
+
+            /** FieldOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
 
             /** FieldOptions uninterpretedOption */
             uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
@@ -4575,11 +7108,29 @@ export namespace google {
             /** FieldOptions lazy. */
             public lazy: boolean;
 
+            /** FieldOptions unverifiedLazy. */
+            public unverifiedLazy: boolean;
+
             /** FieldOptions deprecated. */
             public deprecated: boolean;
 
             /** FieldOptions weak. */
             public weak: boolean;
+
+            /** FieldOptions debugRedact. */
+            public debugRedact: boolean;
+
+            /** FieldOptions retention. */
+            public retention: google.protobuf.FieldOptions.OptionRetention;
+
+            /** FieldOptions targets. */
+            public targets: google.protobuf.FieldOptions.OptionTargetType[];
+
+            /** FieldOptions editionDefaults. */
+            public editionDefaults: google.protobuf.FieldOptions.IEditionDefault[];
+
+            /** FieldOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
 
             /** FieldOptions uninterpretedOption. */
             public uninterpretedOption: google.protobuf.IUninterpretedOption[];
@@ -4622,10 +7173,75 @@ export namespace google {
             /** JSType enum. */
             type JSType =
                 "JS_NORMAL"| "JS_STRING"| "JS_NUMBER";
+
+            /** OptionRetention enum. */
+            type OptionRetention =
+                "RETENTION_UNKNOWN"| "RETENTION_RUNTIME"| "RETENTION_SOURCE";
+
+            /** OptionTargetType enum. */
+            type OptionTargetType =
+                "TARGET_TYPE_UNKNOWN"| "TARGET_TYPE_FILE"| "TARGET_TYPE_EXTENSION_RANGE"| "TARGET_TYPE_MESSAGE"| "TARGET_TYPE_FIELD"| "TARGET_TYPE_ONEOF"| "TARGET_TYPE_ENUM"| "TARGET_TYPE_ENUM_ENTRY"| "TARGET_TYPE_SERVICE"| "TARGET_TYPE_METHOD";
+
+            /** Properties of an EditionDefault. */
+            interface IEditionDefault {
+
+                /** EditionDefault edition */
+                edition?: (google.protobuf.Edition|null);
+
+                /** EditionDefault value */
+                value?: (string|null);
+            }
+
+            /** Represents an EditionDefault. */
+            class EditionDefault implements IEditionDefault {
+
+                /**
+                 * Constructs a new EditionDefault.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.protobuf.FieldOptions.IEditionDefault);
+
+                /** EditionDefault edition. */
+                public edition: google.protobuf.Edition;
+
+                /** EditionDefault value. */
+                public value: string;
+
+                /**
+                 * Creates an EditionDefault message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns EditionDefault
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.FieldOptions.EditionDefault;
+
+                /**
+                 * Creates a plain object from an EditionDefault message. Also converts values to other types if specified.
+                 * @param message EditionDefault
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.FieldOptions.EditionDefault, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this EditionDefault to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for EditionDefault
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
         }
 
         /** Properties of an OneofOptions. */
         interface IOneofOptions {
+
+            /** OneofOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
 
             /** OneofOptions uninterpretedOption */
             uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
@@ -4639,6 +7255,9 @@ export namespace google {
              * @param [properties] Properties to set
              */
             constructor(properties?: google.protobuf.IOneofOptions);
+
+            /** OneofOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
 
             /** OneofOptions uninterpretedOption. */
             public uninterpretedOption: google.protobuf.IUninterpretedOption[];
@@ -4681,6 +7300,12 @@ export namespace google {
             /** EnumOptions deprecated */
             deprecated?: (boolean|null);
 
+            /** EnumOptions deprecatedLegacyJsonFieldConflicts */
+            deprecatedLegacyJsonFieldConflicts?: (boolean|null);
+
+            /** EnumOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
+
             /** EnumOptions uninterpretedOption */
             uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
         }
@@ -4699,6 +7324,12 @@ export namespace google {
 
             /** EnumOptions deprecated. */
             public deprecated: boolean;
+
+            /** EnumOptions deprecatedLegacyJsonFieldConflicts. */
+            public deprecatedLegacyJsonFieldConflicts: boolean;
+
+            /** EnumOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
 
             /** EnumOptions uninterpretedOption. */
             public uninterpretedOption: google.protobuf.IUninterpretedOption[];
@@ -4738,6 +7369,12 @@ export namespace google {
             /** EnumValueOptions deprecated */
             deprecated?: (boolean|null);
 
+            /** EnumValueOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
+
+            /** EnumValueOptions debugRedact */
+            debugRedact?: (boolean|null);
+
             /** EnumValueOptions uninterpretedOption */
             uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
         }
@@ -4753,6 +7390,12 @@ export namespace google {
 
             /** EnumValueOptions deprecated. */
             public deprecated: boolean;
+
+            /** EnumValueOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
+
+            /** EnumValueOptions debugRedact. */
+            public debugRedact: boolean;
 
             /** EnumValueOptions uninterpretedOption. */
             public uninterpretedOption: google.protobuf.IUninterpretedOption[];
@@ -4789,6 +7432,9 @@ export namespace google {
         /** Properties of a ServiceOptions. */
         interface IServiceOptions {
 
+            /** ServiceOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
+
             /** ServiceOptions deprecated */
             deprecated?: (boolean|null);
 
@@ -4800,6 +7446,9 @@ export namespace google {
 
             /** ServiceOptions .google.api.oauthScopes */
             ".google.api.oauthScopes"?: (string|null);
+
+            /** ServiceOptions .google.api.apiVersion */
+            ".google.api.apiVersion"?: (string|null);
         }
 
         /** Represents a ServiceOptions. */
@@ -4810,6 +7459,9 @@ export namespace google {
              * @param [properties] Properties to set
              */
             constructor(properties?: google.protobuf.IServiceOptions);
+
+            /** ServiceOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
 
             /** ServiceOptions deprecated. */
             public deprecated: boolean;
@@ -4852,6 +7504,12 @@ export namespace google {
             /** MethodOptions deprecated */
             deprecated?: (boolean|null);
 
+            /** MethodOptions idempotencyLevel */
+            idempotencyLevel?: (google.protobuf.MethodOptions.IdempotencyLevel|null);
+
+            /** MethodOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
+
             /** MethodOptions uninterpretedOption */
             uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
 
@@ -4876,6 +7534,12 @@ export namespace google {
 
             /** MethodOptions deprecated. */
             public deprecated: boolean;
+
+            /** MethodOptions idempotencyLevel. */
+            public idempotencyLevel: google.protobuf.MethodOptions.IdempotencyLevel;
+
+            /** MethodOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
 
             /** MethodOptions uninterpretedOption. */
             public uninterpretedOption: google.protobuf.IUninterpretedOption[];
@@ -4907,6 +7571,13 @@ export namespace google {
              * @returns The default type url
              */
             public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace MethodOptions {
+
+            /** IdempotencyLevel enum. */
+            type IdempotencyLevel =
+                "IDEMPOTENCY_UNKNOWN"| "NO_SIDE_EFFECTS"| "IDEMPOTENT";
         }
 
         /** Properties of an UninterpretedOption. */
@@ -5043,6 +7714,228 @@ export namespace google {
 
                 /**
                  * Gets the default type url for NamePart
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+        }
+
+        /** Properties of a FeatureSet. */
+        interface IFeatureSet {
+
+            /** FeatureSet fieldPresence */
+            fieldPresence?: (google.protobuf.FeatureSet.FieldPresence|null);
+
+            /** FeatureSet enumType */
+            enumType?: (google.protobuf.FeatureSet.EnumType|null);
+
+            /** FeatureSet repeatedFieldEncoding */
+            repeatedFieldEncoding?: (google.protobuf.FeatureSet.RepeatedFieldEncoding|null);
+
+            /** FeatureSet utf8Validation */
+            utf8Validation?: (google.protobuf.FeatureSet.Utf8Validation|null);
+
+            /** FeatureSet messageEncoding */
+            messageEncoding?: (google.protobuf.FeatureSet.MessageEncoding|null);
+
+            /** FeatureSet jsonFormat */
+            jsonFormat?: (google.protobuf.FeatureSet.JsonFormat|null);
+        }
+
+        /** Represents a FeatureSet. */
+        class FeatureSet implements IFeatureSet {
+
+            /**
+             * Constructs a new FeatureSet.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IFeatureSet);
+
+            /** FeatureSet fieldPresence. */
+            public fieldPresence: google.protobuf.FeatureSet.FieldPresence;
+
+            /** FeatureSet enumType. */
+            public enumType: google.protobuf.FeatureSet.EnumType;
+
+            /** FeatureSet repeatedFieldEncoding. */
+            public repeatedFieldEncoding: google.protobuf.FeatureSet.RepeatedFieldEncoding;
+
+            /** FeatureSet utf8Validation. */
+            public utf8Validation: google.protobuf.FeatureSet.Utf8Validation;
+
+            /** FeatureSet messageEncoding. */
+            public messageEncoding: google.protobuf.FeatureSet.MessageEncoding;
+
+            /** FeatureSet jsonFormat. */
+            public jsonFormat: google.protobuf.FeatureSet.JsonFormat;
+
+            /**
+             * Creates a FeatureSet message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FeatureSet
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FeatureSet;
+
+            /**
+             * Creates a plain object from a FeatureSet message. Also converts values to other types if specified.
+             * @param message FeatureSet
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FeatureSet, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FeatureSet to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for FeatureSet
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace FeatureSet {
+
+            /** FieldPresence enum. */
+            type FieldPresence =
+                "FIELD_PRESENCE_UNKNOWN"| "EXPLICIT"| "IMPLICIT"| "LEGACY_REQUIRED";
+
+            /** EnumType enum. */
+            type EnumType =
+                "ENUM_TYPE_UNKNOWN"| "OPEN"| "CLOSED";
+
+            /** RepeatedFieldEncoding enum. */
+            type RepeatedFieldEncoding =
+                "REPEATED_FIELD_ENCODING_UNKNOWN"| "PACKED"| "EXPANDED";
+
+            /** Utf8Validation enum. */
+            type Utf8Validation =
+                "UTF8_VALIDATION_UNKNOWN"| "VERIFY"| "NONE";
+
+            /** MessageEncoding enum. */
+            type MessageEncoding =
+                "MESSAGE_ENCODING_UNKNOWN"| "LENGTH_PREFIXED"| "DELIMITED";
+
+            /** JsonFormat enum. */
+            type JsonFormat =
+                "JSON_FORMAT_UNKNOWN"| "ALLOW"| "LEGACY_BEST_EFFORT";
+        }
+
+        /** Properties of a FeatureSetDefaults. */
+        interface IFeatureSetDefaults {
+
+            /** FeatureSetDefaults defaults */
+            defaults?: (google.protobuf.FeatureSetDefaults.IFeatureSetEditionDefault[]|null);
+
+            /** FeatureSetDefaults minimumEdition */
+            minimumEdition?: (google.protobuf.Edition|null);
+
+            /** FeatureSetDefaults maximumEdition */
+            maximumEdition?: (google.protobuf.Edition|null);
+        }
+
+        /** Represents a FeatureSetDefaults. */
+        class FeatureSetDefaults implements IFeatureSetDefaults {
+
+            /**
+             * Constructs a new FeatureSetDefaults.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IFeatureSetDefaults);
+
+            /** FeatureSetDefaults defaults. */
+            public defaults: google.protobuf.FeatureSetDefaults.IFeatureSetEditionDefault[];
+
+            /** FeatureSetDefaults minimumEdition. */
+            public minimumEdition: google.protobuf.Edition;
+
+            /** FeatureSetDefaults maximumEdition. */
+            public maximumEdition: google.protobuf.Edition;
+
+            /**
+             * Creates a FeatureSetDefaults message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FeatureSetDefaults
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FeatureSetDefaults;
+
+            /**
+             * Creates a plain object from a FeatureSetDefaults message. Also converts values to other types if specified.
+             * @param message FeatureSetDefaults
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FeatureSetDefaults, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FeatureSetDefaults to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for FeatureSetDefaults
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace FeatureSetDefaults {
+
+            /** Properties of a FeatureSetEditionDefault. */
+            interface IFeatureSetEditionDefault {
+
+                /** FeatureSetEditionDefault edition */
+                edition?: (google.protobuf.Edition|null);
+
+                /** FeatureSetEditionDefault features */
+                features?: (google.protobuf.IFeatureSet|null);
+            }
+
+            /** Represents a FeatureSetEditionDefault. */
+            class FeatureSetEditionDefault implements IFeatureSetEditionDefault {
+
+                /**
+                 * Constructs a new FeatureSetEditionDefault.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.protobuf.FeatureSetDefaults.IFeatureSetEditionDefault);
+
+                /** FeatureSetEditionDefault edition. */
+                public edition: google.protobuf.Edition;
+
+                /** FeatureSetEditionDefault features. */
+                public features?: (google.protobuf.IFeatureSet|null);
+
+                /**
+                 * Creates a FeatureSetEditionDefault message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns FeatureSetEditionDefault
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault;
+
+                /**
+                 * Creates a plain object from a FeatureSetEditionDefault message. Also converts values to other types if specified.
+                 * @param message FeatureSetEditionDefault
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this FeatureSetEditionDefault to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for FeatureSetEditionDefault
                  * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                  * @returns The default type url
                  */
@@ -5237,6 +8130,9 @@ export namespace google {
 
                 /** Annotation end */
                 end?: (number|null);
+
+                /** Annotation semantic */
+                semantic?: (google.protobuf.GeneratedCodeInfo.Annotation.Semantic|null);
             }
 
             /** Represents an Annotation. */
@@ -5259,6 +8155,9 @@ export namespace google {
 
                 /** Annotation end. */
                 public end: number;
+
+                /** Annotation semantic. */
+                public semantic: google.protobuf.GeneratedCodeInfo.Annotation.Semantic;
 
                 /**
                  * Creates an Annotation message from a plain object. Also converts values to their respective internal types.
@@ -5288,6 +8187,175 @@ export namespace google {
                  */
                 public static getTypeUrl(typeUrlPrefix?: string): string;
             }
+
+            namespace Annotation {
+
+                /** Semantic enum. */
+                type Semantic =
+                    "NONE"| "SET"| "ALIAS";
+            }
+        }
+
+        /** Properties of a Timestamp. */
+        interface ITimestamp {
+
+            /** Timestamp seconds */
+            seconds?: (number|string|null);
+
+            /** Timestamp nanos */
+            nanos?: (number|null);
+        }
+
+        /** Represents a Timestamp. */
+        class Timestamp implements ITimestamp {
+
+            /**
+             * Constructs a new Timestamp.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.ITimestamp);
+
+            /** Timestamp seconds. */
+            public seconds: (number|string);
+
+            /** Timestamp nanos. */
+            public nanos: number;
+
+            /**
+             * Creates a Timestamp message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Timestamp
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Timestamp;
+
+            /**
+             * Creates a plain object from a Timestamp message. Also converts values to other types if specified.
+             * @param message Timestamp
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Timestamp, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Timestamp to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for Timestamp
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a Duration. */
+        interface IDuration {
+
+            /** Duration seconds */
+            seconds?: (number|string|null);
+
+            /** Duration nanos */
+            nanos?: (number|null);
+        }
+
+        /** Represents a Duration. */
+        class Duration implements IDuration {
+
+            /**
+             * Constructs a new Duration.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IDuration);
+
+            /** Duration seconds. */
+            public seconds: (number|string);
+
+            /** Duration nanos. */
+            public nanos: number;
+
+            /**
+             * Creates a Duration message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Duration
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Duration;
+
+            /**
+             * Creates a plain object from a Duration message. Also converts values to other types if specified.
+             * @param message Duration
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Duration, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Duration to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for Duration
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of an Any. */
+        interface IAny {
+
+            /** Any type_url */
+            type_url?: (string|null);
+
+            /** Any value */
+            value?: (Uint8Array|null);
+        }
+
+        /** Represents an Any. */
+        class Any implements IAny {
+
+            /**
+             * Constructs a new Any.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IAny);
+
+            /** Any type_url. */
+            public type_url: string;
+
+            /** Any value. */
+            public value: Uint8Array;
+
+            /**
+             * Creates an Any message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Any
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Any;
+
+            /**
+             * Creates a plain object from an Any message. Also converts values to other types if specified.
+             * @param message Any
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Any, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Any to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for Any
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
         }
 
         /** Properties of an Empty. */
@@ -5374,114 +8442,6 @@ export namespace google {
 
             /**
              * Gets the default type url for FieldMask
-             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-             * @returns The default type url
-             */
-            public static getTypeUrl(typeUrlPrefix?: string): string;
-        }
-
-        /** Properties of a Timestamp. */
-        interface ITimestamp {
-
-            /** Timestamp seconds */
-            seconds?: (number|string|null);
-
-            /** Timestamp nanos */
-            nanos?: (number|null);
-        }
-
-        /** Represents a Timestamp. */
-        class Timestamp implements ITimestamp {
-
-            /**
-             * Constructs a new Timestamp.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.ITimestamp);
-
-            /** Timestamp seconds. */
-            public seconds: (number|string);
-
-            /** Timestamp nanos. */
-            public nanos: number;
-
-            /**
-             * Creates a Timestamp message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns Timestamp
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.Timestamp;
-
-            /**
-             * Creates a plain object from a Timestamp message. Also converts values to other types if specified.
-             * @param message Timestamp
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.Timestamp, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this Timestamp to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-
-            /**
-             * Gets the default type url for Timestamp
-             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-             * @returns The default type url
-             */
-            public static getTypeUrl(typeUrlPrefix?: string): string;
-        }
-
-        /** Properties of an Any. */
-        interface IAny {
-
-            /** Any type_url */
-            type_url?: (string|null);
-
-            /** Any value */
-            value?: (Uint8Array|null);
-        }
-
-        /** Represents an Any. */
-        class Any implements IAny {
-
-            /**
-             * Constructs a new Any.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IAny);
-
-            /** Any type_url. */
-            public type_url: string;
-
-            /** Any value. */
-            public value: Uint8Array;
-
-            /**
-             * Creates an Any message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns Any
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.Any;
-
-            /**
-             * Creates a plain object from an Any message. Also converts values to other types if specified.
-             * @param message Any
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.Any, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this Any to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-
-            /**
-             * Gets the default type url for Any
              * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
              * @returns The default type url
              */
@@ -6100,64 +9060,14 @@ export namespace google {
              */
             public static getTypeUrl(typeUrlPrefix?: string): string;
         }
-
-        /** Properties of a Duration. */
-        interface IDuration {
-
-            /** Duration seconds */
-            seconds?: (number|string|null);
-
-            /** Duration nanos */
-            nanos?: (number|null);
-        }
-
-        /** Represents a Duration. */
-        class Duration implements IDuration {
-
-            /**
-             * Constructs a new Duration.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IDuration);
-
-            /** Duration seconds. */
-            public seconds: (number|string);
-
-            /** Duration nanos. */
-            public nanos: number;
-
-            /**
-             * Creates a Duration message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns Duration
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.Duration;
-
-            /**
-             * Creates a plain object from a Duration message. Also converts values to other types if specified.
-             * @param message Duration
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.Duration, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this Duration to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-
-            /**
-             * Gets the default type url for Duration
-             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-             * @returns The default type url
-             */
-            public static getTypeUrl(typeUrlPrefix?: string): string;
-        }
     }
 
     /** Namespace type. */
     namespace type {
+
+        /** DayOfWeek enum. */
+        type DayOfWeek =
+            "DAY_OF_WEEK_UNSPECIFIED"| "MONDAY"| "TUESDAY"| "WEDNESDAY"| "THURSDAY"| "FRIDAY"| "SATURDAY"| "SUNDAY";
 
         /** Properties of a LatLng. */
         interface ILatLng {
@@ -6207,70 +9117,6 @@ export namespace google {
 
             /**
              * Gets the default type url for LatLng
-             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-             * @returns The default type url
-             */
-            public static getTypeUrl(typeUrlPrefix?: string): string;
-        }
-    }
-
-    /** Namespace rpc. */
-    namespace rpc {
-
-        /** Properties of a Status. */
-        interface IStatus {
-
-            /** Status code */
-            code?: (number|null);
-
-            /** Status message */
-            message?: (string|null);
-
-            /** Status details */
-            details?: (google.protobuf.IAny[]|null);
-        }
-
-        /** Represents a Status. */
-        class Status implements IStatus {
-
-            /**
-             * Constructs a new Status.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.rpc.IStatus);
-
-            /** Status code. */
-            public code: number;
-
-            /** Status message. */
-            public message: string;
-
-            /** Status details. */
-            public details: google.protobuf.IAny[];
-
-            /**
-             * Creates a Status message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns Status
-             */
-            public static fromObject(object: { [k: string]: any }): google.rpc.Status;
-
-            /**
-             * Creates a plain object from a Status message. Also converts values to other types if specified.
-             * @param message Status
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.rpc.Status, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this Status to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-
-            /**
-             * Gets the default type url for Status
              * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
              * @returns The default type url
              */
@@ -6842,6 +9688,70 @@ export namespace google {
 
             /**
              * Gets the default type url for OperationInfo
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+    }
+
+    /** Namespace rpc. */
+    namespace rpc {
+
+        /** Properties of a Status. */
+        interface IStatus {
+
+            /** Status code */
+            code?: (number|null);
+
+            /** Status message */
+            message?: (string|null);
+
+            /** Status details */
+            details?: (google.protobuf.IAny[]|null);
+        }
+
+        /** Represents a Status. */
+        class Status implements IStatus {
+
+            /**
+             * Constructs a new Status.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.rpc.IStatus);
+
+            /** Status code. */
+            public code: number;
+
+            /** Status message. */
+            public message: string;
+
+            /** Status details. */
+            public details: google.protobuf.IAny[];
+
+            /**
+             * Creates a Status message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Status
+             */
+            public static fromObject(object: { [k: string]: any }): google.rpc.Status;
+
+            /**
+             * Creates a plain object from a Status message. Also converts values to other types if specified.
+             * @param message Status
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.rpc.Status, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Status to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for Status
              * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
              * @returns The default type url
              */

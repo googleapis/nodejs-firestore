@@ -18,7 +18,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 echo "Running update.sh"
-
+echo $(npm --version)
 # Variables
 PROTOS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 WORK_DIR=`mktemp -d`
@@ -34,15 +34,17 @@ function cleanup {
 trap cleanup EXIT
 
 # Capture location of pbjs / pbts before we pushd.
-PBJS="$(npm bin)/pbjs"
-PBTS="$(npm bin)/pbts"
+PBJS="$(npm root)/.bin/pbjs"
+PBTS="$(npm root)/.bin/pbts"
 
 # Enter work dir
 pushd "$WORK_DIR"
 
 # Clone necessary git repos.
 git clone --depth 1 https://github.com/googleapis/googleapis.git
-git clone --depth 1 https://github.com/google/protobuf.git
+# Protobuf may have breaking changes, so it will be pinned to a specific release.
+# TODO(version) nodejs-firestore should maintain the version number of protobuf manually
+git clone --single-branch --branch v26.1 --depth 1 https://github.com/google/protobuf.git
 
 # Copy necessary protos.
 mkdir -p "${PROTOS_DIR}/google/api"
@@ -70,17 +72,17 @@ cp googleapis/google/rpc/status.proto \
    "${PROTOS_DIR}/google/rpc/"
 
 mkdir -p "${PROTOS_DIR}/google/type"
-cp googleapis/google/type/latlng.proto \
+cp googleapis/google/type/{latlng,dayofweek}.proto \
    "${PROTOS_DIR}/google/type/"
 
 mkdir -p "${PROTOS_DIR}/google/protobuf"
-cp protobuf/src/google/protobuf/{any,descriptor,empty,field_mask,struct,timestamp,wrappers}.proto \
+cp protobuf/src/google/protobuf/{any,descriptor,empty,field_mask,struct,timestamp,wrappers,duration}.proto \
    "${PROTOS_DIR}/google/protobuf/"
 
 popd
 
 # Generate the Protobuf typings
-PBJS_ARGS=( --proto_path=. \
+PBJS_ARGS=( -p . \
   --js_out=import_style=commonjs,binary:library \
   --target=static-module \
   --no-create \
@@ -92,49 +94,51 @@ PBJS_ARGS=( --proto_path=. \
 
 "${PBJS}" "${PBJS_ARGS[@]}" -o firestore_v1_proto_api.js \
   -r firestore_v1 \
-  "${PROTOS_DIR}/google/firestore/v1/*.proto" \
-  "${PROTOS_DIR}/firestore/*.proto" \
-  "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
-  "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
-  "${PROTOS_DIR}/google/longrunning/*.proto"
+  "google/firestore/v1/*.proto" \
+  "firestore/*.proto" \
+  "google/protobuf/*.proto" "google/type/*.proto" \
+  "google/rpc/*.proto" "google/api/*.proto" \
+  "google/longrunning/*.proto"
 perl -pi -e 's/number\|Long/number\|string/g' firestore_v1_proto_api.js
 "${PBTS}" -o firestore_v1_proto_api.d.ts firestore_v1_proto_api.js
 
 "${PBJS}" "${PBJS_ARGS[@]}" -o firestore_admin_v1_proto_api.js \
   -r firestore_admin_v1 \
-  "${PROTOS_DIR}/google/firestore/admin/v1/*.proto" \
-  "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
-  "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
-  "${PROTOS_DIR}/google/longrunning/*.proto"
+  "google/firestore/admin/v1/*.proto" \
+  "google/protobuf/*.proto" "google/type/*.proto" \
+  "google/rpc/*.proto" "google/api/*.proto" \
+  "google/longrunning/*.proto"
 perl -pi -e 's/number\|Long/number\|string/g' firestore_admin_v1_proto_api.js
 "${PBTS}" -o firestore_admin_v1_proto_api.d.ts firestore_admin_v1_proto_api.js
 
 "${PBJS}" "${PBJS_ARGS[@]}" -o firestore_v1beta1_proto_api.js \
   -r firestore_v1beta1 \
-  "${PROTOS_DIR}/google/firestore/v1beta1/*.proto" \
-  "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
-  "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
-  "${PROTOS_DIR}/google/longrunning/*.proto"
+  "google/firestore/v1beta1/*.proto" \
+  "google/protobuf/*.proto" "google/type/*.proto" \
+  "google/rpc/*.proto" "google/api/*.proto" \
+  "google/longrunning/*.proto"
 perl -pi -e 's/number\|Long/number\|string/g' firestore_v1beta1_proto_api.js
 "${PBTS}" -o firestore_v1beta1_proto_api.d.ts firestore_v1beta1_proto_api.js
 
-"${PBJS}" --proto_path=. --target=json -o v1.json \
+"${PBJS}" -p . --target=json -o v1.json \
   -r firestore_v1 \
-  "${PROTOS_DIR}/google/firestore/v1/*.proto" \
-  "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
-  "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto"
+  "google/firestore/v1/*.proto" \
+  "google/protobuf/*.proto" "google/type/*.proto" \
+  "google/rpc/*.proto" "google/api/*.proto"
 
-"${PBJS}" --proto_path=. --target=json -o admin_v1.json \
+"${PBJS}" -p . --target=json -o admin_v1.json \
   -r firestore_admin_v1 \
-  "${PROTOS_DIR}/google/firestore/admin/v1/*.proto" \
-  "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
-  "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto" \
-  "${PROTOS_DIR}/google/longrunning/*.proto"
+  "google/firestore/admin/v1/*.proto" \
+  "google/protobuf/*.proto" "google/type/*.proto" \
+  "google/rpc/*.proto" "google/api/*.proto" \
+  "google/longrunning/*.proto"
 
-"${PBJS}" --proto_path=. --target=json -o v1beta1.json \
+"${PBJS}" -p . --target=json -o v1beta1.json \
   -r firestore_v1beta1 \
-  "${PROTOS_DIR}/google/firestore/v1beta1/*.proto" \
-  "${PROTOS_DIR}/google/protobuf/*.proto" "${PROTOS_DIR}/google/type/*.proto" \
-  "${PROTOS_DIR}/google/rpc/*.proto" "${PROTOS_DIR}/google/api/*.proto"
+  "google/firestore/v1beta1/*.proto" \
+  "google/protobuf/*.proto" "google/type/*.proto" \
+  "google/rpc/*.proto" "google/api/*.proto"
 
-node  ../../scripts/license.js *.d.ts *.js ../../build/src/v1beta1/*.d.ts ../../build/src/v1/*.d.ts
+echo "Finished running update.sh"
+
+node  ../../scripts/license.js ../../build ../protos

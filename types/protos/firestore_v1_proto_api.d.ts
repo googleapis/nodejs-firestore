@@ -1,5 +1,5 @@
 /*!
- * Copyright 2022 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,13 @@ export namespace firestore {
          * @returns JSON object
          */
         public toJSON(): { [k: string]: any };
+
+        /**
+         * Gets the default type url for BundledQuery
+         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns The default type url
+         */
+        public static getTypeUrl(typeUrlPrefix?: string): string;
     }
 
     namespace BundledQuery {
@@ -132,6 +139,13 @@ export namespace firestore {
          * @returns JSON object
          */
         public toJSON(): { [k: string]: any };
+
+        /**
+         * Gets the default type url for NamedQuery
+         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns The default type url
+         */
+        public static getTypeUrl(typeUrlPrefix?: string): string;
     }
 
     /** Properties of a BundledDocumentMetadata. */
@@ -191,6 +205,13 @@ export namespace firestore {
          * @returns JSON object
          */
         public toJSON(): { [k: string]: any };
+
+        /**
+         * Gets the default type url for BundledDocumentMetadata
+         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns The default type url
+         */
+        public static getTypeUrl(typeUrlPrefix?: string): string;
     }
 
     /** Properties of a BundleMetadata. */
@@ -256,6 +277,13 @@ export namespace firestore {
          * @returns JSON object
          */
         public toJSON(): { [k: string]: any };
+
+        /**
+         * Gets the default type url for BundleMetadata
+         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns The default type url
+         */
+        public static getTypeUrl(typeUrlPrefix?: string): string;
     }
 
     /** Properties of a BundleElement. */
@@ -318,2370 +346,18 @@ export namespace firestore {
          * @returns JSON object
          */
         public toJSON(): { [k: string]: any };
+
+        /**
+         * Gets the default type url for BundleElement
+         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+         * @returns The default type url
+         */
+        public static getTypeUrl(typeUrlPrefix?: string): string;
     }
 }
 
 /** Namespace google. */
 export namespace google {
-
-    /** Namespace protobuf. */
-    namespace protobuf {
-
-        /** Properties of a Timestamp. */
-        interface ITimestamp {
-
-            /** Timestamp seconds */
-            seconds?: (number|string|null);
-
-            /** Timestamp nanos */
-            nanos?: (number|null);
-        }
-
-        /** Represents a Timestamp. */
-        class Timestamp implements ITimestamp {
-
-            /**
-             * Constructs a new Timestamp.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.ITimestamp);
-
-            /** Timestamp seconds. */
-            public seconds: (number|string);
-
-            /** Timestamp nanos. */
-            public nanos: number;
-
-            /**
-             * Creates a Timestamp message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns Timestamp
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.Timestamp;
-
-            /**
-             * Creates a plain object from a Timestamp message. Also converts values to other types if specified.
-             * @param message Timestamp
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.Timestamp, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this Timestamp to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a FileDescriptorSet. */
-        interface IFileDescriptorSet {
-
-            /** FileDescriptorSet file */
-            file?: (google.protobuf.IFileDescriptorProto[]|null);
-        }
-
-        /** Represents a FileDescriptorSet. */
-        class FileDescriptorSet implements IFileDescriptorSet {
-
-            /**
-             * Constructs a new FileDescriptorSet.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IFileDescriptorSet);
-
-            /** FileDescriptorSet file. */
-            public file: google.protobuf.IFileDescriptorProto[];
-
-            /**
-             * Creates a FileDescriptorSet message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns FileDescriptorSet
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.FileDescriptorSet;
-
-            /**
-             * Creates a plain object from a FileDescriptorSet message. Also converts values to other types if specified.
-             * @param message FileDescriptorSet
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.FileDescriptorSet, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this FileDescriptorSet to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a FileDescriptorProto. */
-        interface IFileDescriptorProto {
-
-            /** FileDescriptorProto name */
-            name?: (string|null);
-
-            /** FileDescriptorProto package */
-            "package"?: (string|null);
-
-            /** FileDescriptorProto dependency */
-            dependency?: (string[]|null);
-
-            /** FileDescriptorProto publicDependency */
-            publicDependency?: (number[]|null);
-
-            /** FileDescriptorProto weakDependency */
-            weakDependency?: (number[]|null);
-
-            /** FileDescriptorProto messageType */
-            messageType?: (google.protobuf.IDescriptorProto[]|null);
-
-            /** FileDescriptorProto enumType */
-            enumType?: (google.protobuf.IEnumDescriptorProto[]|null);
-
-            /** FileDescriptorProto service */
-            service?: (google.protobuf.IServiceDescriptorProto[]|null);
-
-            /** FileDescriptorProto extension */
-            extension?: (google.protobuf.IFieldDescriptorProto[]|null);
-
-            /** FileDescriptorProto options */
-            options?: (google.protobuf.IFileOptions|null);
-
-            /** FileDescriptorProto sourceCodeInfo */
-            sourceCodeInfo?: (google.protobuf.ISourceCodeInfo|null);
-
-            /** FileDescriptorProto syntax */
-            syntax?: (string|null);
-        }
-
-        /** Represents a FileDescriptorProto. */
-        class FileDescriptorProto implements IFileDescriptorProto {
-
-            /**
-             * Constructs a new FileDescriptorProto.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IFileDescriptorProto);
-
-            /** FileDescriptorProto name. */
-            public name: string;
-
-            /** FileDescriptorProto package. */
-            public package: string;
-
-            /** FileDescriptorProto dependency. */
-            public dependency: string[];
-
-            /** FileDescriptorProto publicDependency. */
-            public publicDependency: number[];
-
-            /** FileDescriptorProto weakDependency. */
-            public weakDependency: number[];
-
-            /** FileDescriptorProto messageType. */
-            public messageType: google.protobuf.IDescriptorProto[];
-
-            /** FileDescriptorProto enumType. */
-            public enumType: google.protobuf.IEnumDescriptorProto[];
-
-            /** FileDescriptorProto service. */
-            public service: google.protobuf.IServiceDescriptorProto[];
-
-            /** FileDescriptorProto extension. */
-            public extension: google.protobuf.IFieldDescriptorProto[];
-
-            /** FileDescriptorProto options. */
-            public options?: (google.protobuf.IFileOptions|null);
-
-            /** FileDescriptorProto sourceCodeInfo. */
-            public sourceCodeInfo?: (google.protobuf.ISourceCodeInfo|null);
-
-            /** FileDescriptorProto syntax. */
-            public syntax: string;
-
-            /**
-             * Creates a FileDescriptorProto message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns FileDescriptorProto
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.FileDescriptorProto;
-
-            /**
-             * Creates a plain object from a FileDescriptorProto message. Also converts values to other types if specified.
-             * @param message FileDescriptorProto
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.FileDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this FileDescriptorProto to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a DescriptorProto. */
-        interface IDescriptorProto {
-
-            /** DescriptorProto name */
-            name?: (string|null);
-
-            /** DescriptorProto field */
-            field?: (google.protobuf.IFieldDescriptorProto[]|null);
-
-            /** DescriptorProto extension */
-            extension?: (google.protobuf.IFieldDescriptorProto[]|null);
-
-            /** DescriptorProto nestedType */
-            nestedType?: (google.protobuf.IDescriptorProto[]|null);
-
-            /** DescriptorProto enumType */
-            enumType?: (google.protobuf.IEnumDescriptorProto[]|null);
-
-            /** DescriptorProto extensionRange */
-            extensionRange?: (google.protobuf.DescriptorProto.IExtensionRange[]|null);
-
-            /** DescriptorProto oneofDecl */
-            oneofDecl?: (google.protobuf.IOneofDescriptorProto[]|null);
-
-            /** DescriptorProto options */
-            options?: (google.protobuf.IMessageOptions|null);
-
-            /** DescriptorProto reservedRange */
-            reservedRange?: (google.protobuf.DescriptorProto.IReservedRange[]|null);
-
-            /** DescriptorProto reservedName */
-            reservedName?: (string[]|null);
-        }
-
-        /** Represents a DescriptorProto. */
-        class DescriptorProto implements IDescriptorProto {
-
-            /**
-             * Constructs a new DescriptorProto.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IDescriptorProto);
-
-            /** DescriptorProto name. */
-            public name: string;
-
-            /** DescriptorProto field. */
-            public field: google.protobuf.IFieldDescriptorProto[];
-
-            /** DescriptorProto extension. */
-            public extension: google.protobuf.IFieldDescriptorProto[];
-
-            /** DescriptorProto nestedType. */
-            public nestedType: google.protobuf.IDescriptorProto[];
-
-            /** DescriptorProto enumType. */
-            public enumType: google.protobuf.IEnumDescriptorProto[];
-
-            /** DescriptorProto extensionRange. */
-            public extensionRange: google.protobuf.DescriptorProto.IExtensionRange[];
-
-            /** DescriptorProto oneofDecl. */
-            public oneofDecl: google.protobuf.IOneofDescriptorProto[];
-
-            /** DescriptorProto options. */
-            public options?: (google.protobuf.IMessageOptions|null);
-
-            /** DescriptorProto reservedRange. */
-            public reservedRange: google.protobuf.DescriptorProto.IReservedRange[];
-
-            /** DescriptorProto reservedName. */
-            public reservedName: string[];
-
-            /**
-             * Creates a DescriptorProto message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns DescriptorProto
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.DescriptorProto;
-
-            /**
-             * Creates a plain object from a DescriptorProto message. Also converts values to other types if specified.
-             * @param message DescriptorProto
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.DescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this DescriptorProto to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        namespace DescriptorProto {
-
-            /** Properties of an ExtensionRange. */
-            interface IExtensionRange {
-
-                /** ExtensionRange start */
-                start?: (number|null);
-
-                /** ExtensionRange end */
-                end?: (number|null);
-            }
-
-            /** Represents an ExtensionRange. */
-            class ExtensionRange implements IExtensionRange {
-
-                /**
-                 * Constructs a new ExtensionRange.
-                 * @param [properties] Properties to set
-                 */
-                constructor(properties?: google.protobuf.DescriptorProto.IExtensionRange);
-
-                /** ExtensionRange start. */
-                public start: number;
-
-                /** ExtensionRange end. */
-                public end: number;
-
-                /**
-                 * Creates an ExtensionRange message from a plain object. Also converts values to their respective internal types.
-                 * @param object Plain object
-                 * @returns ExtensionRange
-                 */
-                public static fromObject(object: { [k: string]: any }): google.protobuf.DescriptorProto.ExtensionRange;
-
-                /**
-                 * Creates a plain object from an ExtensionRange message. Also converts values to other types if specified.
-                 * @param message ExtensionRange
-                 * @param [options] Conversion options
-                 * @returns Plain object
-                 */
-                public static toObject(message: google.protobuf.DescriptorProto.ExtensionRange, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-                /**
-                 * Converts this ExtensionRange to JSON.
-                 * @returns JSON object
-                 */
-                public toJSON(): { [k: string]: any };
-            }
-
-            /** Properties of a ReservedRange. */
-            interface IReservedRange {
-
-                /** ReservedRange start */
-                start?: (number|null);
-
-                /** ReservedRange end */
-                end?: (number|null);
-            }
-
-            /** Represents a ReservedRange. */
-            class ReservedRange implements IReservedRange {
-
-                /**
-                 * Constructs a new ReservedRange.
-                 * @param [properties] Properties to set
-                 */
-                constructor(properties?: google.protobuf.DescriptorProto.IReservedRange);
-
-                /** ReservedRange start. */
-                public start: number;
-
-                /** ReservedRange end. */
-                public end: number;
-
-                /**
-                 * Creates a ReservedRange message from a plain object. Also converts values to their respective internal types.
-                 * @param object Plain object
-                 * @returns ReservedRange
-                 */
-                public static fromObject(object: { [k: string]: any }): google.protobuf.DescriptorProto.ReservedRange;
-
-                /**
-                 * Creates a plain object from a ReservedRange message. Also converts values to other types if specified.
-                 * @param message ReservedRange
-                 * @param [options] Conversion options
-                 * @returns Plain object
-                 */
-                public static toObject(message: google.protobuf.DescriptorProto.ReservedRange, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-                /**
-                 * Converts this ReservedRange to JSON.
-                 * @returns JSON object
-                 */
-                public toJSON(): { [k: string]: any };
-            }
-        }
-
-        /** Properties of a FieldDescriptorProto. */
-        interface IFieldDescriptorProto {
-
-            /** FieldDescriptorProto name */
-            name?: (string|null);
-
-            /** FieldDescriptorProto number */
-            number?: (number|null);
-
-            /** FieldDescriptorProto label */
-            label?: (google.protobuf.FieldDescriptorProto.Label|null);
-
-            /** FieldDescriptorProto type */
-            type?: (google.protobuf.FieldDescriptorProto.Type|null);
-
-            /** FieldDescriptorProto typeName */
-            typeName?: (string|null);
-
-            /** FieldDescriptorProto extendee */
-            extendee?: (string|null);
-
-            /** FieldDescriptorProto defaultValue */
-            defaultValue?: (string|null);
-
-            /** FieldDescriptorProto oneofIndex */
-            oneofIndex?: (number|null);
-
-            /** FieldDescriptorProto jsonName */
-            jsonName?: (string|null);
-
-            /** FieldDescriptorProto options */
-            options?: (google.protobuf.IFieldOptions|null);
-        }
-
-        /** Represents a FieldDescriptorProto. */
-        class FieldDescriptorProto implements IFieldDescriptorProto {
-
-            /**
-             * Constructs a new FieldDescriptorProto.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IFieldDescriptorProto);
-
-            /** FieldDescriptorProto name. */
-            public name: string;
-
-            /** FieldDescriptorProto number. */
-            public number: number;
-
-            /** FieldDescriptorProto label. */
-            public label: google.protobuf.FieldDescriptorProto.Label;
-
-            /** FieldDescriptorProto type. */
-            public type: google.protobuf.FieldDescriptorProto.Type;
-
-            /** FieldDescriptorProto typeName. */
-            public typeName: string;
-
-            /** FieldDescriptorProto extendee. */
-            public extendee: string;
-
-            /** FieldDescriptorProto defaultValue. */
-            public defaultValue: string;
-
-            /** FieldDescriptorProto oneofIndex. */
-            public oneofIndex: number;
-
-            /** FieldDescriptorProto jsonName. */
-            public jsonName: string;
-
-            /** FieldDescriptorProto options. */
-            public options?: (google.protobuf.IFieldOptions|null);
-
-            /**
-             * Creates a FieldDescriptorProto message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns FieldDescriptorProto
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.FieldDescriptorProto;
-
-            /**
-             * Creates a plain object from a FieldDescriptorProto message. Also converts values to other types if specified.
-             * @param message FieldDescriptorProto
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.FieldDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this FieldDescriptorProto to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        namespace FieldDescriptorProto {
-
-            /** Type enum. */
-            type Type =
-                "TYPE_DOUBLE"| "TYPE_FLOAT"| "TYPE_INT64"| "TYPE_UINT64"| "TYPE_INT32"| "TYPE_FIXED64"| "TYPE_FIXED32"| "TYPE_BOOL"| "TYPE_STRING"| "TYPE_GROUP"| "TYPE_MESSAGE"| "TYPE_BYTES"| "TYPE_UINT32"| "TYPE_ENUM"| "TYPE_SFIXED32"| "TYPE_SFIXED64"| "TYPE_SINT32"| "TYPE_SINT64";
-
-            /** Label enum. */
-            type Label =
-                "LABEL_OPTIONAL"| "LABEL_REQUIRED"| "LABEL_REPEATED";
-        }
-
-        /** Properties of an OneofDescriptorProto. */
-        interface IOneofDescriptorProto {
-
-            /** OneofDescriptorProto name */
-            name?: (string|null);
-
-            /** OneofDescriptorProto options */
-            options?: (google.protobuf.IOneofOptions|null);
-        }
-
-        /** Represents an OneofDescriptorProto. */
-        class OneofDescriptorProto implements IOneofDescriptorProto {
-
-            /**
-             * Constructs a new OneofDescriptorProto.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IOneofDescriptorProto);
-
-            /** OneofDescriptorProto name. */
-            public name: string;
-
-            /** OneofDescriptorProto options. */
-            public options?: (google.protobuf.IOneofOptions|null);
-
-            /**
-             * Creates an OneofDescriptorProto message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns OneofDescriptorProto
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.OneofDescriptorProto;
-
-            /**
-             * Creates a plain object from an OneofDescriptorProto message. Also converts values to other types if specified.
-             * @param message OneofDescriptorProto
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.OneofDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this OneofDescriptorProto to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of an EnumDescriptorProto. */
-        interface IEnumDescriptorProto {
-
-            /** EnumDescriptorProto name */
-            name?: (string|null);
-
-            /** EnumDescriptorProto value */
-            value?: (google.protobuf.IEnumValueDescriptorProto[]|null);
-
-            /** EnumDescriptorProto options */
-            options?: (google.protobuf.IEnumOptions|null);
-        }
-
-        /** Represents an EnumDescriptorProto. */
-        class EnumDescriptorProto implements IEnumDescriptorProto {
-
-            /**
-             * Constructs a new EnumDescriptorProto.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IEnumDescriptorProto);
-
-            /** EnumDescriptorProto name. */
-            public name: string;
-
-            /** EnumDescriptorProto value. */
-            public value: google.protobuf.IEnumValueDescriptorProto[];
-
-            /** EnumDescriptorProto options. */
-            public options?: (google.protobuf.IEnumOptions|null);
-
-            /**
-             * Creates an EnumDescriptorProto message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns EnumDescriptorProto
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.EnumDescriptorProto;
-
-            /**
-             * Creates a plain object from an EnumDescriptorProto message. Also converts values to other types if specified.
-             * @param message EnumDescriptorProto
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.EnumDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this EnumDescriptorProto to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of an EnumValueDescriptorProto. */
-        interface IEnumValueDescriptorProto {
-
-            /** EnumValueDescriptorProto name */
-            name?: (string|null);
-
-            /** EnumValueDescriptorProto number */
-            number?: (number|null);
-
-            /** EnumValueDescriptorProto options */
-            options?: (google.protobuf.IEnumValueOptions|null);
-        }
-
-        /** Represents an EnumValueDescriptorProto. */
-        class EnumValueDescriptorProto implements IEnumValueDescriptorProto {
-
-            /**
-             * Constructs a new EnumValueDescriptorProto.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IEnumValueDescriptorProto);
-
-            /** EnumValueDescriptorProto name. */
-            public name: string;
-
-            /** EnumValueDescriptorProto number. */
-            public number: number;
-
-            /** EnumValueDescriptorProto options. */
-            public options?: (google.protobuf.IEnumValueOptions|null);
-
-            /**
-             * Creates an EnumValueDescriptorProto message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns EnumValueDescriptorProto
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.EnumValueDescriptorProto;
-
-            /**
-             * Creates a plain object from an EnumValueDescriptorProto message. Also converts values to other types if specified.
-             * @param message EnumValueDescriptorProto
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.EnumValueDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this EnumValueDescriptorProto to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a ServiceDescriptorProto. */
-        interface IServiceDescriptorProto {
-
-            /** ServiceDescriptorProto name */
-            name?: (string|null);
-
-            /** ServiceDescriptorProto method */
-            method?: (google.protobuf.IMethodDescriptorProto[]|null);
-
-            /** ServiceDescriptorProto options */
-            options?: (google.protobuf.IServiceOptions|null);
-        }
-
-        /** Represents a ServiceDescriptorProto. */
-        class ServiceDescriptorProto implements IServiceDescriptorProto {
-
-            /**
-             * Constructs a new ServiceDescriptorProto.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IServiceDescriptorProto);
-
-            /** ServiceDescriptorProto name. */
-            public name: string;
-
-            /** ServiceDescriptorProto method. */
-            public method: google.protobuf.IMethodDescriptorProto[];
-
-            /** ServiceDescriptorProto options. */
-            public options?: (google.protobuf.IServiceOptions|null);
-
-            /**
-             * Creates a ServiceDescriptorProto message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns ServiceDescriptorProto
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.ServiceDescriptorProto;
-
-            /**
-             * Creates a plain object from a ServiceDescriptorProto message. Also converts values to other types if specified.
-             * @param message ServiceDescriptorProto
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.ServiceDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this ServiceDescriptorProto to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a MethodDescriptorProto. */
-        interface IMethodDescriptorProto {
-
-            /** MethodDescriptorProto name */
-            name?: (string|null);
-
-            /** MethodDescriptorProto inputType */
-            inputType?: (string|null);
-
-            /** MethodDescriptorProto outputType */
-            outputType?: (string|null);
-
-            /** MethodDescriptorProto options */
-            options?: (google.protobuf.IMethodOptions|null);
-
-            /** MethodDescriptorProto clientStreaming */
-            clientStreaming?: (boolean|null);
-
-            /** MethodDescriptorProto serverStreaming */
-            serverStreaming?: (boolean|null);
-        }
-
-        /** Represents a MethodDescriptorProto. */
-        class MethodDescriptorProto implements IMethodDescriptorProto {
-
-            /**
-             * Constructs a new MethodDescriptorProto.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IMethodDescriptorProto);
-
-            /** MethodDescriptorProto name. */
-            public name: string;
-
-            /** MethodDescriptorProto inputType. */
-            public inputType: string;
-
-            /** MethodDescriptorProto outputType. */
-            public outputType: string;
-
-            /** MethodDescriptorProto options. */
-            public options?: (google.protobuf.IMethodOptions|null);
-
-            /** MethodDescriptorProto clientStreaming. */
-            public clientStreaming: boolean;
-
-            /** MethodDescriptorProto serverStreaming. */
-            public serverStreaming: boolean;
-
-            /**
-             * Creates a MethodDescriptorProto message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns MethodDescriptorProto
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.MethodDescriptorProto;
-
-            /**
-             * Creates a plain object from a MethodDescriptorProto message. Also converts values to other types if specified.
-             * @param message MethodDescriptorProto
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.MethodDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this MethodDescriptorProto to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a FileOptions. */
-        interface IFileOptions {
-
-            /** FileOptions javaPackage */
-            javaPackage?: (string|null);
-
-            /** FileOptions javaOuterClassname */
-            javaOuterClassname?: (string|null);
-
-            /** FileOptions javaMultipleFiles */
-            javaMultipleFiles?: (boolean|null);
-
-            /** FileOptions javaGenerateEqualsAndHash */
-            javaGenerateEqualsAndHash?: (boolean|null);
-
-            /** FileOptions javaStringCheckUtf8 */
-            javaStringCheckUtf8?: (boolean|null);
-
-            /** FileOptions optimizeFor */
-            optimizeFor?: (google.protobuf.FileOptions.OptimizeMode|null);
-
-            /** FileOptions goPackage */
-            goPackage?: (string|null);
-
-            /** FileOptions ccGenericServices */
-            ccGenericServices?: (boolean|null);
-
-            /** FileOptions javaGenericServices */
-            javaGenericServices?: (boolean|null);
-
-            /** FileOptions pyGenericServices */
-            pyGenericServices?: (boolean|null);
-
-            /** FileOptions deprecated */
-            deprecated?: (boolean|null);
-
-            /** FileOptions ccEnableArenas */
-            ccEnableArenas?: (boolean|null);
-
-            /** FileOptions objcClassPrefix */
-            objcClassPrefix?: (string|null);
-
-            /** FileOptions csharpNamespace */
-            csharpNamespace?: (string|null);
-
-            /** FileOptions uninterpretedOption */
-            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
-
-            /** FileOptions .google.api.resourceDefinition */
-            ".google.api.resourceDefinition"?: (google.api.IResourceDescriptor[]|null);
-        }
-
-        /** Represents a FileOptions. */
-        class FileOptions implements IFileOptions {
-
-            /**
-             * Constructs a new FileOptions.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IFileOptions);
-
-            /** FileOptions javaPackage. */
-            public javaPackage: string;
-
-            /** FileOptions javaOuterClassname. */
-            public javaOuterClassname: string;
-
-            /** FileOptions javaMultipleFiles. */
-            public javaMultipleFiles: boolean;
-
-            /** FileOptions javaGenerateEqualsAndHash. */
-            public javaGenerateEqualsAndHash: boolean;
-
-            /** FileOptions javaStringCheckUtf8. */
-            public javaStringCheckUtf8: boolean;
-
-            /** FileOptions optimizeFor. */
-            public optimizeFor: google.protobuf.FileOptions.OptimizeMode;
-
-            /** FileOptions goPackage. */
-            public goPackage: string;
-
-            /** FileOptions ccGenericServices. */
-            public ccGenericServices: boolean;
-
-            /** FileOptions javaGenericServices. */
-            public javaGenericServices: boolean;
-
-            /** FileOptions pyGenericServices. */
-            public pyGenericServices: boolean;
-
-            /** FileOptions deprecated. */
-            public deprecated: boolean;
-
-            /** FileOptions ccEnableArenas. */
-            public ccEnableArenas: boolean;
-
-            /** FileOptions objcClassPrefix. */
-            public objcClassPrefix: string;
-
-            /** FileOptions csharpNamespace. */
-            public csharpNamespace: string;
-
-            /** FileOptions uninterpretedOption. */
-            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
-
-            /**
-             * Creates a FileOptions message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns FileOptions
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.FileOptions;
-
-            /**
-             * Creates a plain object from a FileOptions message. Also converts values to other types if specified.
-             * @param message FileOptions
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.FileOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this FileOptions to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        namespace FileOptions {
-
-            /** OptimizeMode enum. */
-            type OptimizeMode =
-                "SPEED"| "CODE_SIZE"| "LITE_RUNTIME";
-        }
-
-        /** Properties of a MessageOptions. */
-        interface IMessageOptions {
-
-            /** MessageOptions messageSetWireFormat */
-            messageSetWireFormat?: (boolean|null);
-
-            /** MessageOptions noStandardDescriptorAccessor */
-            noStandardDescriptorAccessor?: (boolean|null);
-
-            /** MessageOptions deprecated */
-            deprecated?: (boolean|null);
-
-            /** MessageOptions mapEntry */
-            mapEntry?: (boolean|null);
-
-            /** MessageOptions uninterpretedOption */
-            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
-
-            /** MessageOptions .google.api.resource */
-            ".google.api.resource"?: (google.api.IResourceDescriptor|null);
-        }
-
-        /** Represents a MessageOptions. */
-        class MessageOptions implements IMessageOptions {
-
-            /**
-             * Constructs a new MessageOptions.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IMessageOptions);
-
-            /** MessageOptions messageSetWireFormat. */
-            public messageSetWireFormat: boolean;
-
-            /** MessageOptions noStandardDescriptorAccessor. */
-            public noStandardDescriptorAccessor: boolean;
-
-            /** MessageOptions deprecated. */
-            public deprecated: boolean;
-
-            /** MessageOptions mapEntry. */
-            public mapEntry: boolean;
-
-            /** MessageOptions uninterpretedOption. */
-            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
-
-            /**
-             * Creates a MessageOptions message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns MessageOptions
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.MessageOptions;
-
-            /**
-             * Creates a plain object from a MessageOptions message. Also converts values to other types if specified.
-             * @param message MessageOptions
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.MessageOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this MessageOptions to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a FieldOptions. */
-        interface IFieldOptions {
-
-            /** FieldOptions ctype */
-            ctype?: (google.protobuf.FieldOptions.CType|null);
-
-            /** FieldOptions packed */
-            packed?: (boolean|null);
-
-            /** FieldOptions jstype */
-            jstype?: (google.protobuf.FieldOptions.JSType|null);
-
-            /** FieldOptions lazy */
-            lazy?: (boolean|null);
-
-            /** FieldOptions deprecated */
-            deprecated?: (boolean|null);
-
-            /** FieldOptions weak */
-            weak?: (boolean|null);
-
-            /** FieldOptions uninterpretedOption */
-            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
-
-            /** FieldOptions .google.api.fieldBehavior */
-            ".google.api.fieldBehavior"?: (google.api.FieldBehavior[]|null);
-
-            /** FieldOptions .google.api.resourceReference */
-            ".google.api.resourceReference"?: (google.api.IResourceReference|null);
-        }
-
-        /** Represents a FieldOptions. */
-        class FieldOptions implements IFieldOptions {
-
-            /**
-             * Constructs a new FieldOptions.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IFieldOptions);
-
-            /** FieldOptions ctype. */
-            public ctype: google.protobuf.FieldOptions.CType;
-
-            /** FieldOptions packed. */
-            public packed: boolean;
-
-            /** FieldOptions jstype. */
-            public jstype: google.protobuf.FieldOptions.JSType;
-
-            /** FieldOptions lazy. */
-            public lazy: boolean;
-
-            /** FieldOptions deprecated. */
-            public deprecated: boolean;
-
-            /** FieldOptions weak. */
-            public weak: boolean;
-
-            /** FieldOptions uninterpretedOption. */
-            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
-
-            /**
-             * Creates a FieldOptions message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns FieldOptions
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.FieldOptions;
-
-            /**
-             * Creates a plain object from a FieldOptions message. Also converts values to other types if specified.
-             * @param message FieldOptions
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.FieldOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this FieldOptions to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        namespace FieldOptions {
-
-            /** CType enum. */
-            type CType =
-                "STRING"| "CORD"| "STRING_PIECE";
-
-            /** JSType enum. */
-            type JSType =
-                "JS_NORMAL"| "JS_STRING"| "JS_NUMBER";
-        }
-
-        /** Properties of an OneofOptions. */
-        interface IOneofOptions {
-
-            /** OneofOptions uninterpretedOption */
-            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
-        }
-
-        /** Represents an OneofOptions. */
-        class OneofOptions implements IOneofOptions {
-
-            /**
-             * Constructs a new OneofOptions.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IOneofOptions);
-
-            /** OneofOptions uninterpretedOption. */
-            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
-
-            /**
-             * Creates an OneofOptions message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns OneofOptions
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.OneofOptions;
-
-            /**
-             * Creates a plain object from an OneofOptions message. Also converts values to other types if specified.
-             * @param message OneofOptions
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.OneofOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this OneofOptions to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of an EnumOptions. */
-        interface IEnumOptions {
-
-            /** EnumOptions allowAlias */
-            allowAlias?: (boolean|null);
-
-            /** EnumOptions deprecated */
-            deprecated?: (boolean|null);
-
-            /** EnumOptions uninterpretedOption */
-            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
-        }
-
-        /** Represents an EnumOptions. */
-        class EnumOptions implements IEnumOptions {
-
-            /**
-             * Constructs a new EnumOptions.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IEnumOptions);
-
-            /** EnumOptions allowAlias. */
-            public allowAlias: boolean;
-
-            /** EnumOptions deprecated. */
-            public deprecated: boolean;
-
-            /** EnumOptions uninterpretedOption. */
-            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
-
-            /**
-             * Creates an EnumOptions message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns EnumOptions
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.EnumOptions;
-
-            /**
-             * Creates a plain object from an EnumOptions message. Also converts values to other types if specified.
-             * @param message EnumOptions
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.EnumOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this EnumOptions to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of an EnumValueOptions. */
-        interface IEnumValueOptions {
-
-            /** EnumValueOptions deprecated */
-            deprecated?: (boolean|null);
-
-            /** EnumValueOptions uninterpretedOption */
-            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
-        }
-
-        /** Represents an EnumValueOptions. */
-        class EnumValueOptions implements IEnumValueOptions {
-
-            /**
-             * Constructs a new EnumValueOptions.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IEnumValueOptions);
-
-            /** EnumValueOptions deprecated. */
-            public deprecated: boolean;
-
-            /** EnumValueOptions uninterpretedOption. */
-            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
-
-            /**
-             * Creates an EnumValueOptions message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns EnumValueOptions
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.EnumValueOptions;
-
-            /**
-             * Creates a plain object from an EnumValueOptions message. Also converts values to other types if specified.
-             * @param message EnumValueOptions
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.EnumValueOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this EnumValueOptions to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a ServiceOptions. */
-        interface IServiceOptions {
-
-            /** ServiceOptions deprecated */
-            deprecated?: (boolean|null);
-
-            /** ServiceOptions uninterpretedOption */
-            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
-
-            /** ServiceOptions .google.api.defaultHost */
-            ".google.api.defaultHost"?: (string|null);
-
-            /** ServiceOptions .google.api.oauthScopes */
-            ".google.api.oauthScopes"?: (string|null);
-        }
-
-        /** Represents a ServiceOptions. */
-        class ServiceOptions implements IServiceOptions {
-
-            /**
-             * Constructs a new ServiceOptions.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IServiceOptions);
-
-            /** ServiceOptions deprecated. */
-            public deprecated: boolean;
-
-            /** ServiceOptions uninterpretedOption. */
-            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
-
-            /**
-             * Creates a ServiceOptions message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns ServiceOptions
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.ServiceOptions;
-
-            /**
-             * Creates a plain object from a ServiceOptions message. Also converts values to other types if specified.
-             * @param message ServiceOptions
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.ServiceOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this ServiceOptions to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a MethodOptions. */
-        interface IMethodOptions {
-
-            /** MethodOptions deprecated */
-            deprecated?: (boolean|null);
-
-            /** MethodOptions uninterpretedOption */
-            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
-
-            /** MethodOptions .google.api.http */
-            ".google.api.http"?: (google.api.IHttpRule|null);
-
-            /** MethodOptions .google.api.methodSignature */
-            ".google.api.methodSignature"?: (string[]|null);
-
-            /** MethodOptions .google.longrunning.operationInfo */
-            ".google.longrunning.operationInfo"?: (google.longrunning.IOperationInfo|null);
-        }
-
-        /** Represents a MethodOptions. */
-        class MethodOptions implements IMethodOptions {
-
-            /**
-             * Constructs a new MethodOptions.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IMethodOptions);
-
-            /** MethodOptions deprecated. */
-            public deprecated: boolean;
-
-            /** MethodOptions uninterpretedOption. */
-            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
-
-            /**
-             * Creates a MethodOptions message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns MethodOptions
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.MethodOptions;
-
-            /**
-             * Creates a plain object from a MethodOptions message. Also converts values to other types if specified.
-             * @param message MethodOptions
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.MethodOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this MethodOptions to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of an UninterpretedOption. */
-        interface IUninterpretedOption {
-
-            /** UninterpretedOption name */
-            name?: (google.protobuf.UninterpretedOption.INamePart[]|null);
-
-            /** UninterpretedOption identifierValue */
-            identifierValue?: (string|null);
-
-            /** UninterpretedOption positiveIntValue */
-            positiveIntValue?: (number|string|null);
-
-            /** UninterpretedOption negativeIntValue */
-            negativeIntValue?: (number|string|null);
-
-            /** UninterpretedOption doubleValue */
-            doubleValue?: (number|null);
-
-            /** UninterpretedOption stringValue */
-            stringValue?: (Uint8Array|null);
-
-            /** UninterpretedOption aggregateValue */
-            aggregateValue?: (string|null);
-        }
-
-        /** Represents an UninterpretedOption. */
-        class UninterpretedOption implements IUninterpretedOption {
-
-            /**
-             * Constructs a new UninterpretedOption.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IUninterpretedOption);
-
-            /** UninterpretedOption name. */
-            public name: google.protobuf.UninterpretedOption.INamePart[];
-
-            /** UninterpretedOption identifierValue. */
-            public identifierValue: string;
-
-            /** UninterpretedOption positiveIntValue. */
-            public positiveIntValue: (number|string);
-
-            /** UninterpretedOption negativeIntValue. */
-            public negativeIntValue: (number|string);
-
-            /** UninterpretedOption doubleValue. */
-            public doubleValue: number;
-
-            /** UninterpretedOption stringValue. */
-            public stringValue: Uint8Array;
-
-            /** UninterpretedOption aggregateValue. */
-            public aggregateValue: string;
-
-            /**
-             * Creates an UninterpretedOption message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns UninterpretedOption
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.UninterpretedOption;
-
-            /**
-             * Creates a plain object from an UninterpretedOption message. Also converts values to other types if specified.
-             * @param message UninterpretedOption
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.UninterpretedOption, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this UninterpretedOption to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        namespace UninterpretedOption {
-
-            /** Properties of a NamePart. */
-            interface INamePart {
-
-                /** NamePart namePart */
-                namePart: string;
-
-                /** NamePart isExtension */
-                isExtension: boolean;
-            }
-
-            /** Represents a NamePart. */
-            class NamePart implements INamePart {
-
-                /**
-                 * Constructs a new NamePart.
-                 * @param [properties] Properties to set
-                 */
-                constructor(properties?: google.protobuf.UninterpretedOption.INamePart);
-
-                /** NamePart namePart. */
-                public namePart: string;
-
-                /** NamePart isExtension. */
-                public isExtension: boolean;
-
-                /**
-                 * Creates a NamePart message from a plain object. Also converts values to their respective internal types.
-                 * @param object Plain object
-                 * @returns NamePart
-                 */
-                public static fromObject(object: { [k: string]: any }): google.protobuf.UninterpretedOption.NamePart;
-
-                /**
-                 * Creates a plain object from a NamePart message. Also converts values to other types if specified.
-                 * @param message NamePart
-                 * @param [options] Conversion options
-                 * @returns Plain object
-                 */
-                public static toObject(message: google.protobuf.UninterpretedOption.NamePart, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-                /**
-                 * Converts this NamePart to JSON.
-                 * @returns JSON object
-                 */
-                public toJSON(): { [k: string]: any };
-            }
-        }
-
-        /** Properties of a SourceCodeInfo. */
-        interface ISourceCodeInfo {
-
-            /** SourceCodeInfo location */
-            location?: (google.protobuf.SourceCodeInfo.ILocation[]|null);
-        }
-
-        /** Represents a SourceCodeInfo. */
-        class SourceCodeInfo implements ISourceCodeInfo {
-
-            /**
-             * Constructs a new SourceCodeInfo.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.ISourceCodeInfo);
-
-            /** SourceCodeInfo location. */
-            public location: google.protobuf.SourceCodeInfo.ILocation[];
-
-            /**
-             * Creates a SourceCodeInfo message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns SourceCodeInfo
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.SourceCodeInfo;
-
-            /**
-             * Creates a plain object from a SourceCodeInfo message. Also converts values to other types if specified.
-             * @param message SourceCodeInfo
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.SourceCodeInfo, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this SourceCodeInfo to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        namespace SourceCodeInfo {
-
-            /** Properties of a Location. */
-            interface ILocation {
-
-                /** Location path */
-                path?: (number[]|null);
-
-                /** Location span */
-                span?: (number[]|null);
-
-                /** Location leadingComments */
-                leadingComments?: (string|null);
-
-                /** Location trailingComments */
-                trailingComments?: (string|null);
-
-                /** Location leadingDetachedComments */
-                leadingDetachedComments?: (string[]|null);
-            }
-
-            /** Represents a Location. */
-            class Location implements ILocation {
-
-                /**
-                 * Constructs a new Location.
-                 * @param [properties] Properties to set
-                 */
-                constructor(properties?: google.protobuf.SourceCodeInfo.ILocation);
-
-                /** Location path. */
-                public path: number[];
-
-                /** Location span. */
-                public span: number[];
-
-                /** Location leadingComments. */
-                public leadingComments: string;
-
-                /** Location trailingComments. */
-                public trailingComments: string;
-
-                /** Location leadingDetachedComments. */
-                public leadingDetachedComments: string[];
-
-                /**
-                 * Creates a Location message from a plain object. Also converts values to their respective internal types.
-                 * @param object Plain object
-                 * @returns Location
-                 */
-                public static fromObject(object: { [k: string]: any }): google.protobuf.SourceCodeInfo.Location;
-
-                /**
-                 * Creates a plain object from a Location message. Also converts values to other types if specified.
-                 * @param message Location
-                 * @param [options] Conversion options
-                 * @returns Plain object
-                 */
-                public static toObject(message: google.protobuf.SourceCodeInfo.Location, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-                /**
-                 * Converts this Location to JSON.
-                 * @returns JSON object
-                 */
-                public toJSON(): { [k: string]: any };
-            }
-        }
-
-        /** Properties of a GeneratedCodeInfo. */
-        interface IGeneratedCodeInfo {
-
-            /** GeneratedCodeInfo annotation */
-            annotation?: (google.protobuf.GeneratedCodeInfo.IAnnotation[]|null);
-        }
-
-        /** Represents a GeneratedCodeInfo. */
-        class GeneratedCodeInfo implements IGeneratedCodeInfo {
-
-            /**
-             * Constructs a new GeneratedCodeInfo.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IGeneratedCodeInfo);
-
-            /** GeneratedCodeInfo annotation. */
-            public annotation: google.protobuf.GeneratedCodeInfo.IAnnotation[];
-
-            /**
-             * Creates a GeneratedCodeInfo message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns GeneratedCodeInfo
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.GeneratedCodeInfo;
-
-            /**
-             * Creates a plain object from a GeneratedCodeInfo message. Also converts values to other types if specified.
-             * @param message GeneratedCodeInfo
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.GeneratedCodeInfo, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this GeneratedCodeInfo to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        namespace GeneratedCodeInfo {
-
-            /** Properties of an Annotation. */
-            interface IAnnotation {
-
-                /** Annotation path */
-                path?: (number[]|null);
-
-                /** Annotation sourceFile */
-                sourceFile?: (string|null);
-
-                /** Annotation begin */
-                begin?: (number|null);
-
-                /** Annotation end */
-                end?: (number|null);
-            }
-
-            /** Represents an Annotation. */
-            class Annotation implements IAnnotation {
-
-                /**
-                 * Constructs a new Annotation.
-                 * @param [properties] Properties to set
-                 */
-                constructor(properties?: google.protobuf.GeneratedCodeInfo.IAnnotation);
-
-                /** Annotation path. */
-                public path: number[];
-
-                /** Annotation sourceFile. */
-                public sourceFile: string;
-
-                /** Annotation begin. */
-                public begin: number;
-
-                /** Annotation end. */
-                public end: number;
-
-                /**
-                 * Creates an Annotation message from a plain object. Also converts values to their respective internal types.
-                 * @param object Plain object
-                 * @returns Annotation
-                 */
-                public static fromObject(object: { [k: string]: any }): google.protobuf.GeneratedCodeInfo.Annotation;
-
-                /**
-                 * Creates a plain object from an Annotation message. Also converts values to other types if specified.
-                 * @param message Annotation
-                 * @param [options] Conversion options
-                 * @returns Plain object
-                 */
-                public static toObject(message: google.protobuf.GeneratedCodeInfo.Annotation, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-                /**
-                 * Converts this Annotation to JSON.
-                 * @returns JSON object
-                 */
-                public toJSON(): { [k: string]: any };
-            }
-        }
-
-        /** Properties of a Struct. */
-        interface IStruct {
-
-            /** Struct fields */
-            fields?: ({ [k: string]: google.protobuf.IValue }|null);
-        }
-
-        /** Represents a Struct. */
-        class Struct implements IStruct {
-
-            /**
-             * Constructs a new Struct.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IStruct);
-
-            /** Struct fields. */
-            public fields: { [k: string]: google.protobuf.IValue };
-
-            /**
-             * Creates a Struct message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns Struct
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.Struct;
-
-            /**
-             * Creates a plain object from a Struct message. Also converts values to other types if specified.
-             * @param message Struct
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.Struct, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this Struct to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a Value. */
-        interface IValue {
-
-            /** Value nullValue */
-            nullValue?: (google.protobuf.NullValue|null);
-
-            /** Value numberValue */
-            numberValue?: (number|null);
-
-            /** Value stringValue */
-            stringValue?: (string|null);
-
-            /** Value boolValue */
-            boolValue?: (boolean|null);
-
-            /** Value structValue */
-            structValue?: (google.protobuf.IStruct|null);
-
-            /** Value listValue */
-            listValue?: (google.protobuf.IListValue|null);
-        }
-
-        /** Represents a Value. */
-        class Value implements IValue {
-
-            /**
-             * Constructs a new Value.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IValue);
-
-            /** Value nullValue. */
-            public nullValue?: (google.protobuf.NullValue|null);
-
-            /** Value numberValue. */
-            public numberValue?: (number|null);
-
-            /** Value stringValue. */
-            public stringValue?: (string|null);
-
-            /** Value boolValue. */
-            public boolValue?: (boolean|null);
-
-            /** Value structValue. */
-            public structValue?: (google.protobuf.IStruct|null);
-
-            /** Value listValue. */
-            public listValue?: (google.protobuf.IListValue|null);
-
-            /** Value kind. */
-            public kind?: ("nullValue"|"numberValue"|"stringValue"|"boolValue"|"structValue"|"listValue");
-
-            /**
-             * Creates a Value message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns Value
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.Value;
-
-            /**
-             * Creates a plain object from a Value message. Also converts values to other types if specified.
-             * @param message Value
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.Value, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this Value to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** NullValue enum. */
-        type NullValue =
-            "NULL_VALUE";
-
-        /** Properties of a ListValue. */
-        interface IListValue {
-
-            /** ListValue values */
-            values?: (google.protobuf.IValue[]|null);
-        }
-
-        /** Represents a ListValue. */
-        class ListValue implements IListValue {
-
-            /**
-             * Constructs a new ListValue.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IListValue);
-
-            /** ListValue values. */
-            public values: google.protobuf.IValue[];
-
-            /**
-             * Creates a ListValue message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns ListValue
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.ListValue;
-
-            /**
-             * Creates a plain object from a ListValue message. Also converts values to other types if specified.
-             * @param message ListValue
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.ListValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this ListValue to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of an Empty. */
-        interface IEmpty {
-        }
-
-        /** Represents an Empty. */
-        class Empty implements IEmpty {
-
-            /**
-             * Constructs a new Empty.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IEmpty);
-
-            /**
-             * Creates an Empty message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns Empty
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.Empty;
-
-            /**
-             * Creates a plain object from an Empty message. Also converts values to other types if specified.
-             * @param message Empty
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.Empty, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this Empty to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a DoubleValue. */
-        interface IDoubleValue {
-
-            /** DoubleValue value */
-            value?: (number|null);
-        }
-
-        /** Represents a DoubleValue. */
-        class DoubleValue implements IDoubleValue {
-
-            /**
-             * Constructs a new DoubleValue.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IDoubleValue);
-
-            /** DoubleValue value. */
-            public value: number;
-
-            /**
-             * Creates a DoubleValue message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns DoubleValue
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.DoubleValue;
-
-            /**
-             * Creates a plain object from a DoubleValue message. Also converts values to other types if specified.
-             * @param message DoubleValue
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.DoubleValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this DoubleValue to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a FloatValue. */
-        interface IFloatValue {
-
-            /** FloatValue value */
-            value?: (number|null);
-        }
-
-        /** Represents a FloatValue. */
-        class FloatValue implements IFloatValue {
-
-            /**
-             * Constructs a new FloatValue.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IFloatValue);
-
-            /** FloatValue value. */
-            public value: number;
-
-            /**
-             * Creates a FloatValue message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns FloatValue
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.FloatValue;
-
-            /**
-             * Creates a plain object from a FloatValue message. Also converts values to other types if specified.
-             * @param message FloatValue
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.FloatValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this FloatValue to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of an Int64Value. */
-        interface IInt64Value {
-
-            /** Int64Value value */
-            value?: (number|string|null);
-        }
-
-        /** Represents an Int64Value. */
-        class Int64Value implements IInt64Value {
-
-            /**
-             * Constructs a new Int64Value.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IInt64Value);
-
-            /** Int64Value value. */
-            public value: (number|string);
-
-            /**
-             * Creates an Int64Value message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns Int64Value
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.Int64Value;
-
-            /**
-             * Creates a plain object from an Int64Value message. Also converts values to other types if specified.
-             * @param message Int64Value
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.Int64Value, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this Int64Value to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a UInt64Value. */
-        interface IUInt64Value {
-
-            /** UInt64Value value */
-            value?: (number|string|null);
-        }
-
-        /** Represents a UInt64Value. */
-        class UInt64Value implements IUInt64Value {
-
-            /**
-             * Constructs a new UInt64Value.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IUInt64Value);
-
-            /** UInt64Value value. */
-            public value: (number|string);
-
-            /**
-             * Creates a UInt64Value message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns UInt64Value
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.UInt64Value;
-
-            /**
-             * Creates a plain object from a UInt64Value message. Also converts values to other types if specified.
-             * @param message UInt64Value
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.UInt64Value, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this UInt64Value to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of an Int32Value. */
-        interface IInt32Value {
-
-            /** Int32Value value */
-            value?: (number|null);
-        }
-
-        /** Represents an Int32Value. */
-        class Int32Value implements IInt32Value {
-
-            /**
-             * Constructs a new Int32Value.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IInt32Value);
-
-            /** Int32Value value. */
-            public value: number;
-
-            /**
-             * Creates an Int32Value message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns Int32Value
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.Int32Value;
-
-            /**
-             * Creates a plain object from an Int32Value message. Also converts values to other types if specified.
-             * @param message Int32Value
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.Int32Value, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this Int32Value to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a UInt32Value. */
-        interface IUInt32Value {
-
-            /** UInt32Value value */
-            value?: (number|null);
-        }
-
-        /** Represents a UInt32Value. */
-        class UInt32Value implements IUInt32Value {
-
-            /**
-             * Constructs a new UInt32Value.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IUInt32Value);
-
-            /** UInt32Value value. */
-            public value: number;
-
-            /**
-             * Creates a UInt32Value message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns UInt32Value
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.UInt32Value;
-
-            /**
-             * Creates a plain object from a UInt32Value message. Also converts values to other types if specified.
-             * @param message UInt32Value
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.UInt32Value, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this UInt32Value to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a BoolValue. */
-        interface IBoolValue {
-
-            /** BoolValue value */
-            value?: (boolean|null);
-        }
-
-        /** Represents a BoolValue. */
-        class BoolValue implements IBoolValue {
-
-            /**
-             * Constructs a new BoolValue.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IBoolValue);
-
-            /** BoolValue value. */
-            public value: boolean;
-
-            /**
-             * Creates a BoolValue message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns BoolValue
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.BoolValue;
-
-            /**
-             * Creates a plain object from a BoolValue message. Also converts values to other types if specified.
-             * @param message BoolValue
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.BoolValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this BoolValue to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a StringValue. */
-        interface IStringValue {
-
-            /** StringValue value */
-            value?: (string|null);
-        }
-
-        /** Represents a StringValue. */
-        class StringValue implements IStringValue {
-
-            /**
-             * Constructs a new StringValue.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IStringValue);
-
-            /** StringValue value. */
-            public value: string;
-
-            /**
-             * Creates a StringValue message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns StringValue
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.StringValue;
-
-            /**
-             * Creates a plain object from a StringValue message. Also converts values to other types if specified.
-             * @param message StringValue
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.StringValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this StringValue to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a BytesValue. */
-        interface IBytesValue {
-
-            /** BytesValue value */
-            value?: (Uint8Array|null);
-        }
-
-        /** Represents a BytesValue. */
-        class BytesValue implements IBytesValue {
-
-            /**
-             * Constructs a new BytesValue.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IBytesValue);
-
-            /** BytesValue value. */
-            public value: Uint8Array;
-
-            /**
-             * Creates a BytesValue message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns BytesValue
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.BytesValue;
-
-            /**
-             * Creates a plain object from a BytesValue message. Also converts values to other types if specified.
-             * @param message BytesValue
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.BytesValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this BytesValue to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of an Any. */
-        interface IAny {
-
-            /** Any type_url */
-            type_url?: (string|null);
-
-            /** Any value */
-            value?: (Uint8Array|null);
-        }
-
-        /** Represents an Any. */
-        class Any implements IAny {
-
-            /**
-             * Constructs a new Any.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IAny);
-
-            /** Any type_url. */
-            public type_url: string;
-
-            /** Any value. */
-            public value: Uint8Array;
-
-            /**
-             * Creates an Any message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns Any
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.Any;
-
-            /**
-             * Creates a plain object from an Any message. Also converts values to other types if specified.
-             * @param message Any
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.Any, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this Any to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a FieldMask. */
-        interface IFieldMask {
-
-            /** FieldMask paths */
-            paths?: (string[]|null);
-        }
-
-        /** Represents a FieldMask. */
-        class FieldMask implements IFieldMask {
-
-            /**
-             * Constructs a new FieldMask.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IFieldMask);
-
-            /** FieldMask paths. */
-            public paths: string[];
-
-            /**
-             * Creates a FieldMask message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns FieldMask
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.FieldMask;
-
-            /**
-             * Creates a plain object from a FieldMask message. Also converts values to other types if specified.
-             * @param message FieldMask
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.FieldMask, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this FieldMask to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-
-        /** Properties of a Duration. */
-        interface IDuration {
-
-            /** Duration seconds */
-            seconds?: (number|string|null);
-
-            /** Duration nanos */
-            nanos?: (number|null);
-        }
-
-        /** Represents a Duration. */
-        class Duration implements IDuration {
-
-            /**
-             * Constructs a new Duration.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: google.protobuf.IDuration);
-
-            /** Duration seconds. */
-            public seconds: (number|string);
-
-            /** Duration nanos. */
-            public nanos: number;
-
-            /**
-             * Creates a Duration message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns Duration
-             */
-            public static fromObject(object: { [k: string]: any }): google.protobuf.Duration;
-
-            /**
-             * Creates a plain object from a Duration message. Also converts values to other types if specified.
-             * @param message Duration
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(message: google.protobuf.Duration, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-            /**
-             * Converts this Duration to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: any };
-        }
-    }
 
     /** Namespace firestore. */
     namespace firestore {
@@ -2689,233 +365,52 @@ export namespace google {
         /** Namespace v1. */
         namespace v1 {
 
-            /** Properties of a DocumentMask. */
-            interface IDocumentMask {
+            /** Properties of an AggregationResult. */
+            interface IAggregationResult {
 
-                /** DocumentMask fieldPaths */
-                fieldPaths?: (string[]|null);
+                /** AggregationResult aggregateFields */
+                aggregateFields?: ({ [k: string]: google.firestore.v1.IValue }|null);
             }
 
-            /** Represents a DocumentMask. */
-            class DocumentMask implements IDocumentMask {
+            /** Represents an AggregationResult. */
+            class AggregationResult implements IAggregationResult {
 
                 /**
-                 * Constructs a new DocumentMask.
+                 * Constructs a new AggregationResult.
                  * @param [properties] Properties to set
                  */
-                constructor(properties?: google.firestore.v1.IDocumentMask);
+                constructor(properties?: google.firestore.v1.IAggregationResult);
 
-                /** DocumentMask fieldPaths. */
-                public fieldPaths: string[];
+                /** AggregationResult aggregateFields. */
+                public aggregateFields: { [k: string]: google.firestore.v1.IValue };
 
                 /**
-                 * Creates a DocumentMask message from a plain object. Also converts values to their respective internal types.
+                 * Creates an AggregationResult message from a plain object. Also converts values to their respective internal types.
                  * @param object Plain object
-                 * @returns DocumentMask
+                 * @returns AggregationResult
                  */
-                public static fromObject(object: { [k: string]: any }): google.firestore.v1.DocumentMask;
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.AggregationResult;
 
                 /**
-                 * Creates a plain object from a DocumentMask message. Also converts values to other types if specified.
-                 * @param message DocumentMask
+                 * Creates a plain object from an AggregationResult message. Also converts values to other types if specified.
+                 * @param message AggregationResult
                  * @param [options] Conversion options
                  * @returns Plain object
                  */
-                public static toObject(message: google.firestore.v1.DocumentMask, options?: $protobuf.IConversionOptions): { [k: string]: any };
+                public static toObject(message: google.firestore.v1.AggregationResult, options?: $protobuf.IConversionOptions): { [k: string]: any };
 
                 /**
-                 * Converts this DocumentMask to JSON.
+                 * Converts this AggregationResult to JSON.
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
-            }
-
-            /** Properties of a Precondition. */
-            interface IPrecondition {
-
-                /** Precondition exists */
-                exists?: (boolean|null);
-
-                /** Precondition updateTime */
-                updateTime?: (google.protobuf.ITimestamp|null);
-            }
-
-            /** Represents a Precondition. */
-            class Precondition implements IPrecondition {
 
                 /**
-                 * Constructs a new Precondition.
-                 * @param [properties] Properties to set
+                 * Gets the default type url for AggregationResult
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
                  */
-                constructor(properties?: google.firestore.v1.IPrecondition);
-
-                /** Precondition exists. */
-                public exists?: (boolean|null);
-
-                /** Precondition updateTime. */
-                public updateTime?: (google.protobuf.ITimestamp|null);
-
-                /** Precondition conditionType. */
-                public conditionType?: ("exists"|"updateTime");
-
-                /**
-                 * Creates a Precondition message from a plain object. Also converts values to their respective internal types.
-                 * @param object Plain object
-                 * @returns Precondition
-                 */
-                public static fromObject(object: { [k: string]: any }): google.firestore.v1.Precondition;
-
-                /**
-                 * Creates a plain object from a Precondition message. Also converts values to other types if specified.
-                 * @param message Precondition
-                 * @param [options] Conversion options
-                 * @returns Plain object
-                 */
-                public static toObject(message: google.firestore.v1.Precondition, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-                /**
-                 * Converts this Precondition to JSON.
-                 * @returns JSON object
-                 */
-                public toJSON(): { [k: string]: any };
-            }
-
-            /** Properties of a TransactionOptions. */
-            interface ITransactionOptions {
-
-                /** TransactionOptions readOnly */
-                readOnly?: (google.firestore.v1.TransactionOptions.IReadOnly|null);
-
-                /** TransactionOptions readWrite */
-                readWrite?: (google.firestore.v1.TransactionOptions.IReadWrite|null);
-            }
-
-            /** Represents a TransactionOptions. */
-            class TransactionOptions implements ITransactionOptions {
-
-                /**
-                 * Constructs a new TransactionOptions.
-                 * @param [properties] Properties to set
-                 */
-                constructor(properties?: google.firestore.v1.ITransactionOptions);
-
-                /** TransactionOptions readOnly. */
-                public readOnly?: (google.firestore.v1.TransactionOptions.IReadOnly|null);
-
-                /** TransactionOptions readWrite. */
-                public readWrite?: (google.firestore.v1.TransactionOptions.IReadWrite|null);
-
-                /** TransactionOptions mode. */
-                public mode?: ("readOnly"|"readWrite");
-
-                /**
-                 * Creates a TransactionOptions message from a plain object. Also converts values to their respective internal types.
-                 * @param object Plain object
-                 * @returns TransactionOptions
-                 */
-                public static fromObject(object: { [k: string]: any }): google.firestore.v1.TransactionOptions;
-
-                /**
-                 * Creates a plain object from a TransactionOptions message. Also converts values to other types if specified.
-                 * @param message TransactionOptions
-                 * @param [options] Conversion options
-                 * @returns Plain object
-                 */
-                public static toObject(message: google.firestore.v1.TransactionOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-                /**
-                 * Converts this TransactionOptions to JSON.
-                 * @returns JSON object
-                 */
-                public toJSON(): { [k: string]: any };
-            }
-
-            namespace TransactionOptions {
-
-                /** Properties of a ReadWrite. */
-                interface IReadWrite {
-
-                    /** ReadWrite retryTransaction */
-                    retryTransaction?: (Uint8Array|null);
-                }
-
-                /** Represents a ReadWrite. */
-                class ReadWrite implements IReadWrite {
-
-                    /**
-                     * Constructs a new ReadWrite.
-                     * @param [properties] Properties to set
-                     */
-                    constructor(properties?: google.firestore.v1.TransactionOptions.IReadWrite);
-
-                    /** ReadWrite retryTransaction. */
-                    public retryTransaction: Uint8Array;
-
-                    /**
-                     * Creates a ReadWrite message from a plain object. Also converts values to their respective internal types.
-                     * @param object Plain object
-                     * @returns ReadWrite
-                     */
-                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.TransactionOptions.ReadWrite;
-
-                    /**
-                     * Creates a plain object from a ReadWrite message. Also converts values to other types if specified.
-                     * @param message ReadWrite
-                     * @param [options] Conversion options
-                     * @returns Plain object
-                     */
-                    public static toObject(message: google.firestore.v1.TransactionOptions.ReadWrite, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-                    /**
-                     * Converts this ReadWrite to JSON.
-                     * @returns JSON object
-                     */
-                    public toJSON(): { [k: string]: any };
-                }
-
-                /** Properties of a ReadOnly. */
-                interface IReadOnly {
-
-                    /** ReadOnly readTime */
-                    readTime?: (google.protobuf.ITimestamp|null);
-                }
-
-                /** Represents a ReadOnly. */
-                class ReadOnly implements IReadOnly {
-
-                    /**
-                     * Constructs a new ReadOnly.
-                     * @param [properties] Properties to set
-                     */
-                    constructor(properties?: google.firestore.v1.TransactionOptions.IReadOnly);
-
-                    /** ReadOnly readTime. */
-                    public readTime?: (google.protobuf.ITimestamp|null);
-
-                    /** ReadOnly consistencySelector. */
-                    public consistencySelector?: "readTime";
-
-                    /**
-                     * Creates a ReadOnly message from a plain object. Also converts values to their respective internal types.
-                     * @param object Plain object
-                     * @returns ReadOnly
-                     */
-                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.TransactionOptions.ReadOnly;
-
-                    /**
-                     * Creates a plain object from a ReadOnly message. Also converts values to other types if specified.
-                     * @param message ReadOnly
-                     * @param [options] Conversion options
-                     * @returns Plain object
-                     */
-                    public static toObject(message: google.firestore.v1.TransactionOptions.ReadOnly, options?: $protobuf.IConversionOptions): { [k: string]: any };
-
-                    /**
-                     * Converts this ReadOnly to JSON.
-                     * @returns JSON object
-                     */
-                    public toJSON(): { [k: string]: any };
-                }
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a Document. */
@@ -2975,6 +470,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for Document
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a Value. */
@@ -3079,6 +581,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for Value
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of an ArrayValue. */
@@ -3120,6 +629,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ArrayValue
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a MapValue. */
@@ -3161,6 +677,385 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for MapValue
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a BitSequence. */
+            interface IBitSequence {
+
+                /** BitSequence bitmap */
+                bitmap?: (Uint8Array|null);
+
+                /** BitSequence padding */
+                padding?: (number|null);
+            }
+
+            /** Represents a BitSequence. */
+            class BitSequence implements IBitSequence {
+
+                /**
+                 * Constructs a new BitSequence.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IBitSequence);
+
+                /** BitSequence bitmap. */
+                public bitmap: Uint8Array;
+
+                /** BitSequence padding. */
+                public padding: number;
+
+                /**
+                 * Creates a BitSequence message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns BitSequence
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.BitSequence;
+
+                /**
+                 * Creates a plain object from a BitSequence message. Also converts values to other types if specified.
+                 * @param message BitSequence
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.BitSequence, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this BitSequence to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for BitSequence
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a BloomFilter. */
+            interface IBloomFilter {
+
+                /** BloomFilter bits */
+                bits?: (google.firestore.v1.IBitSequence|null);
+
+                /** BloomFilter hashCount */
+                hashCount?: (number|null);
+            }
+
+            /** Represents a BloomFilter. */
+            class BloomFilter implements IBloomFilter {
+
+                /**
+                 * Constructs a new BloomFilter.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IBloomFilter);
+
+                /** BloomFilter bits. */
+                public bits?: (google.firestore.v1.IBitSequence|null);
+
+                /** BloomFilter hashCount. */
+                public hashCount: number;
+
+                /**
+                 * Creates a BloomFilter message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns BloomFilter
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.BloomFilter;
+
+                /**
+                 * Creates a plain object from a BloomFilter message. Also converts values to other types if specified.
+                 * @param message BloomFilter
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.BloomFilter, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this BloomFilter to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for BloomFilter
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a DocumentMask. */
+            interface IDocumentMask {
+
+                /** DocumentMask fieldPaths */
+                fieldPaths?: (string[]|null);
+            }
+
+            /** Represents a DocumentMask. */
+            class DocumentMask implements IDocumentMask {
+
+                /**
+                 * Constructs a new DocumentMask.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IDocumentMask);
+
+                /** DocumentMask fieldPaths. */
+                public fieldPaths: string[];
+
+                /**
+                 * Creates a DocumentMask message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns DocumentMask
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.DocumentMask;
+
+                /**
+                 * Creates a plain object from a DocumentMask message. Also converts values to other types if specified.
+                 * @param message DocumentMask
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.DocumentMask, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this DocumentMask to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for DocumentMask
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a Precondition. */
+            interface IPrecondition {
+
+                /** Precondition exists */
+                exists?: (boolean|null);
+
+                /** Precondition updateTime */
+                updateTime?: (google.protobuf.ITimestamp|null);
+            }
+
+            /** Represents a Precondition. */
+            class Precondition implements IPrecondition {
+
+                /**
+                 * Constructs a new Precondition.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IPrecondition);
+
+                /** Precondition exists. */
+                public exists?: (boolean|null);
+
+                /** Precondition updateTime. */
+                public updateTime?: (google.protobuf.ITimestamp|null);
+
+                /** Precondition conditionType. */
+                public conditionType?: ("exists"|"updateTime");
+
+                /**
+                 * Creates a Precondition message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns Precondition
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.Precondition;
+
+                /**
+                 * Creates a plain object from a Precondition message. Also converts values to other types if specified.
+                 * @param message Precondition
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.Precondition, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this Precondition to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for Precondition
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a TransactionOptions. */
+            interface ITransactionOptions {
+
+                /** TransactionOptions readOnly */
+                readOnly?: (google.firestore.v1.TransactionOptions.IReadOnly|null);
+
+                /** TransactionOptions readWrite */
+                readWrite?: (google.firestore.v1.TransactionOptions.IReadWrite|null);
+            }
+
+            /** Represents a TransactionOptions. */
+            class TransactionOptions implements ITransactionOptions {
+
+                /**
+                 * Constructs a new TransactionOptions.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.ITransactionOptions);
+
+                /** TransactionOptions readOnly. */
+                public readOnly?: (google.firestore.v1.TransactionOptions.IReadOnly|null);
+
+                /** TransactionOptions readWrite. */
+                public readWrite?: (google.firestore.v1.TransactionOptions.IReadWrite|null);
+
+                /** TransactionOptions mode. */
+                public mode?: ("readOnly"|"readWrite");
+
+                /**
+                 * Creates a TransactionOptions message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns TransactionOptions
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.TransactionOptions;
+
+                /**
+                 * Creates a plain object from a TransactionOptions message. Also converts values to other types if specified.
+                 * @param message TransactionOptions
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.TransactionOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this TransactionOptions to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for TransactionOptions
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            namespace TransactionOptions {
+
+                /** Properties of a ReadWrite. */
+                interface IReadWrite {
+
+                    /** ReadWrite retryTransaction */
+                    retryTransaction?: (Uint8Array|null);
+                }
+
+                /** Represents a ReadWrite. */
+                class ReadWrite implements IReadWrite {
+
+                    /**
+                     * Constructs a new ReadWrite.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1.TransactionOptions.IReadWrite);
+
+                    /** ReadWrite retryTransaction. */
+                    public retryTransaction: Uint8Array;
+
+                    /**
+                     * Creates a ReadWrite message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns ReadWrite
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.TransactionOptions.ReadWrite;
+
+                    /**
+                     * Creates a plain object from a ReadWrite message. Also converts values to other types if specified.
+                     * @param message ReadWrite
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.TransactionOptions.ReadWrite, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this ReadWrite to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for ReadWrite
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a ReadOnly. */
+                interface IReadOnly {
+
+                    /** ReadOnly readTime */
+                    readTime?: (google.protobuf.ITimestamp|null);
+                }
+
+                /** Represents a ReadOnly. */
+                class ReadOnly implements IReadOnly {
+
+                    /**
+                     * Constructs a new ReadOnly.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1.TransactionOptions.IReadOnly);
+
+                    /** ReadOnly readTime. */
+                    public readTime?: (google.protobuf.ITimestamp|null);
+
+                    /** ReadOnly consistencySelector. */
+                    public consistencySelector?: "readTime";
+
+                    /**
+                     * Creates a ReadOnly message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns ReadOnly
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.TransactionOptions.ReadOnly;
+
+                    /**
+                     * Creates a plain object from a ReadOnly message. Also converts values to other types if specified.
+                     * @param message ReadOnly
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.TransactionOptions.ReadOnly, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this ReadOnly to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for ReadOnly
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
             }
 
             /** Represents a Firestore */
@@ -3299,6 +1194,20 @@ export namespace google {
                  * @returns Promise
                  */
                 public runQuery(request: google.firestore.v1.IRunQueryRequest): Promise<google.firestore.v1.RunQueryResponse>;
+
+                /**
+                 * Calls RunAggregationQuery.
+                 * @param request RunAggregationQueryRequest message or plain object
+                 * @param callback Node-style callback called with the error, if any, and RunAggregationQueryResponse
+                 */
+                public runAggregationQuery(request: google.firestore.v1.IRunAggregationQueryRequest, callback: google.firestore.v1.Firestore.RunAggregationQueryCallback): void;
+
+                /**
+                 * Calls RunAggregationQuery.
+                 * @param request RunAggregationQueryRequest message or plain object
+                 * @returns Promise
+                 */
+                public runAggregationQuery(request: google.firestore.v1.IRunAggregationQueryRequest): Promise<google.firestore.v1.RunAggregationQueryResponse>;
 
                 /**
                  * Calls PartitionQuery.
@@ -3451,6 +1360,13 @@ export namespace google {
                 type RunQueryCallback = (error: (Error|null), response?: google.firestore.v1.RunQueryResponse) => void;
 
                 /**
+                 * Callback as used by {@link google.firestore.v1.Firestore#runAggregationQuery}.
+                 * @param error Error, if any
+                 * @param [response] RunAggregationQueryResponse
+                 */
+                type RunAggregationQueryCallback = (error: (Error|null), response?: google.firestore.v1.RunAggregationQueryResponse) => void;
+
+                /**
                  * Callback as used by {@link google.firestore.v1.Firestore#partitionQuery}.
                  * @param error Error, if any
                  * @param [response] PartitionQueryResponse
@@ -3553,6 +1469,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for GetDocumentRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a ListDocumentsRequest. */
@@ -3645,6 +1568,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ListDocumentsRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a ListDocumentsResponse. */
@@ -3692,6 +1622,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ListDocumentsResponse
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a CreateDocumentRequest. */
@@ -3757,6 +1694,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for CreateDocumentRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of an UpdateDocumentRequest. */
@@ -3816,6 +1760,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for UpdateDocumentRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a DeleteDocumentRequest. */
@@ -3863,6 +1814,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for DeleteDocumentRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a BatchGetDocumentsRequest. */
@@ -3937,6 +1895,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for BatchGetDocumentsRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a BatchGetDocumentsResponse. */
@@ -3999,6 +1964,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for BatchGetDocumentsResponse
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a BeginTransactionRequest. */
@@ -4046,6 +2018,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for BeginTransactionRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a BeginTransactionResponse. */
@@ -4087,6 +2066,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for BeginTransactionResponse
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a CommitRequest. */
@@ -4140,6 +2126,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for CommitRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a CommitResponse. */
@@ -4187,6 +2180,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for CommitResponse
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a RollbackRequest. */
@@ -4234,6 +2234,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for RollbackRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a RunQueryRequest. */
@@ -4253,6 +2260,9 @@ export namespace google {
 
                 /** RunQueryRequest readTime */
                 readTime?: (google.protobuf.ITimestamp|null);
+
+                /** RunQueryRequest explainOptions */
+                explainOptions?: (google.firestore.v1.IExplainOptions|null);
             }
 
             /** Represents a RunQueryRequest. */
@@ -4278,6 +2288,9 @@ export namespace google {
 
                 /** RunQueryRequest readTime. */
                 public readTime?: (google.protobuf.ITimestamp|null);
+
+                /** RunQueryRequest explainOptions. */
+                public explainOptions?: (google.firestore.v1.IExplainOptions|null);
 
                 /** RunQueryRequest queryType. */
                 public queryType?: "structuredQuery";
@@ -4305,6 +2318,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for RunQueryRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a RunQueryResponse. */
@@ -4321,6 +2341,12 @@ export namespace google {
 
                 /** RunQueryResponse skippedResults */
                 skippedResults?: (number|null);
+
+                /** RunQueryResponse done */
+                done?: (boolean|null);
+
+                /** RunQueryResponse explainMetrics */
+                explainMetrics?: (google.firestore.v1.IExplainMetrics|null);
             }
 
             /** Represents a RunQueryResponse. */
@@ -4344,6 +2370,15 @@ export namespace google {
                 /** RunQueryResponse skippedResults. */
                 public skippedResults: number;
 
+                /** RunQueryResponse done. */
+                public done?: (boolean|null);
+
+                /** RunQueryResponse explainMetrics. */
+                public explainMetrics?: (google.firestore.v1.IExplainMetrics|null);
+
+                /** RunQueryResponse continuationSelector. */
+                public continuationSelector?: "done";
+
                 /**
                  * Creates a RunQueryResponse message from a plain object. Also converts values to their respective internal types.
                  * @param object Plain object
@@ -4364,6 +2399,163 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for RunQueryResponse
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a RunAggregationQueryRequest. */
+            interface IRunAggregationQueryRequest {
+
+                /** RunAggregationQueryRequest parent */
+                parent?: (string|null);
+
+                /** RunAggregationQueryRequest structuredAggregationQuery */
+                structuredAggregationQuery?: (google.firestore.v1.IStructuredAggregationQuery|null);
+
+                /** RunAggregationQueryRequest transaction */
+                transaction?: (Uint8Array|null);
+
+                /** RunAggregationQueryRequest newTransaction */
+                newTransaction?: (google.firestore.v1.ITransactionOptions|null);
+
+                /** RunAggregationQueryRequest readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
+
+                /** RunAggregationQueryRequest explainOptions */
+                explainOptions?: (google.firestore.v1.IExplainOptions|null);
+            }
+
+            /** Represents a RunAggregationQueryRequest. */
+            class RunAggregationQueryRequest implements IRunAggregationQueryRequest {
+
+                /**
+                 * Constructs a new RunAggregationQueryRequest.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IRunAggregationQueryRequest);
+
+                /** RunAggregationQueryRequest parent. */
+                public parent: string;
+
+                /** RunAggregationQueryRequest structuredAggregationQuery. */
+                public structuredAggregationQuery?: (google.firestore.v1.IStructuredAggregationQuery|null);
+
+                /** RunAggregationQueryRequest transaction. */
+                public transaction?: (Uint8Array|null);
+
+                /** RunAggregationQueryRequest newTransaction. */
+                public newTransaction?: (google.firestore.v1.ITransactionOptions|null);
+
+                /** RunAggregationQueryRequest readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+
+                /** RunAggregationQueryRequest explainOptions. */
+                public explainOptions?: (google.firestore.v1.IExplainOptions|null);
+
+                /** RunAggregationQueryRequest queryType. */
+                public queryType?: "structuredAggregationQuery";
+
+                /** RunAggregationQueryRequest consistencySelector. */
+                public consistencySelector?: ("transaction"|"newTransaction"|"readTime");
+
+                /**
+                 * Creates a RunAggregationQueryRequest message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns RunAggregationQueryRequest
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.RunAggregationQueryRequest;
+
+                /**
+                 * Creates a plain object from a RunAggregationQueryRequest message. Also converts values to other types if specified.
+                 * @param message RunAggregationQueryRequest
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.RunAggregationQueryRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this RunAggregationQueryRequest to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for RunAggregationQueryRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a RunAggregationQueryResponse. */
+            interface IRunAggregationQueryResponse {
+
+                /** RunAggregationQueryResponse result */
+                result?: (google.firestore.v1.IAggregationResult|null);
+
+                /** RunAggregationQueryResponse transaction */
+                transaction?: (Uint8Array|null);
+
+                /** RunAggregationQueryResponse readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
+
+                /** RunAggregationQueryResponse explainMetrics */
+                explainMetrics?: (google.firestore.v1.IExplainMetrics|null);
+            }
+
+            /** Represents a RunAggregationQueryResponse. */
+            class RunAggregationQueryResponse implements IRunAggregationQueryResponse {
+
+                /**
+                 * Constructs a new RunAggregationQueryResponse.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IRunAggregationQueryResponse);
+
+                /** RunAggregationQueryResponse result. */
+                public result?: (google.firestore.v1.IAggregationResult|null);
+
+                /** RunAggregationQueryResponse transaction. */
+                public transaction: Uint8Array;
+
+                /** RunAggregationQueryResponse readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+
+                /** RunAggregationQueryResponse explainMetrics. */
+                public explainMetrics?: (google.firestore.v1.IExplainMetrics|null);
+
+                /**
+                 * Creates a RunAggregationQueryResponse message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns RunAggregationQueryResponse
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.RunAggregationQueryResponse;
+
+                /**
+                 * Creates a plain object from a RunAggregationQueryResponse message. Also converts values to other types if specified.
+                 * @param message RunAggregationQueryResponse
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.RunAggregationQueryResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this RunAggregationQueryResponse to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for RunAggregationQueryResponse
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a PartitionQueryRequest. */
@@ -4383,6 +2575,9 @@ export namespace google {
 
                 /** PartitionQueryRequest pageSize */
                 pageSize?: (number|null);
+
+                /** PartitionQueryRequest readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
             }
 
             /** Represents a PartitionQueryRequest. */
@@ -4409,8 +2604,14 @@ export namespace google {
                 /** PartitionQueryRequest pageSize. */
                 public pageSize: number;
 
+                /** PartitionQueryRequest readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+
                 /** PartitionQueryRequest queryType. */
                 public queryType?: "structuredQuery";
+
+                /** PartitionQueryRequest consistencySelector. */
+                public consistencySelector?: "readTime";
 
                 /**
                  * Creates a PartitionQueryRequest message from a plain object. Also converts values to their respective internal types.
@@ -4432,6 +2633,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for PartitionQueryRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a PartitionQueryResponse. */
@@ -4479,6 +2687,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for PartitionQueryResponse
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a WriteRequest. */
@@ -4544,6 +2759,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for WriteRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a WriteResponse. */
@@ -4603,6 +2825,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for WriteResponse
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a ListenRequest. */
@@ -4665,6 +2894,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ListenRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a ListenResponse. */
@@ -4733,6 +2969,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ListenResponse
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a Target. */
@@ -4755,6 +2998,9 @@ export namespace google {
 
                 /** Target once */
                 once?: (boolean|null);
+
+                /** Target expectedCount */
+                expectedCount?: (google.protobuf.IInt32Value|null);
             }
 
             /** Represents a Target. */
@@ -4784,6 +3030,9 @@ export namespace google {
                 /** Target once. */
                 public once: boolean;
 
+                /** Target expectedCount. */
+                public expectedCount?: (google.protobuf.IInt32Value|null);
+
                 /** Target targetType. */
                 public targetType?: ("query"|"documents");
 
@@ -4810,6 +3059,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for Target
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             namespace Target {
@@ -4853,6 +3109,13 @@ export namespace google {
                      * @returns JSON object
                      */
                     public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for DocumentsTarget
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
 
                 /** Properties of a QueryTarget. */
@@ -4903,6 +3166,13 @@ export namespace google {
                      * @returns JSON object
                      */
                     public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for QueryTarget
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
             }
 
@@ -4969,6 +3239,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for TargetChange
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             namespace TargetChange {
@@ -4989,6 +3266,9 @@ export namespace google {
 
                 /** ListCollectionIdsRequest pageToken */
                 pageToken?: (string|null);
+
+                /** ListCollectionIdsRequest readTime */
+                readTime?: (google.protobuf.ITimestamp|null);
             }
 
             /** Represents a ListCollectionIdsRequest. */
@@ -5008,6 +3288,12 @@ export namespace google {
 
                 /** ListCollectionIdsRequest pageToken. */
                 public pageToken: string;
+
+                /** ListCollectionIdsRequest readTime. */
+                public readTime?: (google.protobuf.ITimestamp|null);
+
+                /** ListCollectionIdsRequest consistencySelector. */
+                public consistencySelector?: "readTime";
 
                 /**
                  * Creates a ListCollectionIdsRequest message from a plain object. Also converts values to their respective internal types.
@@ -5029,6 +3315,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ListCollectionIdsRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a ListCollectionIdsResponse. */
@@ -5076,6 +3369,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ListCollectionIdsResponse
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a BatchWriteRequest. */
@@ -5129,6 +3429,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for BatchWriteRequest
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a BatchWriteResponse. */
@@ -5176,6 +3483,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for BatchWriteResponse
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a StructuredQuery. */
@@ -5204,6 +3518,9 @@ export namespace google {
 
                 /** StructuredQuery limit */
                 limit?: (google.protobuf.IInt32Value|null);
+
+                /** StructuredQuery findNearest */
+                findNearest?: (google.firestore.v1.StructuredQuery.IFindNearest|null);
             }
 
             /** Represents a StructuredQuery. */
@@ -5239,6 +3556,9 @@ export namespace google {
                 /** StructuredQuery limit. */
                 public limit?: (google.protobuf.IInt32Value|null);
 
+                /** StructuredQuery findNearest. */
+                public findNearest?: (google.firestore.v1.StructuredQuery.IFindNearest|null);
+
                 /**
                  * Creates a StructuredQuery message from a plain object. Also converts values to their respective internal types.
                  * @param object Plain object
@@ -5259,6 +3579,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for StructuredQuery
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             namespace StructuredQuery {
@@ -5308,6 +3635,13 @@ export namespace google {
                      * @returns JSON object
                      */
                     public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for CollectionSelector
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
 
                 /** Properties of a Filter. */
@@ -5364,6 +3698,13 @@ export namespace google {
                      * @returns JSON object
                      */
                     public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for Filter
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
 
                 /** Properties of a CompositeFilter. */
@@ -5411,6 +3752,13 @@ export namespace google {
                      * @returns JSON object
                      */
                     public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for CompositeFilter
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
 
                 namespace CompositeFilter {
@@ -5471,6 +3819,13 @@ export namespace google {
                      * @returns JSON object
                      */
                     public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for FieldFilter
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
 
                 namespace FieldFilter {
@@ -5528,6 +3883,13 @@ export namespace google {
                      * @returns JSON object
                      */
                     public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for UnaryFilter
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
 
                 namespace UnaryFilter {
@@ -5582,7 +3944,18 @@ export namespace google {
                      * @returns JSON object
                      */
                     public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for Order
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
+
+                /** Direction enum. */
+                type Direction =
+                    "DIRECTION_UNSPECIFIED"| "ASCENDING"| "DESCENDING";
 
                 /** Properties of a FieldReference. */
                 interface IFieldReference {
@@ -5623,6 +3996,13 @@ export namespace google {
                      * @returns JSON object
                      */
                     public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for FieldReference
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
 
                 /** Properties of a Projection. */
@@ -5664,11 +4044,375 @@ export namespace google {
                      * @returns JSON object
                      */
                     public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for Projection
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
 
-                /** Direction enum. */
-                type Direction =
-                    "DIRECTION_UNSPECIFIED"| "ASCENDING"| "DESCENDING";
+                /** Properties of a FindNearest. */
+                interface IFindNearest {
+
+                    /** FindNearest vectorField */
+                    vectorField?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+
+                    /** FindNearest queryVector */
+                    queryVector?: (google.firestore.v1.IValue|null);
+
+                    /** FindNearest distanceMeasure */
+                    distanceMeasure?: (google.firestore.v1.StructuredQuery.FindNearest.DistanceMeasure|null);
+
+                    /** FindNearest limit */
+                    limit?: (google.protobuf.IInt32Value|null);
+
+                    /** FindNearest distanceResultField */
+                    distanceResultField?: (string|null);
+
+                    /** FindNearest distanceThreshold */
+                    distanceThreshold?: (google.protobuf.IDoubleValue|null);
+                }
+
+                /** Represents a FindNearest. */
+                class FindNearest implements IFindNearest {
+
+                    /**
+                     * Constructs a new FindNearest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1.StructuredQuery.IFindNearest);
+
+                    /** FindNearest vectorField. */
+                    public vectorField?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+
+                    /** FindNearest queryVector. */
+                    public queryVector?: (google.firestore.v1.IValue|null);
+
+                    /** FindNearest distanceMeasure. */
+                    public distanceMeasure: google.firestore.v1.StructuredQuery.FindNearest.DistanceMeasure;
+
+                    /** FindNearest limit. */
+                    public limit?: (google.protobuf.IInt32Value|null);
+
+                    /** FindNearest distanceResultField. */
+                    public distanceResultField: string;
+
+                    /** FindNearest distanceThreshold. */
+                    public distanceThreshold?: (google.protobuf.IDoubleValue|null);
+
+                    /**
+                     * Creates a FindNearest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns FindNearest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredQuery.FindNearest;
+
+                    /**
+                     * Creates a plain object from a FindNearest message. Also converts values to other types if specified.
+                     * @param message FindNearest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.StructuredQuery.FindNearest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this FindNearest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for FindNearest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                namespace FindNearest {
+
+                    /** DistanceMeasure enum. */
+                    type DistanceMeasure =
+                        "DISTANCE_MEASURE_UNSPECIFIED"| "EUCLIDEAN"| "COSINE"| "DOT_PRODUCT";
+                }
+            }
+
+            /** Properties of a StructuredAggregationQuery. */
+            interface IStructuredAggregationQuery {
+
+                /** StructuredAggregationQuery structuredQuery */
+                structuredQuery?: (google.firestore.v1.IStructuredQuery|null);
+
+                /** StructuredAggregationQuery aggregations */
+                aggregations?: (google.firestore.v1.StructuredAggregationQuery.IAggregation[]|null);
+            }
+
+            /** Represents a StructuredAggregationQuery. */
+            class StructuredAggregationQuery implements IStructuredAggregationQuery {
+
+                /**
+                 * Constructs a new StructuredAggregationQuery.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IStructuredAggregationQuery);
+
+                /** StructuredAggregationQuery structuredQuery. */
+                public structuredQuery?: (google.firestore.v1.IStructuredQuery|null);
+
+                /** StructuredAggregationQuery aggregations. */
+                public aggregations: google.firestore.v1.StructuredAggregationQuery.IAggregation[];
+
+                /** StructuredAggregationQuery queryType. */
+                public queryType?: "structuredQuery";
+
+                /**
+                 * Creates a StructuredAggregationQuery message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns StructuredAggregationQuery
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredAggregationQuery;
+
+                /**
+                 * Creates a plain object from a StructuredAggregationQuery message. Also converts values to other types if specified.
+                 * @param message StructuredAggregationQuery
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.StructuredAggregationQuery, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this StructuredAggregationQuery to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for StructuredAggregationQuery
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            namespace StructuredAggregationQuery {
+
+                /** Properties of an Aggregation. */
+                interface IAggregation {
+
+                    /** Aggregation count */
+                    count?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.ICount|null);
+
+                    /** Aggregation sum */
+                    sum?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.ISum|null);
+
+                    /** Aggregation avg */
+                    avg?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.IAvg|null);
+
+                    /** Aggregation alias */
+                    alias?: (string|null);
+                }
+
+                /** Represents an Aggregation. */
+                class Aggregation implements IAggregation {
+
+                    /**
+                     * Constructs a new Aggregation.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.v1.StructuredAggregationQuery.IAggregation);
+
+                    /** Aggregation count. */
+                    public count?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.ICount|null);
+
+                    /** Aggregation sum. */
+                    public sum?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.ISum|null);
+
+                    /** Aggregation avg. */
+                    public avg?: (google.firestore.v1.StructuredAggregationQuery.Aggregation.IAvg|null);
+
+                    /** Aggregation alias. */
+                    public alias: string;
+
+                    /** Aggregation operator. */
+                    public operator?: ("count"|"sum"|"avg");
+
+                    /**
+                     * Creates an Aggregation message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns Aggregation
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredAggregationQuery.Aggregation;
+
+                    /**
+                     * Creates a plain object from an Aggregation message. Also converts values to other types if specified.
+                     * @param message Aggregation
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.v1.StructuredAggregationQuery.Aggregation, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this Aggregation to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for Aggregation
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                namespace Aggregation {
+
+                    /** Properties of a Count. */
+                    interface ICount {
+
+                        /** Count upTo */
+                        upTo?: (google.protobuf.IInt64Value|null);
+                    }
+
+                    /** Represents a Count. */
+                    class Count implements ICount {
+
+                        /**
+                         * Constructs a new Count.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.v1.StructuredAggregationQuery.Aggregation.ICount);
+
+                        /** Count upTo. */
+                        public upTo?: (google.protobuf.IInt64Value|null);
+
+                        /**
+                         * Creates a Count message from a plain object. Also converts values to their respective internal types.
+                         * @param object Plain object
+                         * @returns Count
+                         */
+                        public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredAggregationQuery.Aggregation.Count;
+
+                        /**
+                         * Creates a plain object from a Count message. Also converts values to other types if specified.
+                         * @param message Count
+                         * @param [options] Conversion options
+                         * @returns Plain object
+                         */
+                        public static toObject(message: google.firestore.v1.StructuredAggregationQuery.Aggregation.Count, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                        /**
+                         * Converts this Count to JSON.
+                         * @returns JSON object
+                         */
+                        public toJSON(): { [k: string]: any };
+
+                        /**
+                         * Gets the default type url for Count
+                         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns The default type url
+                         */
+                        public static getTypeUrl(typeUrlPrefix?: string): string;
+                    }
+
+                    /** Properties of a Sum. */
+                    interface ISum {
+
+                        /** Sum field */
+                        field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+                    }
+
+                    /** Represents a Sum. */
+                    class Sum implements ISum {
+
+                        /**
+                         * Constructs a new Sum.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.v1.StructuredAggregationQuery.Aggregation.ISum);
+
+                        /** Sum field. */
+                        public field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+
+                        /**
+                         * Creates a Sum message from a plain object. Also converts values to their respective internal types.
+                         * @param object Plain object
+                         * @returns Sum
+                         */
+                        public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum;
+
+                        /**
+                         * Creates a plain object from a Sum message. Also converts values to other types if specified.
+                         * @param message Sum
+                         * @param [options] Conversion options
+                         * @returns Plain object
+                         */
+                        public static toObject(message: google.firestore.v1.StructuredAggregationQuery.Aggregation.Sum, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                        /**
+                         * Converts this Sum to JSON.
+                         * @returns JSON object
+                         */
+                        public toJSON(): { [k: string]: any };
+
+                        /**
+                         * Gets the default type url for Sum
+                         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns The default type url
+                         */
+                        public static getTypeUrl(typeUrlPrefix?: string): string;
+                    }
+
+                    /** Properties of an Avg. */
+                    interface IAvg {
+
+                        /** Avg field */
+                        field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+                    }
+
+                    /** Represents an Avg. */
+                    class Avg implements IAvg {
+
+                        /**
+                         * Constructs a new Avg.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.v1.StructuredAggregationQuery.Aggregation.IAvg);
+
+                        /** Avg field. */
+                        public field?: (google.firestore.v1.StructuredQuery.IFieldReference|null);
+
+                        /**
+                         * Creates an Avg message from a plain object. Also converts values to their respective internal types.
+                         * @param object Plain object
+                         * @returns Avg
+                         */
+                        public static fromObject(object: { [k: string]: any }): google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg;
+
+                        /**
+                         * Creates a plain object from an Avg message. Also converts values to other types if specified.
+                         * @param message Avg
+                         * @param [options] Conversion options
+                         * @returns Plain object
+                         */
+                        public static toObject(message: google.firestore.v1.StructuredAggregationQuery.Aggregation.Avg, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                        /**
+                         * Converts this Avg to JSON.
+                         * @returns JSON object
+                         */
+                        public toJSON(): { [k: string]: any };
+
+                        /**
+                         * Gets the default type url for Avg
+                         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns The default type url
+                         */
+                        public static getTypeUrl(typeUrlPrefix?: string): string;
+                    }
+                }
             }
 
             /** Properties of a Cursor. */
@@ -5716,6 +4460,229 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for Cursor
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of an ExplainOptions. */
+            interface IExplainOptions {
+
+                /** ExplainOptions analyze */
+                analyze?: (boolean|null);
+            }
+
+            /** Represents an ExplainOptions. */
+            class ExplainOptions implements IExplainOptions {
+
+                /**
+                 * Constructs a new ExplainOptions.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IExplainOptions);
+
+                /** ExplainOptions analyze. */
+                public analyze: boolean;
+
+                /**
+                 * Creates an ExplainOptions message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ExplainOptions
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.ExplainOptions;
+
+                /**
+                 * Creates a plain object from an ExplainOptions message. Also converts values to other types if specified.
+                 * @param message ExplainOptions
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.ExplainOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ExplainOptions to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ExplainOptions
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of an ExplainMetrics. */
+            interface IExplainMetrics {
+
+                /** ExplainMetrics planSummary */
+                planSummary?: (google.firestore.v1.IPlanSummary|null);
+
+                /** ExplainMetrics executionStats */
+                executionStats?: (google.firestore.v1.IExecutionStats|null);
+            }
+
+            /** Represents an ExplainMetrics. */
+            class ExplainMetrics implements IExplainMetrics {
+
+                /**
+                 * Constructs a new ExplainMetrics.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IExplainMetrics);
+
+                /** ExplainMetrics planSummary. */
+                public planSummary?: (google.firestore.v1.IPlanSummary|null);
+
+                /** ExplainMetrics executionStats. */
+                public executionStats?: (google.firestore.v1.IExecutionStats|null);
+
+                /**
+                 * Creates an ExplainMetrics message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ExplainMetrics
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.ExplainMetrics;
+
+                /**
+                 * Creates a plain object from an ExplainMetrics message. Also converts values to other types if specified.
+                 * @param message ExplainMetrics
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.ExplainMetrics, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ExplainMetrics to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ExplainMetrics
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a PlanSummary. */
+            interface IPlanSummary {
+
+                /** PlanSummary indexesUsed */
+                indexesUsed?: (google.protobuf.IStruct[]|null);
+            }
+
+            /** Represents a PlanSummary. */
+            class PlanSummary implements IPlanSummary {
+
+                /**
+                 * Constructs a new PlanSummary.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IPlanSummary);
+
+                /** PlanSummary indexesUsed. */
+                public indexesUsed: google.protobuf.IStruct[];
+
+                /**
+                 * Creates a PlanSummary message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns PlanSummary
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.PlanSummary;
+
+                /**
+                 * Creates a plain object from a PlanSummary message. Also converts values to other types if specified.
+                 * @param message PlanSummary
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.PlanSummary, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this PlanSummary to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for PlanSummary
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of an ExecutionStats. */
+            interface IExecutionStats {
+
+                /** ExecutionStats resultsReturned */
+                resultsReturned?: (number|string|null);
+
+                /** ExecutionStats executionDuration */
+                executionDuration?: (google.protobuf.IDuration|null);
+
+                /** ExecutionStats readOperations */
+                readOperations?: (number|string|null);
+
+                /** ExecutionStats debugStats */
+                debugStats?: (google.protobuf.IStruct|null);
+            }
+
+            /** Represents an ExecutionStats. */
+            class ExecutionStats implements IExecutionStats {
+
+                /**
+                 * Constructs a new ExecutionStats.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.firestore.v1.IExecutionStats);
+
+                /** ExecutionStats resultsReturned. */
+                public resultsReturned: (number|string);
+
+                /** ExecutionStats executionDuration. */
+                public executionDuration?: (google.protobuf.IDuration|null);
+
+                /** ExecutionStats readOperations. */
+                public readOperations: (number|string);
+
+                /** ExecutionStats debugStats. */
+                public debugStats?: (google.protobuf.IStruct|null);
+
+                /**
+                 * Creates an ExecutionStats message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ExecutionStats
+                 */
+                public static fromObject(object: { [k: string]: any }): google.firestore.v1.ExecutionStats;
+
+                /**
+                 * Creates a plain object from an ExecutionStats message. Also converts values to other types if specified.
+                 * @param message ExecutionStats
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.firestore.v1.ExecutionStats, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ExecutionStats to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ExecutionStats
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a Write. */
@@ -5790,6 +4757,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for Write
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a DocumentTransform. */
@@ -5837,6 +4811,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for DocumentTransform
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             namespace DocumentTransform {
@@ -5919,6 +4900,13 @@ export namespace google {
                      * @returns JSON object
                      */
                     public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for FieldTransform
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
 
                 namespace FieldTransform {
@@ -5974,6 +4962,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for WriteResult
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a DocumentChange. */
@@ -6027,6 +5022,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for DocumentChange
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a DocumentDelete. */
@@ -6080,6 +5082,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for DocumentDelete
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of a DocumentRemove. */
@@ -6133,6 +5142,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for DocumentRemove
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
 
             /** Properties of an ExistenceFilter. */
@@ -6143,6 +5159,9 @@ export namespace google {
 
                 /** ExistenceFilter count */
                 count?: (number|null);
+
+                /** ExistenceFilter unchangedNames */
+                unchangedNames?: (google.firestore.v1.IBloomFilter|null);
             }
 
             /** Represents an ExistenceFilter. */
@@ -6159,6 +5178,9 @@ export namespace google {
 
                 /** ExistenceFilter count. */
                 public count: number;
+
+                /** ExistenceFilter unchangedNames. */
+                public unchangedNames?: (google.firestore.v1.IBloomFilter|null);
 
                 /**
                  * Creates an ExistenceFilter message from a plain object. Also converts values to their respective internal types.
@@ -6180,6 +5202,13 @@ export namespace google {
                  * @returns JSON object
                  */
                 public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ExistenceFilter
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
             }
         }
     }
@@ -6187,11 +5216,18 @@ export namespace google {
     /** Namespace api. */
     namespace api {
 
+        /** FieldBehavior enum. */
+        type FieldBehavior =
+            "FIELD_BEHAVIOR_UNSPECIFIED"| "OPTIONAL"| "REQUIRED"| "OUTPUT_ONLY"| "INPUT_ONLY"| "IMMUTABLE"| "UNORDERED_LIST"| "NON_EMPTY_DEFAULT"| "IDENTIFIER";
+
         /** Properties of a Http. */
         interface IHttp {
 
             /** Http rules */
             rules?: (google.api.IHttpRule[]|null);
+
+            /** Http fullyDecodeReservedExpansion */
+            fullyDecodeReservedExpansion?: (boolean|null);
         }
 
         /** Represents a Http. */
@@ -6205,6 +5241,9 @@ export namespace google {
 
             /** Http rules. */
             public rules: google.api.IHttpRule[];
+
+            /** Http fullyDecodeReservedExpansion. */
+            public fullyDecodeReservedExpansion: boolean;
 
             /**
              * Creates a Http message from a plain object. Also converts values to their respective internal types.
@@ -6226,10 +5265,20 @@ export namespace google {
              * @returns JSON object
              */
             public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for Http
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
         }
 
         /** Properties of a HttpRule. */
         interface IHttpRule {
+
+            /** HttpRule selector */
+            selector?: (string|null);
 
             /** HttpRule get */
             get?: (string|null);
@@ -6249,11 +5298,11 @@ export namespace google {
             /** HttpRule custom */
             custom?: (google.api.ICustomHttpPattern|null);
 
-            /** HttpRule selector */
-            selector?: (string|null);
-
             /** HttpRule body */
             body?: (string|null);
+
+            /** HttpRule responseBody */
+            responseBody?: (string|null);
 
             /** HttpRule additionalBindings */
             additionalBindings?: (google.api.IHttpRule[]|null);
@@ -6267,6 +5316,9 @@ export namespace google {
              * @param [properties] Properties to set
              */
             constructor(properties?: google.api.IHttpRule);
+
+            /** HttpRule selector. */
+            public selector: string;
 
             /** HttpRule get. */
             public get?: (string|null);
@@ -6286,11 +5338,11 @@ export namespace google {
             /** HttpRule custom. */
             public custom?: (google.api.ICustomHttpPattern|null);
 
-            /** HttpRule selector. */
-            public selector: string;
-
             /** HttpRule body. */
             public body: string;
+
+            /** HttpRule responseBody. */
+            public responseBody: string;
 
             /** HttpRule additionalBindings. */
             public additionalBindings: google.api.IHttpRule[];
@@ -6318,6 +5370,13 @@ export namespace google {
              * @returns JSON object
              */
             public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for HttpRule
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
         }
 
         /** Properties of a CustomHttpPattern. */
@@ -6365,11 +5424,980 @@ export namespace google {
              * @returns JSON object
              */
             public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for CustomHttpPattern
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
         }
 
-        /** FieldBehavior enum. */
-        type FieldBehavior =
-            "FIELD_BEHAVIOR_UNSPECIFIED"| "OPTIONAL"| "REQUIRED"| "OUTPUT_ONLY"| "INPUT_ONLY"| "IMMUTABLE"| "UNORDERED_LIST"| "NON_EMPTY_DEFAULT";
+        /** Properties of a CommonLanguageSettings. */
+        interface ICommonLanguageSettings {
+
+            /** CommonLanguageSettings referenceDocsUri */
+            referenceDocsUri?: (string|null);
+
+            /** CommonLanguageSettings destinations */
+            destinations?: (google.api.ClientLibraryDestination[]|null);
+
+            /** CommonLanguageSettings selectiveGapicGeneration */
+            selectiveGapicGeneration?: (google.api.ISelectiveGapicGeneration|null);
+        }
+
+        /** Represents a CommonLanguageSettings. */
+        class CommonLanguageSettings implements ICommonLanguageSettings {
+
+            /**
+             * Constructs a new CommonLanguageSettings.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.ICommonLanguageSettings);
+
+            /** CommonLanguageSettings referenceDocsUri. */
+            public referenceDocsUri: string;
+
+            /** CommonLanguageSettings destinations. */
+            public destinations: google.api.ClientLibraryDestination[];
+
+            /** CommonLanguageSettings selectiveGapicGeneration. */
+            public selectiveGapicGeneration?: (google.api.ISelectiveGapicGeneration|null);
+
+            /**
+             * Creates a CommonLanguageSettings message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns CommonLanguageSettings
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.CommonLanguageSettings;
+
+            /**
+             * Creates a plain object from a CommonLanguageSettings message. Also converts values to other types if specified.
+             * @param message CommonLanguageSettings
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.CommonLanguageSettings, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this CommonLanguageSettings to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for CommonLanguageSettings
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a ClientLibrarySettings. */
+        interface IClientLibrarySettings {
+
+            /** ClientLibrarySettings version */
+            version?: (string|null);
+
+            /** ClientLibrarySettings launchStage */
+            launchStage?: (google.api.LaunchStage|null);
+
+            /** ClientLibrarySettings restNumericEnums */
+            restNumericEnums?: (boolean|null);
+
+            /** ClientLibrarySettings javaSettings */
+            javaSettings?: (google.api.IJavaSettings|null);
+
+            /** ClientLibrarySettings cppSettings */
+            cppSettings?: (google.api.ICppSettings|null);
+
+            /** ClientLibrarySettings phpSettings */
+            phpSettings?: (google.api.IPhpSettings|null);
+
+            /** ClientLibrarySettings pythonSettings */
+            pythonSettings?: (google.api.IPythonSettings|null);
+
+            /** ClientLibrarySettings nodeSettings */
+            nodeSettings?: (google.api.INodeSettings|null);
+
+            /** ClientLibrarySettings dotnetSettings */
+            dotnetSettings?: (google.api.IDotnetSettings|null);
+
+            /** ClientLibrarySettings rubySettings */
+            rubySettings?: (google.api.IRubySettings|null);
+
+            /** ClientLibrarySettings goSettings */
+            goSettings?: (google.api.IGoSettings|null);
+        }
+
+        /** Represents a ClientLibrarySettings. */
+        class ClientLibrarySettings implements IClientLibrarySettings {
+
+            /**
+             * Constructs a new ClientLibrarySettings.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IClientLibrarySettings);
+
+            /** ClientLibrarySettings version. */
+            public version: string;
+
+            /** ClientLibrarySettings launchStage. */
+            public launchStage: google.api.LaunchStage;
+
+            /** ClientLibrarySettings restNumericEnums. */
+            public restNumericEnums: boolean;
+
+            /** ClientLibrarySettings javaSettings. */
+            public javaSettings?: (google.api.IJavaSettings|null);
+
+            /** ClientLibrarySettings cppSettings. */
+            public cppSettings?: (google.api.ICppSettings|null);
+
+            /** ClientLibrarySettings phpSettings. */
+            public phpSettings?: (google.api.IPhpSettings|null);
+
+            /** ClientLibrarySettings pythonSettings. */
+            public pythonSettings?: (google.api.IPythonSettings|null);
+
+            /** ClientLibrarySettings nodeSettings. */
+            public nodeSettings?: (google.api.INodeSettings|null);
+
+            /** ClientLibrarySettings dotnetSettings. */
+            public dotnetSettings?: (google.api.IDotnetSettings|null);
+
+            /** ClientLibrarySettings rubySettings. */
+            public rubySettings?: (google.api.IRubySettings|null);
+
+            /** ClientLibrarySettings goSettings. */
+            public goSettings?: (google.api.IGoSettings|null);
+
+            /**
+             * Creates a ClientLibrarySettings message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns ClientLibrarySettings
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.ClientLibrarySettings;
+
+            /**
+             * Creates a plain object from a ClientLibrarySettings message. Also converts values to other types if specified.
+             * @param message ClientLibrarySettings
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.ClientLibrarySettings, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this ClientLibrarySettings to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for ClientLibrarySettings
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a Publishing. */
+        interface IPublishing {
+
+            /** Publishing methodSettings */
+            methodSettings?: (google.api.IMethodSettings[]|null);
+
+            /** Publishing newIssueUri */
+            newIssueUri?: (string|null);
+
+            /** Publishing documentationUri */
+            documentationUri?: (string|null);
+
+            /** Publishing apiShortName */
+            apiShortName?: (string|null);
+
+            /** Publishing githubLabel */
+            githubLabel?: (string|null);
+
+            /** Publishing codeownerGithubTeams */
+            codeownerGithubTeams?: (string[]|null);
+
+            /** Publishing docTagPrefix */
+            docTagPrefix?: (string|null);
+
+            /** Publishing organization */
+            organization?: (google.api.ClientLibraryOrganization|null);
+
+            /** Publishing librarySettings */
+            librarySettings?: (google.api.IClientLibrarySettings[]|null);
+
+            /** Publishing protoReferenceDocumentationUri */
+            protoReferenceDocumentationUri?: (string|null);
+
+            /** Publishing restReferenceDocumentationUri */
+            restReferenceDocumentationUri?: (string|null);
+        }
+
+        /** Represents a Publishing. */
+        class Publishing implements IPublishing {
+
+            /**
+             * Constructs a new Publishing.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IPublishing);
+
+            /** Publishing methodSettings. */
+            public methodSettings: google.api.IMethodSettings[];
+
+            /** Publishing newIssueUri. */
+            public newIssueUri: string;
+
+            /** Publishing documentationUri. */
+            public documentationUri: string;
+
+            /** Publishing apiShortName. */
+            public apiShortName: string;
+
+            /** Publishing githubLabel. */
+            public githubLabel: string;
+
+            /** Publishing codeownerGithubTeams. */
+            public codeownerGithubTeams: string[];
+
+            /** Publishing docTagPrefix. */
+            public docTagPrefix: string;
+
+            /** Publishing organization. */
+            public organization: google.api.ClientLibraryOrganization;
+
+            /** Publishing librarySettings. */
+            public librarySettings: google.api.IClientLibrarySettings[];
+
+            /** Publishing protoReferenceDocumentationUri. */
+            public protoReferenceDocumentationUri: string;
+
+            /** Publishing restReferenceDocumentationUri. */
+            public restReferenceDocumentationUri: string;
+
+            /**
+             * Creates a Publishing message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Publishing
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.Publishing;
+
+            /**
+             * Creates a plain object from a Publishing message. Also converts values to other types if specified.
+             * @param message Publishing
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.Publishing, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Publishing to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for Publishing
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a JavaSettings. */
+        interface IJavaSettings {
+
+            /** JavaSettings libraryPackage */
+            libraryPackage?: (string|null);
+
+            /** JavaSettings serviceClassNames */
+            serviceClassNames?: ({ [k: string]: string }|null);
+
+            /** JavaSettings common */
+            common?: (google.api.ICommonLanguageSettings|null);
+        }
+
+        /** Represents a JavaSettings. */
+        class JavaSettings implements IJavaSettings {
+
+            /**
+             * Constructs a new JavaSettings.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IJavaSettings);
+
+            /** JavaSettings libraryPackage. */
+            public libraryPackage: string;
+
+            /** JavaSettings serviceClassNames. */
+            public serviceClassNames: { [k: string]: string };
+
+            /** JavaSettings common. */
+            public common?: (google.api.ICommonLanguageSettings|null);
+
+            /**
+             * Creates a JavaSettings message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns JavaSettings
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.JavaSettings;
+
+            /**
+             * Creates a plain object from a JavaSettings message. Also converts values to other types if specified.
+             * @param message JavaSettings
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.JavaSettings, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this JavaSettings to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for JavaSettings
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a CppSettings. */
+        interface ICppSettings {
+
+            /** CppSettings common */
+            common?: (google.api.ICommonLanguageSettings|null);
+        }
+
+        /** Represents a CppSettings. */
+        class CppSettings implements ICppSettings {
+
+            /**
+             * Constructs a new CppSettings.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.ICppSettings);
+
+            /** CppSettings common. */
+            public common?: (google.api.ICommonLanguageSettings|null);
+
+            /**
+             * Creates a CppSettings message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns CppSettings
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.CppSettings;
+
+            /**
+             * Creates a plain object from a CppSettings message. Also converts values to other types if specified.
+             * @param message CppSettings
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.CppSettings, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this CppSettings to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for CppSettings
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a PhpSettings. */
+        interface IPhpSettings {
+
+            /** PhpSettings common */
+            common?: (google.api.ICommonLanguageSettings|null);
+        }
+
+        /** Represents a PhpSettings. */
+        class PhpSettings implements IPhpSettings {
+
+            /**
+             * Constructs a new PhpSettings.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IPhpSettings);
+
+            /** PhpSettings common. */
+            public common?: (google.api.ICommonLanguageSettings|null);
+
+            /**
+             * Creates a PhpSettings message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns PhpSettings
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.PhpSettings;
+
+            /**
+             * Creates a plain object from a PhpSettings message. Also converts values to other types if specified.
+             * @param message PhpSettings
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.PhpSettings, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this PhpSettings to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for PhpSettings
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a PythonSettings. */
+        interface IPythonSettings {
+
+            /** PythonSettings common */
+            common?: (google.api.ICommonLanguageSettings|null);
+
+            /** PythonSettings experimentalFeatures */
+            experimentalFeatures?: (google.api.PythonSettings.IExperimentalFeatures|null);
+        }
+
+        /** Represents a PythonSettings. */
+        class PythonSettings implements IPythonSettings {
+
+            /**
+             * Constructs a new PythonSettings.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IPythonSettings);
+
+            /** PythonSettings common. */
+            public common?: (google.api.ICommonLanguageSettings|null);
+
+            /** PythonSettings experimentalFeatures. */
+            public experimentalFeatures?: (google.api.PythonSettings.IExperimentalFeatures|null);
+
+            /**
+             * Creates a PythonSettings message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns PythonSettings
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.PythonSettings;
+
+            /**
+             * Creates a plain object from a PythonSettings message. Also converts values to other types if specified.
+             * @param message PythonSettings
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.PythonSettings, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this PythonSettings to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for PythonSettings
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace PythonSettings {
+
+            /** Properties of an ExperimentalFeatures. */
+            interface IExperimentalFeatures {
+
+                /** ExperimentalFeatures restAsyncIoEnabled */
+                restAsyncIoEnabled?: (boolean|null);
+
+                /** ExperimentalFeatures protobufPythonicTypesEnabled */
+                protobufPythonicTypesEnabled?: (boolean|null);
+            }
+
+            /** Represents an ExperimentalFeatures. */
+            class ExperimentalFeatures implements IExperimentalFeatures {
+
+                /**
+                 * Constructs a new ExperimentalFeatures.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.api.PythonSettings.IExperimentalFeatures);
+
+                /** ExperimentalFeatures restAsyncIoEnabled. */
+                public restAsyncIoEnabled: boolean;
+
+                /** ExperimentalFeatures protobufPythonicTypesEnabled. */
+                public protobufPythonicTypesEnabled: boolean;
+
+                /**
+                 * Creates an ExperimentalFeatures message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ExperimentalFeatures
+                 */
+                public static fromObject(object: { [k: string]: any }): google.api.PythonSettings.ExperimentalFeatures;
+
+                /**
+                 * Creates a plain object from an ExperimentalFeatures message. Also converts values to other types if specified.
+                 * @param message ExperimentalFeatures
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.api.PythonSettings.ExperimentalFeatures, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ExperimentalFeatures to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ExperimentalFeatures
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+        }
+
+        /** Properties of a NodeSettings. */
+        interface INodeSettings {
+
+            /** NodeSettings common */
+            common?: (google.api.ICommonLanguageSettings|null);
+        }
+
+        /** Represents a NodeSettings. */
+        class NodeSettings implements INodeSettings {
+
+            /**
+             * Constructs a new NodeSettings.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.INodeSettings);
+
+            /** NodeSettings common. */
+            public common?: (google.api.ICommonLanguageSettings|null);
+
+            /**
+             * Creates a NodeSettings message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns NodeSettings
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.NodeSettings;
+
+            /**
+             * Creates a plain object from a NodeSettings message. Also converts values to other types if specified.
+             * @param message NodeSettings
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.NodeSettings, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this NodeSettings to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for NodeSettings
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a DotnetSettings. */
+        interface IDotnetSettings {
+
+            /** DotnetSettings common */
+            common?: (google.api.ICommonLanguageSettings|null);
+
+            /** DotnetSettings renamedServices */
+            renamedServices?: ({ [k: string]: string }|null);
+
+            /** DotnetSettings renamedResources */
+            renamedResources?: ({ [k: string]: string }|null);
+
+            /** DotnetSettings ignoredResources */
+            ignoredResources?: (string[]|null);
+
+            /** DotnetSettings forcedNamespaceAliases */
+            forcedNamespaceAliases?: (string[]|null);
+
+            /** DotnetSettings handwrittenSignatures */
+            handwrittenSignatures?: (string[]|null);
+        }
+
+        /** Represents a DotnetSettings. */
+        class DotnetSettings implements IDotnetSettings {
+
+            /**
+             * Constructs a new DotnetSettings.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IDotnetSettings);
+
+            /** DotnetSettings common. */
+            public common?: (google.api.ICommonLanguageSettings|null);
+
+            /** DotnetSettings renamedServices. */
+            public renamedServices: { [k: string]: string };
+
+            /** DotnetSettings renamedResources. */
+            public renamedResources: { [k: string]: string };
+
+            /** DotnetSettings ignoredResources. */
+            public ignoredResources: string[];
+
+            /** DotnetSettings forcedNamespaceAliases. */
+            public forcedNamespaceAliases: string[];
+
+            /** DotnetSettings handwrittenSignatures. */
+            public handwrittenSignatures: string[];
+
+            /**
+             * Creates a DotnetSettings message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns DotnetSettings
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.DotnetSettings;
+
+            /**
+             * Creates a plain object from a DotnetSettings message. Also converts values to other types if specified.
+             * @param message DotnetSettings
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.DotnetSettings, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this DotnetSettings to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for DotnetSettings
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a RubySettings. */
+        interface IRubySettings {
+
+            /** RubySettings common */
+            common?: (google.api.ICommonLanguageSettings|null);
+        }
+
+        /** Represents a RubySettings. */
+        class RubySettings implements IRubySettings {
+
+            /**
+             * Constructs a new RubySettings.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IRubySettings);
+
+            /** RubySettings common. */
+            public common?: (google.api.ICommonLanguageSettings|null);
+
+            /**
+             * Creates a RubySettings message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns RubySettings
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.RubySettings;
+
+            /**
+             * Creates a plain object from a RubySettings message. Also converts values to other types if specified.
+             * @param message RubySettings
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.RubySettings, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this RubySettings to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for RubySettings
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a GoSettings. */
+        interface IGoSettings {
+
+            /** GoSettings common */
+            common?: (google.api.ICommonLanguageSettings|null);
+
+            /** GoSettings renamedServices */
+            renamedServices?: ({ [k: string]: string }|null);
+        }
+
+        /** Represents a GoSettings. */
+        class GoSettings implements IGoSettings {
+
+            /**
+             * Constructs a new GoSettings.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IGoSettings);
+
+            /** GoSettings common. */
+            public common?: (google.api.ICommonLanguageSettings|null);
+
+            /** GoSettings renamedServices. */
+            public renamedServices: { [k: string]: string };
+
+            /**
+             * Creates a GoSettings message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns GoSettings
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.GoSettings;
+
+            /**
+             * Creates a plain object from a GoSettings message. Also converts values to other types if specified.
+             * @param message GoSettings
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.GoSettings, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this GoSettings to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for GoSettings
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a MethodSettings. */
+        interface IMethodSettings {
+
+            /** MethodSettings selector */
+            selector?: (string|null);
+
+            /** MethodSettings longRunning */
+            longRunning?: (google.api.MethodSettings.ILongRunning|null);
+
+            /** MethodSettings autoPopulatedFields */
+            autoPopulatedFields?: (string[]|null);
+        }
+
+        /** Represents a MethodSettings. */
+        class MethodSettings implements IMethodSettings {
+
+            /**
+             * Constructs a new MethodSettings.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IMethodSettings);
+
+            /** MethodSettings selector. */
+            public selector: string;
+
+            /** MethodSettings longRunning. */
+            public longRunning?: (google.api.MethodSettings.ILongRunning|null);
+
+            /** MethodSettings autoPopulatedFields. */
+            public autoPopulatedFields: string[];
+
+            /**
+             * Creates a MethodSettings message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns MethodSettings
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.MethodSettings;
+
+            /**
+             * Creates a plain object from a MethodSettings message. Also converts values to other types if specified.
+             * @param message MethodSettings
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.MethodSettings, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this MethodSettings to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for MethodSettings
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace MethodSettings {
+
+            /** Properties of a LongRunning. */
+            interface ILongRunning {
+
+                /** LongRunning initialPollDelay */
+                initialPollDelay?: (google.protobuf.IDuration|null);
+
+                /** LongRunning pollDelayMultiplier */
+                pollDelayMultiplier?: (number|null);
+
+                /** LongRunning maxPollDelay */
+                maxPollDelay?: (google.protobuf.IDuration|null);
+
+                /** LongRunning totalPollTimeout */
+                totalPollTimeout?: (google.protobuf.IDuration|null);
+            }
+
+            /** Represents a LongRunning. */
+            class LongRunning implements ILongRunning {
+
+                /**
+                 * Constructs a new LongRunning.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.api.MethodSettings.ILongRunning);
+
+                /** LongRunning initialPollDelay. */
+                public initialPollDelay?: (google.protobuf.IDuration|null);
+
+                /** LongRunning pollDelayMultiplier. */
+                public pollDelayMultiplier: number;
+
+                /** LongRunning maxPollDelay. */
+                public maxPollDelay?: (google.protobuf.IDuration|null);
+
+                /** LongRunning totalPollTimeout. */
+                public totalPollTimeout?: (google.protobuf.IDuration|null);
+
+                /**
+                 * Creates a LongRunning message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns LongRunning
+                 */
+                public static fromObject(object: { [k: string]: any }): google.api.MethodSettings.LongRunning;
+
+                /**
+                 * Creates a plain object from a LongRunning message. Also converts values to other types if specified.
+                 * @param message LongRunning
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.api.MethodSettings.LongRunning, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this LongRunning to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for LongRunning
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+        }
+
+        /** ClientLibraryOrganization enum. */
+        type ClientLibraryOrganization =
+            "CLIENT_LIBRARY_ORGANIZATION_UNSPECIFIED"| "CLOUD"| "ADS"| "PHOTOS"| "STREET_VIEW"| "SHOPPING"| "GEO"| "GENERATIVE_AI";
+
+        /** ClientLibraryDestination enum. */
+        type ClientLibraryDestination =
+            "CLIENT_LIBRARY_DESTINATION_UNSPECIFIED"| "GITHUB"| "PACKAGE_MANAGER";
+
+        /** Properties of a SelectiveGapicGeneration. */
+        interface ISelectiveGapicGeneration {
+
+            /** SelectiveGapicGeneration methods */
+            methods?: (string[]|null);
+
+            /** SelectiveGapicGeneration generateOmittedAsInternal */
+            generateOmittedAsInternal?: (boolean|null);
+        }
+
+        /** Represents a SelectiveGapicGeneration. */
+        class SelectiveGapicGeneration implements ISelectiveGapicGeneration {
+
+            /**
+             * Constructs a new SelectiveGapicGeneration.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.ISelectiveGapicGeneration);
+
+            /** SelectiveGapicGeneration methods. */
+            public methods: string[];
+
+            /** SelectiveGapicGeneration generateOmittedAsInternal. */
+            public generateOmittedAsInternal: boolean;
+
+            /**
+             * Creates a SelectiveGapicGeneration message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns SelectiveGapicGeneration
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.SelectiveGapicGeneration;
+
+            /**
+             * Creates a plain object from a SelectiveGapicGeneration message. Also converts values to other types if specified.
+             * @param message SelectiveGapicGeneration
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.SelectiveGapicGeneration, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this SelectiveGapicGeneration to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for SelectiveGapicGeneration
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** LaunchStage enum. */
+        type LaunchStage =
+            "LAUNCH_STAGE_UNSPECIFIED"| "UNIMPLEMENTED"| "PRELAUNCH"| "EARLY_ACCESS"| "ALPHA"| "BETA"| "GA"| "DEPRECATED";
 
         /** Properties of a ResourceDescriptor. */
         interface IResourceDescriptor {
@@ -6446,6 +6474,13 @@ export namespace google {
              * @returns JSON object
              */
             public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for ResourceDescriptor
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
         }
 
         namespace ResourceDescriptor {
@@ -6504,6 +6539,3341 @@ export namespace google {
              * @returns JSON object
              */
             public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for ResourceReference
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+    }
+
+    /** Namespace protobuf. */
+    namespace protobuf {
+
+        /** Properties of a FileDescriptorSet. */
+        interface IFileDescriptorSet {
+
+            /** FileDescriptorSet file */
+            file?: (google.protobuf.IFileDescriptorProto[]|null);
+        }
+
+        /** Represents a FileDescriptorSet. */
+        class FileDescriptorSet implements IFileDescriptorSet {
+
+            /**
+             * Constructs a new FileDescriptorSet.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IFileDescriptorSet);
+
+            /** FileDescriptorSet file. */
+            public file: google.protobuf.IFileDescriptorProto[];
+
+            /**
+             * Creates a FileDescriptorSet message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FileDescriptorSet
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FileDescriptorSet;
+
+            /**
+             * Creates a plain object from a FileDescriptorSet message. Also converts values to other types if specified.
+             * @param message FileDescriptorSet
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FileDescriptorSet, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FileDescriptorSet to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for FileDescriptorSet
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Edition enum. */
+        type Edition =
+            "EDITION_UNKNOWN"| "EDITION_PROTO2"| "EDITION_PROTO3"| "EDITION_2023"| "EDITION_2024"| "EDITION_1_TEST_ONLY"| "EDITION_2_TEST_ONLY"| "EDITION_99997_TEST_ONLY"| "EDITION_99998_TEST_ONLY"| "EDITION_99999_TEST_ONLY"| "EDITION_MAX";
+
+        /** Properties of a FileDescriptorProto. */
+        interface IFileDescriptorProto {
+
+            /** FileDescriptorProto name */
+            name?: (string|null);
+
+            /** FileDescriptorProto package */
+            "package"?: (string|null);
+
+            /** FileDescriptorProto dependency */
+            dependency?: (string[]|null);
+
+            /** FileDescriptorProto publicDependency */
+            publicDependency?: (number[]|null);
+
+            /** FileDescriptorProto weakDependency */
+            weakDependency?: (number[]|null);
+
+            /** FileDescriptorProto messageType */
+            messageType?: (google.protobuf.IDescriptorProto[]|null);
+
+            /** FileDescriptorProto enumType */
+            enumType?: (google.protobuf.IEnumDescriptorProto[]|null);
+
+            /** FileDescriptorProto service */
+            service?: (google.protobuf.IServiceDescriptorProto[]|null);
+
+            /** FileDescriptorProto extension */
+            extension?: (google.protobuf.IFieldDescriptorProto[]|null);
+
+            /** FileDescriptorProto options */
+            options?: (google.protobuf.IFileOptions|null);
+
+            /** FileDescriptorProto sourceCodeInfo */
+            sourceCodeInfo?: (google.protobuf.ISourceCodeInfo|null);
+
+            /** FileDescriptorProto syntax */
+            syntax?: (string|null);
+
+            /** FileDescriptorProto edition */
+            edition?: (google.protobuf.Edition|null);
+        }
+
+        /** Represents a FileDescriptorProto. */
+        class FileDescriptorProto implements IFileDescriptorProto {
+
+            /**
+             * Constructs a new FileDescriptorProto.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IFileDescriptorProto);
+
+            /** FileDescriptorProto name. */
+            public name: string;
+
+            /** FileDescriptorProto package. */
+            public package: string;
+
+            /** FileDescriptorProto dependency. */
+            public dependency: string[];
+
+            /** FileDescriptorProto publicDependency. */
+            public publicDependency: number[];
+
+            /** FileDescriptorProto weakDependency. */
+            public weakDependency: number[];
+
+            /** FileDescriptorProto messageType. */
+            public messageType: google.protobuf.IDescriptorProto[];
+
+            /** FileDescriptorProto enumType. */
+            public enumType: google.protobuf.IEnumDescriptorProto[];
+
+            /** FileDescriptorProto service. */
+            public service: google.protobuf.IServiceDescriptorProto[];
+
+            /** FileDescriptorProto extension. */
+            public extension: google.protobuf.IFieldDescriptorProto[];
+
+            /** FileDescriptorProto options. */
+            public options?: (google.protobuf.IFileOptions|null);
+
+            /** FileDescriptorProto sourceCodeInfo. */
+            public sourceCodeInfo?: (google.protobuf.ISourceCodeInfo|null);
+
+            /** FileDescriptorProto syntax. */
+            public syntax: string;
+
+            /** FileDescriptorProto edition. */
+            public edition: google.protobuf.Edition;
+
+            /**
+             * Creates a FileDescriptorProto message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FileDescriptorProto
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FileDescriptorProto;
+
+            /**
+             * Creates a plain object from a FileDescriptorProto message. Also converts values to other types if specified.
+             * @param message FileDescriptorProto
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FileDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FileDescriptorProto to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for FileDescriptorProto
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a DescriptorProto. */
+        interface IDescriptorProto {
+
+            /** DescriptorProto name */
+            name?: (string|null);
+
+            /** DescriptorProto field */
+            field?: (google.protobuf.IFieldDescriptorProto[]|null);
+
+            /** DescriptorProto extension */
+            extension?: (google.protobuf.IFieldDescriptorProto[]|null);
+
+            /** DescriptorProto nestedType */
+            nestedType?: (google.protobuf.IDescriptorProto[]|null);
+
+            /** DescriptorProto enumType */
+            enumType?: (google.protobuf.IEnumDescriptorProto[]|null);
+
+            /** DescriptorProto extensionRange */
+            extensionRange?: (google.protobuf.DescriptorProto.IExtensionRange[]|null);
+
+            /** DescriptorProto oneofDecl */
+            oneofDecl?: (google.protobuf.IOneofDescriptorProto[]|null);
+
+            /** DescriptorProto options */
+            options?: (google.protobuf.IMessageOptions|null);
+
+            /** DescriptorProto reservedRange */
+            reservedRange?: (google.protobuf.DescriptorProto.IReservedRange[]|null);
+
+            /** DescriptorProto reservedName */
+            reservedName?: (string[]|null);
+        }
+
+        /** Represents a DescriptorProto. */
+        class DescriptorProto implements IDescriptorProto {
+
+            /**
+             * Constructs a new DescriptorProto.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IDescriptorProto);
+
+            /** DescriptorProto name. */
+            public name: string;
+
+            /** DescriptorProto field. */
+            public field: google.protobuf.IFieldDescriptorProto[];
+
+            /** DescriptorProto extension. */
+            public extension: google.protobuf.IFieldDescriptorProto[];
+
+            /** DescriptorProto nestedType. */
+            public nestedType: google.protobuf.IDescriptorProto[];
+
+            /** DescriptorProto enumType. */
+            public enumType: google.protobuf.IEnumDescriptorProto[];
+
+            /** DescriptorProto extensionRange. */
+            public extensionRange: google.protobuf.DescriptorProto.IExtensionRange[];
+
+            /** DescriptorProto oneofDecl. */
+            public oneofDecl: google.protobuf.IOneofDescriptorProto[];
+
+            /** DescriptorProto options. */
+            public options?: (google.protobuf.IMessageOptions|null);
+
+            /** DescriptorProto reservedRange. */
+            public reservedRange: google.protobuf.DescriptorProto.IReservedRange[];
+
+            /** DescriptorProto reservedName. */
+            public reservedName: string[];
+
+            /**
+             * Creates a DescriptorProto message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns DescriptorProto
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.DescriptorProto;
+
+            /**
+             * Creates a plain object from a DescriptorProto message. Also converts values to other types if specified.
+             * @param message DescriptorProto
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.DescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this DescriptorProto to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for DescriptorProto
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace DescriptorProto {
+
+            /** Properties of an ExtensionRange. */
+            interface IExtensionRange {
+
+                /** ExtensionRange start */
+                start?: (number|null);
+
+                /** ExtensionRange end */
+                end?: (number|null);
+
+                /** ExtensionRange options */
+                options?: (google.protobuf.IExtensionRangeOptions|null);
+            }
+
+            /** Represents an ExtensionRange. */
+            class ExtensionRange implements IExtensionRange {
+
+                /**
+                 * Constructs a new ExtensionRange.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.protobuf.DescriptorProto.IExtensionRange);
+
+                /** ExtensionRange start. */
+                public start: number;
+
+                /** ExtensionRange end. */
+                public end: number;
+
+                /** ExtensionRange options. */
+                public options?: (google.protobuf.IExtensionRangeOptions|null);
+
+                /**
+                 * Creates an ExtensionRange message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ExtensionRange
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.DescriptorProto.ExtensionRange;
+
+                /**
+                 * Creates a plain object from an ExtensionRange message. Also converts values to other types if specified.
+                 * @param message ExtensionRange
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.DescriptorProto.ExtensionRange, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ExtensionRange to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ExtensionRange
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** Properties of a ReservedRange. */
+            interface IReservedRange {
+
+                /** ReservedRange start */
+                start?: (number|null);
+
+                /** ReservedRange end */
+                end?: (number|null);
+            }
+
+            /** Represents a ReservedRange. */
+            class ReservedRange implements IReservedRange {
+
+                /**
+                 * Constructs a new ReservedRange.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.protobuf.DescriptorProto.IReservedRange);
+
+                /** ReservedRange start. */
+                public start: number;
+
+                /** ReservedRange end. */
+                public end: number;
+
+                /**
+                 * Creates a ReservedRange message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ReservedRange
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.DescriptorProto.ReservedRange;
+
+                /**
+                 * Creates a plain object from a ReservedRange message. Also converts values to other types if specified.
+                 * @param message ReservedRange
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.DescriptorProto.ReservedRange, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ReservedRange to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ReservedRange
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+        }
+
+        /** Properties of an ExtensionRangeOptions. */
+        interface IExtensionRangeOptions {
+
+            /** ExtensionRangeOptions uninterpretedOption */
+            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
+
+            /** ExtensionRangeOptions declaration */
+            declaration?: (google.protobuf.ExtensionRangeOptions.IDeclaration[]|null);
+
+            /** ExtensionRangeOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
+
+            /** ExtensionRangeOptions verification */
+            verification?: (google.protobuf.ExtensionRangeOptions.VerificationState|null);
+        }
+
+        /** Represents an ExtensionRangeOptions. */
+        class ExtensionRangeOptions implements IExtensionRangeOptions {
+
+            /**
+             * Constructs a new ExtensionRangeOptions.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IExtensionRangeOptions);
+
+            /** ExtensionRangeOptions uninterpretedOption. */
+            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /** ExtensionRangeOptions declaration. */
+            public declaration: google.protobuf.ExtensionRangeOptions.IDeclaration[];
+
+            /** ExtensionRangeOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
+
+            /** ExtensionRangeOptions verification. */
+            public verification: google.protobuf.ExtensionRangeOptions.VerificationState;
+
+            /**
+             * Creates an ExtensionRangeOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns ExtensionRangeOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.ExtensionRangeOptions;
+
+            /**
+             * Creates a plain object from an ExtensionRangeOptions message. Also converts values to other types if specified.
+             * @param message ExtensionRangeOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.ExtensionRangeOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this ExtensionRangeOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for ExtensionRangeOptions
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace ExtensionRangeOptions {
+
+            /** Properties of a Declaration. */
+            interface IDeclaration {
+
+                /** Declaration number */
+                number?: (number|null);
+
+                /** Declaration fullName */
+                fullName?: (string|null);
+
+                /** Declaration type */
+                type?: (string|null);
+
+                /** Declaration reserved */
+                reserved?: (boolean|null);
+
+                /** Declaration repeated */
+                repeated?: (boolean|null);
+            }
+
+            /** Represents a Declaration. */
+            class Declaration implements IDeclaration {
+
+                /**
+                 * Constructs a new Declaration.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.protobuf.ExtensionRangeOptions.IDeclaration);
+
+                /** Declaration number. */
+                public number: number;
+
+                /** Declaration fullName. */
+                public fullName: string;
+
+                /** Declaration type. */
+                public type: string;
+
+                /** Declaration reserved. */
+                public reserved: boolean;
+
+                /** Declaration repeated. */
+                public repeated: boolean;
+
+                /**
+                 * Creates a Declaration message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns Declaration
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.ExtensionRangeOptions.Declaration;
+
+                /**
+                 * Creates a plain object from a Declaration message. Also converts values to other types if specified.
+                 * @param message Declaration
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.ExtensionRangeOptions.Declaration, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this Declaration to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for Declaration
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            /** VerificationState enum. */
+            type VerificationState =
+                "DECLARATION"| "UNVERIFIED";
+        }
+
+        /** Properties of a FieldDescriptorProto. */
+        interface IFieldDescriptorProto {
+
+            /** FieldDescriptorProto name */
+            name?: (string|null);
+
+            /** FieldDescriptorProto number */
+            number?: (number|null);
+
+            /** FieldDescriptorProto label */
+            label?: (google.protobuf.FieldDescriptorProto.Label|null);
+
+            /** FieldDescriptorProto type */
+            type?: (google.protobuf.FieldDescriptorProto.Type|null);
+
+            /** FieldDescriptorProto typeName */
+            typeName?: (string|null);
+
+            /** FieldDescriptorProto extendee */
+            extendee?: (string|null);
+
+            /** FieldDescriptorProto defaultValue */
+            defaultValue?: (string|null);
+
+            /** FieldDescriptorProto oneofIndex */
+            oneofIndex?: (number|null);
+
+            /** FieldDescriptorProto jsonName */
+            jsonName?: (string|null);
+
+            /** FieldDescriptorProto options */
+            options?: (google.protobuf.IFieldOptions|null);
+
+            /** FieldDescriptorProto proto3Optional */
+            proto3Optional?: (boolean|null);
+        }
+
+        /** Represents a FieldDescriptorProto. */
+        class FieldDescriptorProto implements IFieldDescriptorProto {
+
+            /**
+             * Constructs a new FieldDescriptorProto.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IFieldDescriptorProto);
+
+            /** FieldDescriptorProto name. */
+            public name: string;
+
+            /** FieldDescriptorProto number. */
+            public number: number;
+
+            /** FieldDescriptorProto label. */
+            public label: google.protobuf.FieldDescriptorProto.Label;
+
+            /** FieldDescriptorProto type. */
+            public type: google.protobuf.FieldDescriptorProto.Type;
+
+            /** FieldDescriptorProto typeName. */
+            public typeName: string;
+
+            /** FieldDescriptorProto extendee. */
+            public extendee: string;
+
+            /** FieldDescriptorProto defaultValue. */
+            public defaultValue: string;
+
+            /** FieldDescriptorProto oneofIndex. */
+            public oneofIndex: number;
+
+            /** FieldDescriptorProto jsonName. */
+            public jsonName: string;
+
+            /** FieldDescriptorProto options. */
+            public options?: (google.protobuf.IFieldOptions|null);
+
+            /** FieldDescriptorProto proto3Optional. */
+            public proto3Optional: boolean;
+
+            /**
+             * Creates a FieldDescriptorProto message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FieldDescriptorProto
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FieldDescriptorProto;
+
+            /**
+             * Creates a plain object from a FieldDescriptorProto message. Also converts values to other types if specified.
+             * @param message FieldDescriptorProto
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FieldDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FieldDescriptorProto to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for FieldDescriptorProto
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace FieldDescriptorProto {
+
+            /** Type enum. */
+            type Type =
+                "TYPE_DOUBLE"| "TYPE_FLOAT"| "TYPE_INT64"| "TYPE_UINT64"| "TYPE_INT32"| "TYPE_FIXED64"| "TYPE_FIXED32"| "TYPE_BOOL"| "TYPE_STRING"| "TYPE_GROUP"| "TYPE_MESSAGE"| "TYPE_BYTES"| "TYPE_UINT32"| "TYPE_ENUM"| "TYPE_SFIXED32"| "TYPE_SFIXED64"| "TYPE_SINT32"| "TYPE_SINT64";
+
+            /** Label enum. */
+            type Label =
+                "LABEL_OPTIONAL"| "LABEL_REPEATED"| "LABEL_REQUIRED";
+        }
+
+        /** Properties of an OneofDescriptorProto. */
+        interface IOneofDescriptorProto {
+
+            /** OneofDescriptorProto name */
+            name?: (string|null);
+
+            /** OneofDescriptorProto options */
+            options?: (google.protobuf.IOneofOptions|null);
+        }
+
+        /** Represents an OneofDescriptorProto. */
+        class OneofDescriptorProto implements IOneofDescriptorProto {
+
+            /**
+             * Constructs a new OneofDescriptorProto.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IOneofDescriptorProto);
+
+            /** OneofDescriptorProto name. */
+            public name: string;
+
+            /** OneofDescriptorProto options. */
+            public options?: (google.protobuf.IOneofOptions|null);
+
+            /**
+             * Creates an OneofDescriptorProto message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns OneofDescriptorProto
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.OneofDescriptorProto;
+
+            /**
+             * Creates a plain object from an OneofDescriptorProto message. Also converts values to other types if specified.
+             * @param message OneofDescriptorProto
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.OneofDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this OneofDescriptorProto to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for OneofDescriptorProto
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of an EnumDescriptorProto. */
+        interface IEnumDescriptorProto {
+
+            /** EnumDescriptorProto name */
+            name?: (string|null);
+
+            /** EnumDescriptorProto value */
+            value?: (google.protobuf.IEnumValueDescriptorProto[]|null);
+
+            /** EnumDescriptorProto options */
+            options?: (google.protobuf.IEnumOptions|null);
+
+            /** EnumDescriptorProto reservedRange */
+            reservedRange?: (google.protobuf.EnumDescriptorProto.IEnumReservedRange[]|null);
+
+            /** EnumDescriptorProto reservedName */
+            reservedName?: (string[]|null);
+        }
+
+        /** Represents an EnumDescriptorProto. */
+        class EnumDescriptorProto implements IEnumDescriptorProto {
+
+            /**
+             * Constructs a new EnumDescriptorProto.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IEnumDescriptorProto);
+
+            /** EnumDescriptorProto name. */
+            public name: string;
+
+            /** EnumDescriptorProto value. */
+            public value: google.protobuf.IEnumValueDescriptorProto[];
+
+            /** EnumDescriptorProto options. */
+            public options?: (google.protobuf.IEnumOptions|null);
+
+            /** EnumDescriptorProto reservedRange. */
+            public reservedRange: google.protobuf.EnumDescriptorProto.IEnumReservedRange[];
+
+            /** EnumDescriptorProto reservedName. */
+            public reservedName: string[];
+
+            /**
+             * Creates an EnumDescriptorProto message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns EnumDescriptorProto
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.EnumDescriptorProto;
+
+            /**
+             * Creates a plain object from an EnumDescriptorProto message. Also converts values to other types if specified.
+             * @param message EnumDescriptorProto
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.EnumDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this EnumDescriptorProto to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for EnumDescriptorProto
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace EnumDescriptorProto {
+
+            /** Properties of an EnumReservedRange. */
+            interface IEnumReservedRange {
+
+                /** EnumReservedRange start */
+                start?: (number|null);
+
+                /** EnumReservedRange end */
+                end?: (number|null);
+            }
+
+            /** Represents an EnumReservedRange. */
+            class EnumReservedRange implements IEnumReservedRange {
+
+                /**
+                 * Constructs a new EnumReservedRange.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.protobuf.EnumDescriptorProto.IEnumReservedRange);
+
+                /** EnumReservedRange start. */
+                public start: number;
+
+                /** EnumReservedRange end. */
+                public end: number;
+
+                /**
+                 * Creates an EnumReservedRange message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns EnumReservedRange
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.EnumDescriptorProto.EnumReservedRange;
+
+                /**
+                 * Creates a plain object from an EnumReservedRange message. Also converts values to other types if specified.
+                 * @param message EnumReservedRange
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.EnumDescriptorProto.EnumReservedRange, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this EnumReservedRange to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for EnumReservedRange
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+        }
+
+        /** Properties of an EnumValueDescriptorProto. */
+        interface IEnumValueDescriptorProto {
+
+            /** EnumValueDescriptorProto name */
+            name?: (string|null);
+
+            /** EnumValueDescriptorProto number */
+            number?: (number|null);
+
+            /** EnumValueDescriptorProto options */
+            options?: (google.protobuf.IEnumValueOptions|null);
+        }
+
+        /** Represents an EnumValueDescriptorProto. */
+        class EnumValueDescriptorProto implements IEnumValueDescriptorProto {
+
+            /**
+             * Constructs a new EnumValueDescriptorProto.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IEnumValueDescriptorProto);
+
+            /** EnumValueDescriptorProto name. */
+            public name: string;
+
+            /** EnumValueDescriptorProto number. */
+            public number: number;
+
+            /** EnumValueDescriptorProto options. */
+            public options?: (google.protobuf.IEnumValueOptions|null);
+
+            /**
+             * Creates an EnumValueDescriptorProto message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns EnumValueDescriptorProto
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.EnumValueDescriptorProto;
+
+            /**
+             * Creates a plain object from an EnumValueDescriptorProto message. Also converts values to other types if specified.
+             * @param message EnumValueDescriptorProto
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.EnumValueDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this EnumValueDescriptorProto to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for EnumValueDescriptorProto
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a ServiceDescriptorProto. */
+        interface IServiceDescriptorProto {
+
+            /** ServiceDescriptorProto name */
+            name?: (string|null);
+
+            /** ServiceDescriptorProto method */
+            method?: (google.protobuf.IMethodDescriptorProto[]|null);
+
+            /** ServiceDescriptorProto options */
+            options?: (google.protobuf.IServiceOptions|null);
+        }
+
+        /** Represents a ServiceDescriptorProto. */
+        class ServiceDescriptorProto implements IServiceDescriptorProto {
+
+            /**
+             * Constructs a new ServiceDescriptorProto.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IServiceDescriptorProto);
+
+            /** ServiceDescriptorProto name. */
+            public name: string;
+
+            /** ServiceDescriptorProto method. */
+            public method: google.protobuf.IMethodDescriptorProto[];
+
+            /** ServiceDescriptorProto options. */
+            public options?: (google.protobuf.IServiceOptions|null);
+
+            /**
+             * Creates a ServiceDescriptorProto message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns ServiceDescriptorProto
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.ServiceDescriptorProto;
+
+            /**
+             * Creates a plain object from a ServiceDescriptorProto message. Also converts values to other types if specified.
+             * @param message ServiceDescriptorProto
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.ServiceDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this ServiceDescriptorProto to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for ServiceDescriptorProto
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a MethodDescriptorProto. */
+        interface IMethodDescriptorProto {
+
+            /** MethodDescriptorProto name */
+            name?: (string|null);
+
+            /** MethodDescriptorProto inputType */
+            inputType?: (string|null);
+
+            /** MethodDescriptorProto outputType */
+            outputType?: (string|null);
+
+            /** MethodDescriptorProto options */
+            options?: (google.protobuf.IMethodOptions|null);
+
+            /** MethodDescriptorProto clientStreaming */
+            clientStreaming?: (boolean|null);
+
+            /** MethodDescriptorProto serverStreaming */
+            serverStreaming?: (boolean|null);
+        }
+
+        /** Represents a MethodDescriptorProto. */
+        class MethodDescriptorProto implements IMethodDescriptorProto {
+
+            /**
+             * Constructs a new MethodDescriptorProto.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IMethodDescriptorProto);
+
+            /** MethodDescriptorProto name. */
+            public name: string;
+
+            /** MethodDescriptorProto inputType. */
+            public inputType: string;
+
+            /** MethodDescriptorProto outputType. */
+            public outputType: string;
+
+            /** MethodDescriptorProto options. */
+            public options?: (google.protobuf.IMethodOptions|null);
+
+            /** MethodDescriptorProto clientStreaming. */
+            public clientStreaming: boolean;
+
+            /** MethodDescriptorProto serverStreaming. */
+            public serverStreaming: boolean;
+
+            /**
+             * Creates a MethodDescriptorProto message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns MethodDescriptorProto
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.MethodDescriptorProto;
+
+            /**
+             * Creates a plain object from a MethodDescriptorProto message. Also converts values to other types if specified.
+             * @param message MethodDescriptorProto
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.MethodDescriptorProto, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this MethodDescriptorProto to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for MethodDescriptorProto
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a FileOptions. */
+        interface IFileOptions {
+
+            /** FileOptions javaPackage */
+            javaPackage?: (string|null);
+
+            /** FileOptions javaOuterClassname */
+            javaOuterClassname?: (string|null);
+
+            /** FileOptions javaMultipleFiles */
+            javaMultipleFiles?: (boolean|null);
+
+            /** FileOptions javaGenerateEqualsAndHash */
+            javaGenerateEqualsAndHash?: (boolean|null);
+
+            /** FileOptions javaStringCheckUtf8 */
+            javaStringCheckUtf8?: (boolean|null);
+
+            /** FileOptions optimizeFor */
+            optimizeFor?: (google.protobuf.FileOptions.OptimizeMode|null);
+
+            /** FileOptions goPackage */
+            goPackage?: (string|null);
+
+            /** FileOptions ccGenericServices */
+            ccGenericServices?: (boolean|null);
+
+            /** FileOptions javaGenericServices */
+            javaGenericServices?: (boolean|null);
+
+            /** FileOptions pyGenericServices */
+            pyGenericServices?: (boolean|null);
+
+            /** FileOptions deprecated */
+            deprecated?: (boolean|null);
+
+            /** FileOptions ccEnableArenas */
+            ccEnableArenas?: (boolean|null);
+
+            /** FileOptions objcClassPrefix */
+            objcClassPrefix?: (string|null);
+
+            /** FileOptions csharpNamespace */
+            csharpNamespace?: (string|null);
+
+            /** FileOptions swiftPrefix */
+            swiftPrefix?: (string|null);
+
+            /** FileOptions phpClassPrefix */
+            phpClassPrefix?: (string|null);
+
+            /** FileOptions phpNamespace */
+            phpNamespace?: (string|null);
+
+            /** FileOptions phpMetadataNamespace */
+            phpMetadataNamespace?: (string|null);
+
+            /** FileOptions rubyPackage */
+            rubyPackage?: (string|null);
+
+            /** FileOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
+
+            /** FileOptions uninterpretedOption */
+            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
+
+            /** FileOptions .google.api.resourceDefinition */
+            ".google.api.resourceDefinition"?: (google.api.IResourceDescriptor[]|null);
+        }
+
+        /** Represents a FileOptions. */
+        class FileOptions implements IFileOptions {
+
+            /**
+             * Constructs a new FileOptions.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IFileOptions);
+
+            /** FileOptions javaPackage. */
+            public javaPackage: string;
+
+            /** FileOptions javaOuterClassname. */
+            public javaOuterClassname: string;
+
+            /** FileOptions javaMultipleFiles. */
+            public javaMultipleFiles: boolean;
+
+            /** FileOptions javaGenerateEqualsAndHash. */
+            public javaGenerateEqualsAndHash: boolean;
+
+            /** FileOptions javaStringCheckUtf8. */
+            public javaStringCheckUtf8: boolean;
+
+            /** FileOptions optimizeFor. */
+            public optimizeFor: google.protobuf.FileOptions.OptimizeMode;
+
+            /** FileOptions goPackage. */
+            public goPackage: string;
+
+            /** FileOptions ccGenericServices. */
+            public ccGenericServices: boolean;
+
+            /** FileOptions javaGenericServices. */
+            public javaGenericServices: boolean;
+
+            /** FileOptions pyGenericServices. */
+            public pyGenericServices: boolean;
+
+            /** FileOptions deprecated. */
+            public deprecated: boolean;
+
+            /** FileOptions ccEnableArenas. */
+            public ccEnableArenas: boolean;
+
+            /** FileOptions objcClassPrefix. */
+            public objcClassPrefix: string;
+
+            /** FileOptions csharpNamespace. */
+            public csharpNamespace: string;
+
+            /** FileOptions swiftPrefix. */
+            public swiftPrefix: string;
+
+            /** FileOptions phpClassPrefix. */
+            public phpClassPrefix: string;
+
+            /** FileOptions phpNamespace. */
+            public phpNamespace: string;
+
+            /** FileOptions phpMetadataNamespace. */
+            public phpMetadataNamespace: string;
+
+            /** FileOptions rubyPackage. */
+            public rubyPackage: string;
+
+            /** FileOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
+
+            /** FileOptions uninterpretedOption. */
+            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /**
+             * Creates a FileOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FileOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FileOptions;
+
+            /**
+             * Creates a plain object from a FileOptions message. Also converts values to other types if specified.
+             * @param message FileOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FileOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FileOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for FileOptions
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace FileOptions {
+
+            /** OptimizeMode enum. */
+            type OptimizeMode =
+                "SPEED"| "CODE_SIZE"| "LITE_RUNTIME";
+        }
+
+        /** Properties of a MessageOptions. */
+        interface IMessageOptions {
+
+            /** MessageOptions messageSetWireFormat */
+            messageSetWireFormat?: (boolean|null);
+
+            /** MessageOptions noStandardDescriptorAccessor */
+            noStandardDescriptorAccessor?: (boolean|null);
+
+            /** MessageOptions deprecated */
+            deprecated?: (boolean|null);
+
+            /** MessageOptions mapEntry */
+            mapEntry?: (boolean|null);
+
+            /** MessageOptions deprecatedLegacyJsonFieldConflicts */
+            deprecatedLegacyJsonFieldConflicts?: (boolean|null);
+
+            /** MessageOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
+
+            /** MessageOptions uninterpretedOption */
+            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
+
+            /** MessageOptions .google.api.resource */
+            ".google.api.resource"?: (google.api.IResourceDescriptor|null);
+        }
+
+        /** Represents a MessageOptions. */
+        class MessageOptions implements IMessageOptions {
+
+            /**
+             * Constructs a new MessageOptions.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IMessageOptions);
+
+            /** MessageOptions messageSetWireFormat. */
+            public messageSetWireFormat: boolean;
+
+            /** MessageOptions noStandardDescriptorAccessor. */
+            public noStandardDescriptorAccessor: boolean;
+
+            /** MessageOptions deprecated. */
+            public deprecated: boolean;
+
+            /** MessageOptions mapEntry. */
+            public mapEntry: boolean;
+
+            /** MessageOptions deprecatedLegacyJsonFieldConflicts. */
+            public deprecatedLegacyJsonFieldConflicts: boolean;
+
+            /** MessageOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
+
+            /** MessageOptions uninterpretedOption. */
+            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /**
+             * Creates a MessageOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns MessageOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.MessageOptions;
+
+            /**
+             * Creates a plain object from a MessageOptions message. Also converts values to other types if specified.
+             * @param message MessageOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.MessageOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this MessageOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for MessageOptions
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a FieldOptions. */
+        interface IFieldOptions {
+
+            /** FieldOptions ctype */
+            ctype?: (google.protobuf.FieldOptions.CType|null);
+
+            /** FieldOptions packed */
+            packed?: (boolean|null);
+
+            /** FieldOptions jstype */
+            jstype?: (google.protobuf.FieldOptions.JSType|null);
+
+            /** FieldOptions lazy */
+            lazy?: (boolean|null);
+
+            /** FieldOptions unverifiedLazy */
+            unverifiedLazy?: (boolean|null);
+
+            /** FieldOptions deprecated */
+            deprecated?: (boolean|null);
+
+            /** FieldOptions weak */
+            weak?: (boolean|null);
+
+            /** FieldOptions debugRedact */
+            debugRedact?: (boolean|null);
+
+            /** FieldOptions retention */
+            retention?: (google.protobuf.FieldOptions.OptionRetention|null);
+
+            /** FieldOptions targets */
+            targets?: (google.protobuf.FieldOptions.OptionTargetType[]|null);
+
+            /** FieldOptions editionDefaults */
+            editionDefaults?: (google.protobuf.FieldOptions.IEditionDefault[]|null);
+
+            /** FieldOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
+
+            /** FieldOptions uninterpretedOption */
+            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
+
+            /** FieldOptions .google.api.fieldBehavior */
+            ".google.api.fieldBehavior"?: (google.api.FieldBehavior[]|null);
+
+            /** FieldOptions .google.api.resourceReference */
+            ".google.api.resourceReference"?: (google.api.IResourceReference|null);
+        }
+
+        /** Represents a FieldOptions. */
+        class FieldOptions implements IFieldOptions {
+
+            /**
+             * Constructs a new FieldOptions.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IFieldOptions);
+
+            /** FieldOptions ctype. */
+            public ctype: google.protobuf.FieldOptions.CType;
+
+            /** FieldOptions packed. */
+            public packed: boolean;
+
+            /** FieldOptions jstype. */
+            public jstype: google.protobuf.FieldOptions.JSType;
+
+            /** FieldOptions lazy. */
+            public lazy: boolean;
+
+            /** FieldOptions unverifiedLazy. */
+            public unverifiedLazy: boolean;
+
+            /** FieldOptions deprecated. */
+            public deprecated: boolean;
+
+            /** FieldOptions weak. */
+            public weak: boolean;
+
+            /** FieldOptions debugRedact. */
+            public debugRedact: boolean;
+
+            /** FieldOptions retention. */
+            public retention: google.protobuf.FieldOptions.OptionRetention;
+
+            /** FieldOptions targets. */
+            public targets: google.protobuf.FieldOptions.OptionTargetType[];
+
+            /** FieldOptions editionDefaults. */
+            public editionDefaults: google.protobuf.FieldOptions.IEditionDefault[];
+
+            /** FieldOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
+
+            /** FieldOptions uninterpretedOption. */
+            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /**
+             * Creates a FieldOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FieldOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FieldOptions;
+
+            /**
+             * Creates a plain object from a FieldOptions message. Also converts values to other types if specified.
+             * @param message FieldOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FieldOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FieldOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for FieldOptions
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace FieldOptions {
+
+            /** CType enum. */
+            type CType =
+                "STRING"| "CORD"| "STRING_PIECE";
+
+            /** JSType enum. */
+            type JSType =
+                "JS_NORMAL"| "JS_STRING"| "JS_NUMBER";
+
+            /** OptionRetention enum. */
+            type OptionRetention =
+                "RETENTION_UNKNOWN"| "RETENTION_RUNTIME"| "RETENTION_SOURCE";
+
+            /** OptionTargetType enum. */
+            type OptionTargetType =
+                "TARGET_TYPE_UNKNOWN"| "TARGET_TYPE_FILE"| "TARGET_TYPE_EXTENSION_RANGE"| "TARGET_TYPE_MESSAGE"| "TARGET_TYPE_FIELD"| "TARGET_TYPE_ONEOF"| "TARGET_TYPE_ENUM"| "TARGET_TYPE_ENUM_ENTRY"| "TARGET_TYPE_SERVICE"| "TARGET_TYPE_METHOD";
+
+            /** Properties of an EditionDefault. */
+            interface IEditionDefault {
+
+                /** EditionDefault edition */
+                edition?: (google.protobuf.Edition|null);
+
+                /** EditionDefault value */
+                value?: (string|null);
+            }
+
+            /** Represents an EditionDefault. */
+            class EditionDefault implements IEditionDefault {
+
+                /**
+                 * Constructs a new EditionDefault.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.protobuf.FieldOptions.IEditionDefault);
+
+                /** EditionDefault edition. */
+                public edition: google.protobuf.Edition;
+
+                /** EditionDefault value. */
+                public value: string;
+
+                /**
+                 * Creates an EditionDefault message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns EditionDefault
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.FieldOptions.EditionDefault;
+
+                /**
+                 * Creates a plain object from an EditionDefault message. Also converts values to other types if specified.
+                 * @param message EditionDefault
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.FieldOptions.EditionDefault, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this EditionDefault to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for EditionDefault
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+        }
+
+        /** Properties of an OneofOptions. */
+        interface IOneofOptions {
+
+            /** OneofOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
+
+            /** OneofOptions uninterpretedOption */
+            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
+        }
+
+        /** Represents an OneofOptions. */
+        class OneofOptions implements IOneofOptions {
+
+            /**
+             * Constructs a new OneofOptions.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IOneofOptions);
+
+            /** OneofOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
+
+            /** OneofOptions uninterpretedOption. */
+            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /**
+             * Creates an OneofOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns OneofOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.OneofOptions;
+
+            /**
+             * Creates a plain object from an OneofOptions message. Also converts values to other types if specified.
+             * @param message OneofOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.OneofOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this OneofOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for OneofOptions
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of an EnumOptions. */
+        interface IEnumOptions {
+
+            /** EnumOptions allowAlias */
+            allowAlias?: (boolean|null);
+
+            /** EnumOptions deprecated */
+            deprecated?: (boolean|null);
+
+            /** EnumOptions deprecatedLegacyJsonFieldConflicts */
+            deprecatedLegacyJsonFieldConflicts?: (boolean|null);
+
+            /** EnumOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
+
+            /** EnumOptions uninterpretedOption */
+            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
+        }
+
+        /** Represents an EnumOptions. */
+        class EnumOptions implements IEnumOptions {
+
+            /**
+             * Constructs a new EnumOptions.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IEnumOptions);
+
+            /** EnumOptions allowAlias. */
+            public allowAlias: boolean;
+
+            /** EnumOptions deprecated. */
+            public deprecated: boolean;
+
+            /** EnumOptions deprecatedLegacyJsonFieldConflicts. */
+            public deprecatedLegacyJsonFieldConflicts: boolean;
+
+            /** EnumOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
+
+            /** EnumOptions uninterpretedOption. */
+            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /**
+             * Creates an EnumOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns EnumOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.EnumOptions;
+
+            /**
+             * Creates a plain object from an EnumOptions message. Also converts values to other types if specified.
+             * @param message EnumOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.EnumOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this EnumOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for EnumOptions
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of an EnumValueOptions. */
+        interface IEnumValueOptions {
+
+            /** EnumValueOptions deprecated */
+            deprecated?: (boolean|null);
+
+            /** EnumValueOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
+
+            /** EnumValueOptions debugRedact */
+            debugRedact?: (boolean|null);
+
+            /** EnumValueOptions uninterpretedOption */
+            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
+        }
+
+        /** Represents an EnumValueOptions. */
+        class EnumValueOptions implements IEnumValueOptions {
+
+            /**
+             * Constructs a new EnumValueOptions.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IEnumValueOptions);
+
+            /** EnumValueOptions deprecated. */
+            public deprecated: boolean;
+
+            /** EnumValueOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
+
+            /** EnumValueOptions debugRedact. */
+            public debugRedact: boolean;
+
+            /** EnumValueOptions uninterpretedOption. */
+            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /**
+             * Creates an EnumValueOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns EnumValueOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.EnumValueOptions;
+
+            /**
+             * Creates a plain object from an EnumValueOptions message. Also converts values to other types if specified.
+             * @param message EnumValueOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.EnumValueOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this EnumValueOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for EnumValueOptions
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a ServiceOptions. */
+        interface IServiceOptions {
+
+            /** ServiceOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
+
+            /** ServiceOptions deprecated */
+            deprecated?: (boolean|null);
+
+            /** ServiceOptions uninterpretedOption */
+            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
+
+            /** ServiceOptions .google.api.defaultHost */
+            ".google.api.defaultHost"?: (string|null);
+
+            /** ServiceOptions .google.api.oauthScopes */
+            ".google.api.oauthScopes"?: (string|null);
+
+            /** ServiceOptions .google.api.apiVersion */
+            ".google.api.apiVersion"?: (string|null);
+        }
+
+        /** Represents a ServiceOptions. */
+        class ServiceOptions implements IServiceOptions {
+
+            /**
+             * Constructs a new ServiceOptions.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IServiceOptions);
+
+            /** ServiceOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
+
+            /** ServiceOptions deprecated. */
+            public deprecated: boolean;
+
+            /** ServiceOptions uninterpretedOption. */
+            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /**
+             * Creates a ServiceOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns ServiceOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.ServiceOptions;
+
+            /**
+             * Creates a plain object from a ServiceOptions message. Also converts values to other types if specified.
+             * @param message ServiceOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.ServiceOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this ServiceOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for ServiceOptions
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a MethodOptions. */
+        interface IMethodOptions {
+
+            /** MethodOptions deprecated */
+            deprecated?: (boolean|null);
+
+            /** MethodOptions idempotencyLevel */
+            idempotencyLevel?: (google.protobuf.MethodOptions.IdempotencyLevel|null);
+
+            /** MethodOptions features */
+            features?: (google.protobuf.IFeatureSet|null);
+
+            /** MethodOptions uninterpretedOption */
+            uninterpretedOption?: (google.protobuf.IUninterpretedOption[]|null);
+
+            /** MethodOptions .google.api.http */
+            ".google.api.http"?: (google.api.IHttpRule|null);
+
+            /** MethodOptions .google.api.methodSignature */
+            ".google.api.methodSignature"?: (string[]|null);
+
+            /** MethodOptions .google.longrunning.operationInfo */
+            ".google.longrunning.operationInfo"?: (google.longrunning.IOperationInfo|null);
+        }
+
+        /** Represents a MethodOptions. */
+        class MethodOptions implements IMethodOptions {
+
+            /**
+             * Constructs a new MethodOptions.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IMethodOptions);
+
+            /** MethodOptions deprecated. */
+            public deprecated: boolean;
+
+            /** MethodOptions idempotencyLevel. */
+            public idempotencyLevel: google.protobuf.MethodOptions.IdempotencyLevel;
+
+            /** MethodOptions features. */
+            public features?: (google.protobuf.IFeatureSet|null);
+
+            /** MethodOptions uninterpretedOption. */
+            public uninterpretedOption: google.protobuf.IUninterpretedOption[];
+
+            /**
+             * Creates a MethodOptions message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns MethodOptions
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.MethodOptions;
+
+            /**
+             * Creates a plain object from a MethodOptions message. Also converts values to other types if specified.
+             * @param message MethodOptions
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.MethodOptions, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this MethodOptions to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for MethodOptions
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace MethodOptions {
+
+            /** IdempotencyLevel enum. */
+            type IdempotencyLevel =
+                "IDEMPOTENCY_UNKNOWN"| "NO_SIDE_EFFECTS"| "IDEMPOTENT";
+        }
+
+        /** Properties of an UninterpretedOption. */
+        interface IUninterpretedOption {
+
+            /** UninterpretedOption name */
+            name?: (google.protobuf.UninterpretedOption.INamePart[]|null);
+
+            /** UninterpretedOption identifierValue */
+            identifierValue?: (string|null);
+
+            /** UninterpretedOption positiveIntValue */
+            positiveIntValue?: (number|string|null);
+
+            /** UninterpretedOption negativeIntValue */
+            negativeIntValue?: (number|string|null);
+
+            /** UninterpretedOption doubleValue */
+            doubleValue?: (number|null);
+
+            /** UninterpretedOption stringValue */
+            stringValue?: (Uint8Array|null);
+
+            /** UninterpretedOption aggregateValue */
+            aggregateValue?: (string|null);
+        }
+
+        /** Represents an UninterpretedOption. */
+        class UninterpretedOption implements IUninterpretedOption {
+
+            /**
+             * Constructs a new UninterpretedOption.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IUninterpretedOption);
+
+            /** UninterpretedOption name. */
+            public name: google.protobuf.UninterpretedOption.INamePart[];
+
+            /** UninterpretedOption identifierValue. */
+            public identifierValue: string;
+
+            /** UninterpretedOption positiveIntValue. */
+            public positiveIntValue: (number|string);
+
+            /** UninterpretedOption negativeIntValue. */
+            public negativeIntValue: (number|string);
+
+            /** UninterpretedOption doubleValue. */
+            public doubleValue: number;
+
+            /** UninterpretedOption stringValue. */
+            public stringValue: Uint8Array;
+
+            /** UninterpretedOption aggregateValue. */
+            public aggregateValue: string;
+
+            /**
+             * Creates an UninterpretedOption message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns UninterpretedOption
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.UninterpretedOption;
+
+            /**
+             * Creates a plain object from an UninterpretedOption message. Also converts values to other types if specified.
+             * @param message UninterpretedOption
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.UninterpretedOption, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this UninterpretedOption to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for UninterpretedOption
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace UninterpretedOption {
+
+            /** Properties of a NamePart. */
+            interface INamePart {
+
+                /** NamePart namePart */
+                namePart: string;
+
+                /** NamePart isExtension */
+                isExtension: boolean;
+            }
+
+            /** Represents a NamePart. */
+            class NamePart implements INamePart {
+
+                /**
+                 * Constructs a new NamePart.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.protobuf.UninterpretedOption.INamePart);
+
+                /** NamePart namePart. */
+                public namePart: string;
+
+                /** NamePart isExtension. */
+                public isExtension: boolean;
+
+                /**
+                 * Creates a NamePart message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns NamePart
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.UninterpretedOption.NamePart;
+
+                /**
+                 * Creates a plain object from a NamePart message. Also converts values to other types if specified.
+                 * @param message NamePart
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.UninterpretedOption.NamePart, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this NamePart to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for NamePart
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+        }
+
+        /** Properties of a FeatureSet. */
+        interface IFeatureSet {
+
+            /** FeatureSet fieldPresence */
+            fieldPresence?: (google.protobuf.FeatureSet.FieldPresence|null);
+
+            /** FeatureSet enumType */
+            enumType?: (google.protobuf.FeatureSet.EnumType|null);
+
+            /** FeatureSet repeatedFieldEncoding */
+            repeatedFieldEncoding?: (google.protobuf.FeatureSet.RepeatedFieldEncoding|null);
+
+            /** FeatureSet utf8Validation */
+            utf8Validation?: (google.protobuf.FeatureSet.Utf8Validation|null);
+
+            /** FeatureSet messageEncoding */
+            messageEncoding?: (google.protobuf.FeatureSet.MessageEncoding|null);
+
+            /** FeatureSet jsonFormat */
+            jsonFormat?: (google.protobuf.FeatureSet.JsonFormat|null);
+        }
+
+        /** Represents a FeatureSet. */
+        class FeatureSet implements IFeatureSet {
+
+            /**
+             * Constructs a new FeatureSet.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IFeatureSet);
+
+            /** FeatureSet fieldPresence. */
+            public fieldPresence: google.protobuf.FeatureSet.FieldPresence;
+
+            /** FeatureSet enumType. */
+            public enumType: google.protobuf.FeatureSet.EnumType;
+
+            /** FeatureSet repeatedFieldEncoding. */
+            public repeatedFieldEncoding: google.protobuf.FeatureSet.RepeatedFieldEncoding;
+
+            /** FeatureSet utf8Validation. */
+            public utf8Validation: google.protobuf.FeatureSet.Utf8Validation;
+
+            /** FeatureSet messageEncoding. */
+            public messageEncoding: google.protobuf.FeatureSet.MessageEncoding;
+
+            /** FeatureSet jsonFormat. */
+            public jsonFormat: google.protobuf.FeatureSet.JsonFormat;
+
+            /**
+             * Creates a FeatureSet message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FeatureSet
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FeatureSet;
+
+            /**
+             * Creates a plain object from a FeatureSet message. Also converts values to other types if specified.
+             * @param message FeatureSet
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FeatureSet, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FeatureSet to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for FeatureSet
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace FeatureSet {
+
+            /** FieldPresence enum. */
+            type FieldPresence =
+                "FIELD_PRESENCE_UNKNOWN"| "EXPLICIT"| "IMPLICIT"| "LEGACY_REQUIRED";
+
+            /** EnumType enum. */
+            type EnumType =
+                "ENUM_TYPE_UNKNOWN"| "OPEN"| "CLOSED";
+
+            /** RepeatedFieldEncoding enum. */
+            type RepeatedFieldEncoding =
+                "REPEATED_FIELD_ENCODING_UNKNOWN"| "PACKED"| "EXPANDED";
+
+            /** Utf8Validation enum. */
+            type Utf8Validation =
+                "UTF8_VALIDATION_UNKNOWN"| "VERIFY"| "NONE";
+
+            /** MessageEncoding enum. */
+            type MessageEncoding =
+                "MESSAGE_ENCODING_UNKNOWN"| "LENGTH_PREFIXED"| "DELIMITED";
+
+            /** JsonFormat enum. */
+            type JsonFormat =
+                "JSON_FORMAT_UNKNOWN"| "ALLOW"| "LEGACY_BEST_EFFORT";
+        }
+
+        /** Properties of a FeatureSetDefaults. */
+        interface IFeatureSetDefaults {
+
+            /** FeatureSetDefaults defaults */
+            defaults?: (google.protobuf.FeatureSetDefaults.IFeatureSetEditionDefault[]|null);
+
+            /** FeatureSetDefaults minimumEdition */
+            minimumEdition?: (google.protobuf.Edition|null);
+
+            /** FeatureSetDefaults maximumEdition */
+            maximumEdition?: (google.protobuf.Edition|null);
+        }
+
+        /** Represents a FeatureSetDefaults. */
+        class FeatureSetDefaults implements IFeatureSetDefaults {
+
+            /**
+             * Constructs a new FeatureSetDefaults.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IFeatureSetDefaults);
+
+            /** FeatureSetDefaults defaults. */
+            public defaults: google.protobuf.FeatureSetDefaults.IFeatureSetEditionDefault[];
+
+            /** FeatureSetDefaults minimumEdition. */
+            public minimumEdition: google.protobuf.Edition;
+
+            /** FeatureSetDefaults maximumEdition. */
+            public maximumEdition: google.protobuf.Edition;
+
+            /**
+             * Creates a FeatureSetDefaults message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FeatureSetDefaults
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FeatureSetDefaults;
+
+            /**
+             * Creates a plain object from a FeatureSetDefaults message. Also converts values to other types if specified.
+             * @param message FeatureSetDefaults
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FeatureSetDefaults, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FeatureSetDefaults to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for FeatureSetDefaults
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace FeatureSetDefaults {
+
+            /** Properties of a FeatureSetEditionDefault. */
+            interface IFeatureSetEditionDefault {
+
+                /** FeatureSetEditionDefault edition */
+                edition?: (google.protobuf.Edition|null);
+
+                /** FeatureSetEditionDefault features */
+                features?: (google.protobuf.IFeatureSet|null);
+            }
+
+            /** Represents a FeatureSetEditionDefault. */
+            class FeatureSetEditionDefault implements IFeatureSetEditionDefault {
+
+                /**
+                 * Constructs a new FeatureSetEditionDefault.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.protobuf.FeatureSetDefaults.IFeatureSetEditionDefault);
+
+                /** FeatureSetEditionDefault edition. */
+                public edition: google.protobuf.Edition;
+
+                /** FeatureSetEditionDefault features. */
+                public features?: (google.protobuf.IFeatureSet|null);
+
+                /**
+                 * Creates a FeatureSetEditionDefault message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns FeatureSetEditionDefault
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault;
+
+                /**
+                 * Creates a plain object from a FeatureSetEditionDefault message. Also converts values to other types if specified.
+                 * @param message FeatureSetEditionDefault
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this FeatureSetEditionDefault to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for FeatureSetEditionDefault
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+        }
+
+        /** Properties of a SourceCodeInfo. */
+        interface ISourceCodeInfo {
+
+            /** SourceCodeInfo location */
+            location?: (google.protobuf.SourceCodeInfo.ILocation[]|null);
+        }
+
+        /** Represents a SourceCodeInfo. */
+        class SourceCodeInfo implements ISourceCodeInfo {
+
+            /**
+             * Constructs a new SourceCodeInfo.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.ISourceCodeInfo);
+
+            /** SourceCodeInfo location. */
+            public location: google.protobuf.SourceCodeInfo.ILocation[];
+
+            /**
+             * Creates a SourceCodeInfo message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns SourceCodeInfo
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.SourceCodeInfo;
+
+            /**
+             * Creates a plain object from a SourceCodeInfo message. Also converts values to other types if specified.
+             * @param message SourceCodeInfo
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.SourceCodeInfo, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this SourceCodeInfo to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for SourceCodeInfo
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace SourceCodeInfo {
+
+            /** Properties of a Location. */
+            interface ILocation {
+
+                /** Location path */
+                path?: (number[]|null);
+
+                /** Location span */
+                span?: (number[]|null);
+
+                /** Location leadingComments */
+                leadingComments?: (string|null);
+
+                /** Location trailingComments */
+                trailingComments?: (string|null);
+
+                /** Location leadingDetachedComments */
+                leadingDetachedComments?: (string[]|null);
+            }
+
+            /** Represents a Location. */
+            class Location implements ILocation {
+
+                /**
+                 * Constructs a new Location.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.protobuf.SourceCodeInfo.ILocation);
+
+                /** Location path. */
+                public path: number[];
+
+                /** Location span. */
+                public span: number[];
+
+                /** Location leadingComments. */
+                public leadingComments: string;
+
+                /** Location trailingComments. */
+                public trailingComments: string;
+
+                /** Location leadingDetachedComments. */
+                public leadingDetachedComments: string[];
+
+                /**
+                 * Creates a Location message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns Location
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.SourceCodeInfo.Location;
+
+                /**
+                 * Creates a plain object from a Location message. Also converts values to other types if specified.
+                 * @param message Location
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.SourceCodeInfo.Location, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this Location to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for Location
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+        }
+
+        /** Properties of a GeneratedCodeInfo. */
+        interface IGeneratedCodeInfo {
+
+            /** GeneratedCodeInfo annotation */
+            annotation?: (google.protobuf.GeneratedCodeInfo.IAnnotation[]|null);
+        }
+
+        /** Represents a GeneratedCodeInfo. */
+        class GeneratedCodeInfo implements IGeneratedCodeInfo {
+
+            /**
+             * Constructs a new GeneratedCodeInfo.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IGeneratedCodeInfo);
+
+            /** GeneratedCodeInfo annotation. */
+            public annotation: google.protobuf.GeneratedCodeInfo.IAnnotation[];
+
+            /**
+             * Creates a GeneratedCodeInfo message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns GeneratedCodeInfo
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.GeneratedCodeInfo;
+
+            /**
+             * Creates a plain object from a GeneratedCodeInfo message. Also converts values to other types if specified.
+             * @param message GeneratedCodeInfo
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.GeneratedCodeInfo, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this GeneratedCodeInfo to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for GeneratedCodeInfo
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace GeneratedCodeInfo {
+
+            /** Properties of an Annotation. */
+            interface IAnnotation {
+
+                /** Annotation path */
+                path?: (number[]|null);
+
+                /** Annotation sourceFile */
+                sourceFile?: (string|null);
+
+                /** Annotation begin */
+                begin?: (number|null);
+
+                /** Annotation end */
+                end?: (number|null);
+
+                /** Annotation semantic */
+                semantic?: (google.protobuf.GeneratedCodeInfo.Annotation.Semantic|null);
+            }
+
+            /** Represents an Annotation. */
+            class Annotation implements IAnnotation {
+
+                /**
+                 * Constructs a new Annotation.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.protobuf.GeneratedCodeInfo.IAnnotation);
+
+                /** Annotation path. */
+                public path: number[];
+
+                /** Annotation sourceFile. */
+                public sourceFile: string;
+
+                /** Annotation begin. */
+                public begin: number;
+
+                /** Annotation end. */
+                public end: number;
+
+                /** Annotation semantic. */
+                public semantic: google.protobuf.GeneratedCodeInfo.Annotation.Semantic;
+
+                /**
+                 * Creates an Annotation message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns Annotation
+                 */
+                public static fromObject(object: { [k: string]: any }): google.protobuf.GeneratedCodeInfo.Annotation;
+
+                /**
+                 * Creates a plain object from an Annotation message. Also converts values to other types if specified.
+                 * @param message Annotation
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.protobuf.GeneratedCodeInfo.Annotation, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this Annotation to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for Annotation
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
+
+            namespace Annotation {
+
+                /** Semantic enum. */
+                type Semantic =
+                    "NONE"| "SET"| "ALIAS";
+            }
+        }
+
+        /** Properties of a Struct. */
+        interface IStruct {
+
+            /** Struct fields */
+            fields?: ({ [k: string]: google.protobuf.IValue }|null);
+        }
+
+        /** Represents a Struct. */
+        class Struct implements IStruct {
+
+            /**
+             * Constructs a new Struct.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IStruct);
+
+            /** Struct fields. */
+            public fields: { [k: string]: google.protobuf.IValue };
+
+            /**
+             * Creates a Struct message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Struct
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Struct;
+
+            /**
+             * Creates a plain object from a Struct message. Also converts values to other types if specified.
+             * @param message Struct
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Struct, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Struct to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for Struct
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a Value. */
+        interface IValue {
+
+            /** Value nullValue */
+            nullValue?: (google.protobuf.NullValue|null);
+
+            /** Value numberValue */
+            numberValue?: (number|null);
+
+            /** Value stringValue */
+            stringValue?: (string|null);
+
+            /** Value boolValue */
+            boolValue?: (boolean|null);
+
+            /** Value structValue */
+            structValue?: (google.protobuf.IStruct|null);
+
+            /** Value listValue */
+            listValue?: (google.protobuf.IListValue|null);
+        }
+
+        /** Represents a Value. */
+        class Value implements IValue {
+
+            /**
+             * Constructs a new Value.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IValue);
+
+            /** Value nullValue. */
+            public nullValue?: (google.protobuf.NullValue|null);
+
+            /** Value numberValue. */
+            public numberValue?: (number|null);
+
+            /** Value stringValue. */
+            public stringValue?: (string|null);
+
+            /** Value boolValue. */
+            public boolValue?: (boolean|null);
+
+            /** Value structValue. */
+            public structValue?: (google.protobuf.IStruct|null);
+
+            /** Value listValue. */
+            public listValue?: (google.protobuf.IListValue|null);
+
+            /** Value kind. */
+            public kind?: ("nullValue"|"numberValue"|"stringValue"|"boolValue"|"structValue"|"listValue");
+
+            /**
+             * Creates a Value message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Value
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Value;
+
+            /**
+             * Creates a plain object from a Value message. Also converts values to other types if specified.
+             * @param message Value
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Value, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Value to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for Value
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** NullValue enum. */
+        type NullValue =
+            "NULL_VALUE";
+
+        /** Properties of a ListValue. */
+        interface IListValue {
+
+            /** ListValue values */
+            values?: (google.protobuf.IValue[]|null);
+        }
+
+        /** Represents a ListValue. */
+        class ListValue implements IListValue {
+
+            /**
+             * Constructs a new ListValue.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IListValue);
+
+            /** ListValue values. */
+            public values: google.protobuf.IValue[];
+
+            /**
+             * Creates a ListValue message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns ListValue
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.ListValue;
+
+            /**
+             * Creates a plain object from a ListValue message. Also converts values to other types if specified.
+             * @param message ListValue
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.ListValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this ListValue to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for ListValue
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a Timestamp. */
+        interface ITimestamp {
+
+            /** Timestamp seconds */
+            seconds?: (number|string|null);
+
+            /** Timestamp nanos */
+            nanos?: (number|null);
+        }
+
+        /** Represents a Timestamp. */
+        class Timestamp implements ITimestamp {
+
+            /**
+             * Constructs a new Timestamp.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.ITimestamp);
+
+            /** Timestamp seconds. */
+            public seconds: (number|string);
+
+            /** Timestamp nanos. */
+            public nanos: number;
+
+            /**
+             * Creates a Timestamp message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Timestamp
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Timestamp;
+
+            /**
+             * Creates a plain object from a Timestamp message. Also converts values to other types if specified.
+             * @param message Timestamp
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Timestamp, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Timestamp to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for Timestamp
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a Duration. */
+        interface IDuration {
+
+            /** Duration seconds */
+            seconds?: (number|string|null);
+
+            /** Duration nanos */
+            nanos?: (number|null);
+        }
+
+        /** Represents a Duration. */
+        class Duration implements IDuration {
+
+            /**
+             * Constructs a new Duration.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IDuration);
+
+            /** Duration seconds. */
+            public seconds: (number|string);
+
+            /** Duration nanos. */
+            public nanos: number;
+
+            /**
+             * Creates a Duration message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Duration
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Duration;
+
+            /**
+             * Creates a plain object from a Duration message. Also converts values to other types if specified.
+             * @param message Duration
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Duration, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Duration to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for Duration
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a DoubleValue. */
+        interface IDoubleValue {
+
+            /** DoubleValue value */
+            value?: (number|null);
+        }
+
+        /** Represents a DoubleValue. */
+        class DoubleValue implements IDoubleValue {
+
+            /**
+             * Constructs a new DoubleValue.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IDoubleValue);
+
+            /** DoubleValue value. */
+            public value: number;
+
+            /**
+             * Creates a DoubleValue message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns DoubleValue
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.DoubleValue;
+
+            /**
+             * Creates a plain object from a DoubleValue message. Also converts values to other types if specified.
+             * @param message DoubleValue
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.DoubleValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this DoubleValue to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for DoubleValue
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a FloatValue. */
+        interface IFloatValue {
+
+            /** FloatValue value */
+            value?: (number|null);
+        }
+
+        /** Represents a FloatValue. */
+        class FloatValue implements IFloatValue {
+
+            /**
+             * Constructs a new FloatValue.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IFloatValue);
+
+            /** FloatValue value. */
+            public value: number;
+
+            /**
+             * Creates a FloatValue message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FloatValue
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FloatValue;
+
+            /**
+             * Creates a plain object from a FloatValue message. Also converts values to other types if specified.
+             * @param message FloatValue
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FloatValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FloatValue to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for FloatValue
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of an Int64Value. */
+        interface IInt64Value {
+
+            /** Int64Value value */
+            value?: (number|string|null);
+        }
+
+        /** Represents an Int64Value. */
+        class Int64Value implements IInt64Value {
+
+            /**
+             * Constructs a new Int64Value.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IInt64Value);
+
+            /** Int64Value value. */
+            public value: (number|string);
+
+            /**
+             * Creates an Int64Value message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Int64Value
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Int64Value;
+
+            /**
+             * Creates a plain object from an Int64Value message. Also converts values to other types if specified.
+             * @param message Int64Value
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Int64Value, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Int64Value to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for Int64Value
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a UInt64Value. */
+        interface IUInt64Value {
+
+            /** UInt64Value value */
+            value?: (number|string|null);
+        }
+
+        /** Represents a UInt64Value. */
+        class UInt64Value implements IUInt64Value {
+
+            /**
+             * Constructs a new UInt64Value.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IUInt64Value);
+
+            /** UInt64Value value. */
+            public value: (number|string);
+
+            /**
+             * Creates a UInt64Value message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns UInt64Value
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.UInt64Value;
+
+            /**
+             * Creates a plain object from a UInt64Value message. Also converts values to other types if specified.
+             * @param message UInt64Value
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.UInt64Value, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this UInt64Value to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for UInt64Value
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of an Int32Value. */
+        interface IInt32Value {
+
+            /** Int32Value value */
+            value?: (number|null);
+        }
+
+        /** Represents an Int32Value. */
+        class Int32Value implements IInt32Value {
+
+            /**
+             * Constructs a new Int32Value.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IInt32Value);
+
+            /** Int32Value value. */
+            public value: number;
+
+            /**
+             * Creates an Int32Value message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Int32Value
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Int32Value;
+
+            /**
+             * Creates a plain object from an Int32Value message. Also converts values to other types if specified.
+             * @param message Int32Value
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Int32Value, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Int32Value to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for Int32Value
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a UInt32Value. */
+        interface IUInt32Value {
+
+            /** UInt32Value value */
+            value?: (number|null);
+        }
+
+        /** Represents a UInt32Value. */
+        class UInt32Value implements IUInt32Value {
+
+            /**
+             * Constructs a new UInt32Value.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IUInt32Value);
+
+            /** UInt32Value value. */
+            public value: number;
+
+            /**
+             * Creates a UInt32Value message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns UInt32Value
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.UInt32Value;
+
+            /**
+             * Creates a plain object from a UInt32Value message. Also converts values to other types if specified.
+             * @param message UInt32Value
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.UInt32Value, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this UInt32Value to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for UInt32Value
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a BoolValue. */
+        interface IBoolValue {
+
+            /** BoolValue value */
+            value?: (boolean|null);
+        }
+
+        /** Represents a BoolValue. */
+        class BoolValue implements IBoolValue {
+
+            /**
+             * Constructs a new BoolValue.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IBoolValue);
+
+            /** BoolValue value. */
+            public value: boolean;
+
+            /**
+             * Creates a BoolValue message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns BoolValue
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.BoolValue;
+
+            /**
+             * Creates a plain object from a BoolValue message. Also converts values to other types if specified.
+             * @param message BoolValue
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.BoolValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this BoolValue to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for BoolValue
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a StringValue. */
+        interface IStringValue {
+
+            /** StringValue value */
+            value?: (string|null);
+        }
+
+        /** Represents a StringValue. */
+        class StringValue implements IStringValue {
+
+            /**
+             * Constructs a new StringValue.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IStringValue);
+
+            /** StringValue value. */
+            public value: string;
+
+            /**
+             * Creates a StringValue message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns StringValue
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.StringValue;
+
+            /**
+             * Creates a plain object from a StringValue message. Also converts values to other types if specified.
+             * @param message StringValue
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.StringValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this StringValue to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for StringValue
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a BytesValue. */
+        interface IBytesValue {
+
+            /** BytesValue value */
+            value?: (Uint8Array|null);
+        }
+
+        /** Represents a BytesValue. */
+        class BytesValue implements IBytesValue {
+
+            /**
+             * Constructs a new BytesValue.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IBytesValue);
+
+            /** BytesValue value. */
+            public value: Uint8Array;
+
+            /**
+             * Creates a BytesValue message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns BytesValue
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.BytesValue;
+
+            /**
+             * Creates a plain object from a BytesValue message. Also converts values to other types if specified.
+             * @param message BytesValue
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.BytesValue, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this BytesValue to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for BytesValue
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of an Empty. */
+        interface IEmpty {
+        }
+
+        /** Represents an Empty. */
+        class Empty implements IEmpty {
+
+            /**
+             * Constructs a new Empty.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IEmpty);
+
+            /**
+             * Creates an Empty message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Empty
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Empty;
+
+            /**
+             * Creates a plain object from an Empty message. Also converts values to other types if specified.
+             * @param message Empty
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Empty, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Empty to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for Empty
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of an Any. */
+        interface IAny {
+
+            /** Any type_url */
+            type_url?: (string|null);
+
+            /** Any value */
+            value?: (Uint8Array|null);
+        }
+
+        /** Represents an Any. */
+        class Any implements IAny {
+
+            /**
+             * Constructs a new Any.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IAny);
+
+            /** Any type_url. */
+            public type_url: string;
+
+            /** Any value. */
+            public value: Uint8Array;
+
+            /**
+             * Creates an Any message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns Any
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.Any;
+
+            /**
+             * Creates a plain object from an Any message. Also converts values to other types if specified.
+             * @param message Any
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.Any, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this Any to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for Any
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a FieldMask. */
+        interface IFieldMask {
+
+            /** FieldMask paths */
+            paths?: (string[]|null);
+        }
+
+        /** Represents a FieldMask. */
+        class FieldMask implements IFieldMask {
+
+            /**
+             * Constructs a new FieldMask.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.protobuf.IFieldMask);
+
+            /** FieldMask paths. */
+            public paths: string[];
+
+            /**
+             * Creates a FieldMask message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns FieldMask
+             */
+            public static fromObject(object: { [k: string]: any }): google.protobuf.FieldMask;
+
+            /**
+             * Creates a plain object from a FieldMask message. Also converts values to other types if specified.
+             * @param message FieldMask
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.protobuf.FieldMask, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this FieldMask to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for FieldMask
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
         }
     }
 
@@ -6555,7 +9925,18 @@ export namespace google {
              * @returns JSON object
              */
             public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for LatLng
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
         }
+
+        /** DayOfWeek enum. */
+        type DayOfWeek =
+            "DAY_OF_WEEK_UNSPECIFIED"| "MONDAY"| "TUESDAY"| "WEDNESDAY"| "THURSDAY"| "FRIDAY"| "SATURDAY"| "SUNDAY";
     }
 
     /** Namespace rpc. */
@@ -6612,6 +9993,13 @@ export namespace google {
              * @returns JSON object
              */
             public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for Status
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
         }
     }
 
@@ -6804,6 +10192,13 @@ export namespace google {
              * @returns JSON object
              */
             public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for Operation
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
         }
 
         /** Properties of a GetOperationRequest. */
@@ -6845,6 +10240,13 @@ export namespace google {
              * @returns JSON object
              */
             public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for GetOperationRequest
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
         }
 
         /** Properties of a ListOperationsRequest. */
@@ -6904,6 +10306,13 @@ export namespace google {
              * @returns JSON object
              */
             public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for ListOperationsRequest
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
         }
 
         /** Properties of a ListOperationsResponse. */
@@ -6951,6 +10360,13 @@ export namespace google {
              * @returns JSON object
              */
             public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for ListOperationsResponse
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
         }
 
         /** Properties of a CancelOperationRequest. */
@@ -6992,6 +10408,13 @@ export namespace google {
              * @returns JSON object
              */
             public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for CancelOperationRequest
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
         }
 
         /** Properties of a DeleteOperationRequest. */
@@ -7033,6 +10456,13 @@ export namespace google {
              * @returns JSON object
              */
             public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for DeleteOperationRequest
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
         }
 
         /** Properties of a WaitOperationRequest. */
@@ -7080,6 +10510,13 @@ export namespace google {
              * @returns JSON object
              */
             public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for WaitOperationRequest
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
         }
 
         /** Properties of an OperationInfo. */
@@ -7127,6 +10564,13 @@ export namespace google {
              * @returns JSON object
              */
             public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for OperationInfo
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
         }
     }
 }

@@ -50,7 +50,7 @@ export class DocumentChange<
     type: DocumentChangeType,
     document: QueryDocumentSnapshot<AppModelType, DbModelType>,
     oldIndex: number,
-    newIndex: number
+    newIndex: number,
   ) {
     this._type = type;
     this._document = document;

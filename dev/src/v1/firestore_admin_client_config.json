@@ -70,7 +70,13 @@
           "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"
         },
+        "BulkDeleteDocuments": {
+          "timeout_millis": 60000,
+          "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
+        },
         "CreateDatabase": {
+          "timeout_millis": 120000,
           "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"
         },
@@ -83,6 +89,47 @@
           "retry_params_name": "default"
         },
         "UpdateDatabase": {
+          "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
+        },
+        "DeleteDatabase": {
+          "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
+        },
+        "GetBackup": {
+          "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
+        },
+        "ListBackups": {
+          "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
+        },
+        "DeleteBackup": {
+          "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
+        },
+        "RestoreDatabase": {
+          "timeout_millis": 120000,
+          "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
+        },
+        "CreateBackupSchedule": {
+          "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
+        },
+        "GetBackupSchedule": {
+          "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
+        },
+        "ListBackupSchedules": {
+          "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
+        },
+        "UpdateBackupSchedule": {
+          "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
+        },
+        "DeleteBackupSchedule": {
           "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"
         }

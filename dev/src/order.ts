@@ -34,7 +34,8 @@ enum TypeOrder {
   REF = 6,
   GEO_POINT = 7,
   ARRAY = 8,
-  OBJECT = 9,
+  VECTOR = 9,
+  OBJECT = 10,
 }
 
 /*!
@@ -67,6 +68,8 @@ function typeOrder(val: api.IValue): TypeOrder {
       return TypeOrder.REF;
     case 'mapValue':
       return TypeOrder.OBJECT;
+    case 'vectorValue':
+      return TypeOrder.VECTOR;
     default:
       throw new Error('Unexpected value type: ' + valueType);
   }
@@ -78,7 +81,7 @@ function typeOrder(val: api.IValue): TypeOrder {
  */
 export function primitiveComparator(
   left: string | boolean | number,
-  right: string | boolean | number
+  right: string | boolean | number,
 ): number {
   if (left < right) {
     return -1;
@@ -136,7 +139,7 @@ function compareNumberProtos(left: api.IValue, right: api.IValue): number {
  */
 function compareTimestamps(
   left: google.protobuf.ITimestamp,
-  right: google.protobuf.ITimestamp
+  right: google.protobuf.ITimestamp,
 ): number {
   const seconds = primitiveComparator(left.seconds || 0, right.seconds || 0);
   if (seconds !== 0) {
@@ -162,10 +165,10 @@ function compareBlobs(left: Uint8Array, right: Uint8Array): number {
  */
 function compareReferenceProtos(left: api.IValue, right: api.IValue): number {
   const leftPath = QualifiedResourcePath.fromSlashSeparatedString(
-    left.referenceValue!
+    left.referenceValue!,
   );
   const rightPath = QualifiedResourcePath.fromSlashSeparatedString(
-    right.referenceValue!
+    right.referenceValue!,
   );
   return leftPath.compareTo(rightPath);
 }
@@ -176,7 +179,7 @@ function compareReferenceProtos(left: api.IValue, right: api.IValue): number {
  */
 function compareGeoPoints(
   left: google.type.ILatLng,
-  right: google.type.ILatLng
+  right: google.type.ILatLng,
 ): number {
   return (
     primitiveComparator(left.latitude || 0, right.latitude || 0) ||
@@ -211,7 +214,7 @@ function compareObjects(left: ApiMapValue, right: ApiMapValue): number {
   leftKeys.sort();
   rightKeys.sort();
   for (let i = 0; i < leftKeys.length && i < rightKeys.length; i++) {
-    const keyComparison = primitiveComparator(leftKeys[i], rightKeys[i]);
+    const keyComparison = compareUtf8Strings(leftKeys[i], rightKeys[i]);
     if (keyComparison !== 0) {
       return keyComparison;
     }
@@ -223,6 +226,93 @@ function compareObjects(left: ApiMapValue, right: ApiMapValue): number {
   }
   // If all the keys matched so far, just check the length.
   return primitiveComparator(leftKeys.length, rightKeys.length);
+}
+
+/*!
+ * @private
+ * @internal
+ */
+function compareVectors(left: ApiMapValue, right: ApiMapValue): number {
+  // The vector is a map, but only vector value is compared.
+  const leftArray = left?.['value']?.arrayValue?.values ?? [];
+  const rightArray = right?.['value']?.arrayValue?.values ?? [];
+
+  const lengthCompare = primitiveComparator(
+    leftArray.length,
+    rightArray.length,
+  );
+  if (lengthCompare !== 0) {
+    return lengthCompare;
+  }
+
+  return compareArrays(leftArray, rightArray);
+}
+
+/*!
+ * Compare strings in UTF-8 encoded byte order
+ * @private
+ * @internal
+ */
+export function compareUtf8Strings(left: string, right: string): number {
+  // Find the first differing character (a.k.a. "UTF-16 code unit") in the two strings and,
+  // if found, use that character to determine the relative ordering of the two strings as a
+  // whole. Comparing UTF-16 strings in UTF-8 byte order can be done simply and efficiently by
+  // comparing the UTF-16 code units (chars). This serendipitously works because of the way UTF-8
+  // and UTF-16 happen to represent Unicode code points.
+  //
+  // After finding the first pair of differing characters, there are two cases:
+  //
+  // Case 1: Both characters are non-surrogates (code points less than or equal to 0xFFFF) or
+  // both are surrogates from a surrogate pair (that collectively represent code points greater
+  // than 0xFFFF). In this case their numeric order as UTF-16 code units is the same as the
+  // lexicographical order of their corresponding UTF-8 byte sequences. A direct comparison is
+  // sufficient.
+  //
+  // Case 2: One character is a surrogate and the other is not. In this case the surrogate-
+  // containing string is always ordered after the non-surrogate. This is because surrogates are
+  // used to represent code points greater than 0xFFFF which have 4-byte UTF-8 representations
+  // and are lexicographically greater than the 1, 2, or 3-byte representations of code points
+  // less than or equal to 0xFFFF.
+  //
+  // An example of why Case 2 is required is comparing the following two Unicode code points:
+  //
+  // |-----------------------|------------|---------------------|-----------------|
+  // | Name                  | Code Point | UTF-8 Encoding      | UTF-16 Encoding |
+  // |-----------------------|------------|---------------------|-----------------|
+  // | Replacement Character | U+FFFD     | 0xEF 0xBF 0xBD      | 0xFFFD          |
+  // | Grinning Face         | U+1F600    | 0xF0 0x9F 0x98 0x80 | 0xD83D 0xDE00   |
+  // |-----------------------|------------|---------------------|-----------------|
+  //
+  // A lexicographical comparison of the UTF-8 encodings of these code points would order
+  // "Replacement Character" _before_ "Grinning Face" because 0xEF is less than 0xF0. However, a
+  // direct comparison of the UTF-16 code units, as would be done in case 1, would erroneously
+  // produce the _opposite_ ordering, because 0xFFFD is _greater than_ 0xD83D. As it turns out,
+  // this relative ordering holds for all comparisons of UTF-16 code points requiring a surrogate
+  // pair with those that do not.
+  const length = Math.min(left.length, right.length);
+  for (let i = 0; i < length; i++) {
+    const leftChar = left.charAt(i);
+    const rightChar = right.charAt(i);
+    if (leftChar !== rightChar) {
+      return isSurrogate(leftChar) === isSurrogate(rightChar)
+        ? primitiveComparator(leftChar, rightChar)
+        : isSurrogate(leftChar)
+          ? 1
+          : -1;
+    }
+  }
+
+  // Use the lengths of the strings to determine the overall comparison result since either the
+  // strings were equal or one is a prefix of the other.
+  return primitiveComparator(left.length, right.length);
+}
+
+const MIN_SURROGATE = 0xd800;
+const MAX_SURROGATE = 0xdfff;
+
+function isSurrogate(s: string): boolean {
+  const c = s.charCodeAt(0);
+  return c >= MIN_SURROGATE && c <= MAX_SURROGATE;
 }
 
 /*!
@@ -246,7 +336,7 @@ export function compare(left: api.IValue, right: api.IValue): number {
     case TypeOrder.BOOLEAN:
       return primitiveComparator(left.booleanValue!, right.booleanValue!);
     case TypeOrder.STRING:
-      return primitiveComparator(left.stringValue!, right.stringValue!);
+      return compareUtf8Strings(left.stringValue!, right.stringValue!);
     case TypeOrder.NUMBER:
       return compareNumberProtos(left, right);
     case TypeOrder.TIMESTAMP:
@@ -260,12 +350,17 @@ export function compare(left: api.IValue, right: api.IValue): number {
     case TypeOrder.ARRAY:
       return compareArrays(
         left.arrayValue!.values || [],
-        right.arrayValue!.values || []
+        right.arrayValue!.values || [],
       );
     case TypeOrder.OBJECT:
       return compareObjects(
         left.mapValue!.fields || {},
-        right.mapValue!.fields || {}
+        right.mapValue!.fields || {},
+      );
+    case TypeOrder.VECTOR:
+      return compareVectors(
+        left.mapValue!.fields || {},
+        right.mapValue!.fields || {},
       );
     default:
       throw new Error(`Encountered unknown type order: ${leftType}`);

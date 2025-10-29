@@ -1,5 +1,5 @@
 /*!
- * Copyright 2022 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,407 @@
                      */
                     var v1 = {};
     
+                    v1.Backup = (function() {
+    
+                        /**
+                         * Properties of a Backup.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IBackup
+                         * @property {string|null} [name] Backup name
+                         * @property {string|null} [database] Backup database
+                         * @property {string|null} [databaseUid] Backup databaseUid
+                         * @property {google.protobuf.ITimestamp|null} [snapshotTime] Backup snapshotTime
+                         * @property {google.protobuf.ITimestamp|null} [expireTime] Backup expireTime
+                         * @property {google.firestore.admin.v1.Backup.IStats|null} [stats] Backup stats
+                         * @property {google.firestore.admin.v1.Backup.State|null} [state] Backup state
+                         */
+    
+                        /**
+                         * Constructs a new Backup.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a Backup.
+                         * @implements IBackup
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IBackup=} [properties] Properties to set
+                         */
+                        function Backup(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * Backup name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.Backup
+                         * @instance
+                         */
+                        Backup.prototype.name = "";
+    
+                        /**
+                         * Backup database.
+                         * @member {string} database
+                         * @memberof google.firestore.admin.v1.Backup
+                         * @instance
+                         */
+                        Backup.prototype.database = "";
+    
+                        /**
+                         * Backup databaseUid.
+                         * @member {string} databaseUid
+                         * @memberof google.firestore.admin.v1.Backup
+                         * @instance
+                         */
+                        Backup.prototype.databaseUid = "";
+    
+                        /**
+                         * Backup snapshotTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} snapshotTime
+                         * @memberof google.firestore.admin.v1.Backup
+                         * @instance
+                         */
+                        Backup.prototype.snapshotTime = null;
+    
+                        /**
+                         * Backup expireTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} expireTime
+                         * @memberof google.firestore.admin.v1.Backup
+                         * @instance
+                         */
+                        Backup.prototype.expireTime = null;
+    
+                        /**
+                         * Backup stats.
+                         * @member {google.firestore.admin.v1.Backup.IStats|null|undefined} stats
+                         * @memberof google.firestore.admin.v1.Backup
+                         * @instance
+                         */
+                        Backup.prototype.stats = null;
+    
+                        /**
+                         * Backup state.
+                         * @member {google.firestore.admin.v1.Backup.State} state
+                         * @memberof google.firestore.admin.v1.Backup
+                         * @instance
+                         */
+                        Backup.prototype.state = 0;
+    
+                        /**
+                         * Creates a Backup message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.Backup
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.Backup} Backup
+                         */
+                        Backup.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.Backup)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.Backup();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            if (object.database != null)
+                                message.database = String(object.database);
+                            if (object.databaseUid != null)
+                                message.databaseUid = String(object.databaseUid);
+                            if (object.snapshotTime != null) {
+                                if (typeof object.snapshotTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Backup.snapshotTime: object expected");
+                                message.snapshotTime = $root.google.protobuf.Timestamp.fromObject(object.snapshotTime);
+                            }
+                            if (object.expireTime != null) {
+                                if (typeof object.expireTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Backup.expireTime: object expected");
+                                message.expireTime = $root.google.protobuf.Timestamp.fromObject(object.expireTime);
+                            }
+                            if (object.stats != null) {
+                                if (typeof object.stats !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Backup.stats: object expected");
+                                message.stats = $root.google.firestore.admin.v1.Backup.Stats.fromObject(object.stats);
+                            }
+                            switch (object.state) {
+                            default:
+                                if (typeof object.state === "number") {
+                                    message.state = object.state;
+                                    break;
+                                }
+                                break;
+                            case "STATE_UNSPECIFIED":
+                            case 0:
+                                message.state = 0;
+                                break;
+                            case "CREATING":
+                            case 1:
+                                message.state = 1;
+                                break;
+                            case "READY":
+                            case 2:
+                                message.state = 2;
+                                break;
+                            case "NOT_AVAILABLE":
+                            case 3:
+                                message.state = 3;
+                                break;
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a Backup message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.Backup
+                         * @static
+                         * @param {google.firestore.admin.v1.Backup} message Backup
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        Backup.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.name = "";
+                                object.database = "";
+                                object.snapshotTime = null;
+                                object.expireTime = null;
+                                object.stats = null;
+                                object.databaseUid = "";
+                                object.state = options.enums === String ? "STATE_UNSPECIFIED" : 0;
+                            }
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            if (message.database != null && message.hasOwnProperty("database"))
+                                object.database = message.database;
+                            if (message.snapshotTime != null && message.hasOwnProperty("snapshotTime"))
+                                object.snapshotTime = $root.google.protobuf.Timestamp.toObject(message.snapshotTime, options);
+                            if (message.expireTime != null && message.hasOwnProperty("expireTime"))
+                                object.expireTime = $root.google.protobuf.Timestamp.toObject(message.expireTime, options);
+                            if (message.stats != null && message.hasOwnProperty("stats"))
+                                object.stats = $root.google.firestore.admin.v1.Backup.Stats.toObject(message.stats, options);
+                            if (message.databaseUid != null && message.hasOwnProperty("databaseUid"))
+                                object.databaseUid = message.databaseUid;
+                            if (message.state != null && message.hasOwnProperty("state"))
+                                object.state = options.enums === String ? $root.google.firestore.admin.v1.Backup.State[message.state] === undefined ? message.state : $root.google.firestore.admin.v1.Backup.State[message.state] : message.state;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this Backup to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.Backup
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        Backup.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for Backup
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.Backup
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        Backup.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.Backup";
+                        };
+    
+                        Backup.Stats = (function() {
+    
+                            /**
+                             * Properties of a Stats.
+                             * @memberof google.firestore.admin.v1.Backup
+                             * @interface IStats
+                             * @property {number|string|null} [sizeBytes] Stats sizeBytes
+                             * @property {number|string|null} [documentCount] Stats documentCount
+                             * @property {number|string|null} [indexCount] Stats indexCount
+                             */
+    
+                            /**
+                             * Constructs a new Stats.
+                             * @memberof google.firestore.admin.v1.Backup
+                             * @classdesc Represents a Stats.
+                             * @implements IStats
+                             * @constructor
+                             * @param {google.firestore.admin.v1.Backup.IStats=} [properties] Properties to set
+                             */
+                            function Stats(properties) {
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * Stats sizeBytes.
+                             * @member {number|string} sizeBytes
+                             * @memberof google.firestore.admin.v1.Backup.Stats
+                             * @instance
+                             */
+                            Stats.prototype.sizeBytes = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+                            /**
+                             * Stats documentCount.
+                             * @member {number|string} documentCount
+                             * @memberof google.firestore.admin.v1.Backup.Stats
+                             * @instance
+                             */
+                            Stats.prototype.documentCount = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+                            /**
+                             * Stats indexCount.
+                             * @member {number|string} indexCount
+                             * @memberof google.firestore.admin.v1.Backup.Stats
+                             * @instance
+                             */
+                            Stats.prototype.indexCount = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+                            /**
+                             * Creates a Stats message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.admin.v1.Backup.Stats
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.admin.v1.Backup.Stats} Stats
+                             */
+                            Stats.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.admin.v1.Backup.Stats)
+                                    return object;
+                                var message = new $root.google.firestore.admin.v1.Backup.Stats();
+                                if (object.sizeBytes != null)
+                                    if ($util.Long)
+                                        (message.sizeBytes = $util.Long.fromValue(object.sizeBytes)).unsigned = false;
+                                    else if (typeof object.sizeBytes === "string")
+                                        message.sizeBytes = parseInt(object.sizeBytes, 10);
+                                    else if (typeof object.sizeBytes === "number")
+                                        message.sizeBytes = object.sizeBytes;
+                                    else if (typeof object.sizeBytes === "object")
+                                        message.sizeBytes = new $util.LongBits(object.sizeBytes.low >>> 0, object.sizeBytes.high >>> 0).toNumber();
+                                if (object.documentCount != null)
+                                    if ($util.Long)
+                                        (message.documentCount = $util.Long.fromValue(object.documentCount)).unsigned = false;
+                                    else if (typeof object.documentCount === "string")
+                                        message.documentCount = parseInt(object.documentCount, 10);
+                                    else if (typeof object.documentCount === "number")
+                                        message.documentCount = object.documentCount;
+                                    else if (typeof object.documentCount === "object")
+                                        message.documentCount = new $util.LongBits(object.documentCount.low >>> 0, object.documentCount.high >>> 0).toNumber();
+                                if (object.indexCount != null)
+                                    if ($util.Long)
+                                        (message.indexCount = $util.Long.fromValue(object.indexCount)).unsigned = false;
+                                    else if (typeof object.indexCount === "string")
+                                        message.indexCount = parseInt(object.indexCount, 10);
+                                    else if (typeof object.indexCount === "number")
+                                        message.indexCount = object.indexCount;
+                                    else if (typeof object.indexCount === "object")
+                                        message.indexCount = new $util.LongBits(object.indexCount.low >>> 0, object.indexCount.high >>> 0).toNumber();
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from a Stats message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.admin.v1.Backup.Stats
+                             * @static
+                             * @param {google.firestore.admin.v1.Backup.Stats} message Stats
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            Stats.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (options.defaults) {
+                                    if ($util.Long) {
+                                        var long = new $util.Long(0, 0, false);
+                                        object.sizeBytes = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                                    } else
+                                        object.sizeBytes = options.longs === String ? "0" : 0;
+                                    if ($util.Long) {
+                                        var long = new $util.Long(0, 0, false);
+                                        object.documentCount = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                                    } else
+                                        object.documentCount = options.longs === String ? "0" : 0;
+                                    if ($util.Long) {
+                                        var long = new $util.Long(0, 0, false);
+                                        object.indexCount = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                                    } else
+                                        object.indexCount = options.longs === String ? "0" : 0;
+                                }
+                                if (message.sizeBytes != null && message.hasOwnProperty("sizeBytes"))
+                                    if (typeof message.sizeBytes === "number")
+                                        object.sizeBytes = options.longs === String ? String(message.sizeBytes) : message.sizeBytes;
+                                    else
+                                        object.sizeBytes = options.longs === String ? $util.Long.prototype.toString.call(message.sizeBytes) : options.longs === Number ? new $util.LongBits(message.sizeBytes.low >>> 0, message.sizeBytes.high >>> 0).toNumber() : message.sizeBytes;
+                                if (message.documentCount != null && message.hasOwnProperty("documentCount"))
+                                    if (typeof message.documentCount === "number")
+                                        object.documentCount = options.longs === String ? String(message.documentCount) : message.documentCount;
+                                    else
+                                        object.documentCount = options.longs === String ? $util.Long.prototype.toString.call(message.documentCount) : options.longs === Number ? new $util.LongBits(message.documentCount.low >>> 0, message.documentCount.high >>> 0).toNumber() : message.documentCount;
+                                if (message.indexCount != null && message.hasOwnProperty("indexCount"))
+                                    if (typeof message.indexCount === "number")
+                                        object.indexCount = options.longs === String ? String(message.indexCount) : message.indexCount;
+                                    else
+                                        object.indexCount = options.longs === String ? $util.Long.prototype.toString.call(message.indexCount) : options.longs === Number ? new $util.LongBits(message.indexCount.low >>> 0, message.indexCount.high >>> 0).toNumber() : message.indexCount;
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this Stats to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.admin.v1.Backup.Stats
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            Stats.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for Stats
+                             * @function getTypeUrl
+                             * @memberof google.firestore.admin.v1.Backup.Stats
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            Stats.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.admin.v1.Backup.Stats";
+                            };
+    
+                            return Stats;
+                        })();
+    
+                        /**
+                         * State enum.
+                         * @name google.firestore.admin.v1.Backup.State
+                         * @enum {string}
+                         * @property {string} STATE_UNSPECIFIED=STATE_UNSPECIFIED STATE_UNSPECIFIED value
+                         * @property {string} CREATING=CREATING CREATING value
+                         * @property {string} READY=READY READY value
+                         * @property {string} NOT_AVAILABLE=NOT_AVAILABLE NOT_AVAILABLE value
+                         */
+                        Backup.State = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "STATE_UNSPECIFIED"] = "STATE_UNSPECIFIED";
+                            values[valuesById[1] = "CREATING"] = "CREATING";
+                            values[valuesById[2] = "READY"] = "READY";
+                            values[valuesById[3] = "NOT_AVAILABLE"] = "NOT_AVAILABLE";
+                            return values;
+                        })();
+    
+                        return Backup;
+                    })();
+    
                     v1.Database = (function() {
     
                         /**
@@ -75,11 +476,22 @@
                          * @memberof google.firestore.admin.v1
                          * @interface IDatabase
                          * @property {string|null} [name] Database name
+                         * @property {string|null} [uid] Database uid
+                         * @property {google.protobuf.ITimestamp|null} [createTime] Database createTime
+                         * @property {google.protobuf.ITimestamp|null} [updateTime] Database updateTime
+                         * @property {google.protobuf.ITimestamp|null} [deleteTime] Database deleteTime
                          * @property {string|null} [locationId] Database locationId
                          * @property {google.firestore.admin.v1.Database.DatabaseType|null} [type] Database type
                          * @property {google.firestore.admin.v1.Database.ConcurrencyMode|null} [concurrencyMode] Database concurrencyMode
+                         * @property {google.protobuf.IDuration|null} [versionRetentionPeriod] Database versionRetentionPeriod
+                         * @property {google.protobuf.ITimestamp|null} [earliestVersionTime] Database earliestVersionTime
+                         * @property {google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement|null} [pointInTimeRecoveryEnablement] Database pointInTimeRecoveryEnablement
                          * @property {google.firestore.admin.v1.Database.AppEngineIntegrationMode|null} [appEngineIntegrationMode] Database appEngineIntegrationMode
                          * @property {string|null} [keyPrefix] Database keyPrefix
+                         * @property {google.firestore.admin.v1.Database.DeleteProtectionState|null} [deleteProtectionState] Database deleteProtectionState
+                         * @property {google.firestore.admin.v1.Database.ICmekConfig|null} [cmekConfig] Database cmekConfig
+                         * @property {string|null} [previousId] Database previousId
+                         * @property {google.firestore.admin.v1.Database.ISourceInfo|null} [sourceInfo] Database sourceInfo
                          * @property {string|null} [etag] Database etag
                          */
     
@@ -107,6 +519,38 @@
                         Database.prototype.name = "";
     
                         /**
+                         * Database uid.
+                         * @member {string} uid
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.uid = "";
+    
+                        /**
+                         * Database createTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} createTime
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.createTime = null;
+    
+                        /**
+                         * Database updateTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} updateTime
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.updateTime = null;
+    
+                        /**
+                         * Database deleteTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} deleteTime
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.deleteTime = null;
+    
+                        /**
                          * Database locationId.
                          * @member {string} locationId
                          * @memberof google.firestore.admin.v1.Database
@@ -131,6 +575,30 @@
                         Database.prototype.concurrencyMode = 0;
     
                         /**
+                         * Database versionRetentionPeriod.
+                         * @member {google.protobuf.IDuration|null|undefined} versionRetentionPeriod
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.versionRetentionPeriod = null;
+    
+                        /**
+                         * Database earliestVersionTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} earliestVersionTime
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.earliestVersionTime = null;
+    
+                        /**
+                         * Database pointInTimeRecoveryEnablement.
+                         * @member {google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement} pointInTimeRecoveryEnablement
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.pointInTimeRecoveryEnablement = 0;
+    
+                        /**
                          * Database appEngineIntegrationMode.
                          * @member {google.firestore.admin.v1.Database.AppEngineIntegrationMode} appEngineIntegrationMode
                          * @memberof google.firestore.admin.v1.Database
@@ -145,6 +613,38 @@
                          * @instance
                          */
                         Database.prototype.keyPrefix = "";
+    
+                        /**
+                         * Database deleteProtectionState.
+                         * @member {google.firestore.admin.v1.Database.DeleteProtectionState} deleteProtectionState
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.deleteProtectionState = 0;
+    
+                        /**
+                         * Database cmekConfig.
+                         * @member {google.firestore.admin.v1.Database.ICmekConfig|null|undefined} cmekConfig
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.cmekConfig = null;
+    
+                        /**
+                         * Database previousId.
+                         * @member {string} previousId
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.previousId = "";
+    
+                        /**
+                         * Database sourceInfo.
+                         * @member {google.firestore.admin.v1.Database.ISourceInfo|null|undefined} sourceInfo
+                         * @memberof google.firestore.admin.v1.Database
+                         * @instance
+                         */
+                        Database.prototype.sourceInfo = null;
     
                         /**
                          * Database etag.
@@ -168,6 +668,23 @@
                             var message = new $root.google.firestore.admin.v1.Database();
                             if (object.name != null)
                                 message.name = String(object.name);
+                            if (object.uid != null)
+                                message.uid = String(object.uid);
+                            if (object.createTime != null) {
+                                if (typeof object.createTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Database.createTime: object expected");
+                                message.createTime = $root.google.protobuf.Timestamp.fromObject(object.createTime);
+                            }
+                            if (object.updateTime != null) {
+                                if (typeof object.updateTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Database.updateTime: object expected");
+                                message.updateTime = $root.google.protobuf.Timestamp.fromObject(object.updateTime);
+                            }
+                            if (object.deleteTime != null) {
+                                if (typeof object.deleteTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Database.deleteTime: object expected");
+                                message.deleteTime = $root.google.protobuf.Timestamp.fromObject(object.deleteTime);
+                            }
                             if (object.locationId != null)
                                 message.locationId = String(object.locationId);
                             switch (object.type) {
@@ -214,6 +731,36 @@
                                 message.concurrencyMode = 3;
                                 break;
                             }
+                            if (object.versionRetentionPeriod != null) {
+                                if (typeof object.versionRetentionPeriod !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Database.versionRetentionPeriod: object expected");
+                                message.versionRetentionPeriod = $root.google.protobuf.Duration.fromObject(object.versionRetentionPeriod);
+                            }
+                            if (object.earliestVersionTime != null) {
+                                if (typeof object.earliestVersionTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Database.earliestVersionTime: object expected");
+                                message.earliestVersionTime = $root.google.protobuf.Timestamp.fromObject(object.earliestVersionTime);
+                            }
+                            switch (object.pointInTimeRecoveryEnablement) {
+                            default:
+                                if (typeof object.pointInTimeRecoveryEnablement === "number") {
+                                    message.pointInTimeRecoveryEnablement = object.pointInTimeRecoveryEnablement;
+                                    break;
+                                }
+                                break;
+                            case "POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED":
+                            case 0:
+                                message.pointInTimeRecoveryEnablement = 0;
+                                break;
+                            case "POINT_IN_TIME_RECOVERY_ENABLED":
+                            case 1:
+                                message.pointInTimeRecoveryEnablement = 1;
+                                break;
+                            case "POINT_IN_TIME_RECOVERY_DISABLED":
+                            case 2:
+                                message.pointInTimeRecoveryEnablement = 2;
+                                break;
+                            }
                             switch (object.appEngineIntegrationMode) {
                             default:
                                 if (typeof object.appEngineIntegrationMode === "number") {
@@ -236,6 +783,38 @@
                             }
                             if (object.keyPrefix != null)
                                 message.keyPrefix = String(object.keyPrefix);
+                            switch (object.deleteProtectionState) {
+                            default:
+                                if (typeof object.deleteProtectionState === "number") {
+                                    message.deleteProtectionState = object.deleteProtectionState;
+                                    break;
+                                }
+                                break;
+                            case "DELETE_PROTECTION_STATE_UNSPECIFIED":
+                            case 0:
+                                message.deleteProtectionState = 0;
+                                break;
+                            case "DELETE_PROTECTION_DISABLED":
+                            case 1:
+                                message.deleteProtectionState = 1;
+                                break;
+                            case "DELETE_PROTECTION_ENABLED":
+                            case 2:
+                                message.deleteProtectionState = 2;
+                                break;
+                            }
+                            if (object.cmekConfig != null) {
+                                if (typeof object.cmekConfig !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Database.cmekConfig: object expected");
+                                message.cmekConfig = $root.google.firestore.admin.v1.Database.CmekConfig.fromObject(object.cmekConfig);
+                            }
+                            if (object.previousId != null)
+                                message.previousId = String(object.previousId);
+                            if (object.sourceInfo != null) {
+                                if (typeof object.sourceInfo !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.Database.sourceInfo: object expected");
+                                message.sourceInfo = $root.google.firestore.admin.v1.Database.SourceInfo.fromObject(object.sourceInfo);
+                            }
                             if (object.etag != null)
                                 message.etag = String(object.etag);
                             return message;
@@ -256,25 +835,58 @@
                             var object = {};
                             if (options.defaults) {
                                 object.name = "";
+                                object.uid = "";
+                                object.createTime = null;
+                                object.updateTime = null;
+                                object.deleteTime = null;
                                 object.locationId = "";
                                 object.type = options.enums === String ? "DATABASE_TYPE_UNSPECIFIED" : 0;
                                 object.concurrencyMode = options.enums === String ? "CONCURRENCY_MODE_UNSPECIFIED" : 0;
+                                object.versionRetentionPeriod = null;
+                                object.earliestVersionTime = null;
                                 object.appEngineIntegrationMode = options.enums === String ? "APP_ENGINE_INTEGRATION_MODE_UNSPECIFIED" : 0;
                                 object.keyPrefix = "";
+                                object.pointInTimeRecoveryEnablement = options.enums === String ? "POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED" : 0;
+                                object.deleteProtectionState = options.enums === String ? "DELETE_PROTECTION_STATE_UNSPECIFIED" : 0;
+                                object.cmekConfig = null;
+                                object.previousId = "";
+                                object.sourceInfo = null;
                                 object.etag = "";
                             }
                             if (message.name != null && message.hasOwnProperty("name"))
                                 object.name = message.name;
+                            if (message.uid != null && message.hasOwnProperty("uid"))
+                                object.uid = message.uid;
+                            if (message.createTime != null && message.hasOwnProperty("createTime"))
+                                object.createTime = $root.google.protobuf.Timestamp.toObject(message.createTime, options);
+                            if (message.updateTime != null && message.hasOwnProperty("updateTime"))
+                                object.updateTime = $root.google.protobuf.Timestamp.toObject(message.updateTime, options);
+                            if (message.deleteTime != null && message.hasOwnProperty("deleteTime"))
+                                object.deleteTime = $root.google.protobuf.Timestamp.toObject(message.deleteTime, options);
                             if (message.locationId != null && message.hasOwnProperty("locationId"))
                                 object.locationId = message.locationId;
                             if (message.type != null && message.hasOwnProperty("type"))
                                 object.type = options.enums === String ? $root.google.firestore.admin.v1.Database.DatabaseType[message.type] === undefined ? message.type : $root.google.firestore.admin.v1.Database.DatabaseType[message.type] : message.type;
                             if (message.concurrencyMode != null && message.hasOwnProperty("concurrencyMode"))
                                 object.concurrencyMode = options.enums === String ? $root.google.firestore.admin.v1.Database.ConcurrencyMode[message.concurrencyMode] === undefined ? message.concurrencyMode : $root.google.firestore.admin.v1.Database.ConcurrencyMode[message.concurrencyMode] : message.concurrencyMode;
+                            if (message.versionRetentionPeriod != null && message.hasOwnProperty("versionRetentionPeriod"))
+                                object.versionRetentionPeriod = $root.google.protobuf.Duration.toObject(message.versionRetentionPeriod, options);
+                            if (message.earliestVersionTime != null && message.hasOwnProperty("earliestVersionTime"))
+                                object.earliestVersionTime = $root.google.protobuf.Timestamp.toObject(message.earliestVersionTime, options);
                             if (message.appEngineIntegrationMode != null && message.hasOwnProperty("appEngineIntegrationMode"))
                                 object.appEngineIntegrationMode = options.enums === String ? $root.google.firestore.admin.v1.Database.AppEngineIntegrationMode[message.appEngineIntegrationMode] === undefined ? message.appEngineIntegrationMode : $root.google.firestore.admin.v1.Database.AppEngineIntegrationMode[message.appEngineIntegrationMode] : message.appEngineIntegrationMode;
                             if (message.keyPrefix != null && message.hasOwnProperty("keyPrefix"))
                                 object.keyPrefix = message.keyPrefix;
+                            if (message.pointInTimeRecoveryEnablement != null && message.hasOwnProperty("pointInTimeRecoveryEnablement"))
+                                object.pointInTimeRecoveryEnablement = options.enums === String ? $root.google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement[message.pointInTimeRecoveryEnablement] === undefined ? message.pointInTimeRecoveryEnablement : $root.google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement[message.pointInTimeRecoveryEnablement] : message.pointInTimeRecoveryEnablement;
+                            if (message.deleteProtectionState != null && message.hasOwnProperty("deleteProtectionState"))
+                                object.deleteProtectionState = options.enums === String ? $root.google.firestore.admin.v1.Database.DeleteProtectionState[message.deleteProtectionState] === undefined ? message.deleteProtectionState : $root.google.firestore.admin.v1.Database.DeleteProtectionState[message.deleteProtectionState] : message.deleteProtectionState;
+                            if (message.cmekConfig != null && message.hasOwnProperty("cmekConfig"))
+                                object.cmekConfig = $root.google.firestore.admin.v1.Database.CmekConfig.toObject(message.cmekConfig, options);
+                            if (message.previousId != null && message.hasOwnProperty("previousId"))
+                                object.previousId = message.previousId;
+                            if (message.sourceInfo != null && message.hasOwnProperty("sourceInfo"))
+                                object.sourceInfo = $root.google.firestore.admin.v1.Database.SourceInfo.toObject(message.sourceInfo, options);
                             if (message.etag != null && message.hasOwnProperty("etag"))
                                 object.etag = message.etag;
                             return object;
@@ -341,6 +953,22 @@
                         })();
     
                         /**
+                         * PointInTimeRecoveryEnablement enum.
+                         * @name google.firestore.admin.v1.Database.PointInTimeRecoveryEnablement
+                         * @enum {string}
+                         * @property {string} POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED=POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED value
+                         * @property {string} POINT_IN_TIME_RECOVERY_ENABLED=POINT_IN_TIME_RECOVERY_ENABLED POINT_IN_TIME_RECOVERY_ENABLED value
+                         * @property {string} POINT_IN_TIME_RECOVERY_DISABLED=POINT_IN_TIME_RECOVERY_DISABLED POINT_IN_TIME_RECOVERY_DISABLED value
+                         */
+                        Database.PointInTimeRecoveryEnablement = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED"] = "POINT_IN_TIME_RECOVERY_ENABLEMENT_UNSPECIFIED";
+                            values[valuesById[1] = "POINT_IN_TIME_RECOVERY_ENABLED"] = "POINT_IN_TIME_RECOVERY_ENABLED";
+                            values[valuesById[2] = "POINT_IN_TIME_RECOVERY_DISABLED"] = "POINT_IN_TIME_RECOVERY_DISABLED";
+                            return values;
+                        })();
+    
+                        /**
                          * AppEngineIntegrationMode enum.
                          * @name google.firestore.admin.v1.Database.AppEngineIntegrationMode
                          * @enum {string}
@@ -354,6 +982,783 @@
                             values[valuesById[1] = "ENABLED"] = "ENABLED";
                             values[valuesById[2] = "DISABLED"] = "DISABLED";
                             return values;
+                        })();
+    
+                        /**
+                         * DeleteProtectionState enum.
+                         * @name google.firestore.admin.v1.Database.DeleteProtectionState
+                         * @enum {string}
+                         * @property {string} DELETE_PROTECTION_STATE_UNSPECIFIED=DELETE_PROTECTION_STATE_UNSPECIFIED DELETE_PROTECTION_STATE_UNSPECIFIED value
+                         * @property {string} DELETE_PROTECTION_DISABLED=DELETE_PROTECTION_DISABLED DELETE_PROTECTION_DISABLED value
+                         * @property {string} DELETE_PROTECTION_ENABLED=DELETE_PROTECTION_ENABLED DELETE_PROTECTION_ENABLED value
+                         */
+                        Database.DeleteProtectionState = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "DELETE_PROTECTION_STATE_UNSPECIFIED"] = "DELETE_PROTECTION_STATE_UNSPECIFIED";
+                            values[valuesById[1] = "DELETE_PROTECTION_DISABLED"] = "DELETE_PROTECTION_DISABLED";
+                            values[valuesById[2] = "DELETE_PROTECTION_ENABLED"] = "DELETE_PROTECTION_ENABLED";
+                            return values;
+                        })();
+    
+                        Database.CmekConfig = (function() {
+    
+                            /**
+                             * Properties of a CmekConfig.
+                             * @memberof google.firestore.admin.v1.Database
+                             * @interface ICmekConfig
+                             * @property {string|null} [kmsKeyName] CmekConfig kmsKeyName
+                             * @property {Array.<string>|null} [activeKeyVersion] CmekConfig activeKeyVersion
+                             */
+    
+                            /**
+                             * Constructs a new CmekConfig.
+                             * @memberof google.firestore.admin.v1.Database
+                             * @classdesc Represents a CmekConfig.
+                             * @implements ICmekConfig
+                             * @constructor
+                             * @param {google.firestore.admin.v1.Database.ICmekConfig=} [properties] Properties to set
+                             */
+                            function CmekConfig(properties) {
+                                this.activeKeyVersion = [];
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * CmekConfig kmsKeyName.
+                             * @member {string} kmsKeyName
+                             * @memberof google.firestore.admin.v1.Database.CmekConfig
+                             * @instance
+                             */
+                            CmekConfig.prototype.kmsKeyName = "";
+    
+                            /**
+                             * CmekConfig activeKeyVersion.
+                             * @member {Array.<string>} activeKeyVersion
+                             * @memberof google.firestore.admin.v1.Database.CmekConfig
+                             * @instance
+                             */
+                            CmekConfig.prototype.activeKeyVersion = $util.emptyArray;
+    
+                            /**
+                             * Creates a CmekConfig message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.admin.v1.Database.CmekConfig
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.admin.v1.Database.CmekConfig} CmekConfig
+                             */
+                            CmekConfig.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.admin.v1.Database.CmekConfig)
+                                    return object;
+                                var message = new $root.google.firestore.admin.v1.Database.CmekConfig();
+                                if (object.kmsKeyName != null)
+                                    message.kmsKeyName = String(object.kmsKeyName);
+                                if (object.activeKeyVersion) {
+                                    if (!Array.isArray(object.activeKeyVersion))
+                                        throw TypeError(".google.firestore.admin.v1.Database.CmekConfig.activeKeyVersion: array expected");
+                                    message.activeKeyVersion = [];
+                                    for (var i = 0; i < object.activeKeyVersion.length; ++i)
+                                        message.activeKeyVersion[i] = String(object.activeKeyVersion[i]);
+                                }
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from a CmekConfig message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.admin.v1.Database.CmekConfig
+                             * @static
+                             * @param {google.firestore.admin.v1.Database.CmekConfig} message CmekConfig
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            CmekConfig.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (options.arrays || options.defaults)
+                                    object.activeKeyVersion = [];
+                                if (options.defaults)
+                                    object.kmsKeyName = "";
+                                if (message.kmsKeyName != null && message.hasOwnProperty("kmsKeyName"))
+                                    object.kmsKeyName = message.kmsKeyName;
+                                if (message.activeKeyVersion && message.activeKeyVersion.length) {
+                                    object.activeKeyVersion = [];
+                                    for (var j = 0; j < message.activeKeyVersion.length; ++j)
+                                        object.activeKeyVersion[j] = message.activeKeyVersion[j];
+                                }
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this CmekConfig to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.admin.v1.Database.CmekConfig
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            CmekConfig.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for CmekConfig
+                             * @function getTypeUrl
+                             * @memberof google.firestore.admin.v1.Database.CmekConfig
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            CmekConfig.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.admin.v1.Database.CmekConfig";
+                            };
+    
+                            return CmekConfig;
+                        })();
+    
+                        Database.SourceInfo = (function() {
+    
+                            /**
+                             * Properties of a SourceInfo.
+                             * @memberof google.firestore.admin.v1.Database
+                             * @interface ISourceInfo
+                             * @property {google.firestore.admin.v1.Database.SourceInfo.IBackupSource|null} [backup] SourceInfo backup
+                             * @property {string|null} [operation] SourceInfo operation
+                             */
+    
+                            /**
+                             * Constructs a new SourceInfo.
+                             * @memberof google.firestore.admin.v1.Database
+                             * @classdesc Represents a SourceInfo.
+                             * @implements ISourceInfo
+                             * @constructor
+                             * @param {google.firestore.admin.v1.Database.ISourceInfo=} [properties] Properties to set
+                             */
+                            function SourceInfo(properties) {
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * SourceInfo backup.
+                             * @member {google.firestore.admin.v1.Database.SourceInfo.IBackupSource|null|undefined} backup
+                             * @memberof google.firestore.admin.v1.Database.SourceInfo
+                             * @instance
+                             */
+                            SourceInfo.prototype.backup = null;
+    
+                            /**
+                             * SourceInfo operation.
+                             * @member {string} operation
+                             * @memberof google.firestore.admin.v1.Database.SourceInfo
+                             * @instance
+                             */
+                            SourceInfo.prototype.operation = "";
+    
+                            // OneOf field names bound to virtual getters and setters
+                            var $oneOfFields;
+    
+                            /**
+                             * SourceInfo source.
+                             * @member {"backup"|undefined} source
+                             * @memberof google.firestore.admin.v1.Database.SourceInfo
+                             * @instance
+                             */
+                            Object.defineProperty(SourceInfo.prototype, "source", {
+                                get: $util.oneOfGetter($oneOfFields = ["backup"]),
+                                set: $util.oneOfSetter($oneOfFields)
+                            });
+    
+                            /**
+                             * Creates a SourceInfo message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.admin.v1.Database.SourceInfo
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.admin.v1.Database.SourceInfo} SourceInfo
+                             */
+                            SourceInfo.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.admin.v1.Database.SourceInfo)
+                                    return object;
+                                var message = new $root.google.firestore.admin.v1.Database.SourceInfo();
+                                if (object.backup != null) {
+                                    if (typeof object.backup !== "object")
+                                        throw TypeError(".google.firestore.admin.v1.Database.SourceInfo.backup: object expected");
+                                    message.backup = $root.google.firestore.admin.v1.Database.SourceInfo.BackupSource.fromObject(object.backup);
+                                }
+                                if (object.operation != null)
+                                    message.operation = String(object.operation);
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from a SourceInfo message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.admin.v1.Database.SourceInfo
+                             * @static
+                             * @param {google.firestore.admin.v1.Database.SourceInfo} message SourceInfo
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            SourceInfo.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (options.defaults)
+                                    object.operation = "";
+                                if (message.backup != null && message.hasOwnProperty("backup")) {
+                                    object.backup = $root.google.firestore.admin.v1.Database.SourceInfo.BackupSource.toObject(message.backup, options);
+                                    if (options.oneofs)
+                                        object.source = "backup";
+                                }
+                                if (message.operation != null && message.hasOwnProperty("operation"))
+                                    object.operation = message.operation;
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this SourceInfo to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.admin.v1.Database.SourceInfo
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            SourceInfo.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for SourceInfo
+                             * @function getTypeUrl
+                             * @memberof google.firestore.admin.v1.Database.SourceInfo
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            SourceInfo.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.admin.v1.Database.SourceInfo";
+                            };
+    
+                            SourceInfo.BackupSource = (function() {
+    
+                                /**
+                                 * Properties of a BackupSource.
+                                 * @memberof google.firestore.admin.v1.Database.SourceInfo
+                                 * @interface IBackupSource
+                                 * @property {string|null} [backup] BackupSource backup
+                                 */
+    
+                                /**
+                                 * Constructs a new BackupSource.
+                                 * @memberof google.firestore.admin.v1.Database.SourceInfo
+                                 * @classdesc Represents a BackupSource.
+                                 * @implements IBackupSource
+                                 * @constructor
+                                 * @param {google.firestore.admin.v1.Database.SourceInfo.IBackupSource=} [properties] Properties to set
+                                 */
+                                function BackupSource(properties) {
+                                    if (properties)
+                                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                            if (properties[keys[i]] != null)
+                                                this[keys[i]] = properties[keys[i]];
+                                }
+    
+                                /**
+                                 * BackupSource backup.
+                                 * @member {string} backup
+                                 * @memberof google.firestore.admin.v1.Database.SourceInfo.BackupSource
+                                 * @instance
+                                 */
+                                BackupSource.prototype.backup = "";
+    
+                                /**
+                                 * Creates a BackupSource message from a plain object. Also converts values to their respective internal types.
+                                 * @function fromObject
+                                 * @memberof google.firestore.admin.v1.Database.SourceInfo.BackupSource
+                                 * @static
+                                 * @param {Object.<string,*>} object Plain object
+                                 * @returns {google.firestore.admin.v1.Database.SourceInfo.BackupSource} BackupSource
+                                 */
+                                BackupSource.fromObject = function fromObject(object) {
+                                    if (object instanceof $root.google.firestore.admin.v1.Database.SourceInfo.BackupSource)
+                                        return object;
+                                    var message = new $root.google.firestore.admin.v1.Database.SourceInfo.BackupSource();
+                                    if (object.backup != null)
+                                        message.backup = String(object.backup);
+                                    return message;
+                                };
+    
+                                /**
+                                 * Creates a plain object from a BackupSource message. Also converts values to other types if specified.
+                                 * @function toObject
+                                 * @memberof google.firestore.admin.v1.Database.SourceInfo.BackupSource
+                                 * @static
+                                 * @param {google.firestore.admin.v1.Database.SourceInfo.BackupSource} message BackupSource
+                                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                                 * @returns {Object.<string,*>} Plain object
+                                 */
+                                BackupSource.toObject = function toObject(message, options) {
+                                    if (!options)
+                                        options = {};
+                                    var object = {};
+                                    if (options.defaults)
+                                        object.backup = "";
+                                    if (message.backup != null && message.hasOwnProperty("backup"))
+                                        object.backup = message.backup;
+                                    return object;
+                                };
+    
+                                /**
+                                 * Converts this BackupSource to JSON.
+                                 * @function toJSON
+                                 * @memberof google.firestore.admin.v1.Database.SourceInfo.BackupSource
+                                 * @instance
+                                 * @returns {Object.<string,*>} JSON object
+                                 */
+                                BackupSource.prototype.toJSON = function toJSON() {
+                                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                                };
+    
+                                /**
+                                 * Gets the default type url for BackupSource
+                                 * @function getTypeUrl
+                                 * @memberof google.firestore.admin.v1.Database.SourceInfo.BackupSource
+                                 * @static
+                                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                                 * @returns {string} The default type url
+                                 */
+                                BackupSource.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                    if (typeUrlPrefix === undefined) {
+                                        typeUrlPrefix = "type.googleapis.com";
+                                    }
+                                    return typeUrlPrefix + "/google.firestore.admin.v1.Database.SourceInfo.BackupSource";
+                                };
+    
+                                return BackupSource;
+                            })();
+    
+                            return SourceInfo;
+                        })();
+    
+                        Database.EncryptionConfig = (function() {
+    
+                            /**
+                             * Properties of an EncryptionConfig.
+                             * @memberof google.firestore.admin.v1.Database
+                             * @interface IEncryptionConfig
+                             * @property {google.firestore.admin.v1.Database.EncryptionConfig.IGoogleDefaultEncryptionOptions|null} [googleDefaultEncryption] EncryptionConfig googleDefaultEncryption
+                             * @property {google.firestore.admin.v1.Database.EncryptionConfig.ISourceEncryptionOptions|null} [useSourceEncryption] EncryptionConfig useSourceEncryption
+                             * @property {google.firestore.admin.v1.Database.EncryptionConfig.ICustomerManagedEncryptionOptions|null} [customerManagedEncryption] EncryptionConfig customerManagedEncryption
+                             */
+    
+                            /**
+                             * Constructs a new EncryptionConfig.
+                             * @memberof google.firestore.admin.v1.Database
+                             * @classdesc Represents an EncryptionConfig.
+                             * @implements IEncryptionConfig
+                             * @constructor
+                             * @param {google.firestore.admin.v1.Database.IEncryptionConfig=} [properties] Properties to set
+                             */
+                            function EncryptionConfig(properties) {
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * EncryptionConfig googleDefaultEncryption.
+                             * @member {google.firestore.admin.v1.Database.EncryptionConfig.IGoogleDefaultEncryptionOptions|null|undefined} googleDefaultEncryption
+                             * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                             * @instance
+                             */
+                            EncryptionConfig.prototype.googleDefaultEncryption = null;
+    
+                            /**
+                             * EncryptionConfig useSourceEncryption.
+                             * @member {google.firestore.admin.v1.Database.EncryptionConfig.ISourceEncryptionOptions|null|undefined} useSourceEncryption
+                             * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                             * @instance
+                             */
+                            EncryptionConfig.prototype.useSourceEncryption = null;
+    
+                            /**
+                             * EncryptionConfig customerManagedEncryption.
+                             * @member {google.firestore.admin.v1.Database.EncryptionConfig.ICustomerManagedEncryptionOptions|null|undefined} customerManagedEncryption
+                             * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                             * @instance
+                             */
+                            EncryptionConfig.prototype.customerManagedEncryption = null;
+    
+                            // OneOf field names bound to virtual getters and setters
+                            var $oneOfFields;
+    
+                            /**
+                             * EncryptionConfig encryptionType.
+                             * @member {"googleDefaultEncryption"|"useSourceEncryption"|"customerManagedEncryption"|undefined} encryptionType
+                             * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                             * @instance
+                             */
+                            Object.defineProperty(EncryptionConfig.prototype, "encryptionType", {
+                                get: $util.oneOfGetter($oneOfFields = ["googleDefaultEncryption", "useSourceEncryption", "customerManagedEncryption"]),
+                                set: $util.oneOfSetter($oneOfFields)
+                            });
+    
+                            /**
+                             * Creates an EncryptionConfig message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.admin.v1.Database.EncryptionConfig} EncryptionConfig
+                             */
+                            EncryptionConfig.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.admin.v1.Database.EncryptionConfig)
+                                    return object;
+                                var message = new $root.google.firestore.admin.v1.Database.EncryptionConfig();
+                                if (object.googleDefaultEncryption != null) {
+                                    if (typeof object.googleDefaultEncryption !== "object")
+                                        throw TypeError(".google.firestore.admin.v1.Database.EncryptionConfig.googleDefaultEncryption: object expected");
+                                    message.googleDefaultEncryption = $root.google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions.fromObject(object.googleDefaultEncryption);
+                                }
+                                if (object.useSourceEncryption != null) {
+                                    if (typeof object.useSourceEncryption !== "object")
+                                        throw TypeError(".google.firestore.admin.v1.Database.EncryptionConfig.useSourceEncryption: object expected");
+                                    message.useSourceEncryption = $root.google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions.fromObject(object.useSourceEncryption);
+                                }
+                                if (object.customerManagedEncryption != null) {
+                                    if (typeof object.customerManagedEncryption !== "object")
+                                        throw TypeError(".google.firestore.admin.v1.Database.EncryptionConfig.customerManagedEncryption: object expected");
+                                    message.customerManagedEncryption = $root.google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions.fromObject(object.customerManagedEncryption);
+                                }
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from an EncryptionConfig message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                             * @static
+                             * @param {google.firestore.admin.v1.Database.EncryptionConfig} message EncryptionConfig
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            EncryptionConfig.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (message.googleDefaultEncryption != null && message.hasOwnProperty("googleDefaultEncryption")) {
+                                    object.googleDefaultEncryption = $root.google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions.toObject(message.googleDefaultEncryption, options);
+                                    if (options.oneofs)
+                                        object.encryptionType = "googleDefaultEncryption";
+                                }
+                                if (message.useSourceEncryption != null && message.hasOwnProperty("useSourceEncryption")) {
+                                    object.useSourceEncryption = $root.google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions.toObject(message.useSourceEncryption, options);
+                                    if (options.oneofs)
+                                        object.encryptionType = "useSourceEncryption";
+                                }
+                                if (message.customerManagedEncryption != null && message.hasOwnProperty("customerManagedEncryption")) {
+                                    object.customerManagedEncryption = $root.google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions.toObject(message.customerManagedEncryption, options);
+                                    if (options.oneofs)
+                                        object.encryptionType = "customerManagedEncryption";
+                                }
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this EncryptionConfig to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            EncryptionConfig.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for EncryptionConfig
+                             * @function getTypeUrl
+                             * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            EncryptionConfig.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.admin.v1.Database.EncryptionConfig";
+                            };
+    
+                            EncryptionConfig.GoogleDefaultEncryptionOptions = (function() {
+    
+                                /**
+                                 * Properties of a GoogleDefaultEncryptionOptions.
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                                 * @interface IGoogleDefaultEncryptionOptions
+                                 */
+    
+                                /**
+                                 * Constructs a new GoogleDefaultEncryptionOptions.
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                                 * @classdesc Represents a GoogleDefaultEncryptionOptions.
+                                 * @implements IGoogleDefaultEncryptionOptions
+                                 * @constructor
+                                 * @param {google.firestore.admin.v1.Database.EncryptionConfig.IGoogleDefaultEncryptionOptions=} [properties] Properties to set
+                                 */
+                                function GoogleDefaultEncryptionOptions(properties) {
+                                    if (properties)
+                                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                            if (properties[keys[i]] != null)
+                                                this[keys[i]] = properties[keys[i]];
+                                }
+    
+                                /**
+                                 * Creates a GoogleDefaultEncryptionOptions message from a plain object. Also converts values to their respective internal types.
+                                 * @function fromObject
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions
+                                 * @static
+                                 * @param {Object.<string,*>} object Plain object
+                                 * @returns {google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions} GoogleDefaultEncryptionOptions
+                                 */
+                                GoogleDefaultEncryptionOptions.fromObject = function fromObject(object) {
+                                    if (object instanceof $root.google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions)
+                                        return object;
+                                    return new $root.google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions();
+                                };
+    
+                                /**
+                                 * Creates a plain object from a GoogleDefaultEncryptionOptions message. Also converts values to other types if specified.
+                                 * @function toObject
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions
+                                 * @static
+                                 * @param {google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions} message GoogleDefaultEncryptionOptions
+                                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                                 * @returns {Object.<string,*>} Plain object
+                                 */
+                                GoogleDefaultEncryptionOptions.toObject = function toObject() {
+                                    return {};
+                                };
+    
+                                /**
+                                 * Converts this GoogleDefaultEncryptionOptions to JSON.
+                                 * @function toJSON
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions
+                                 * @instance
+                                 * @returns {Object.<string,*>} JSON object
+                                 */
+                                GoogleDefaultEncryptionOptions.prototype.toJSON = function toJSON() {
+                                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                                };
+    
+                                /**
+                                 * Gets the default type url for GoogleDefaultEncryptionOptions
+                                 * @function getTypeUrl
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions
+                                 * @static
+                                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                                 * @returns {string} The default type url
+                                 */
+                                GoogleDefaultEncryptionOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                    if (typeUrlPrefix === undefined) {
+                                        typeUrlPrefix = "type.googleapis.com";
+                                    }
+                                    return typeUrlPrefix + "/google.firestore.admin.v1.Database.EncryptionConfig.GoogleDefaultEncryptionOptions";
+                                };
+    
+                                return GoogleDefaultEncryptionOptions;
+                            })();
+    
+                            EncryptionConfig.SourceEncryptionOptions = (function() {
+    
+                                /**
+                                 * Properties of a SourceEncryptionOptions.
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                                 * @interface ISourceEncryptionOptions
+                                 */
+    
+                                /**
+                                 * Constructs a new SourceEncryptionOptions.
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                                 * @classdesc Represents a SourceEncryptionOptions.
+                                 * @implements ISourceEncryptionOptions
+                                 * @constructor
+                                 * @param {google.firestore.admin.v1.Database.EncryptionConfig.ISourceEncryptionOptions=} [properties] Properties to set
+                                 */
+                                function SourceEncryptionOptions(properties) {
+                                    if (properties)
+                                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                            if (properties[keys[i]] != null)
+                                                this[keys[i]] = properties[keys[i]];
+                                }
+    
+                                /**
+                                 * Creates a SourceEncryptionOptions message from a plain object. Also converts values to their respective internal types.
+                                 * @function fromObject
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions
+                                 * @static
+                                 * @param {Object.<string,*>} object Plain object
+                                 * @returns {google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions} SourceEncryptionOptions
+                                 */
+                                SourceEncryptionOptions.fromObject = function fromObject(object) {
+                                    if (object instanceof $root.google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions)
+                                        return object;
+                                    return new $root.google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions();
+                                };
+    
+                                /**
+                                 * Creates a plain object from a SourceEncryptionOptions message. Also converts values to other types if specified.
+                                 * @function toObject
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions
+                                 * @static
+                                 * @param {google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions} message SourceEncryptionOptions
+                                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                                 * @returns {Object.<string,*>} Plain object
+                                 */
+                                SourceEncryptionOptions.toObject = function toObject() {
+                                    return {};
+                                };
+    
+                                /**
+                                 * Converts this SourceEncryptionOptions to JSON.
+                                 * @function toJSON
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions
+                                 * @instance
+                                 * @returns {Object.<string,*>} JSON object
+                                 */
+                                SourceEncryptionOptions.prototype.toJSON = function toJSON() {
+                                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                                };
+    
+                                /**
+                                 * Gets the default type url for SourceEncryptionOptions
+                                 * @function getTypeUrl
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions
+                                 * @static
+                                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                                 * @returns {string} The default type url
+                                 */
+                                SourceEncryptionOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                    if (typeUrlPrefix === undefined) {
+                                        typeUrlPrefix = "type.googleapis.com";
+                                    }
+                                    return typeUrlPrefix + "/google.firestore.admin.v1.Database.EncryptionConfig.SourceEncryptionOptions";
+                                };
+    
+                                return SourceEncryptionOptions;
+                            })();
+    
+                            EncryptionConfig.CustomerManagedEncryptionOptions = (function() {
+    
+                                /**
+                                 * Properties of a CustomerManagedEncryptionOptions.
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                                 * @interface ICustomerManagedEncryptionOptions
+                                 * @property {string|null} [kmsKeyName] CustomerManagedEncryptionOptions kmsKeyName
+                                 */
+    
+                                /**
+                                 * Constructs a new CustomerManagedEncryptionOptions.
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig
+                                 * @classdesc Represents a CustomerManagedEncryptionOptions.
+                                 * @implements ICustomerManagedEncryptionOptions
+                                 * @constructor
+                                 * @param {google.firestore.admin.v1.Database.EncryptionConfig.ICustomerManagedEncryptionOptions=} [properties] Properties to set
+                                 */
+                                function CustomerManagedEncryptionOptions(properties) {
+                                    if (properties)
+                                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                            if (properties[keys[i]] != null)
+                                                this[keys[i]] = properties[keys[i]];
+                                }
+    
+                                /**
+                                 * CustomerManagedEncryptionOptions kmsKeyName.
+                                 * @member {string} kmsKeyName
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions
+                                 * @instance
+                                 */
+                                CustomerManagedEncryptionOptions.prototype.kmsKeyName = "";
+    
+                                /**
+                                 * Creates a CustomerManagedEncryptionOptions message from a plain object. Also converts values to their respective internal types.
+                                 * @function fromObject
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions
+                                 * @static
+                                 * @param {Object.<string,*>} object Plain object
+                                 * @returns {google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions} CustomerManagedEncryptionOptions
+                                 */
+                                CustomerManagedEncryptionOptions.fromObject = function fromObject(object) {
+                                    if (object instanceof $root.google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions)
+                                        return object;
+                                    var message = new $root.google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions();
+                                    if (object.kmsKeyName != null)
+                                        message.kmsKeyName = String(object.kmsKeyName);
+                                    return message;
+                                };
+    
+                                /**
+                                 * Creates a plain object from a CustomerManagedEncryptionOptions message. Also converts values to other types if specified.
+                                 * @function toObject
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions
+                                 * @static
+                                 * @param {google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions} message CustomerManagedEncryptionOptions
+                                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                                 * @returns {Object.<string,*>} Plain object
+                                 */
+                                CustomerManagedEncryptionOptions.toObject = function toObject(message, options) {
+                                    if (!options)
+                                        options = {};
+                                    var object = {};
+                                    if (options.defaults)
+                                        object.kmsKeyName = "";
+                                    if (message.kmsKeyName != null && message.hasOwnProperty("kmsKeyName"))
+                                        object.kmsKeyName = message.kmsKeyName;
+                                    return object;
+                                };
+    
+                                /**
+                                 * Converts this CustomerManagedEncryptionOptions to JSON.
+                                 * @function toJSON
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions
+                                 * @instance
+                                 * @returns {Object.<string,*>} JSON object
+                                 */
+                                CustomerManagedEncryptionOptions.prototype.toJSON = function toJSON() {
+                                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                                };
+    
+                                /**
+                                 * Gets the default type url for CustomerManagedEncryptionOptions
+                                 * @function getTypeUrl
+                                 * @memberof google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions
+                                 * @static
+                                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                                 * @returns {string} The default type url
+                                 */
+                                CustomerManagedEncryptionOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                    if (typeUrlPrefix === undefined) {
+                                        typeUrlPrefix = "type.googleapis.com";
+                                    }
+                                    return typeUrlPrefix + "/google.firestore.admin.v1.Database.EncryptionConfig.CustomerManagedEncryptionOptions";
+                                };
+    
+                                return CustomerManagedEncryptionOptions;
+                            })();
+    
+                            return EncryptionConfig;
                         })();
     
                         return Database;
@@ -784,6 +2189,717 @@
                         return Field;
                     })();
     
+                    v1.Index = (function() {
+    
+                        /**
+                         * Properties of an Index.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IIndex
+                         * @property {string|null} [name] Index name
+                         * @property {google.firestore.admin.v1.Index.QueryScope|null} [queryScope] Index queryScope
+                         * @property {google.firestore.admin.v1.Index.ApiScope|null} [apiScope] Index apiScope
+                         * @property {Array.<google.firestore.admin.v1.Index.IIndexField>|null} [fields] Index fields
+                         * @property {google.firestore.admin.v1.Index.State|null} [state] Index state
+                         */
+    
+                        /**
+                         * Constructs a new Index.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents an Index.
+                         * @implements IIndex
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IIndex=} [properties] Properties to set
+                         */
+                        function Index(properties) {
+                            this.fields = [];
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * Index name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.Index
+                         * @instance
+                         */
+                        Index.prototype.name = "";
+    
+                        /**
+                         * Index queryScope.
+                         * @member {google.firestore.admin.v1.Index.QueryScope} queryScope
+                         * @memberof google.firestore.admin.v1.Index
+                         * @instance
+                         */
+                        Index.prototype.queryScope = 0;
+    
+                        /**
+                         * Index apiScope.
+                         * @member {google.firestore.admin.v1.Index.ApiScope} apiScope
+                         * @memberof google.firestore.admin.v1.Index
+                         * @instance
+                         */
+                        Index.prototype.apiScope = 0;
+    
+                        /**
+                         * Index fields.
+                         * @member {Array.<google.firestore.admin.v1.Index.IIndexField>} fields
+                         * @memberof google.firestore.admin.v1.Index
+                         * @instance
+                         */
+                        Index.prototype.fields = $util.emptyArray;
+    
+                        /**
+                         * Index state.
+                         * @member {google.firestore.admin.v1.Index.State} state
+                         * @memberof google.firestore.admin.v1.Index
+                         * @instance
+                         */
+                        Index.prototype.state = 0;
+    
+                        /**
+                         * Creates an Index message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.Index
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.Index} Index
+                         */
+                        Index.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.Index)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.Index();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            switch (object.queryScope) {
+                            default:
+                                if (typeof object.queryScope === "number") {
+                                    message.queryScope = object.queryScope;
+                                    break;
+                                }
+                                break;
+                            case "QUERY_SCOPE_UNSPECIFIED":
+                            case 0:
+                                message.queryScope = 0;
+                                break;
+                            case "COLLECTION":
+                            case 1:
+                                message.queryScope = 1;
+                                break;
+                            case "COLLECTION_GROUP":
+                            case 2:
+                                message.queryScope = 2;
+                                break;
+                            case "COLLECTION_RECURSIVE":
+                            case 3:
+                                message.queryScope = 3;
+                                break;
+                            }
+                            switch (object.apiScope) {
+                            default:
+                                if (typeof object.apiScope === "number") {
+                                    message.apiScope = object.apiScope;
+                                    break;
+                                }
+                                break;
+                            case "ANY_API":
+                            case 0:
+                                message.apiScope = 0;
+                                break;
+                            case "DATASTORE_MODE_API":
+                            case 1:
+                                message.apiScope = 1;
+                                break;
+                            }
+                            if (object.fields) {
+                                if (!Array.isArray(object.fields))
+                                    throw TypeError(".google.firestore.admin.v1.Index.fields: array expected");
+                                message.fields = [];
+                                for (var i = 0; i < object.fields.length; ++i) {
+                                    if (typeof object.fields[i] !== "object")
+                                        throw TypeError(".google.firestore.admin.v1.Index.fields: object expected");
+                                    message.fields[i] = $root.google.firestore.admin.v1.Index.IndexField.fromObject(object.fields[i]);
+                                }
+                            }
+                            switch (object.state) {
+                            default:
+                                if (typeof object.state === "number") {
+                                    message.state = object.state;
+                                    break;
+                                }
+                                break;
+                            case "STATE_UNSPECIFIED":
+                            case 0:
+                                message.state = 0;
+                                break;
+                            case "CREATING":
+                            case 1:
+                                message.state = 1;
+                                break;
+                            case "READY":
+                            case 2:
+                                message.state = 2;
+                                break;
+                            case "NEEDS_REPAIR":
+                            case 3:
+                                message.state = 3;
+                                break;
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from an Index message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.Index
+                         * @static
+                         * @param {google.firestore.admin.v1.Index} message Index
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        Index.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.arrays || options.defaults)
+                                object.fields = [];
+                            if (options.defaults) {
+                                object.name = "";
+                                object.queryScope = options.enums === String ? "QUERY_SCOPE_UNSPECIFIED" : 0;
+                                object.state = options.enums === String ? "STATE_UNSPECIFIED" : 0;
+                                object.apiScope = options.enums === String ? "ANY_API" : 0;
+                            }
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            if (message.queryScope != null && message.hasOwnProperty("queryScope"))
+                                object.queryScope = options.enums === String ? $root.google.firestore.admin.v1.Index.QueryScope[message.queryScope] === undefined ? message.queryScope : $root.google.firestore.admin.v1.Index.QueryScope[message.queryScope] : message.queryScope;
+                            if (message.fields && message.fields.length) {
+                                object.fields = [];
+                                for (var j = 0; j < message.fields.length; ++j)
+                                    object.fields[j] = $root.google.firestore.admin.v1.Index.IndexField.toObject(message.fields[j], options);
+                            }
+                            if (message.state != null && message.hasOwnProperty("state"))
+                                object.state = options.enums === String ? $root.google.firestore.admin.v1.Index.State[message.state] === undefined ? message.state : $root.google.firestore.admin.v1.Index.State[message.state] : message.state;
+                            if (message.apiScope != null && message.hasOwnProperty("apiScope"))
+                                object.apiScope = options.enums === String ? $root.google.firestore.admin.v1.Index.ApiScope[message.apiScope] === undefined ? message.apiScope : $root.google.firestore.admin.v1.Index.ApiScope[message.apiScope] : message.apiScope;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this Index to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.Index
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        Index.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for Index
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.Index
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        Index.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.Index";
+                        };
+    
+                        /**
+                         * QueryScope enum.
+                         * @name google.firestore.admin.v1.Index.QueryScope
+                         * @enum {string}
+                         * @property {string} QUERY_SCOPE_UNSPECIFIED=QUERY_SCOPE_UNSPECIFIED QUERY_SCOPE_UNSPECIFIED value
+                         * @property {string} COLLECTION=COLLECTION COLLECTION value
+                         * @property {string} COLLECTION_GROUP=COLLECTION_GROUP COLLECTION_GROUP value
+                         * @property {string} COLLECTION_RECURSIVE=COLLECTION_RECURSIVE COLLECTION_RECURSIVE value
+                         */
+                        Index.QueryScope = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "QUERY_SCOPE_UNSPECIFIED"] = "QUERY_SCOPE_UNSPECIFIED";
+                            values[valuesById[1] = "COLLECTION"] = "COLLECTION";
+                            values[valuesById[2] = "COLLECTION_GROUP"] = "COLLECTION_GROUP";
+                            values[valuesById[3] = "COLLECTION_RECURSIVE"] = "COLLECTION_RECURSIVE";
+                            return values;
+                        })();
+    
+                        /**
+                         * ApiScope enum.
+                         * @name google.firestore.admin.v1.Index.ApiScope
+                         * @enum {string}
+                         * @property {string} ANY_API=ANY_API ANY_API value
+                         * @property {string} DATASTORE_MODE_API=DATASTORE_MODE_API DATASTORE_MODE_API value
+                         */
+                        Index.ApiScope = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "ANY_API"] = "ANY_API";
+                            values[valuesById[1] = "DATASTORE_MODE_API"] = "DATASTORE_MODE_API";
+                            return values;
+                        })();
+    
+                        Index.IndexField = (function() {
+    
+                            /**
+                             * Properties of an IndexField.
+                             * @memberof google.firestore.admin.v1.Index
+                             * @interface IIndexField
+                             * @property {string|null} [fieldPath] IndexField fieldPath
+                             * @property {google.firestore.admin.v1.Index.IndexField.Order|null} [order] IndexField order
+                             * @property {google.firestore.admin.v1.Index.IndexField.ArrayConfig|null} [arrayConfig] IndexField arrayConfig
+                             * @property {google.firestore.admin.v1.Index.IndexField.IVectorConfig|null} [vectorConfig] IndexField vectorConfig
+                             */
+    
+                            /**
+                             * Constructs a new IndexField.
+                             * @memberof google.firestore.admin.v1.Index
+                             * @classdesc Represents an IndexField.
+                             * @implements IIndexField
+                             * @constructor
+                             * @param {google.firestore.admin.v1.Index.IIndexField=} [properties] Properties to set
+                             */
+                            function IndexField(properties) {
+                                if (properties)
+                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                        if (properties[keys[i]] != null)
+                                            this[keys[i]] = properties[keys[i]];
+                            }
+    
+                            /**
+                             * IndexField fieldPath.
+                             * @member {string} fieldPath
+                             * @memberof google.firestore.admin.v1.Index.IndexField
+                             * @instance
+                             */
+                            IndexField.prototype.fieldPath = "";
+    
+                            /**
+                             * IndexField order.
+                             * @member {google.firestore.admin.v1.Index.IndexField.Order|null|undefined} order
+                             * @memberof google.firestore.admin.v1.Index.IndexField
+                             * @instance
+                             */
+                            IndexField.prototype.order = null;
+    
+                            /**
+                             * IndexField arrayConfig.
+                             * @member {google.firestore.admin.v1.Index.IndexField.ArrayConfig|null|undefined} arrayConfig
+                             * @memberof google.firestore.admin.v1.Index.IndexField
+                             * @instance
+                             */
+                            IndexField.prototype.arrayConfig = null;
+    
+                            /**
+                             * IndexField vectorConfig.
+                             * @member {google.firestore.admin.v1.Index.IndexField.IVectorConfig|null|undefined} vectorConfig
+                             * @memberof google.firestore.admin.v1.Index.IndexField
+                             * @instance
+                             */
+                            IndexField.prototype.vectorConfig = null;
+    
+                            // OneOf field names bound to virtual getters and setters
+                            var $oneOfFields;
+    
+                            /**
+                             * IndexField valueMode.
+                             * @member {"order"|"arrayConfig"|"vectorConfig"|undefined} valueMode
+                             * @memberof google.firestore.admin.v1.Index.IndexField
+                             * @instance
+                             */
+                            Object.defineProperty(IndexField.prototype, "valueMode", {
+                                get: $util.oneOfGetter($oneOfFields = ["order", "arrayConfig", "vectorConfig"]),
+                                set: $util.oneOfSetter($oneOfFields)
+                            });
+    
+                            /**
+                             * Creates an IndexField message from a plain object. Also converts values to their respective internal types.
+                             * @function fromObject
+                             * @memberof google.firestore.admin.v1.Index.IndexField
+                             * @static
+                             * @param {Object.<string,*>} object Plain object
+                             * @returns {google.firestore.admin.v1.Index.IndexField} IndexField
+                             */
+                            IndexField.fromObject = function fromObject(object) {
+                                if (object instanceof $root.google.firestore.admin.v1.Index.IndexField)
+                                    return object;
+                                var message = new $root.google.firestore.admin.v1.Index.IndexField();
+                                if (object.fieldPath != null)
+                                    message.fieldPath = String(object.fieldPath);
+                                switch (object.order) {
+                                default:
+                                    if (typeof object.order === "number") {
+                                        message.order = object.order;
+                                        break;
+                                    }
+                                    break;
+                                case "ORDER_UNSPECIFIED":
+                                case 0:
+                                    message.order = 0;
+                                    break;
+                                case "ASCENDING":
+                                case 1:
+                                    message.order = 1;
+                                    break;
+                                case "DESCENDING":
+                                case 2:
+                                    message.order = 2;
+                                    break;
+                                }
+                                switch (object.arrayConfig) {
+                                default:
+                                    if (typeof object.arrayConfig === "number") {
+                                        message.arrayConfig = object.arrayConfig;
+                                        break;
+                                    }
+                                    break;
+                                case "ARRAY_CONFIG_UNSPECIFIED":
+                                case 0:
+                                    message.arrayConfig = 0;
+                                    break;
+                                case "CONTAINS":
+                                case 1:
+                                    message.arrayConfig = 1;
+                                    break;
+                                }
+                                if (object.vectorConfig != null) {
+                                    if (typeof object.vectorConfig !== "object")
+                                        throw TypeError(".google.firestore.admin.v1.Index.IndexField.vectorConfig: object expected");
+                                    message.vectorConfig = $root.google.firestore.admin.v1.Index.IndexField.VectorConfig.fromObject(object.vectorConfig);
+                                }
+                                return message;
+                            };
+    
+                            /**
+                             * Creates a plain object from an IndexField message. Also converts values to other types if specified.
+                             * @function toObject
+                             * @memberof google.firestore.admin.v1.Index.IndexField
+                             * @static
+                             * @param {google.firestore.admin.v1.Index.IndexField} message IndexField
+                             * @param {$protobuf.IConversionOptions} [options] Conversion options
+                             * @returns {Object.<string,*>} Plain object
+                             */
+                            IndexField.toObject = function toObject(message, options) {
+                                if (!options)
+                                    options = {};
+                                var object = {};
+                                if (options.defaults)
+                                    object.fieldPath = "";
+                                if (message.fieldPath != null && message.hasOwnProperty("fieldPath"))
+                                    object.fieldPath = message.fieldPath;
+                                if (message.order != null && message.hasOwnProperty("order")) {
+                                    object.order = options.enums === String ? $root.google.firestore.admin.v1.Index.IndexField.Order[message.order] === undefined ? message.order : $root.google.firestore.admin.v1.Index.IndexField.Order[message.order] : message.order;
+                                    if (options.oneofs)
+                                        object.valueMode = "order";
+                                }
+                                if (message.arrayConfig != null && message.hasOwnProperty("arrayConfig")) {
+                                    object.arrayConfig = options.enums === String ? $root.google.firestore.admin.v1.Index.IndexField.ArrayConfig[message.arrayConfig] === undefined ? message.arrayConfig : $root.google.firestore.admin.v1.Index.IndexField.ArrayConfig[message.arrayConfig] : message.arrayConfig;
+                                    if (options.oneofs)
+                                        object.valueMode = "arrayConfig";
+                                }
+                                if (message.vectorConfig != null && message.hasOwnProperty("vectorConfig")) {
+                                    object.vectorConfig = $root.google.firestore.admin.v1.Index.IndexField.VectorConfig.toObject(message.vectorConfig, options);
+                                    if (options.oneofs)
+                                        object.valueMode = "vectorConfig";
+                                }
+                                return object;
+                            };
+    
+                            /**
+                             * Converts this IndexField to JSON.
+                             * @function toJSON
+                             * @memberof google.firestore.admin.v1.Index.IndexField
+                             * @instance
+                             * @returns {Object.<string,*>} JSON object
+                             */
+                            IndexField.prototype.toJSON = function toJSON() {
+                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                            };
+    
+                            /**
+                             * Gets the default type url for IndexField
+                             * @function getTypeUrl
+                             * @memberof google.firestore.admin.v1.Index.IndexField
+                             * @static
+                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                             * @returns {string} The default type url
+                             */
+                            IndexField.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                if (typeUrlPrefix === undefined) {
+                                    typeUrlPrefix = "type.googleapis.com";
+                                }
+                                return typeUrlPrefix + "/google.firestore.admin.v1.Index.IndexField";
+                            };
+    
+                            /**
+                             * Order enum.
+                             * @name google.firestore.admin.v1.Index.IndexField.Order
+                             * @enum {string}
+                             * @property {string} ORDER_UNSPECIFIED=ORDER_UNSPECIFIED ORDER_UNSPECIFIED value
+                             * @property {string} ASCENDING=ASCENDING ASCENDING value
+                             * @property {string} DESCENDING=DESCENDING DESCENDING value
+                             */
+                            IndexField.Order = (function() {
+                                var valuesById = {}, values = Object.create(valuesById);
+                                values[valuesById[0] = "ORDER_UNSPECIFIED"] = "ORDER_UNSPECIFIED";
+                                values[valuesById[1] = "ASCENDING"] = "ASCENDING";
+                                values[valuesById[2] = "DESCENDING"] = "DESCENDING";
+                                return values;
+                            })();
+    
+                            /**
+                             * ArrayConfig enum.
+                             * @name google.firestore.admin.v1.Index.IndexField.ArrayConfig
+                             * @enum {string}
+                             * @property {string} ARRAY_CONFIG_UNSPECIFIED=ARRAY_CONFIG_UNSPECIFIED ARRAY_CONFIG_UNSPECIFIED value
+                             * @property {string} CONTAINS=CONTAINS CONTAINS value
+                             */
+                            IndexField.ArrayConfig = (function() {
+                                var valuesById = {}, values = Object.create(valuesById);
+                                values[valuesById[0] = "ARRAY_CONFIG_UNSPECIFIED"] = "ARRAY_CONFIG_UNSPECIFIED";
+                                values[valuesById[1] = "CONTAINS"] = "CONTAINS";
+                                return values;
+                            })();
+    
+                            IndexField.VectorConfig = (function() {
+    
+                                /**
+                                 * Properties of a VectorConfig.
+                                 * @memberof google.firestore.admin.v1.Index.IndexField
+                                 * @interface IVectorConfig
+                                 * @property {number|null} [dimension] VectorConfig dimension
+                                 * @property {google.firestore.admin.v1.Index.IndexField.VectorConfig.IFlatIndex|null} [flat] VectorConfig flat
+                                 */
+    
+                                /**
+                                 * Constructs a new VectorConfig.
+                                 * @memberof google.firestore.admin.v1.Index.IndexField
+                                 * @classdesc Represents a VectorConfig.
+                                 * @implements IVectorConfig
+                                 * @constructor
+                                 * @param {google.firestore.admin.v1.Index.IndexField.IVectorConfig=} [properties] Properties to set
+                                 */
+                                function VectorConfig(properties) {
+                                    if (properties)
+                                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                            if (properties[keys[i]] != null)
+                                                this[keys[i]] = properties[keys[i]];
+                                }
+    
+                                /**
+                                 * VectorConfig dimension.
+                                 * @member {number} dimension
+                                 * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                 * @instance
+                                 */
+                                VectorConfig.prototype.dimension = 0;
+    
+                                /**
+                                 * VectorConfig flat.
+                                 * @member {google.firestore.admin.v1.Index.IndexField.VectorConfig.IFlatIndex|null|undefined} flat
+                                 * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                 * @instance
+                                 */
+                                VectorConfig.prototype.flat = null;
+    
+                                // OneOf field names bound to virtual getters and setters
+                                var $oneOfFields;
+    
+                                /**
+                                 * VectorConfig type.
+                                 * @member {"flat"|undefined} type
+                                 * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                 * @instance
+                                 */
+                                Object.defineProperty(VectorConfig.prototype, "type", {
+                                    get: $util.oneOfGetter($oneOfFields = ["flat"]),
+                                    set: $util.oneOfSetter($oneOfFields)
+                                });
+    
+                                /**
+                                 * Creates a VectorConfig message from a plain object. Also converts values to their respective internal types.
+                                 * @function fromObject
+                                 * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                 * @static
+                                 * @param {Object.<string,*>} object Plain object
+                                 * @returns {google.firestore.admin.v1.Index.IndexField.VectorConfig} VectorConfig
+                                 */
+                                VectorConfig.fromObject = function fromObject(object) {
+                                    if (object instanceof $root.google.firestore.admin.v1.Index.IndexField.VectorConfig)
+                                        return object;
+                                    var message = new $root.google.firestore.admin.v1.Index.IndexField.VectorConfig();
+                                    if (object.dimension != null)
+                                        message.dimension = object.dimension | 0;
+                                    if (object.flat != null) {
+                                        if (typeof object.flat !== "object")
+                                            throw TypeError(".google.firestore.admin.v1.Index.IndexField.VectorConfig.flat: object expected");
+                                        message.flat = $root.google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex.fromObject(object.flat);
+                                    }
+                                    return message;
+                                };
+    
+                                /**
+                                 * Creates a plain object from a VectorConfig message. Also converts values to other types if specified.
+                                 * @function toObject
+                                 * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                 * @static
+                                 * @param {google.firestore.admin.v1.Index.IndexField.VectorConfig} message VectorConfig
+                                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                                 * @returns {Object.<string,*>} Plain object
+                                 */
+                                VectorConfig.toObject = function toObject(message, options) {
+                                    if (!options)
+                                        options = {};
+                                    var object = {};
+                                    if (options.defaults)
+                                        object.dimension = 0;
+                                    if (message.dimension != null && message.hasOwnProperty("dimension"))
+                                        object.dimension = message.dimension;
+                                    if (message.flat != null && message.hasOwnProperty("flat")) {
+                                        object.flat = $root.google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex.toObject(message.flat, options);
+                                        if (options.oneofs)
+                                            object.type = "flat";
+                                    }
+                                    return object;
+                                };
+    
+                                /**
+                                 * Converts this VectorConfig to JSON.
+                                 * @function toJSON
+                                 * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                 * @instance
+                                 * @returns {Object.<string,*>} JSON object
+                                 */
+                                VectorConfig.prototype.toJSON = function toJSON() {
+                                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                                };
+    
+                                /**
+                                 * Gets the default type url for VectorConfig
+                                 * @function getTypeUrl
+                                 * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                 * @static
+                                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                                 * @returns {string} The default type url
+                                 */
+                                VectorConfig.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                    if (typeUrlPrefix === undefined) {
+                                        typeUrlPrefix = "type.googleapis.com";
+                                    }
+                                    return typeUrlPrefix + "/google.firestore.admin.v1.Index.IndexField.VectorConfig";
+                                };
+    
+                                VectorConfig.FlatIndex = (function() {
+    
+                                    /**
+                                     * Properties of a FlatIndex.
+                                     * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                     * @interface IFlatIndex
+                                     */
+    
+                                    /**
+                                     * Constructs a new FlatIndex.
+                                     * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig
+                                     * @classdesc Represents a FlatIndex.
+                                     * @implements IFlatIndex
+                                     * @constructor
+                                     * @param {google.firestore.admin.v1.Index.IndexField.VectorConfig.IFlatIndex=} [properties] Properties to set
+                                     */
+                                    function FlatIndex(properties) {
+                                        if (properties)
+                                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                                if (properties[keys[i]] != null)
+                                                    this[keys[i]] = properties[keys[i]];
+                                    }
+    
+                                    /**
+                                     * Creates a FlatIndex message from a plain object. Also converts values to their respective internal types.
+                                     * @function fromObject
+                                     * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex
+                                     * @static
+                                     * @param {Object.<string,*>} object Plain object
+                                     * @returns {google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex} FlatIndex
+                                     */
+                                    FlatIndex.fromObject = function fromObject(object) {
+                                        if (object instanceof $root.google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex)
+                                            return object;
+                                        return new $root.google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex();
+                                    };
+    
+                                    /**
+                                     * Creates a plain object from a FlatIndex message. Also converts values to other types if specified.
+                                     * @function toObject
+                                     * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex
+                                     * @static
+                                     * @param {google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex} message FlatIndex
+                                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                                     * @returns {Object.<string,*>} Plain object
+                                     */
+                                    FlatIndex.toObject = function toObject() {
+                                        return {};
+                                    };
+    
+                                    /**
+                                     * Converts this FlatIndex to JSON.
+                                     * @function toJSON
+                                     * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex
+                                     * @instance
+                                     * @returns {Object.<string,*>} JSON object
+                                     */
+                                    FlatIndex.prototype.toJSON = function toJSON() {
+                                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                                    };
+    
+                                    /**
+                                     * Gets the default type url for FlatIndex
+                                     * @function getTypeUrl
+                                     * @memberof google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex
+                                     * @static
+                                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                                     * @returns {string} The default type url
+                                     */
+                                    FlatIndex.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                                        if (typeUrlPrefix === undefined) {
+                                            typeUrlPrefix = "type.googleapis.com";
+                                        }
+                                        return typeUrlPrefix + "/google.firestore.admin.v1.Index.IndexField.VectorConfig.FlatIndex";
+                                    };
+    
+                                    return FlatIndex;
+                                })();
+    
+                                return VectorConfig;
+                            })();
+    
+                            return IndexField;
+                        })();
+    
+                        /**
+                         * State enum.
+                         * @name google.firestore.admin.v1.Index.State
+                         * @enum {string}
+                         * @property {string} STATE_UNSPECIFIED=STATE_UNSPECIFIED STATE_UNSPECIFIED value
+                         * @property {string} CREATING=CREATING CREATING value
+                         * @property {string} READY=READY READY value
+                         * @property {string} NEEDS_REPAIR=NEEDS_REPAIR NEEDS_REPAIR value
+                         */
+                        Index.State = (function() {
+                            var valuesById = {}, values = Object.create(valuesById);
+                            values[valuesById[0] = "STATE_UNSPECIFIED"] = "STATE_UNSPECIFIED";
+                            values[valuesById[1] = "CREATING"] = "CREATING";
+                            values[valuesById[2] = "READY"] = "READY";
+                            values[valuesById[3] = "NEEDS_REPAIR"] = "NEEDS_REPAIR";
+                            return values;
+                        })();
+    
+                        return Index;
+                    })();
+    
                     v1.FirestoreAdmin = (function() {
     
                         /**
@@ -1100,6 +3216,39 @@
                          */
     
                         /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#bulkDeleteDocuments}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef BulkDeleteDocumentsCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.longrunning.Operation} [response] Operation
+                         */
+    
+                        /**
+                         * Calls BulkDeleteDocuments.
+                         * @function bulkDeleteDocuments
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IBulkDeleteDocumentsRequest} request BulkDeleteDocumentsRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.BulkDeleteDocumentsCallback} callback Node-style callback called with the error, if any, and Operation
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.bulkDeleteDocuments = function bulkDeleteDocuments(request, callback) {
+                            return this.rpcCall(bulkDeleteDocuments, $root.google.firestore.admin.v1.BulkDeleteDocumentsRequest, $root.google.longrunning.Operation, request, callback);
+                        }, "name", { value: "BulkDeleteDocuments" });
+    
+                        /**
+                         * Calls BulkDeleteDocuments.
+                         * @function bulkDeleteDocuments
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IBulkDeleteDocumentsRequest} request BulkDeleteDocumentsRequest message or plain object
+                         * @returns {Promise<google.longrunning.Operation>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
                          * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#createDatabase}.
                          * @memberof google.firestore.admin.v1.FirestoreAdmin
                          * @typedef CreateDatabaseCallback
@@ -1231,6 +3380,336 @@
                          * @variation 2
                          */
     
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#deleteDatabase}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef DeleteDatabaseCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.longrunning.Operation} [response] Operation
+                         */
+    
+                        /**
+                         * Calls DeleteDatabase.
+                         * @function deleteDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IDeleteDatabaseRequest} request DeleteDatabaseRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.DeleteDatabaseCallback} callback Node-style callback called with the error, if any, and Operation
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.deleteDatabase = function deleteDatabase(request, callback) {
+                            return this.rpcCall(deleteDatabase, $root.google.firestore.admin.v1.DeleteDatabaseRequest, $root.google.longrunning.Operation, request, callback);
+                        }, "name", { value: "DeleteDatabase" });
+    
+                        /**
+                         * Calls DeleteDatabase.
+                         * @function deleteDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IDeleteDatabaseRequest} request DeleteDatabaseRequest message or plain object
+                         * @returns {Promise<google.longrunning.Operation>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#getBackup}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef GetBackupCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.Backup} [response] Backup
+                         */
+    
+                        /**
+                         * Calls GetBackup.
+                         * @function getBackup
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IGetBackupRequest} request GetBackupRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.GetBackupCallback} callback Node-style callback called with the error, if any, and Backup
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.getBackup = function getBackup(request, callback) {
+                            return this.rpcCall(getBackup, $root.google.firestore.admin.v1.GetBackupRequest, $root.google.firestore.admin.v1.Backup, request, callback);
+                        }, "name", { value: "GetBackup" });
+    
+                        /**
+                         * Calls GetBackup.
+                         * @function getBackup
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IGetBackupRequest} request GetBackupRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.Backup>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#listBackups}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef ListBackupsCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.ListBackupsResponse} [response] ListBackupsResponse
+                         */
+    
+                        /**
+                         * Calls ListBackups.
+                         * @function listBackups
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IListBackupsRequest} request ListBackupsRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.ListBackupsCallback} callback Node-style callback called with the error, if any, and ListBackupsResponse
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.listBackups = function listBackups(request, callback) {
+                            return this.rpcCall(listBackups, $root.google.firestore.admin.v1.ListBackupsRequest, $root.google.firestore.admin.v1.ListBackupsResponse, request, callback);
+                        }, "name", { value: "ListBackups" });
+    
+                        /**
+                         * Calls ListBackups.
+                         * @function listBackups
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IListBackupsRequest} request ListBackupsRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.ListBackupsResponse>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#deleteBackup}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef DeleteBackupCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.protobuf.Empty} [response] Empty
+                         */
+    
+                        /**
+                         * Calls DeleteBackup.
+                         * @function deleteBackup
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IDeleteBackupRequest} request DeleteBackupRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.DeleteBackupCallback} callback Node-style callback called with the error, if any, and Empty
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.deleteBackup = function deleteBackup(request, callback) {
+                            return this.rpcCall(deleteBackup, $root.google.firestore.admin.v1.DeleteBackupRequest, $root.google.protobuf.Empty, request, callback);
+                        }, "name", { value: "DeleteBackup" });
+    
+                        /**
+                         * Calls DeleteBackup.
+                         * @function deleteBackup
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IDeleteBackupRequest} request DeleteBackupRequest message or plain object
+                         * @returns {Promise<google.protobuf.Empty>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#restoreDatabase}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef RestoreDatabaseCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.longrunning.Operation} [response] Operation
+                         */
+    
+                        /**
+                         * Calls RestoreDatabase.
+                         * @function restoreDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IRestoreDatabaseRequest} request RestoreDatabaseRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.RestoreDatabaseCallback} callback Node-style callback called with the error, if any, and Operation
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.restoreDatabase = function restoreDatabase(request, callback) {
+                            return this.rpcCall(restoreDatabase, $root.google.firestore.admin.v1.RestoreDatabaseRequest, $root.google.longrunning.Operation, request, callback);
+                        }, "name", { value: "RestoreDatabase" });
+    
+                        /**
+                         * Calls RestoreDatabase.
+                         * @function restoreDatabase
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IRestoreDatabaseRequest} request RestoreDatabaseRequest message or plain object
+                         * @returns {Promise<google.longrunning.Operation>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#createBackupSchedule}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef CreateBackupScheduleCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.BackupSchedule} [response] BackupSchedule
+                         */
+    
+                        /**
+                         * Calls CreateBackupSchedule.
+                         * @function createBackupSchedule
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.ICreateBackupScheduleRequest} request CreateBackupScheduleRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.CreateBackupScheduleCallback} callback Node-style callback called with the error, if any, and BackupSchedule
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.createBackupSchedule = function createBackupSchedule(request, callback) {
+                            return this.rpcCall(createBackupSchedule, $root.google.firestore.admin.v1.CreateBackupScheduleRequest, $root.google.firestore.admin.v1.BackupSchedule, request, callback);
+                        }, "name", { value: "CreateBackupSchedule" });
+    
+                        /**
+                         * Calls CreateBackupSchedule.
+                         * @function createBackupSchedule
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.ICreateBackupScheduleRequest} request CreateBackupScheduleRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.BackupSchedule>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#getBackupSchedule}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef GetBackupScheduleCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.BackupSchedule} [response] BackupSchedule
+                         */
+    
+                        /**
+                         * Calls GetBackupSchedule.
+                         * @function getBackupSchedule
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IGetBackupScheduleRequest} request GetBackupScheduleRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.GetBackupScheduleCallback} callback Node-style callback called with the error, if any, and BackupSchedule
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.getBackupSchedule = function getBackupSchedule(request, callback) {
+                            return this.rpcCall(getBackupSchedule, $root.google.firestore.admin.v1.GetBackupScheduleRequest, $root.google.firestore.admin.v1.BackupSchedule, request, callback);
+                        }, "name", { value: "GetBackupSchedule" });
+    
+                        /**
+                         * Calls GetBackupSchedule.
+                         * @function getBackupSchedule
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IGetBackupScheduleRequest} request GetBackupScheduleRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.BackupSchedule>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#listBackupSchedules}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef ListBackupSchedulesCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.ListBackupSchedulesResponse} [response] ListBackupSchedulesResponse
+                         */
+    
+                        /**
+                         * Calls ListBackupSchedules.
+                         * @function listBackupSchedules
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IListBackupSchedulesRequest} request ListBackupSchedulesRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.ListBackupSchedulesCallback} callback Node-style callback called with the error, if any, and ListBackupSchedulesResponse
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.listBackupSchedules = function listBackupSchedules(request, callback) {
+                            return this.rpcCall(listBackupSchedules, $root.google.firestore.admin.v1.ListBackupSchedulesRequest, $root.google.firestore.admin.v1.ListBackupSchedulesResponse, request, callback);
+                        }, "name", { value: "ListBackupSchedules" });
+    
+                        /**
+                         * Calls ListBackupSchedules.
+                         * @function listBackupSchedules
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IListBackupSchedulesRequest} request ListBackupSchedulesRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.ListBackupSchedulesResponse>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#updateBackupSchedule}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef UpdateBackupScheduleCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.firestore.admin.v1.BackupSchedule} [response] BackupSchedule
+                         */
+    
+                        /**
+                         * Calls UpdateBackupSchedule.
+                         * @function updateBackupSchedule
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IUpdateBackupScheduleRequest} request UpdateBackupScheduleRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.UpdateBackupScheduleCallback} callback Node-style callback called with the error, if any, and BackupSchedule
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.updateBackupSchedule = function updateBackupSchedule(request, callback) {
+                            return this.rpcCall(updateBackupSchedule, $root.google.firestore.admin.v1.UpdateBackupScheduleRequest, $root.google.firestore.admin.v1.BackupSchedule, request, callback);
+                        }, "name", { value: "UpdateBackupSchedule" });
+    
+                        /**
+                         * Calls UpdateBackupSchedule.
+                         * @function updateBackupSchedule
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IUpdateBackupScheduleRequest} request UpdateBackupScheduleRequest message or plain object
+                         * @returns {Promise<google.firestore.admin.v1.BackupSchedule>} Promise
+                         * @variation 2
+                         */
+    
+                        /**
+                         * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#deleteBackupSchedule}.
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @typedef DeleteBackupScheduleCallback
+                         * @type {function}
+                         * @param {Error|null} error Error, if any
+                         * @param {google.protobuf.Empty} [response] Empty
+                         */
+    
+                        /**
+                         * Calls DeleteBackupSchedule.
+                         * @function deleteBackupSchedule
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IDeleteBackupScheduleRequest} request DeleteBackupScheduleRequest message or plain object
+                         * @param {google.firestore.admin.v1.FirestoreAdmin.DeleteBackupScheduleCallback} callback Node-style callback called with the error, if any, and Empty
+                         * @returns {undefined}
+                         * @variation 1
+                         */
+                        Object.defineProperty(FirestoreAdmin.prototype.deleteBackupSchedule = function deleteBackupSchedule(request, callback) {
+                            return this.rpcCall(deleteBackupSchedule, $root.google.firestore.admin.v1.DeleteBackupScheduleRequest, $root.google.protobuf.Empty, request, callback);
+                        }, "name", { value: "DeleteBackupSchedule" });
+    
+                        /**
+                         * Calls DeleteBackupSchedule.
+                         * @function deleteBackupSchedule
+                         * @memberof google.firestore.admin.v1.FirestoreAdmin
+                         * @instance
+                         * @param {google.firestore.admin.v1.IDeleteBackupScheduleRequest} request DeleteBackupScheduleRequest message or plain object
+                         * @returns {Promise<google.protobuf.Empty>} Promise
+                         * @variation 2
+                         */
+    
                         return FirestoreAdmin;
                     })();
     
@@ -1241,6 +3720,7 @@
                          * @memberof google.firestore.admin.v1
                          * @interface IListDatabasesRequest
                          * @property {string|null} [parent] ListDatabasesRequest parent
+                         * @property {boolean|null} [showDeleted] ListDatabasesRequest showDeleted
                          */
     
                         /**
@@ -1267,6 +3747,14 @@
                         ListDatabasesRequest.prototype.parent = "";
     
                         /**
+                         * ListDatabasesRequest showDeleted.
+                         * @member {boolean} showDeleted
+                         * @memberof google.firestore.admin.v1.ListDatabasesRequest
+                         * @instance
+                         */
+                        ListDatabasesRequest.prototype.showDeleted = false;
+    
+                        /**
                          * Creates a ListDatabasesRequest message from a plain object. Also converts values to their respective internal types.
                          * @function fromObject
                          * @memberof google.firestore.admin.v1.ListDatabasesRequest
@@ -1280,6 +3768,8 @@
                             var message = new $root.google.firestore.admin.v1.ListDatabasesRequest();
                             if (object.parent != null)
                                 message.parent = String(object.parent);
+                            if (object.showDeleted != null)
+                                message.showDeleted = Boolean(object.showDeleted);
                             return message;
                         };
     
@@ -1296,10 +3786,14 @@
                             if (!options)
                                 options = {};
                             var object = {};
-                            if (options.defaults)
+                            if (options.defaults) {
                                 object.parent = "";
+                                object.showDeleted = false;
+                            }
                             if (message.parent != null && message.hasOwnProperty("parent"))
                                 object.parent = message.parent;
+                            if (message.showDeleted != null && message.hasOwnProperty("showDeleted"))
+                                object.showDeleted = message.showDeleted;
                             return object;
                         };
     
@@ -1548,6 +4042,7 @@
                          * @memberof google.firestore.admin.v1
                          * @interface IListDatabasesResponse
                          * @property {Array.<google.firestore.admin.v1.IDatabase>|null} [databases] ListDatabasesResponse databases
+                         * @property {Array.<string>|null} [unreachable] ListDatabasesResponse unreachable
                          */
     
                         /**
@@ -1560,6 +4055,7 @@
                          */
                         function ListDatabasesResponse(properties) {
                             this.databases = [];
+                            this.unreachable = [];
                             if (properties)
                                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                                     if (properties[keys[i]] != null)
@@ -1573,6 +4069,14 @@
                          * @instance
                          */
                         ListDatabasesResponse.prototype.databases = $util.emptyArray;
+    
+                        /**
+                         * ListDatabasesResponse unreachable.
+                         * @member {Array.<string>} unreachable
+                         * @memberof google.firestore.admin.v1.ListDatabasesResponse
+                         * @instance
+                         */
+                        ListDatabasesResponse.prototype.unreachable = $util.emptyArray;
     
                         /**
                          * Creates a ListDatabasesResponse message from a plain object. Also converts values to their respective internal types.
@@ -1596,6 +4100,13 @@
                                     message.databases[i] = $root.google.firestore.admin.v1.Database.fromObject(object.databases[i]);
                                 }
                             }
+                            if (object.unreachable) {
+                                if (!Array.isArray(object.unreachable))
+                                    throw TypeError(".google.firestore.admin.v1.ListDatabasesResponse.unreachable: array expected");
+                                message.unreachable = [];
+                                for (var i = 0; i < object.unreachable.length; ++i)
+                                    message.unreachable[i] = String(object.unreachable[i]);
+                            }
                             return message;
                         };
     
@@ -1612,12 +4123,19 @@
                             if (!options)
                                 options = {};
                             var object = {};
-                            if (options.arrays || options.defaults)
+                            if (options.arrays || options.defaults) {
                                 object.databases = [];
+                                object.unreachable = [];
+                            }
                             if (message.databases && message.databases.length) {
                                 object.databases = [];
                                 for (var j = 0; j < message.databases.length; ++j)
                                     object.databases[j] = $root.google.firestore.admin.v1.Database.toObject(message.databases[j], options);
+                            }
+                            if (message.unreachable && message.unreachable.length) {
+                                object.unreachable = [];
+                                for (var j = 0; j < message.unreachable.length; ++j)
+                                    object.unreachable[j] = message.unreachable[j];
                             }
                             return object;
                         };
@@ -1945,6 +4463,837 @@
                         };
     
                         return UpdateDatabaseMetadata;
+                    })();
+    
+                    v1.DeleteDatabaseRequest = (function() {
+    
+                        /**
+                         * Properties of a DeleteDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IDeleteDatabaseRequest
+                         * @property {string|null} [name] DeleteDatabaseRequest name
+                         * @property {string|null} [etag] DeleteDatabaseRequest etag
+                         */
+    
+                        /**
+                         * Constructs a new DeleteDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a DeleteDatabaseRequest.
+                         * @implements IDeleteDatabaseRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IDeleteDatabaseRequest=} [properties] Properties to set
+                         */
+                        function DeleteDatabaseRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * DeleteDatabaseRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseRequest
+                         * @instance
+                         */
+                        DeleteDatabaseRequest.prototype.name = "";
+    
+                        /**
+                         * DeleteDatabaseRequest etag.
+                         * @member {string} etag
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseRequest
+                         * @instance
+                         */
+                        DeleteDatabaseRequest.prototype.etag = "";
+    
+                        /**
+                         * Creates a DeleteDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.DeleteDatabaseRequest} DeleteDatabaseRequest
+                         */
+                        DeleteDatabaseRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.DeleteDatabaseRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.DeleteDatabaseRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            if (object.etag != null)
+                                message.etag = String(object.etag);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a DeleteDatabaseRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.DeleteDatabaseRequest} message DeleteDatabaseRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        DeleteDatabaseRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.name = "";
+                                object.etag = "";
+                            }
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            if (message.etag != null && message.hasOwnProperty("etag"))
+                                object.etag = message.etag;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this DeleteDatabaseRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        DeleteDatabaseRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for DeleteDatabaseRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        DeleteDatabaseRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.DeleteDatabaseRequest";
+                        };
+    
+                        return DeleteDatabaseRequest;
+                    })();
+    
+                    v1.DeleteDatabaseMetadata = (function() {
+    
+                        /**
+                         * Properties of a DeleteDatabaseMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IDeleteDatabaseMetadata
+                         */
+    
+                        /**
+                         * Constructs a new DeleteDatabaseMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a DeleteDatabaseMetadata.
+                         * @implements IDeleteDatabaseMetadata
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IDeleteDatabaseMetadata=} [properties] Properties to set
+                         */
+                        function DeleteDatabaseMetadata(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * Creates a DeleteDatabaseMetadata message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseMetadata
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.DeleteDatabaseMetadata} DeleteDatabaseMetadata
+                         */
+                        DeleteDatabaseMetadata.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.DeleteDatabaseMetadata)
+                                return object;
+                            return new $root.google.firestore.admin.v1.DeleteDatabaseMetadata();
+                        };
+    
+                        /**
+                         * Creates a plain object from a DeleteDatabaseMetadata message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseMetadata
+                         * @static
+                         * @param {google.firestore.admin.v1.DeleteDatabaseMetadata} message DeleteDatabaseMetadata
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        DeleteDatabaseMetadata.toObject = function toObject() {
+                            return {};
+                        };
+    
+                        /**
+                         * Converts this DeleteDatabaseMetadata to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseMetadata
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        DeleteDatabaseMetadata.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for DeleteDatabaseMetadata
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.DeleteDatabaseMetadata
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        DeleteDatabaseMetadata.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.DeleteDatabaseMetadata";
+                        };
+    
+                        return DeleteDatabaseMetadata;
+                    })();
+    
+                    v1.CreateBackupScheduleRequest = (function() {
+    
+                        /**
+                         * Properties of a CreateBackupScheduleRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface ICreateBackupScheduleRequest
+                         * @property {string|null} [parent] CreateBackupScheduleRequest parent
+                         * @property {google.firestore.admin.v1.IBackupSchedule|null} [backupSchedule] CreateBackupScheduleRequest backupSchedule
+                         */
+    
+                        /**
+                         * Constructs a new CreateBackupScheduleRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a CreateBackupScheduleRequest.
+                         * @implements ICreateBackupScheduleRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.ICreateBackupScheduleRequest=} [properties] Properties to set
+                         */
+                        function CreateBackupScheduleRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * CreateBackupScheduleRequest parent.
+                         * @member {string} parent
+                         * @memberof google.firestore.admin.v1.CreateBackupScheduleRequest
+                         * @instance
+                         */
+                        CreateBackupScheduleRequest.prototype.parent = "";
+    
+                        /**
+                         * CreateBackupScheduleRequest backupSchedule.
+                         * @member {google.firestore.admin.v1.IBackupSchedule|null|undefined} backupSchedule
+                         * @memberof google.firestore.admin.v1.CreateBackupScheduleRequest
+                         * @instance
+                         */
+                        CreateBackupScheduleRequest.prototype.backupSchedule = null;
+    
+                        /**
+                         * Creates a CreateBackupScheduleRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.CreateBackupScheduleRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.CreateBackupScheduleRequest} CreateBackupScheduleRequest
+                         */
+                        CreateBackupScheduleRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.CreateBackupScheduleRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.CreateBackupScheduleRequest();
+                            if (object.parent != null)
+                                message.parent = String(object.parent);
+                            if (object.backupSchedule != null) {
+                                if (typeof object.backupSchedule !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.CreateBackupScheduleRequest.backupSchedule: object expected");
+                                message.backupSchedule = $root.google.firestore.admin.v1.BackupSchedule.fromObject(object.backupSchedule);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a CreateBackupScheduleRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.CreateBackupScheduleRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.CreateBackupScheduleRequest} message CreateBackupScheduleRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        CreateBackupScheduleRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.parent = "";
+                                object.backupSchedule = null;
+                            }
+                            if (message.parent != null && message.hasOwnProperty("parent"))
+                                object.parent = message.parent;
+                            if (message.backupSchedule != null && message.hasOwnProperty("backupSchedule"))
+                                object.backupSchedule = $root.google.firestore.admin.v1.BackupSchedule.toObject(message.backupSchedule, options);
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this CreateBackupScheduleRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.CreateBackupScheduleRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        CreateBackupScheduleRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for CreateBackupScheduleRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.CreateBackupScheduleRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        CreateBackupScheduleRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.CreateBackupScheduleRequest";
+                        };
+    
+                        return CreateBackupScheduleRequest;
+                    })();
+    
+                    v1.GetBackupScheduleRequest = (function() {
+    
+                        /**
+                         * Properties of a GetBackupScheduleRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IGetBackupScheduleRequest
+                         * @property {string|null} [name] GetBackupScheduleRequest name
+                         */
+    
+                        /**
+                         * Constructs a new GetBackupScheduleRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a GetBackupScheduleRequest.
+                         * @implements IGetBackupScheduleRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IGetBackupScheduleRequest=} [properties] Properties to set
+                         */
+                        function GetBackupScheduleRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * GetBackupScheduleRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.GetBackupScheduleRequest
+                         * @instance
+                         */
+                        GetBackupScheduleRequest.prototype.name = "";
+    
+                        /**
+                         * Creates a GetBackupScheduleRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.GetBackupScheduleRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.GetBackupScheduleRequest} GetBackupScheduleRequest
+                         */
+                        GetBackupScheduleRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.GetBackupScheduleRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.GetBackupScheduleRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a GetBackupScheduleRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.GetBackupScheduleRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.GetBackupScheduleRequest} message GetBackupScheduleRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        GetBackupScheduleRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this GetBackupScheduleRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.GetBackupScheduleRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        GetBackupScheduleRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for GetBackupScheduleRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.GetBackupScheduleRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        GetBackupScheduleRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.GetBackupScheduleRequest";
+                        };
+    
+                        return GetBackupScheduleRequest;
+                    })();
+    
+                    v1.UpdateBackupScheduleRequest = (function() {
+    
+                        /**
+                         * Properties of an UpdateBackupScheduleRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IUpdateBackupScheduleRequest
+                         * @property {google.firestore.admin.v1.IBackupSchedule|null} [backupSchedule] UpdateBackupScheduleRequest backupSchedule
+                         * @property {google.protobuf.IFieldMask|null} [updateMask] UpdateBackupScheduleRequest updateMask
+                         */
+    
+                        /**
+                         * Constructs a new UpdateBackupScheduleRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents an UpdateBackupScheduleRequest.
+                         * @implements IUpdateBackupScheduleRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IUpdateBackupScheduleRequest=} [properties] Properties to set
+                         */
+                        function UpdateBackupScheduleRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * UpdateBackupScheduleRequest backupSchedule.
+                         * @member {google.firestore.admin.v1.IBackupSchedule|null|undefined} backupSchedule
+                         * @memberof google.firestore.admin.v1.UpdateBackupScheduleRequest
+                         * @instance
+                         */
+                        UpdateBackupScheduleRequest.prototype.backupSchedule = null;
+    
+                        /**
+                         * UpdateBackupScheduleRequest updateMask.
+                         * @member {google.protobuf.IFieldMask|null|undefined} updateMask
+                         * @memberof google.firestore.admin.v1.UpdateBackupScheduleRequest
+                         * @instance
+                         */
+                        UpdateBackupScheduleRequest.prototype.updateMask = null;
+    
+                        /**
+                         * Creates an UpdateBackupScheduleRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.UpdateBackupScheduleRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.UpdateBackupScheduleRequest} UpdateBackupScheduleRequest
+                         */
+                        UpdateBackupScheduleRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.UpdateBackupScheduleRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.UpdateBackupScheduleRequest();
+                            if (object.backupSchedule != null) {
+                                if (typeof object.backupSchedule !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.UpdateBackupScheduleRequest.backupSchedule: object expected");
+                                message.backupSchedule = $root.google.firestore.admin.v1.BackupSchedule.fromObject(object.backupSchedule);
+                            }
+                            if (object.updateMask != null) {
+                                if (typeof object.updateMask !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.UpdateBackupScheduleRequest.updateMask: object expected");
+                                message.updateMask = $root.google.protobuf.FieldMask.fromObject(object.updateMask);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from an UpdateBackupScheduleRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.UpdateBackupScheduleRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.UpdateBackupScheduleRequest} message UpdateBackupScheduleRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        UpdateBackupScheduleRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.backupSchedule = null;
+                                object.updateMask = null;
+                            }
+                            if (message.backupSchedule != null && message.hasOwnProperty("backupSchedule"))
+                                object.backupSchedule = $root.google.firestore.admin.v1.BackupSchedule.toObject(message.backupSchedule, options);
+                            if (message.updateMask != null && message.hasOwnProperty("updateMask"))
+                                object.updateMask = $root.google.protobuf.FieldMask.toObject(message.updateMask, options);
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this UpdateBackupScheduleRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.UpdateBackupScheduleRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        UpdateBackupScheduleRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for UpdateBackupScheduleRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.UpdateBackupScheduleRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        UpdateBackupScheduleRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.UpdateBackupScheduleRequest";
+                        };
+    
+                        return UpdateBackupScheduleRequest;
+                    })();
+    
+                    v1.ListBackupSchedulesRequest = (function() {
+    
+                        /**
+                         * Properties of a ListBackupSchedulesRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IListBackupSchedulesRequest
+                         * @property {string|null} [parent] ListBackupSchedulesRequest parent
+                         */
+    
+                        /**
+                         * Constructs a new ListBackupSchedulesRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a ListBackupSchedulesRequest.
+                         * @implements IListBackupSchedulesRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IListBackupSchedulesRequest=} [properties] Properties to set
+                         */
+                        function ListBackupSchedulesRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * ListBackupSchedulesRequest parent.
+                         * @member {string} parent
+                         * @memberof google.firestore.admin.v1.ListBackupSchedulesRequest
+                         * @instance
+                         */
+                        ListBackupSchedulesRequest.prototype.parent = "";
+    
+                        /**
+                         * Creates a ListBackupSchedulesRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.ListBackupSchedulesRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.ListBackupSchedulesRequest} ListBackupSchedulesRequest
+                         */
+                        ListBackupSchedulesRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.ListBackupSchedulesRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.ListBackupSchedulesRequest();
+                            if (object.parent != null)
+                                message.parent = String(object.parent);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a ListBackupSchedulesRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.ListBackupSchedulesRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.ListBackupSchedulesRequest} message ListBackupSchedulesRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        ListBackupSchedulesRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.parent = "";
+                            if (message.parent != null && message.hasOwnProperty("parent"))
+                                object.parent = message.parent;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this ListBackupSchedulesRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.ListBackupSchedulesRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        ListBackupSchedulesRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for ListBackupSchedulesRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ListBackupSchedulesRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ListBackupSchedulesRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ListBackupSchedulesRequest";
+                        };
+    
+                        return ListBackupSchedulesRequest;
+                    })();
+    
+                    v1.ListBackupSchedulesResponse = (function() {
+    
+                        /**
+                         * Properties of a ListBackupSchedulesResponse.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IListBackupSchedulesResponse
+                         * @property {Array.<google.firestore.admin.v1.IBackupSchedule>|null} [backupSchedules] ListBackupSchedulesResponse backupSchedules
+                         */
+    
+                        /**
+                         * Constructs a new ListBackupSchedulesResponse.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a ListBackupSchedulesResponse.
+                         * @implements IListBackupSchedulesResponse
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IListBackupSchedulesResponse=} [properties] Properties to set
+                         */
+                        function ListBackupSchedulesResponse(properties) {
+                            this.backupSchedules = [];
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * ListBackupSchedulesResponse backupSchedules.
+                         * @member {Array.<google.firestore.admin.v1.IBackupSchedule>} backupSchedules
+                         * @memberof google.firestore.admin.v1.ListBackupSchedulesResponse
+                         * @instance
+                         */
+                        ListBackupSchedulesResponse.prototype.backupSchedules = $util.emptyArray;
+    
+                        /**
+                         * Creates a ListBackupSchedulesResponse message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.ListBackupSchedulesResponse
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.ListBackupSchedulesResponse} ListBackupSchedulesResponse
+                         */
+                        ListBackupSchedulesResponse.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.ListBackupSchedulesResponse)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.ListBackupSchedulesResponse();
+                            if (object.backupSchedules) {
+                                if (!Array.isArray(object.backupSchedules))
+                                    throw TypeError(".google.firestore.admin.v1.ListBackupSchedulesResponse.backupSchedules: array expected");
+                                message.backupSchedules = [];
+                                for (var i = 0; i < object.backupSchedules.length; ++i) {
+                                    if (typeof object.backupSchedules[i] !== "object")
+                                        throw TypeError(".google.firestore.admin.v1.ListBackupSchedulesResponse.backupSchedules: object expected");
+                                    message.backupSchedules[i] = $root.google.firestore.admin.v1.BackupSchedule.fromObject(object.backupSchedules[i]);
+                                }
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a ListBackupSchedulesResponse message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.ListBackupSchedulesResponse
+                         * @static
+                         * @param {google.firestore.admin.v1.ListBackupSchedulesResponse} message ListBackupSchedulesResponse
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        ListBackupSchedulesResponse.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.arrays || options.defaults)
+                                object.backupSchedules = [];
+                            if (message.backupSchedules && message.backupSchedules.length) {
+                                object.backupSchedules = [];
+                                for (var j = 0; j < message.backupSchedules.length; ++j)
+                                    object.backupSchedules[j] = $root.google.firestore.admin.v1.BackupSchedule.toObject(message.backupSchedules[j], options);
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this ListBackupSchedulesResponse to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.ListBackupSchedulesResponse
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        ListBackupSchedulesResponse.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for ListBackupSchedulesResponse
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ListBackupSchedulesResponse
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ListBackupSchedulesResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ListBackupSchedulesResponse";
+                        };
+    
+                        return ListBackupSchedulesResponse;
+                    })();
+    
+                    v1.DeleteBackupScheduleRequest = (function() {
+    
+                        /**
+                         * Properties of a DeleteBackupScheduleRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IDeleteBackupScheduleRequest
+                         * @property {string|null} [name] DeleteBackupScheduleRequest name
+                         */
+    
+                        /**
+                         * Constructs a new DeleteBackupScheduleRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a DeleteBackupScheduleRequest.
+                         * @implements IDeleteBackupScheduleRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IDeleteBackupScheduleRequest=} [properties] Properties to set
+                         */
+                        function DeleteBackupScheduleRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * DeleteBackupScheduleRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.DeleteBackupScheduleRequest
+                         * @instance
+                         */
+                        DeleteBackupScheduleRequest.prototype.name = "";
+    
+                        /**
+                         * Creates a DeleteBackupScheduleRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.DeleteBackupScheduleRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.DeleteBackupScheduleRequest} DeleteBackupScheduleRequest
+                         */
+                        DeleteBackupScheduleRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.DeleteBackupScheduleRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.DeleteBackupScheduleRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a DeleteBackupScheduleRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.DeleteBackupScheduleRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.DeleteBackupScheduleRequest} message DeleteBackupScheduleRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        DeleteBackupScheduleRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this DeleteBackupScheduleRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.DeleteBackupScheduleRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        DeleteBackupScheduleRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for DeleteBackupScheduleRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.DeleteBackupScheduleRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        DeleteBackupScheduleRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.DeleteBackupScheduleRequest";
+                        };
+    
+                        return DeleteBackupScheduleRequest;
                     })();
     
                     v1.CreateIndexRequest = (function() {
@@ -3017,6 +6366,8 @@
                          * @property {string|null} [name] ExportDocumentsRequest name
                          * @property {Array.<string>|null} [collectionIds] ExportDocumentsRequest collectionIds
                          * @property {string|null} [outputUriPrefix] ExportDocumentsRequest outputUriPrefix
+                         * @property {Array.<string>|null} [namespaceIds] ExportDocumentsRequest namespaceIds
+                         * @property {google.protobuf.ITimestamp|null} [snapshotTime] ExportDocumentsRequest snapshotTime
                          */
     
                         /**
@@ -3029,6 +6380,7 @@
                          */
                         function ExportDocumentsRequest(properties) {
                             this.collectionIds = [];
+                            this.namespaceIds = [];
                             if (properties)
                                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                                     if (properties[keys[i]] != null)
@@ -3060,6 +6412,22 @@
                         ExportDocumentsRequest.prototype.outputUriPrefix = "";
     
                         /**
+                         * ExportDocumentsRequest namespaceIds.
+                         * @member {Array.<string>} namespaceIds
+                         * @memberof google.firestore.admin.v1.ExportDocumentsRequest
+                         * @instance
+                         */
+                        ExportDocumentsRequest.prototype.namespaceIds = $util.emptyArray;
+    
+                        /**
+                         * ExportDocumentsRequest snapshotTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} snapshotTime
+                         * @memberof google.firestore.admin.v1.ExportDocumentsRequest
+                         * @instance
+                         */
+                        ExportDocumentsRequest.prototype.snapshotTime = null;
+    
+                        /**
                          * Creates an ExportDocumentsRequest message from a plain object. Also converts values to their respective internal types.
                          * @function fromObject
                          * @memberof google.firestore.admin.v1.ExportDocumentsRequest
@@ -3082,6 +6450,18 @@
                             }
                             if (object.outputUriPrefix != null)
                                 message.outputUriPrefix = String(object.outputUriPrefix);
+                            if (object.namespaceIds) {
+                                if (!Array.isArray(object.namespaceIds))
+                                    throw TypeError(".google.firestore.admin.v1.ExportDocumentsRequest.namespaceIds: array expected");
+                                message.namespaceIds = [];
+                                for (var i = 0; i < object.namespaceIds.length; ++i)
+                                    message.namespaceIds[i] = String(object.namespaceIds[i]);
+                            }
+                            if (object.snapshotTime != null) {
+                                if (typeof object.snapshotTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.ExportDocumentsRequest.snapshotTime: object expected");
+                                message.snapshotTime = $root.google.protobuf.Timestamp.fromObject(object.snapshotTime);
+                            }
                             return message;
                         };
     
@@ -3098,11 +6478,14 @@
                             if (!options)
                                 options = {};
                             var object = {};
-                            if (options.arrays || options.defaults)
+                            if (options.arrays || options.defaults) {
                                 object.collectionIds = [];
+                                object.namespaceIds = [];
+                            }
                             if (options.defaults) {
                                 object.name = "";
                                 object.outputUriPrefix = "";
+                                object.snapshotTime = null;
                             }
                             if (message.name != null && message.hasOwnProperty("name"))
                                 object.name = message.name;
@@ -3113,6 +6496,13 @@
                             }
                             if (message.outputUriPrefix != null && message.hasOwnProperty("outputUriPrefix"))
                                 object.outputUriPrefix = message.outputUriPrefix;
+                            if (message.namespaceIds && message.namespaceIds.length) {
+                                object.namespaceIds = [];
+                                for (var j = 0; j < message.namespaceIds.length; ++j)
+                                    object.namespaceIds[j] = message.namespaceIds[j];
+                            }
+                            if (message.snapshotTime != null && message.hasOwnProperty("snapshotTime"))
+                                object.snapshotTime = $root.google.protobuf.Timestamp.toObject(message.snapshotTime, options);
                             return object;
                         };
     
@@ -3154,6 +6544,7 @@
                          * @property {string|null} [name] ImportDocumentsRequest name
                          * @property {Array.<string>|null} [collectionIds] ImportDocumentsRequest collectionIds
                          * @property {string|null} [inputUriPrefix] ImportDocumentsRequest inputUriPrefix
+                         * @property {Array.<string>|null} [namespaceIds] ImportDocumentsRequest namespaceIds
                          */
     
                         /**
@@ -3166,6 +6557,7 @@
                          */
                         function ImportDocumentsRequest(properties) {
                             this.collectionIds = [];
+                            this.namespaceIds = [];
                             if (properties)
                                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                                     if (properties[keys[i]] != null)
@@ -3197,6 +6589,14 @@
                         ImportDocumentsRequest.prototype.inputUriPrefix = "";
     
                         /**
+                         * ImportDocumentsRequest namespaceIds.
+                         * @member {Array.<string>} namespaceIds
+                         * @memberof google.firestore.admin.v1.ImportDocumentsRequest
+                         * @instance
+                         */
+                        ImportDocumentsRequest.prototype.namespaceIds = $util.emptyArray;
+    
+                        /**
                          * Creates an ImportDocumentsRequest message from a plain object. Also converts values to their respective internal types.
                          * @function fromObject
                          * @memberof google.firestore.admin.v1.ImportDocumentsRequest
@@ -3219,6 +6619,13 @@
                             }
                             if (object.inputUriPrefix != null)
                                 message.inputUriPrefix = String(object.inputUriPrefix);
+                            if (object.namespaceIds) {
+                                if (!Array.isArray(object.namespaceIds))
+                                    throw TypeError(".google.firestore.admin.v1.ImportDocumentsRequest.namespaceIds: array expected");
+                                message.namespaceIds = [];
+                                for (var i = 0; i < object.namespaceIds.length; ++i)
+                                    message.namespaceIds[i] = String(object.namespaceIds[i]);
+                            }
                             return message;
                         };
     
@@ -3235,8 +6642,10 @@
                             if (!options)
                                 options = {};
                             var object = {};
-                            if (options.arrays || options.defaults)
+                            if (options.arrays || options.defaults) {
                                 object.collectionIds = [];
+                                object.namespaceIds = [];
+                            }
                             if (options.defaults) {
                                 object.name = "";
                                 object.inputUriPrefix = "";
@@ -3250,6 +6659,11 @@
                             }
                             if (message.inputUriPrefix != null && message.hasOwnProperty("inputUriPrefix"))
                                 object.inputUriPrefix = message.inputUriPrefix;
+                            if (message.namespaceIds && message.namespaceIds.length) {
+                                object.namespaceIds = [];
+                                for (var j = 0; j < message.namespaceIds.length; ++j)
+                                    object.namespaceIds[j] = message.namespaceIds[j];
+                            }
                             return object;
                         };
     
@@ -3282,29 +6696,28 @@
                         return ImportDocumentsRequest;
                     })();
     
-                    v1.Index = (function() {
+                    v1.BulkDeleteDocumentsRequest = (function() {
     
                         /**
-                         * Properties of an Index.
+                         * Properties of a BulkDeleteDocumentsRequest.
                          * @memberof google.firestore.admin.v1
-                         * @interface IIndex
-                         * @property {string|null} [name] Index name
-                         * @property {google.firestore.admin.v1.Index.QueryScope|null} [queryScope] Index queryScope
-                         * @property {google.firestore.admin.v1.Index.ApiScope|null} [apiScope] Index apiScope
-                         * @property {Array.<google.firestore.admin.v1.Index.IIndexField>|null} [fields] Index fields
-                         * @property {google.firestore.admin.v1.Index.State|null} [state] Index state
+                         * @interface IBulkDeleteDocumentsRequest
+                         * @property {string|null} [name] BulkDeleteDocumentsRequest name
+                         * @property {Array.<string>|null} [collectionIds] BulkDeleteDocumentsRequest collectionIds
+                         * @property {Array.<string>|null} [namespaceIds] BulkDeleteDocumentsRequest namespaceIds
                          */
     
                         /**
-                         * Constructs a new Index.
+                         * Constructs a new BulkDeleteDocumentsRequest.
                          * @memberof google.firestore.admin.v1
-                         * @classdesc Represents an Index.
-                         * @implements IIndex
+                         * @classdesc Represents a BulkDeleteDocumentsRequest.
+                         * @implements IBulkDeleteDocumentsRequest
                          * @constructor
-                         * @param {google.firestore.admin.v1.IIndex=} [properties] Properties to set
+                         * @param {google.firestore.admin.v1.IBulkDeleteDocumentsRequest=} [properties] Properties to set
                          */
-                        function Index(properties) {
-                            this.fields = [];
+                        function BulkDeleteDocumentsRequest(properties) {
+                            this.collectionIds = [];
+                            this.namespaceIds = [];
                             if (properties)
                                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                                     if (properties[keys[i]] != null)
@@ -3312,475 +6725,140 @@
                         }
     
                         /**
-                         * Index name.
+                         * BulkDeleteDocumentsRequest name.
                          * @member {string} name
-                         * @memberof google.firestore.admin.v1.Index
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
                          * @instance
                          */
-                        Index.prototype.name = "";
+                        BulkDeleteDocumentsRequest.prototype.name = "";
     
                         /**
-                         * Index queryScope.
-                         * @member {google.firestore.admin.v1.Index.QueryScope} queryScope
-                         * @memberof google.firestore.admin.v1.Index
+                         * BulkDeleteDocumentsRequest collectionIds.
+                         * @member {Array.<string>} collectionIds
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
                          * @instance
                          */
-                        Index.prototype.queryScope = 0;
+                        BulkDeleteDocumentsRequest.prototype.collectionIds = $util.emptyArray;
     
                         /**
-                         * Index apiScope.
-                         * @member {google.firestore.admin.v1.Index.ApiScope} apiScope
-                         * @memberof google.firestore.admin.v1.Index
+                         * BulkDeleteDocumentsRequest namespaceIds.
+                         * @member {Array.<string>} namespaceIds
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
                          * @instance
                          */
-                        Index.prototype.apiScope = 0;
+                        BulkDeleteDocumentsRequest.prototype.namespaceIds = $util.emptyArray;
     
                         /**
-                         * Index fields.
-                         * @member {Array.<google.firestore.admin.v1.Index.IIndexField>} fields
-                         * @memberof google.firestore.admin.v1.Index
-                         * @instance
-                         */
-                        Index.prototype.fields = $util.emptyArray;
-    
-                        /**
-                         * Index state.
-                         * @member {google.firestore.admin.v1.Index.State} state
-                         * @memberof google.firestore.admin.v1.Index
-                         * @instance
-                         */
-                        Index.prototype.state = 0;
-    
-                        /**
-                         * Creates an Index message from a plain object. Also converts values to their respective internal types.
+                         * Creates a BulkDeleteDocumentsRequest message from a plain object. Also converts values to their respective internal types.
                          * @function fromObject
-                         * @memberof google.firestore.admin.v1.Index
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
                          * @static
                          * @param {Object.<string,*>} object Plain object
-                         * @returns {google.firestore.admin.v1.Index} Index
+                         * @returns {google.firestore.admin.v1.BulkDeleteDocumentsRequest} BulkDeleteDocumentsRequest
                          */
-                        Index.fromObject = function fromObject(object) {
-                            if (object instanceof $root.google.firestore.admin.v1.Index)
+                        BulkDeleteDocumentsRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.BulkDeleteDocumentsRequest)
                                 return object;
-                            var message = new $root.google.firestore.admin.v1.Index();
+                            var message = new $root.google.firestore.admin.v1.BulkDeleteDocumentsRequest();
                             if (object.name != null)
                                 message.name = String(object.name);
-                            switch (object.queryScope) {
-                            default:
-                                if (typeof object.queryScope === "number") {
-                                    message.queryScope = object.queryScope;
-                                    break;
-                                }
-                                break;
-                            case "QUERY_SCOPE_UNSPECIFIED":
-                            case 0:
-                                message.queryScope = 0;
-                                break;
-                            case "COLLECTION":
-                            case 1:
-                                message.queryScope = 1;
-                                break;
-                            case "COLLECTION_GROUP":
-                            case 2:
-                                message.queryScope = 2;
-                                break;
-                            case "COLLECTION_RECURSIVE":
-                            case 3:
-                                message.queryScope = 3;
-                                break;
+                            if (object.collectionIds) {
+                                if (!Array.isArray(object.collectionIds))
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsRequest.collectionIds: array expected");
+                                message.collectionIds = [];
+                                for (var i = 0; i < object.collectionIds.length; ++i)
+                                    message.collectionIds[i] = String(object.collectionIds[i]);
                             }
-                            switch (object.apiScope) {
-                            default:
-                                if (typeof object.apiScope === "number") {
-                                    message.apiScope = object.apiScope;
-                                    break;
-                                }
-                                break;
-                            case "ANY_API":
-                            case 0:
-                                message.apiScope = 0;
-                                break;
-                            case "DATASTORE_MODE_API":
-                            case 1:
-                                message.apiScope = 1;
-                                break;
-                            }
-                            if (object.fields) {
-                                if (!Array.isArray(object.fields))
-                                    throw TypeError(".google.firestore.admin.v1.Index.fields: array expected");
-                                message.fields = [];
-                                for (var i = 0; i < object.fields.length; ++i) {
-                                    if (typeof object.fields[i] !== "object")
-                                        throw TypeError(".google.firestore.admin.v1.Index.fields: object expected");
-                                    message.fields[i] = $root.google.firestore.admin.v1.Index.IndexField.fromObject(object.fields[i]);
-                                }
-                            }
-                            switch (object.state) {
-                            default:
-                                if (typeof object.state === "number") {
-                                    message.state = object.state;
-                                    break;
-                                }
-                                break;
-                            case "STATE_UNSPECIFIED":
-                            case 0:
-                                message.state = 0;
-                                break;
-                            case "CREATING":
-                            case 1:
-                                message.state = 1;
-                                break;
-                            case "READY":
-                            case 2:
-                                message.state = 2;
-                                break;
-                            case "NEEDS_REPAIR":
-                            case 3:
-                                message.state = 3;
-                                break;
+                            if (object.namespaceIds) {
+                                if (!Array.isArray(object.namespaceIds))
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsRequest.namespaceIds: array expected");
+                                message.namespaceIds = [];
+                                for (var i = 0; i < object.namespaceIds.length; ++i)
+                                    message.namespaceIds[i] = String(object.namespaceIds[i]);
                             }
                             return message;
                         };
     
                         /**
-                         * Creates a plain object from an Index message. Also converts values to other types if specified.
+                         * Creates a plain object from a BulkDeleteDocumentsRequest message. Also converts values to other types if specified.
                          * @function toObject
-                         * @memberof google.firestore.admin.v1.Index
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
                          * @static
-                         * @param {google.firestore.admin.v1.Index} message Index
+                         * @param {google.firestore.admin.v1.BulkDeleteDocumentsRequest} message BulkDeleteDocumentsRequest
                          * @param {$protobuf.IConversionOptions} [options] Conversion options
                          * @returns {Object.<string,*>} Plain object
                          */
-                        Index.toObject = function toObject(message, options) {
+                        BulkDeleteDocumentsRequest.toObject = function toObject(message, options) {
                             if (!options)
                                 options = {};
                             var object = {};
-                            if (options.arrays || options.defaults)
-                                object.fields = [];
-                            if (options.defaults) {
-                                object.name = "";
-                                object.queryScope = options.enums === String ? "QUERY_SCOPE_UNSPECIFIED" : 0;
-                                object.state = options.enums === String ? "STATE_UNSPECIFIED" : 0;
-                                object.apiScope = options.enums === String ? "ANY_API" : 0;
+                            if (options.arrays || options.defaults) {
+                                object.collectionIds = [];
+                                object.namespaceIds = [];
                             }
+                            if (options.defaults)
+                                object.name = "";
                             if (message.name != null && message.hasOwnProperty("name"))
                                 object.name = message.name;
-                            if (message.queryScope != null && message.hasOwnProperty("queryScope"))
-                                object.queryScope = options.enums === String ? $root.google.firestore.admin.v1.Index.QueryScope[message.queryScope] === undefined ? message.queryScope : $root.google.firestore.admin.v1.Index.QueryScope[message.queryScope] : message.queryScope;
-                            if (message.fields && message.fields.length) {
-                                object.fields = [];
-                                for (var j = 0; j < message.fields.length; ++j)
-                                    object.fields[j] = $root.google.firestore.admin.v1.Index.IndexField.toObject(message.fields[j], options);
+                            if (message.collectionIds && message.collectionIds.length) {
+                                object.collectionIds = [];
+                                for (var j = 0; j < message.collectionIds.length; ++j)
+                                    object.collectionIds[j] = message.collectionIds[j];
                             }
-                            if (message.state != null && message.hasOwnProperty("state"))
-                                object.state = options.enums === String ? $root.google.firestore.admin.v1.Index.State[message.state] === undefined ? message.state : $root.google.firestore.admin.v1.Index.State[message.state] : message.state;
-                            if (message.apiScope != null && message.hasOwnProperty("apiScope"))
-                                object.apiScope = options.enums === String ? $root.google.firestore.admin.v1.Index.ApiScope[message.apiScope] === undefined ? message.apiScope : $root.google.firestore.admin.v1.Index.ApiScope[message.apiScope] : message.apiScope;
+                            if (message.namespaceIds && message.namespaceIds.length) {
+                                object.namespaceIds = [];
+                                for (var j = 0; j < message.namespaceIds.length; ++j)
+                                    object.namespaceIds[j] = message.namespaceIds[j];
+                            }
                             return object;
                         };
     
                         /**
-                         * Converts this Index to JSON.
+                         * Converts this BulkDeleteDocumentsRequest to JSON.
                          * @function toJSON
-                         * @memberof google.firestore.admin.v1.Index
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
                          * @instance
                          * @returns {Object.<string,*>} JSON object
                          */
-                        Index.prototype.toJSON = function toJSON() {
+                        BulkDeleteDocumentsRequest.prototype.toJSON = function toJSON() {
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                         };
     
                         /**
-                         * Gets the default type url for Index
+                         * Gets the default type url for BulkDeleteDocumentsRequest
                          * @function getTypeUrl
-                         * @memberof google.firestore.admin.v1.Index
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsRequest
                          * @static
                          * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                          * @returns {string} The default type url
                          */
-                        Index.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        BulkDeleteDocumentsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
                             if (typeUrlPrefix === undefined) {
                                 typeUrlPrefix = "type.googleapis.com";
                             }
-                            return typeUrlPrefix + "/google.firestore.admin.v1.Index";
+                            return typeUrlPrefix + "/google.firestore.admin.v1.BulkDeleteDocumentsRequest";
                         };
     
-                        /**
-                         * QueryScope enum.
-                         * @name google.firestore.admin.v1.Index.QueryScope
-                         * @enum {string}
-                         * @property {string} QUERY_SCOPE_UNSPECIFIED=QUERY_SCOPE_UNSPECIFIED QUERY_SCOPE_UNSPECIFIED value
-                         * @property {string} COLLECTION=COLLECTION COLLECTION value
-                         * @property {string} COLLECTION_GROUP=COLLECTION_GROUP COLLECTION_GROUP value
-                         * @property {string} COLLECTION_RECURSIVE=COLLECTION_RECURSIVE COLLECTION_RECURSIVE value
-                         */
-                        Index.QueryScope = (function() {
-                            var valuesById = {}, values = Object.create(valuesById);
-                            values[valuesById[0] = "QUERY_SCOPE_UNSPECIFIED"] = "QUERY_SCOPE_UNSPECIFIED";
-                            values[valuesById[1] = "COLLECTION"] = "COLLECTION";
-                            values[valuesById[2] = "COLLECTION_GROUP"] = "COLLECTION_GROUP";
-                            values[valuesById[3] = "COLLECTION_RECURSIVE"] = "COLLECTION_RECURSIVE";
-                            return values;
-                        })();
-    
-                        /**
-                         * ApiScope enum.
-                         * @name google.firestore.admin.v1.Index.ApiScope
-                         * @enum {string}
-                         * @property {string} ANY_API=ANY_API ANY_API value
-                         * @property {string} DATASTORE_MODE_API=DATASTORE_MODE_API DATASTORE_MODE_API value
-                         */
-                        Index.ApiScope = (function() {
-                            var valuesById = {}, values = Object.create(valuesById);
-                            values[valuesById[0] = "ANY_API"] = "ANY_API";
-                            values[valuesById[1] = "DATASTORE_MODE_API"] = "DATASTORE_MODE_API";
-                            return values;
-                        })();
-    
-                        Index.IndexField = (function() {
-    
-                            /**
-                             * Properties of an IndexField.
-                             * @memberof google.firestore.admin.v1.Index
-                             * @interface IIndexField
-                             * @property {string|null} [fieldPath] IndexField fieldPath
-                             * @property {google.firestore.admin.v1.Index.IndexField.Order|null} [order] IndexField order
-                             * @property {google.firestore.admin.v1.Index.IndexField.ArrayConfig|null} [arrayConfig] IndexField arrayConfig
-                             */
-    
-                            /**
-                             * Constructs a new IndexField.
-                             * @memberof google.firestore.admin.v1.Index
-                             * @classdesc Represents an IndexField.
-                             * @implements IIndexField
-                             * @constructor
-                             * @param {google.firestore.admin.v1.Index.IIndexField=} [properties] Properties to set
-                             */
-                            function IndexField(properties) {
-                                if (properties)
-                                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                                        if (properties[keys[i]] != null)
-                                            this[keys[i]] = properties[keys[i]];
-                            }
-    
-                            /**
-                             * IndexField fieldPath.
-                             * @member {string} fieldPath
-                             * @memberof google.firestore.admin.v1.Index.IndexField
-                             * @instance
-                             */
-                            IndexField.prototype.fieldPath = "";
-    
-                            /**
-                             * IndexField order.
-                             * @member {google.firestore.admin.v1.Index.IndexField.Order|null|undefined} order
-                             * @memberof google.firestore.admin.v1.Index.IndexField
-                             * @instance
-                             */
-                            IndexField.prototype.order = null;
-    
-                            /**
-                             * IndexField arrayConfig.
-                             * @member {google.firestore.admin.v1.Index.IndexField.ArrayConfig|null|undefined} arrayConfig
-                             * @memberof google.firestore.admin.v1.Index.IndexField
-                             * @instance
-                             */
-                            IndexField.prototype.arrayConfig = null;
-    
-                            // OneOf field names bound to virtual getters and setters
-                            var $oneOfFields;
-    
-                            /**
-                             * IndexField valueMode.
-                             * @member {"order"|"arrayConfig"|undefined} valueMode
-                             * @memberof google.firestore.admin.v1.Index.IndexField
-                             * @instance
-                             */
-                            Object.defineProperty(IndexField.prototype, "valueMode", {
-                                get: $util.oneOfGetter($oneOfFields = ["order", "arrayConfig"]),
-                                set: $util.oneOfSetter($oneOfFields)
-                            });
-    
-                            /**
-                             * Creates an IndexField message from a plain object. Also converts values to their respective internal types.
-                             * @function fromObject
-                             * @memberof google.firestore.admin.v1.Index.IndexField
-                             * @static
-                             * @param {Object.<string,*>} object Plain object
-                             * @returns {google.firestore.admin.v1.Index.IndexField} IndexField
-                             */
-                            IndexField.fromObject = function fromObject(object) {
-                                if (object instanceof $root.google.firestore.admin.v1.Index.IndexField)
-                                    return object;
-                                var message = new $root.google.firestore.admin.v1.Index.IndexField();
-                                if (object.fieldPath != null)
-                                    message.fieldPath = String(object.fieldPath);
-                                switch (object.order) {
-                                default:
-                                    if (typeof object.order === "number") {
-                                        message.order = object.order;
-                                        break;
-                                    }
-                                    break;
-                                case "ORDER_UNSPECIFIED":
-                                case 0:
-                                    message.order = 0;
-                                    break;
-                                case "ASCENDING":
-                                case 1:
-                                    message.order = 1;
-                                    break;
-                                case "DESCENDING":
-                                case 2:
-                                    message.order = 2;
-                                    break;
-                                }
-                                switch (object.arrayConfig) {
-                                default:
-                                    if (typeof object.arrayConfig === "number") {
-                                        message.arrayConfig = object.arrayConfig;
-                                        break;
-                                    }
-                                    break;
-                                case "ARRAY_CONFIG_UNSPECIFIED":
-                                case 0:
-                                    message.arrayConfig = 0;
-                                    break;
-                                case "CONTAINS":
-                                case 1:
-                                    message.arrayConfig = 1;
-                                    break;
-                                }
-                                return message;
-                            };
-    
-                            /**
-                             * Creates a plain object from an IndexField message. Also converts values to other types if specified.
-                             * @function toObject
-                             * @memberof google.firestore.admin.v1.Index.IndexField
-                             * @static
-                             * @param {google.firestore.admin.v1.Index.IndexField} message IndexField
-                             * @param {$protobuf.IConversionOptions} [options] Conversion options
-                             * @returns {Object.<string,*>} Plain object
-                             */
-                            IndexField.toObject = function toObject(message, options) {
-                                if (!options)
-                                    options = {};
-                                var object = {};
-                                if (options.defaults)
-                                    object.fieldPath = "";
-                                if (message.fieldPath != null && message.hasOwnProperty("fieldPath"))
-                                    object.fieldPath = message.fieldPath;
-                                if (message.order != null && message.hasOwnProperty("order")) {
-                                    object.order = options.enums === String ? $root.google.firestore.admin.v1.Index.IndexField.Order[message.order] === undefined ? message.order : $root.google.firestore.admin.v1.Index.IndexField.Order[message.order] : message.order;
-                                    if (options.oneofs)
-                                        object.valueMode = "order";
-                                }
-                                if (message.arrayConfig != null && message.hasOwnProperty("arrayConfig")) {
-                                    object.arrayConfig = options.enums === String ? $root.google.firestore.admin.v1.Index.IndexField.ArrayConfig[message.arrayConfig] === undefined ? message.arrayConfig : $root.google.firestore.admin.v1.Index.IndexField.ArrayConfig[message.arrayConfig] : message.arrayConfig;
-                                    if (options.oneofs)
-                                        object.valueMode = "arrayConfig";
-                                }
-                                return object;
-                            };
-    
-                            /**
-                             * Converts this IndexField to JSON.
-                             * @function toJSON
-                             * @memberof google.firestore.admin.v1.Index.IndexField
-                             * @instance
-                             * @returns {Object.<string,*>} JSON object
-                             */
-                            IndexField.prototype.toJSON = function toJSON() {
-                                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                            };
-    
-                            /**
-                             * Gets the default type url for IndexField
-                             * @function getTypeUrl
-                             * @memberof google.firestore.admin.v1.Index.IndexField
-                             * @static
-                             * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                             * @returns {string} The default type url
-                             */
-                            IndexField.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                                if (typeUrlPrefix === undefined) {
-                                    typeUrlPrefix = "type.googleapis.com";
-                                }
-                                return typeUrlPrefix + "/google.firestore.admin.v1.Index.IndexField";
-                            };
-    
-                            /**
-                             * Order enum.
-                             * @name google.firestore.admin.v1.Index.IndexField.Order
-                             * @enum {string}
-                             * @property {string} ORDER_UNSPECIFIED=ORDER_UNSPECIFIED ORDER_UNSPECIFIED value
-                             * @property {string} ASCENDING=ASCENDING ASCENDING value
-                             * @property {string} DESCENDING=DESCENDING DESCENDING value
-                             */
-                            IndexField.Order = (function() {
-                                var valuesById = {}, values = Object.create(valuesById);
-                                values[valuesById[0] = "ORDER_UNSPECIFIED"] = "ORDER_UNSPECIFIED";
-                                values[valuesById[1] = "ASCENDING"] = "ASCENDING";
-                                values[valuesById[2] = "DESCENDING"] = "DESCENDING";
-                                return values;
-                            })();
-    
-                            /**
-                             * ArrayConfig enum.
-                             * @name google.firestore.admin.v1.Index.IndexField.ArrayConfig
-                             * @enum {string}
-                             * @property {string} ARRAY_CONFIG_UNSPECIFIED=ARRAY_CONFIG_UNSPECIFIED ARRAY_CONFIG_UNSPECIFIED value
-                             * @property {string} CONTAINS=CONTAINS CONTAINS value
-                             */
-                            IndexField.ArrayConfig = (function() {
-                                var valuesById = {}, values = Object.create(valuesById);
-                                values[valuesById[0] = "ARRAY_CONFIG_UNSPECIFIED"] = "ARRAY_CONFIG_UNSPECIFIED";
-                                values[valuesById[1] = "CONTAINS"] = "CONTAINS";
-                                return values;
-                            })();
-    
-                            return IndexField;
-                        })();
-    
-                        /**
-                         * State enum.
-                         * @name google.firestore.admin.v1.Index.State
-                         * @enum {string}
-                         * @property {string} STATE_UNSPECIFIED=STATE_UNSPECIFIED STATE_UNSPECIFIED value
-                         * @property {string} CREATING=CREATING CREATING value
-                         * @property {string} READY=READY READY value
-                         * @property {string} NEEDS_REPAIR=NEEDS_REPAIR NEEDS_REPAIR value
-                         */
-                        Index.State = (function() {
-                            var valuesById = {}, values = Object.create(valuesById);
-                            values[valuesById[0] = "STATE_UNSPECIFIED"] = "STATE_UNSPECIFIED";
-                            values[valuesById[1] = "CREATING"] = "CREATING";
-                            values[valuesById[2] = "READY"] = "READY";
-                            values[valuesById[3] = "NEEDS_REPAIR"] = "NEEDS_REPAIR";
-                            return values;
-                        })();
-    
-                        return Index;
+                        return BulkDeleteDocumentsRequest;
                     })();
     
-                    v1.LocationMetadata = (function() {
+                    v1.BulkDeleteDocumentsResponse = (function() {
     
                         /**
-                         * Properties of a LocationMetadata.
+                         * Properties of a BulkDeleteDocumentsResponse.
                          * @memberof google.firestore.admin.v1
-                         * @interface ILocationMetadata
+                         * @interface IBulkDeleteDocumentsResponse
                          */
     
                         /**
-                         * Constructs a new LocationMetadata.
+                         * Constructs a new BulkDeleteDocumentsResponse.
                          * @memberof google.firestore.admin.v1
-                         * @classdesc Represents a LocationMetadata.
-                         * @implements ILocationMetadata
+                         * @classdesc Represents a BulkDeleteDocumentsResponse.
+                         * @implements IBulkDeleteDocumentsResponse
                          * @constructor
-                         * @param {google.firestore.admin.v1.ILocationMetadata=} [properties] Properties to set
+                         * @param {google.firestore.admin.v1.IBulkDeleteDocumentsResponse=} [properties] Properties to set
                          */
-                        function LocationMetadata(properties) {
+                        function BulkDeleteDocumentsResponse(properties) {
                             if (properties)
                                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                                     if (properties[keys[i]] != null)
@@ -3788,59 +6866,646 @@
                         }
     
                         /**
-                         * Creates a LocationMetadata message from a plain object. Also converts values to their respective internal types.
+                         * Creates a BulkDeleteDocumentsResponse message from a plain object. Also converts values to their respective internal types.
                          * @function fromObject
-                         * @memberof google.firestore.admin.v1.LocationMetadata
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsResponse
                          * @static
                          * @param {Object.<string,*>} object Plain object
-                         * @returns {google.firestore.admin.v1.LocationMetadata} LocationMetadata
+                         * @returns {google.firestore.admin.v1.BulkDeleteDocumentsResponse} BulkDeleteDocumentsResponse
                          */
-                        LocationMetadata.fromObject = function fromObject(object) {
-                            if (object instanceof $root.google.firestore.admin.v1.LocationMetadata)
+                        BulkDeleteDocumentsResponse.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.BulkDeleteDocumentsResponse)
                                 return object;
-                            return new $root.google.firestore.admin.v1.LocationMetadata();
+                            return new $root.google.firestore.admin.v1.BulkDeleteDocumentsResponse();
                         };
     
                         /**
-                         * Creates a plain object from a LocationMetadata message. Also converts values to other types if specified.
+                         * Creates a plain object from a BulkDeleteDocumentsResponse message. Also converts values to other types if specified.
                          * @function toObject
-                         * @memberof google.firestore.admin.v1.LocationMetadata
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsResponse
                          * @static
-                         * @param {google.firestore.admin.v1.LocationMetadata} message LocationMetadata
+                         * @param {google.firestore.admin.v1.BulkDeleteDocumentsResponse} message BulkDeleteDocumentsResponse
                          * @param {$protobuf.IConversionOptions} [options] Conversion options
                          * @returns {Object.<string,*>} Plain object
                          */
-                        LocationMetadata.toObject = function toObject() {
+                        BulkDeleteDocumentsResponse.toObject = function toObject() {
                             return {};
                         };
     
                         /**
-                         * Converts this LocationMetadata to JSON.
+                         * Converts this BulkDeleteDocumentsResponse to JSON.
                          * @function toJSON
-                         * @memberof google.firestore.admin.v1.LocationMetadata
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsResponse
                          * @instance
                          * @returns {Object.<string,*>} JSON object
                          */
-                        LocationMetadata.prototype.toJSON = function toJSON() {
+                        BulkDeleteDocumentsResponse.prototype.toJSON = function toJSON() {
                             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
                         };
     
                         /**
-                         * Gets the default type url for LocationMetadata
+                         * Gets the default type url for BulkDeleteDocumentsResponse
                          * @function getTypeUrl
-                         * @memberof google.firestore.admin.v1.LocationMetadata
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsResponse
                          * @static
                          * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                          * @returns {string} The default type url
                          */
-                        LocationMetadata.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        BulkDeleteDocumentsResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
                             if (typeUrlPrefix === undefined) {
                                 typeUrlPrefix = "type.googleapis.com";
                             }
-                            return typeUrlPrefix + "/google.firestore.admin.v1.LocationMetadata";
+                            return typeUrlPrefix + "/google.firestore.admin.v1.BulkDeleteDocumentsResponse";
                         };
     
-                        return LocationMetadata;
+                        return BulkDeleteDocumentsResponse;
+                    })();
+    
+                    v1.GetBackupRequest = (function() {
+    
+                        /**
+                         * Properties of a GetBackupRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IGetBackupRequest
+                         * @property {string|null} [name] GetBackupRequest name
+                         */
+    
+                        /**
+                         * Constructs a new GetBackupRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a GetBackupRequest.
+                         * @implements IGetBackupRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IGetBackupRequest=} [properties] Properties to set
+                         */
+                        function GetBackupRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * GetBackupRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.GetBackupRequest
+                         * @instance
+                         */
+                        GetBackupRequest.prototype.name = "";
+    
+                        /**
+                         * Creates a GetBackupRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.GetBackupRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.GetBackupRequest} GetBackupRequest
+                         */
+                        GetBackupRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.GetBackupRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.GetBackupRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a GetBackupRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.GetBackupRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.GetBackupRequest} message GetBackupRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        GetBackupRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this GetBackupRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.GetBackupRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        GetBackupRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for GetBackupRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.GetBackupRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        GetBackupRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.GetBackupRequest";
+                        };
+    
+                        return GetBackupRequest;
+                    })();
+    
+                    v1.ListBackupsRequest = (function() {
+    
+                        /**
+                         * Properties of a ListBackupsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IListBackupsRequest
+                         * @property {string|null} [parent] ListBackupsRequest parent
+                         * @property {string|null} [filter] ListBackupsRequest filter
+                         */
+    
+                        /**
+                         * Constructs a new ListBackupsRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a ListBackupsRequest.
+                         * @implements IListBackupsRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IListBackupsRequest=} [properties] Properties to set
+                         */
+                        function ListBackupsRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * ListBackupsRequest parent.
+                         * @member {string} parent
+                         * @memberof google.firestore.admin.v1.ListBackupsRequest
+                         * @instance
+                         */
+                        ListBackupsRequest.prototype.parent = "";
+    
+                        /**
+                         * ListBackupsRequest filter.
+                         * @member {string} filter
+                         * @memberof google.firestore.admin.v1.ListBackupsRequest
+                         * @instance
+                         */
+                        ListBackupsRequest.prototype.filter = "";
+    
+                        /**
+                         * Creates a ListBackupsRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.ListBackupsRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.ListBackupsRequest} ListBackupsRequest
+                         */
+                        ListBackupsRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.ListBackupsRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.ListBackupsRequest();
+                            if (object.parent != null)
+                                message.parent = String(object.parent);
+                            if (object.filter != null)
+                                message.filter = String(object.filter);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a ListBackupsRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.ListBackupsRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.ListBackupsRequest} message ListBackupsRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        ListBackupsRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.parent = "";
+                                object.filter = "";
+                            }
+                            if (message.parent != null && message.hasOwnProperty("parent"))
+                                object.parent = message.parent;
+                            if (message.filter != null && message.hasOwnProperty("filter"))
+                                object.filter = message.filter;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this ListBackupsRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.ListBackupsRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        ListBackupsRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for ListBackupsRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ListBackupsRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ListBackupsRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ListBackupsRequest";
+                        };
+    
+                        return ListBackupsRequest;
+                    })();
+    
+                    v1.ListBackupsResponse = (function() {
+    
+                        /**
+                         * Properties of a ListBackupsResponse.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IListBackupsResponse
+                         * @property {Array.<google.firestore.admin.v1.IBackup>|null} [backups] ListBackupsResponse backups
+                         * @property {Array.<string>|null} [unreachable] ListBackupsResponse unreachable
+                         */
+    
+                        /**
+                         * Constructs a new ListBackupsResponse.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a ListBackupsResponse.
+                         * @implements IListBackupsResponse
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IListBackupsResponse=} [properties] Properties to set
+                         */
+                        function ListBackupsResponse(properties) {
+                            this.backups = [];
+                            this.unreachable = [];
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * ListBackupsResponse backups.
+                         * @member {Array.<google.firestore.admin.v1.IBackup>} backups
+                         * @memberof google.firestore.admin.v1.ListBackupsResponse
+                         * @instance
+                         */
+                        ListBackupsResponse.prototype.backups = $util.emptyArray;
+    
+                        /**
+                         * ListBackupsResponse unreachable.
+                         * @member {Array.<string>} unreachable
+                         * @memberof google.firestore.admin.v1.ListBackupsResponse
+                         * @instance
+                         */
+                        ListBackupsResponse.prototype.unreachable = $util.emptyArray;
+    
+                        /**
+                         * Creates a ListBackupsResponse message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.ListBackupsResponse
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.ListBackupsResponse} ListBackupsResponse
+                         */
+                        ListBackupsResponse.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.ListBackupsResponse)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.ListBackupsResponse();
+                            if (object.backups) {
+                                if (!Array.isArray(object.backups))
+                                    throw TypeError(".google.firestore.admin.v1.ListBackupsResponse.backups: array expected");
+                                message.backups = [];
+                                for (var i = 0; i < object.backups.length; ++i) {
+                                    if (typeof object.backups[i] !== "object")
+                                        throw TypeError(".google.firestore.admin.v1.ListBackupsResponse.backups: object expected");
+                                    message.backups[i] = $root.google.firestore.admin.v1.Backup.fromObject(object.backups[i]);
+                                }
+                            }
+                            if (object.unreachable) {
+                                if (!Array.isArray(object.unreachable))
+                                    throw TypeError(".google.firestore.admin.v1.ListBackupsResponse.unreachable: array expected");
+                                message.unreachable = [];
+                                for (var i = 0; i < object.unreachable.length; ++i)
+                                    message.unreachable[i] = String(object.unreachable[i]);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a ListBackupsResponse message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.ListBackupsResponse
+                         * @static
+                         * @param {google.firestore.admin.v1.ListBackupsResponse} message ListBackupsResponse
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        ListBackupsResponse.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.arrays || options.defaults) {
+                                object.backups = [];
+                                object.unreachable = [];
+                            }
+                            if (message.backups && message.backups.length) {
+                                object.backups = [];
+                                for (var j = 0; j < message.backups.length; ++j)
+                                    object.backups[j] = $root.google.firestore.admin.v1.Backup.toObject(message.backups[j], options);
+                            }
+                            if (message.unreachable && message.unreachable.length) {
+                                object.unreachable = [];
+                                for (var j = 0; j < message.unreachable.length; ++j)
+                                    object.unreachable[j] = message.unreachable[j];
+                            }
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this ListBackupsResponse to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.ListBackupsResponse
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        ListBackupsResponse.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for ListBackupsResponse
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.ListBackupsResponse
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        ListBackupsResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.ListBackupsResponse";
+                        };
+    
+                        return ListBackupsResponse;
+                    })();
+    
+                    v1.DeleteBackupRequest = (function() {
+    
+                        /**
+                         * Properties of a DeleteBackupRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IDeleteBackupRequest
+                         * @property {string|null} [name] DeleteBackupRequest name
+                         */
+    
+                        /**
+                         * Constructs a new DeleteBackupRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a DeleteBackupRequest.
+                         * @implements IDeleteBackupRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IDeleteBackupRequest=} [properties] Properties to set
+                         */
+                        function DeleteBackupRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * DeleteBackupRequest name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.DeleteBackupRequest
+                         * @instance
+                         */
+                        DeleteBackupRequest.prototype.name = "";
+    
+                        /**
+                         * Creates a DeleteBackupRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.DeleteBackupRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.DeleteBackupRequest} DeleteBackupRequest
+                         */
+                        DeleteBackupRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.DeleteBackupRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.DeleteBackupRequest();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a DeleteBackupRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.DeleteBackupRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.DeleteBackupRequest} message DeleteBackupRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        DeleteBackupRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.name = "";
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this DeleteBackupRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.DeleteBackupRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        DeleteBackupRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for DeleteBackupRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.DeleteBackupRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        DeleteBackupRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.DeleteBackupRequest";
+                        };
+    
+                        return DeleteBackupRequest;
+                    })();
+    
+                    v1.RestoreDatabaseRequest = (function() {
+    
+                        /**
+                         * Properties of a RestoreDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IRestoreDatabaseRequest
+                         * @property {string|null} [parent] RestoreDatabaseRequest parent
+                         * @property {string|null} [databaseId] RestoreDatabaseRequest databaseId
+                         * @property {string|null} [backup] RestoreDatabaseRequest backup
+                         * @property {google.firestore.admin.v1.Database.IEncryptionConfig|null} [encryptionConfig] RestoreDatabaseRequest encryptionConfig
+                         */
+    
+                        /**
+                         * Constructs a new RestoreDatabaseRequest.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a RestoreDatabaseRequest.
+                         * @implements IRestoreDatabaseRequest
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IRestoreDatabaseRequest=} [properties] Properties to set
+                         */
+                        function RestoreDatabaseRequest(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * RestoreDatabaseRequest parent.
+                         * @member {string} parent
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseRequest
+                         * @instance
+                         */
+                        RestoreDatabaseRequest.prototype.parent = "";
+    
+                        /**
+                         * RestoreDatabaseRequest databaseId.
+                         * @member {string} databaseId
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseRequest
+                         * @instance
+                         */
+                        RestoreDatabaseRequest.prototype.databaseId = "";
+    
+                        /**
+                         * RestoreDatabaseRequest backup.
+                         * @member {string} backup
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseRequest
+                         * @instance
+                         */
+                        RestoreDatabaseRequest.prototype.backup = "";
+    
+                        /**
+                         * RestoreDatabaseRequest encryptionConfig.
+                         * @member {google.firestore.admin.v1.Database.IEncryptionConfig|null|undefined} encryptionConfig
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseRequest
+                         * @instance
+                         */
+                        RestoreDatabaseRequest.prototype.encryptionConfig = null;
+    
+                        /**
+                         * Creates a RestoreDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseRequest
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.RestoreDatabaseRequest} RestoreDatabaseRequest
+                         */
+                        RestoreDatabaseRequest.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.RestoreDatabaseRequest)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.RestoreDatabaseRequest();
+                            if (object.parent != null)
+                                message.parent = String(object.parent);
+                            if (object.databaseId != null)
+                                message.databaseId = String(object.databaseId);
+                            if (object.backup != null)
+                                message.backup = String(object.backup);
+                            if (object.encryptionConfig != null) {
+                                if (typeof object.encryptionConfig !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.RestoreDatabaseRequest.encryptionConfig: object expected");
+                                message.encryptionConfig = $root.google.firestore.admin.v1.Database.EncryptionConfig.fromObject(object.encryptionConfig);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a RestoreDatabaseRequest message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseRequest
+                         * @static
+                         * @param {google.firestore.admin.v1.RestoreDatabaseRequest} message RestoreDatabaseRequest
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        RestoreDatabaseRequest.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.parent = "";
+                                object.databaseId = "";
+                                object.backup = "";
+                                object.encryptionConfig = null;
+                            }
+                            if (message.parent != null && message.hasOwnProperty("parent"))
+                                object.parent = message.parent;
+                            if (message.databaseId != null && message.hasOwnProperty("databaseId"))
+                                object.databaseId = message.databaseId;
+                            if (message.backup != null && message.hasOwnProperty("backup"))
+                                object.backup = message.backup;
+                            if (message.encryptionConfig != null && message.hasOwnProperty("encryptionConfig"))
+                                object.encryptionConfig = $root.google.firestore.admin.v1.Database.EncryptionConfig.toObject(message.encryptionConfig, options);
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this RestoreDatabaseRequest to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseRequest
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        RestoreDatabaseRequest.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for RestoreDatabaseRequest
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseRequest
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        RestoreDatabaseRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.RestoreDatabaseRequest";
+                        };
+    
+                        return RestoreDatabaseRequest;
                     })();
     
                     v1.IndexOperationMetadata = (function() {
@@ -4620,6 +8285,8 @@
                          * @property {google.firestore.admin.v1.IProgress|null} [progressBytes] ExportDocumentsMetadata progressBytes
                          * @property {Array.<string>|null} [collectionIds] ExportDocumentsMetadata collectionIds
                          * @property {string|null} [outputUriPrefix] ExportDocumentsMetadata outputUriPrefix
+                         * @property {Array.<string>|null} [namespaceIds] ExportDocumentsMetadata namespaceIds
+                         * @property {google.protobuf.ITimestamp|null} [snapshotTime] ExportDocumentsMetadata snapshotTime
                          */
     
                         /**
@@ -4632,6 +8299,7 @@
                          */
                         function ExportDocumentsMetadata(properties) {
                             this.collectionIds = [];
+                            this.namespaceIds = [];
                             if (properties)
                                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                                     if (properties[keys[i]] != null)
@@ -4693,6 +8361,22 @@
                          * @instance
                          */
                         ExportDocumentsMetadata.prototype.outputUriPrefix = "";
+    
+                        /**
+                         * ExportDocumentsMetadata namespaceIds.
+                         * @member {Array.<string>} namespaceIds
+                         * @memberof google.firestore.admin.v1.ExportDocumentsMetadata
+                         * @instance
+                         */
+                        ExportDocumentsMetadata.prototype.namespaceIds = $util.emptyArray;
+    
+                        /**
+                         * ExportDocumentsMetadata snapshotTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} snapshotTime
+                         * @memberof google.firestore.admin.v1.ExportDocumentsMetadata
+                         * @instance
+                         */
+                        ExportDocumentsMetadata.prototype.snapshotTime = null;
     
                         /**
                          * Creates an ExportDocumentsMetadata message from a plain object. Also converts values to their respective internal types.
@@ -4775,6 +8459,18 @@
                             }
                             if (object.outputUriPrefix != null)
                                 message.outputUriPrefix = String(object.outputUriPrefix);
+                            if (object.namespaceIds) {
+                                if (!Array.isArray(object.namespaceIds))
+                                    throw TypeError(".google.firestore.admin.v1.ExportDocumentsMetadata.namespaceIds: array expected");
+                                message.namespaceIds = [];
+                                for (var i = 0; i < object.namespaceIds.length; ++i)
+                                    message.namespaceIds[i] = String(object.namespaceIds[i]);
+                            }
+                            if (object.snapshotTime != null) {
+                                if (typeof object.snapshotTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.ExportDocumentsMetadata.snapshotTime: object expected");
+                                message.snapshotTime = $root.google.protobuf.Timestamp.fromObject(object.snapshotTime);
+                            }
                             return message;
                         };
     
@@ -4791,8 +8487,10 @@
                             if (!options)
                                 options = {};
                             var object = {};
-                            if (options.arrays || options.defaults)
+                            if (options.arrays || options.defaults) {
                                 object.collectionIds = [];
+                                object.namespaceIds = [];
+                            }
                             if (options.defaults) {
                                 object.startTime = null;
                                 object.endTime = null;
@@ -4800,6 +8498,7 @@
                                 object.progressDocuments = null;
                                 object.progressBytes = null;
                                 object.outputUriPrefix = "";
+                                object.snapshotTime = null;
                             }
                             if (message.startTime != null && message.hasOwnProperty("startTime"))
                                 object.startTime = $root.google.protobuf.Timestamp.toObject(message.startTime, options);
@@ -4818,6 +8517,13 @@
                             }
                             if (message.outputUriPrefix != null && message.hasOwnProperty("outputUriPrefix"))
                                 object.outputUriPrefix = message.outputUriPrefix;
+                            if (message.namespaceIds && message.namespaceIds.length) {
+                                object.namespaceIds = [];
+                                for (var j = 0; j < message.namespaceIds.length; ++j)
+                                    object.namespaceIds[j] = message.namespaceIds[j];
+                            }
+                            if (message.snapshotTime != null && message.hasOwnProperty("snapshotTime"))
+                                object.snapshotTime = $root.google.protobuf.Timestamp.toObject(message.snapshotTime, options);
                             return object;
                         };
     
@@ -4863,6 +8569,7 @@
                          * @property {google.firestore.admin.v1.IProgress|null} [progressBytes] ImportDocumentsMetadata progressBytes
                          * @property {Array.<string>|null} [collectionIds] ImportDocumentsMetadata collectionIds
                          * @property {string|null} [inputUriPrefix] ImportDocumentsMetadata inputUriPrefix
+                         * @property {Array.<string>|null} [namespaceIds] ImportDocumentsMetadata namespaceIds
                          */
     
                         /**
@@ -4875,6 +8582,7 @@
                          */
                         function ImportDocumentsMetadata(properties) {
                             this.collectionIds = [];
+                            this.namespaceIds = [];
                             if (properties)
                                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                                     if (properties[keys[i]] != null)
@@ -4936,6 +8644,14 @@
                          * @instance
                          */
                         ImportDocumentsMetadata.prototype.inputUriPrefix = "";
+    
+                        /**
+                         * ImportDocumentsMetadata namespaceIds.
+                         * @member {Array.<string>} namespaceIds
+                         * @memberof google.firestore.admin.v1.ImportDocumentsMetadata
+                         * @instance
+                         */
+                        ImportDocumentsMetadata.prototype.namespaceIds = $util.emptyArray;
     
                         /**
                          * Creates an ImportDocumentsMetadata message from a plain object. Also converts values to their respective internal types.
@@ -5018,6 +8734,13 @@
                             }
                             if (object.inputUriPrefix != null)
                                 message.inputUriPrefix = String(object.inputUriPrefix);
+                            if (object.namespaceIds) {
+                                if (!Array.isArray(object.namespaceIds))
+                                    throw TypeError(".google.firestore.admin.v1.ImportDocumentsMetadata.namespaceIds: array expected");
+                                message.namespaceIds = [];
+                                for (var i = 0; i < object.namespaceIds.length; ++i)
+                                    message.namespaceIds[i] = String(object.namespaceIds[i]);
+                            }
                             return message;
                         };
     
@@ -5034,8 +8757,10 @@
                             if (!options)
                                 options = {};
                             var object = {};
-                            if (options.arrays || options.defaults)
+                            if (options.arrays || options.defaults) {
                                 object.collectionIds = [];
+                                object.namespaceIds = [];
+                            }
                             if (options.defaults) {
                                 object.startTime = null;
                                 object.endTime = null;
@@ -5061,6 +8786,11 @@
                             }
                             if (message.inputUriPrefix != null && message.hasOwnProperty("inputUriPrefix"))
                                 object.inputUriPrefix = message.inputUriPrefix;
+                            if (message.namespaceIds && message.namespaceIds.length) {
+                                object.namespaceIds = [];
+                                for (var j = 0; j < message.namespaceIds.length; ++j)
+                                    object.namespaceIds[j] = message.namespaceIds[j];
+                            }
                             return object;
                         };
     
@@ -5091,6 +8821,276 @@
                         };
     
                         return ImportDocumentsMetadata;
+                    })();
+    
+                    v1.BulkDeleteDocumentsMetadata = (function() {
+    
+                        /**
+                         * Properties of a BulkDeleteDocumentsMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IBulkDeleteDocumentsMetadata
+                         * @property {google.protobuf.ITimestamp|null} [startTime] BulkDeleteDocumentsMetadata startTime
+                         * @property {google.protobuf.ITimestamp|null} [endTime] BulkDeleteDocumentsMetadata endTime
+                         * @property {google.firestore.admin.v1.OperationState|null} [operationState] BulkDeleteDocumentsMetadata operationState
+                         * @property {google.firestore.admin.v1.IProgress|null} [progressDocuments] BulkDeleteDocumentsMetadata progressDocuments
+                         * @property {google.firestore.admin.v1.IProgress|null} [progressBytes] BulkDeleteDocumentsMetadata progressBytes
+                         * @property {Array.<string>|null} [collectionIds] BulkDeleteDocumentsMetadata collectionIds
+                         * @property {Array.<string>|null} [namespaceIds] BulkDeleteDocumentsMetadata namespaceIds
+                         * @property {google.protobuf.ITimestamp|null} [snapshotTime] BulkDeleteDocumentsMetadata snapshotTime
+                         */
+    
+                        /**
+                         * Constructs a new BulkDeleteDocumentsMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a BulkDeleteDocumentsMetadata.
+                         * @implements IBulkDeleteDocumentsMetadata
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IBulkDeleteDocumentsMetadata=} [properties] Properties to set
+                         */
+                        function BulkDeleteDocumentsMetadata(properties) {
+                            this.collectionIds = [];
+                            this.namespaceIds = [];
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * BulkDeleteDocumentsMetadata startTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} startTime
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.startTime = null;
+    
+                        /**
+                         * BulkDeleteDocumentsMetadata endTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} endTime
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.endTime = null;
+    
+                        /**
+                         * BulkDeleteDocumentsMetadata operationState.
+                         * @member {google.firestore.admin.v1.OperationState} operationState
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.operationState = 0;
+    
+                        /**
+                         * BulkDeleteDocumentsMetadata progressDocuments.
+                         * @member {google.firestore.admin.v1.IProgress|null|undefined} progressDocuments
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.progressDocuments = null;
+    
+                        /**
+                         * BulkDeleteDocumentsMetadata progressBytes.
+                         * @member {google.firestore.admin.v1.IProgress|null|undefined} progressBytes
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.progressBytes = null;
+    
+                        /**
+                         * BulkDeleteDocumentsMetadata collectionIds.
+                         * @member {Array.<string>} collectionIds
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.collectionIds = $util.emptyArray;
+    
+                        /**
+                         * BulkDeleteDocumentsMetadata namespaceIds.
+                         * @member {Array.<string>} namespaceIds
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.namespaceIds = $util.emptyArray;
+    
+                        /**
+                         * BulkDeleteDocumentsMetadata snapshotTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} snapshotTime
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.snapshotTime = null;
+    
+                        /**
+                         * Creates a BulkDeleteDocumentsMetadata message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.BulkDeleteDocumentsMetadata} BulkDeleteDocumentsMetadata
+                         */
+                        BulkDeleteDocumentsMetadata.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.BulkDeleteDocumentsMetadata)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.BulkDeleteDocumentsMetadata();
+                            if (object.startTime != null) {
+                                if (typeof object.startTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.startTime: object expected");
+                                message.startTime = $root.google.protobuf.Timestamp.fromObject(object.startTime);
+                            }
+                            if (object.endTime != null) {
+                                if (typeof object.endTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.endTime: object expected");
+                                message.endTime = $root.google.protobuf.Timestamp.fromObject(object.endTime);
+                            }
+                            switch (object.operationState) {
+                            default:
+                                if (typeof object.operationState === "number") {
+                                    message.operationState = object.operationState;
+                                    break;
+                                }
+                                break;
+                            case "OPERATION_STATE_UNSPECIFIED":
+                            case 0:
+                                message.operationState = 0;
+                                break;
+                            case "INITIALIZING":
+                            case 1:
+                                message.operationState = 1;
+                                break;
+                            case "PROCESSING":
+                            case 2:
+                                message.operationState = 2;
+                                break;
+                            case "CANCELLING":
+                            case 3:
+                                message.operationState = 3;
+                                break;
+                            case "FINALIZING":
+                            case 4:
+                                message.operationState = 4;
+                                break;
+                            case "SUCCESSFUL":
+                            case 5:
+                                message.operationState = 5;
+                                break;
+                            case "FAILED":
+                            case 6:
+                                message.operationState = 6;
+                                break;
+                            case "CANCELLED":
+                            case 7:
+                                message.operationState = 7;
+                                break;
+                            }
+                            if (object.progressDocuments != null) {
+                                if (typeof object.progressDocuments !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.progressDocuments: object expected");
+                                message.progressDocuments = $root.google.firestore.admin.v1.Progress.fromObject(object.progressDocuments);
+                            }
+                            if (object.progressBytes != null) {
+                                if (typeof object.progressBytes !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.progressBytes: object expected");
+                                message.progressBytes = $root.google.firestore.admin.v1.Progress.fromObject(object.progressBytes);
+                            }
+                            if (object.collectionIds) {
+                                if (!Array.isArray(object.collectionIds))
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.collectionIds: array expected");
+                                message.collectionIds = [];
+                                for (var i = 0; i < object.collectionIds.length; ++i)
+                                    message.collectionIds[i] = String(object.collectionIds[i]);
+                            }
+                            if (object.namespaceIds) {
+                                if (!Array.isArray(object.namespaceIds))
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.namespaceIds: array expected");
+                                message.namespaceIds = [];
+                                for (var i = 0; i < object.namespaceIds.length; ++i)
+                                    message.namespaceIds[i] = String(object.namespaceIds[i]);
+                            }
+                            if (object.snapshotTime != null) {
+                                if (typeof object.snapshotTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.BulkDeleteDocumentsMetadata.snapshotTime: object expected");
+                                message.snapshotTime = $root.google.protobuf.Timestamp.fromObject(object.snapshotTime);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a BulkDeleteDocumentsMetadata message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @static
+                         * @param {google.firestore.admin.v1.BulkDeleteDocumentsMetadata} message BulkDeleteDocumentsMetadata
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        BulkDeleteDocumentsMetadata.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.arrays || options.defaults) {
+                                object.collectionIds = [];
+                                object.namespaceIds = [];
+                            }
+                            if (options.defaults) {
+                                object.startTime = null;
+                                object.endTime = null;
+                                object.operationState = options.enums === String ? "OPERATION_STATE_UNSPECIFIED" : 0;
+                                object.progressDocuments = null;
+                                object.progressBytes = null;
+                                object.snapshotTime = null;
+                            }
+                            if (message.startTime != null && message.hasOwnProperty("startTime"))
+                                object.startTime = $root.google.protobuf.Timestamp.toObject(message.startTime, options);
+                            if (message.endTime != null && message.hasOwnProperty("endTime"))
+                                object.endTime = $root.google.protobuf.Timestamp.toObject(message.endTime, options);
+                            if (message.operationState != null && message.hasOwnProperty("operationState"))
+                                object.operationState = options.enums === String ? $root.google.firestore.admin.v1.OperationState[message.operationState] === undefined ? message.operationState : $root.google.firestore.admin.v1.OperationState[message.operationState] : message.operationState;
+                            if (message.progressDocuments != null && message.hasOwnProperty("progressDocuments"))
+                                object.progressDocuments = $root.google.firestore.admin.v1.Progress.toObject(message.progressDocuments, options);
+                            if (message.progressBytes != null && message.hasOwnProperty("progressBytes"))
+                                object.progressBytes = $root.google.firestore.admin.v1.Progress.toObject(message.progressBytes, options);
+                            if (message.collectionIds && message.collectionIds.length) {
+                                object.collectionIds = [];
+                                for (var j = 0; j < message.collectionIds.length; ++j)
+                                    object.collectionIds[j] = message.collectionIds[j];
+                            }
+                            if (message.namespaceIds && message.namespaceIds.length) {
+                                object.namespaceIds = [];
+                                for (var j = 0; j < message.namespaceIds.length; ++j)
+                                    object.namespaceIds[j] = message.namespaceIds[j];
+                            }
+                            if (message.snapshotTime != null && message.hasOwnProperty("snapshotTime"))
+                                object.snapshotTime = $root.google.protobuf.Timestamp.toObject(message.snapshotTime, options);
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this BulkDeleteDocumentsMetadata to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        BulkDeleteDocumentsMetadata.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for BulkDeleteDocumentsMetadata
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.BulkDeleteDocumentsMetadata
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        BulkDeleteDocumentsMetadata.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.BulkDeleteDocumentsMetadata";
+                        };
+    
+                        return BulkDeleteDocumentsMetadata;
                     })();
     
                     v1.ExportDocumentsResponse = (function() {
@@ -5191,30 +9191,220 @@
                         return ExportDocumentsResponse;
                     })();
     
-                    /**
-                     * OperationState enum.
-                     * @name google.firestore.admin.v1.OperationState
-                     * @enum {string}
-                     * @property {string} OPERATION_STATE_UNSPECIFIED=OPERATION_STATE_UNSPECIFIED OPERATION_STATE_UNSPECIFIED value
-                     * @property {string} INITIALIZING=INITIALIZING INITIALIZING value
-                     * @property {string} PROCESSING=PROCESSING PROCESSING value
-                     * @property {string} CANCELLING=CANCELLING CANCELLING value
-                     * @property {string} FINALIZING=FINALIZING FINALIZING value
-                     * @property {string} SUCCESSFUL=SUCCESSFUL SUCCESSFUL value
-                     * @property {string} FAILED=FAILED FAILED value
-                     * @property {string} CANCELLED=CANCELLED CANCELLED value
-                     */
-                    v1.OperationState = (function() {
-                        var valuesById = {}, values = Object.create(valuesById);
-                        values[valuesById[0] = "OPERATION_STATE_UNSPECIFIED"] = "OPERATION_STATE_UNSPECIFIED";
-                        values[valuesById[1] = "INITIALIZING"] = "INITIALIZING";
-                        values[valuesById[2] = "PROCESSING"] = "PROCESSING";
-                        values[valuesById[3] = "CANCELLING"] = "CANCELLING";
-                        values[valuesById[4] = "FINALIZING"] = "FINALIZING";
-                        values[valuesById[5] = "SUCCESSFUL"] = "SUCCESSFUL";
-                        values[valuesById[6] = "FAILED"] = "FAILED";
-                        values[valuesById[7] = "CANCELLED"] = "CANCELLED";
-                        return values;
+                    v1.RestoreDatabaseMetadata = (function() {
+    
+                        /**
+                         * Properties of a RestoreDatabaseMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IRestoreDatabaseMetadata
+                         * @property {google.protobuf.ITimestamp|null} [startTime] RestoreDatabaseMetadata startTime
+                         * @property {google.protobuf.ITimestamp|null} [endTime] RestoreDatabaseMetadata endTime
+                         * @property {google.firestore.admin.v1.OperationState|null} [operationState] RestoreDatabaseMetadata operationState
+                         * @property {string|null} [database] RestoreDatabaseMetadata database
+                         * @property {string|null} [backup] RestoreDatabaseMetadata backup
+                         * @property {google.firestore.admin.v1.IProgress|null} [progressPercentage] RestoreDatabaseMetadata progressPercentage
+                         */
+    
+                        /**
+                         * Constructs a new RestoreDatabaseMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a RestoreDatabaseMetadata.
+                         * @implements IRestoreDatabaseMetadata
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IRestoreDatabaseMetadata=} [properties] Properties to set
+                         */
+                        function RestoreDatabaseMetadata(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * RestoreDatabaseMetadata startTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} startTime
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseMetadata
+                         * @instance
+                         */
+                        RestoreDatabaseMetadata.prototype.startTime = null;
+    
+                        /**
+                         * RestoreDatabaseMetadata endTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} endTime
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseMetadata
+                         * @instance
+                         */
+                        RestoreDatabaseMetadata.prototype.endTime = null;
+    
+                        /**
+                         * RestoreDatabaseMetadata operationState.
+                         * @member {google.firestore.admin.v1.OperationState} operationState
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseMetadata
+                         * @instance
+                         */
+                        RestoreDatabaseMetadata.prototype.operationState = 0;
+    
+                        /**
+                         * RestoreDatabaseMetadata database.
+                         * @member {string} database
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseMetadata
+                         * @instance
+                         */
+                        RestoreDatabaseMetadata.prototype.database = "";
+    
+                        /**
+                         * RestoreDatabaseMetadata backup.
+                         * @member {string} backup
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseMetadata
+                         * @instance
+                         */
+                        RestoreDatabaseMetadata.prototype.backup = "";
+    
+                        /**
+                         * RestoreDatabaseMetadata progressPercentage.
+                         * @member {google.firestore.admin.v1.IProgress|null|undefined} progressPercentage
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseMetadata
+                         * @instance
+                         */
+                        RestoreDatabaseMetadata.prototype.progressPercentage = null;
+    
+                        /**
+                         * Creates a RestoreDatabaseMetadata message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseMetadata
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.RestoreDatabaseMetadata} RestoreDatabaseMetadata
+                         */
+                        RestoreDatabaseMetadata.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.RestoreDatabaseMetadata)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.RestoreDatabaseMetadata();
+                            if (object.startTime != null) {
+                                if (typeof object.startTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.RestoreDatabaseMetadata.startTime: object expected");
+                                message.startTime = $root.google.protobuf.Timestamp.fromObject(object.startTime);
+                            }
+                            if (object.endTime != null) {
+                                if (typeof object.endTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.RestoreDatabaseMetadata.endTime: object expected");
+                                message.endTime = $root.google.protobuf.Timestamp.fromObject(object.endTime);
+                            }
+                            switch (object.operationState) {
+                            default:
+                                if (typeof object.operationState === "number") {
+                                    message.operationState = object.operationState;
+                                    break;
+                                }
+                                break;
+                            case "OPERATION_STATE_UNSPECIFIED":
+                            case 0:
+                                message.operationState = 0;
+                                break;
+                            case "INITIALIZING":
+                            case 1:
+                                message.operationState = 1;
+                                break;
+                            case "PROCESSING":
+                            case 2:
+                                message.operationState = 2;
+                                break;
+                            case "CANCELLING":
+                            case 3:
+                                message.operationState = 3;
+                                break;
+                            case "FINALIZING":
+                            case 4:
+                                message.operationState = 4;
+                                break;
+                            case "SUCCESSFUL":
+                            case 5:
+                                message.operationState = 5;
+                                break;
+                            case "FAILED":
+                            case 6:
+                                message.operationState = 6;
+                                break;
+                            case "CANCELLED":
+                            case 7:
+                                message.operationState = 7;
+                                break;
+                            }
+                            if (object.database != null)
+                                message.database = String(object.database);
+                            if (object.backup != null)
+                                message.backup = String(object.backup);
+                            if (object.progressPercentage != null) {
+                                if (typeof object.progressPercentage !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.RestoreDatabaseMetadata.progressPercentage: object expected");
+                                message.progressPercentage = $root.google.firestore.admin.v1.Progress.fromObject(object.progressPercentage);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a RestoreDatabaseMetadata message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseMetadata
+                         * @static
+                         * @param {google.firestore.admin.v1.RestoreDatabaseMetadata} message RestoreDatabaseMetadata
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        RestoreDatabaseMetadata.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.startTime = null;
+                                object.endTime = null;
+                                object.operationState = options.enums === String ? "OPERATION_STATE_UNSPECIFIED" : 0;
+                                object.database = "";
+                                object.backup = "";
+                                object.progressPercentage = null;
+                            }
+                            if (message.startTime != null && message.hasOwnProperty("startTime"))
+                                object.startTime = $root.google.protobuf.Timestamp.toObject(message.startTime, options);
+                            if (message.endTime != null && message.hasOwnProperty("endTime"))
+                                object.endTime = $root.google.protobuf.Timestamp.toObject(message.endTime, options);
+                            if (message.operationState != null && message.hasOwnProperty("operationState"))
+                                object.operationState = options.enums === String ? $root.google.firestore.admin.v1.OperationState[message.operationState] === undefined ? message.operationState : $root.google.firestore.admin.v1.OperationState[message.operationState] : message.operationState;
+                            if (message.database != null && message.hasOwnProperty("database"))
+                                object.database = message.database;
+                            if (message.backup != null && message.hasOwnProperty("backup"))
+                                object.backup = message.backup;
+                            if (message.progressPercentage != null && message.hasOwnProperty("progressPercentage"))
+                                object.progressPercentage = $root.google.firestore.admin.v1.Progress.toObject(message.progressPercentage, options);
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this RestoreDatabaseMetadata to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseMetadata
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        RestoreDatabaseMetadata.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for RestoreDatabaseMetadata
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.RestoreDatabaseMetadata
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        RestoreDatabaseMetadata.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.RestoreDatabaseMetadata";
+                        };
+    
+                        return RestoreDatabaseMetadata;
                     })();
     
                     v1.Progress = (function() {
@@ -5358,6 +9548,528 @@
                         return Progress;
                     })();
     
+                    /**
+                     * OperationState enum.
+                     * @name google.firestore.admin.v1.OperationState
+                     * @enum {string}
+                     * @property {string} OPERATION_STATE_UNSPECIFIED=OPERATION_STATE_UNSPECIFIED OPERATION_STATE_UNSPECIFIED value
+                     * @property {string} INITIALIZING=INITIALIZING INITIALIZING value
+                     * @property {string} PROCESSING=PROCESSING PROCESSING value
+                     * @property {string} CANCELLING=CANCELLING CANCELLING value
+                     * @property {string} FINALIZING=FINALIZING FINALIZING value
+                     * @property {string} SUCCESSFUL=SUCCESSFUL SUCCESSFUL value
+                     * @property {string} FAILED=FAILED FAILED value
+                     * @property {string} CANCELLED=CANCELLED CANCELLED value
+                     */
+                    v1.OperationState = (function() {
+                        var valuesById = {}, values = Object.create(valuesById);
+                        values[valuesById[0] = "OPERATION_STATE_UNSPECIFIED"] = "OPERATION_STATE_UNSPECIFIED";
+                        values[valuesById[1] = "INITIALIZING"] = "INITIALIZING";
+                        values[valuesById[2] = "PROCESSING"] = "PROCESSING";
+                        values[valuesById[3] = "CANCELLING"] = "CANCELLING";
+                        values[valuesById[4] = "FINALIZING"] = "FINALIZING";
+                        values[valuesById[5] = "SUCCESSFUL"] = "SUCCESSFUL";
+                        values[valuesById[6] = "FAILED"] = "FAILED";
+                        values[valuesById[7] = "CANCELLED"] = "CANCELLED";
+                        return values;
+                    })();
+    
+                    v1.BackupSchedule = (function() {
+    
+                        /**
+                         * Properties of a BackupSchedule.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IBackupSchedule
+                         * @property {string|null} [name] BackupSchedule name
+                         * @property {google.protobuf.ITimestamp|null} [createTime] BackupSchedule createTime
+                         * @property {google.protobuf.ITimestamp|null} [updateTime] BackupSchedule updateTime
+                         * @property {google.protobuf.IDuration|null} [retention] BackupSchedule retention
+                         * @property {google.firestore.admin.v1.IDailyRecurrence|null} [dailyRecurrence] BackupSchedule dailyRecurrence
+                         * @property {google.firestore.admin.v1.IWeeklyRecurrence|null} [weeklyRecurrence] BackupSchedule weeklyRecurrence
+                         */
+    
+                        /**
+                         * Constructs a new BackupSchedule.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a BackupSchedule.
+                         * @implements IBackupSchedule
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IBackupSchedule=} [properties] Properties to set
+                         */
+                        function BackupSchedule(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * BackupSchedule name.
+                         * @member {string} name
+                         * @memberof google.firestore.admin.v1.BackupSchedule
+                         * @instance
+                         */
+                        BackupSchedule.prototype.name = "";
+    
+                        /**
+                         * BackupSchedule createTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} createTime
+                         * @memberof google.firestore.admin.v1.BackupSchedule
+                         * @instance
+                         */
+                        BackupSchedule.prototype.createTime = null;
+    
+                        /**
+                         * BackupSchedule updateTime.
+                         * @member {google.protobuf.ITimestamp|null|undefined} updateTime
+                         * @memberof google.firestore.admin.v1.BackupSchedule
+                         * @instance
+                         */
+                        BackupSchedule.prototype.updateTime = null;
+    
+                        /**
+                         * BackupSchedule retention.
+                         * @member {google.protobuf.IDuration|null|undefined} retention
+                         * @memberof google.firestore.admin.v1.BackupSchedule
+                         * @instance
+                         */
+                        BackupSchedule.prototype.retention = null;
+    
+                        /**
+                         * BackupSchedule dailyRecurrence.
+                         * @member {google.firestore.admin.v1.IDailyRecurrence|null|undefined} dailyRecurrence
+                         * @memberof google.firestore.admin.v1.BackupSchedule
+                         * @instance
+                         */
+                        BackupSchedule.prototype.dailyRecurrence = null;
+    
+                        /**
+                         * BackupSchedule weeklyRecurrence.
+                         * @member {google.firestore.admin.v1.IWeeklyRecurrence|null|undefined} weeklyRecurrence
+                         * @memberof google.firestore.admin.v1.BackupSchedule
+                         * @instance
+                         */
+                        BackupSchedule.prototype.weeklyRecurrence = null;
+    
+                        // OneOf field names bound to virtual getters and setters
+                        var $oneOfFields;
+    
+                        /**
+                         * BackupSchedule recurrence.
+                         * @member {"dailyRecurrence"|"weeklyRecurrence"|undefined} recurrence
+                         * @memberof google.firestore.admin.v1.BackupSchedule
+                         * @instance
+                         */
+                        Object.defineProperty(BackupSchedule.prototype, "recurrence", {
+                            get: $util.oneOfGetter($oneOfFields = ["dailyRecurrence", "weeklyRecurrence"]),
+                            set: $util.oneOfSetter($oneOfFields)
+                        });
+    
+                        /**
+                         * Creates a BackupSchedule message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.BackupSchedule
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.BackupSchedule} BackupSchedule
+                         */
+                        BackupSchedule.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.BackupSchedule)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.BackupSchedule();
+                            if (object.name != null)
+                                message.name = String(object.name);
+                            if (object.createTime != null) {
+                                if (typeof object.createTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.BackupSchedule.createTime: object expected");
+                                message.createTime = $root.google.protobuf.Timestamp.fromObject(object.createTime);
+                            }
+                            if (object.updateTime != null) {
+                                if (typeof object.updateTime !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.BackupSchedule.updateTime: object expected");
+                                message.updateTime = $root.google.protobuf.Timestamp.fromObject(object.updateTime);
+                            }
+                            if (object.retention != null) {
+                                if (typeof object.retention !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.BackupSchedule.retention: object expected");
+                                message.retention = $root.google.protobuf.Duration.fromObject(object.retention);
+                            }
+                            if (object.dailyRecurrence != null) {
+                                if (typeof object.dailyRecurrence !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.BackupSchedule.dailyRecurrence: object expected");
+                                message.dailyRecurrence = $root.google.firestore.admin.v1.DailyRecurrence.fromObject(object.dailyRecurrence);
+                            }
+                            if (object.weeklyRecurrence != null) {
+                                if (typeof object.weeklyRecurrence !== "object")
+                                    throw TypeError(".google.firestore.admin.v1.BackupSchedule.weeklyRecurrence: object expected");
+                                message.weeklyRecurrence = $root.google.firestore.admin.v1.WeeklyRecurrence.fromObject(object.weeklyRecurrence);
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a BackupSchedule message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.BackupSchedule
+                         * @static
+                         * @param {google.firestore.admin.v1.BackupSchedule} message BackupSchedule
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        BackupSchedule.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults) {
+                                object.name = "";
+                                object.createTime = null;
+                                object.retention = null;
+                                object.updateTime = null;
+                            }
+                            if (message.name != null && message.hasOwnProperty("name"))
+                                object.name = message.name;
+                            if (message.createTime != null && message.hasOwnProperty("createTime"))
+                                object.createTime = $root.google.protobuf.Timestamp.toObject(message.createTime, options);
+                            if (message.retention != null && message.hasOwnProperty("retention"))
+                                object.retention = $root.google.protobuf.Duration.toObject(message.retention, options);
+                            if (message.dailyRecurrence != null && message.hasOwnProperty("dailyRecurrence")) {
+                                object.dailyRecurrence = $root.google.firestore.admin.v1.DailyRecurrence.toObject(message.dailyRecurrence, options);
+                                if (options.oneofs)
+                                    object.recurrence = "dailyRecurrence";
+                            }
+                            if (message.weeklyRecurrence != null && message.hasOwnProperty("weeklyRecurrence")) {
+                                object.weeklyRecurrence = $root.google.firestore.admin.v1.WeeklyRecurrence.toObject(message.weeklyRecurrence, options);
+                                if (options.oneofs)
+                                    object.recurrence = "weeklyRecurrence";
+                            }
+                            if (message.updateTime != null && message.hasOwnProperty("updateTime"))
+                                object.updateTime = $root.google.protobuf.Timestamp.toObject(message.updateTime, options);
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this BackupSchedule to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.BackupSchedule
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        BackupSchedule.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for BackupSchedule
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.BackupSchedule
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        BackupSchedule.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.BackupSchedule";
+                        };
+    
+                        return BackupSchedule;
+                    })();
+    
+                    v1.DailyRecurrence = (function() {
+    
+                        /**
+                         * Properties of a DailyRecurrence.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IDailyRecurrence
+                         */
+    
+                        /**
+                         * Constructs a new DailyRecurrence.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a DailyRecurrence.
+                         * @implements IDailyRecurrence
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IDailyRecurrence=} [properties] Properties to set
+                         */
+                        function DailyRecurrence(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * Creates a DailyRecurrence message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.DailyRecurrence
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.DailyRecurrence} DailyRecurrence
+                         */
+                        DailyRecurrence.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.DailyRecurrence)
+                                return object;
+                            return new $root.google.firestore.admin.v1.DailyRecurrence();
+                        };
+    
+                        /**
+                         * Creates a plain object from a DailyRecurrence message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.DailyRecurrence
+                         * @static
+                         * @param {google.firestore.admin.v1.DailyRecurrence} message DailyRecurrence
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        DailyRecurrence.toObject = function toObject() {
+                            return {};
+                        };
+    
+                        /**
+                         * Converts this DailyRecurrence to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.DailyRecurrence
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        DailyRecurrence.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for DailyRecurrence
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.DailyRecurrence
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        DailyRecurrence.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.DailyRecurrence";
+                        };
+    
+                        return DailyRecurrence;
+                    })();
+    
+                    v1.WeeklyRecurrence = (function() {
+    
+                        /**
+                         * Properties of a WeeklyRecurrence.
+                         * @memberof google.firestore.admin.v1
+                         * @interface IWeeklyRecurrence
+                         * @property {google.type.DayOfWeek|null} [day] WeeklyRecurrence day
+                         */
+    
+                        /**
+                         * Constructs a new WeeklyRecurrence.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a WeeklyRecurrence.
+                         * @implements IWeeklyRecurrence
+                         * @constructor
+                         * @param {google.firestore.admin.v1.IWeeklyRecurrence=} [properties] Properties to set
+                         */
+                        function WeeklyRecurrence(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * WeeklyRecurrence day.
+                         * @member {google.type.DayOfWeek} day
+                         * @memberof google.firestore.admin.v1.WeeklyRecurrence
+                         * @instance
+                         */
+                        WeeklyRecurrence.prototype.day = 0;
+    
+                        /**
+                         * Creates a WeeklyRecurrence message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.WeeklyRecurrence
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.WeeklyRecurrence} WeeklyRecurrence
+                         */
+                        WeeklyRecurrence.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.WeeklyRecurrence)
+                                return object;
+                            var message = new $root.google.firestore.admin.v1.WeeklyRecurrence();
+                            switch (object.day) {
+                            default:
+                                if (typeof object.day === "number") {
+                                    message.day = object.day;
+                                    break;
+                                }
+                                break;
+                            case "DAY_OF_WEEK_UNSPECIFIED":
+                            case 0:
+                                message.day = 0;
+                                break;
+                            case "MONDAY":
+                            case 1:
+                                message.day = 1;
+                                break;
+                            case "TUESDAY":
+                            case 2:
+                                message.day = 2;
+                                break;
+                            case "WEDNESDAY":
+                            case 3:
+                                message.day = 3;
+                                break;
+                            case "THURSDAY":
+                            case 4:
+                                message.day = 4;
+                                break;
+                            case "FRIDAY":
+                            case 5:
+                                message.day = 5;
+                                break;
+                            case "SATURDAY":
+                            case 6:
+                                message.day = 6;
+                                break;
+                            case "SUNDAY":
+                            case 7:
+                                message.day = 7;
+                                break;
+                            }
+                            return message;
+                        };
+    
+                        /**
+                         * Creates a plain object from a WeeklyRecurrence message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.WeeklyRecurrence
+                         * @static
+                         * @param {google.firestore.admin.v1.WeeklyRecurrence} message WeeklyRecurrence
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        WeeklyRecurrence.toObject = function toObject(message, options) {
+                            if (!options)
+                                options = {};
+                            var object = {};
+                            if (options.defaults)
+                                object.day = options.enums === String ? "DAY_OF_WEEK_UNSPECIFIED" : 0;
+                            if (message.day != null && message.hasOwnProperty("day"))
+                                object.day = options.enums === String ? $root.google.type.DayOfWeek[message.day] === undefined ? message.day : $root.google.type.DayOfWeek[message.day] : message.day;
+                            return object;
+                        };
+    
+                        /**
+                         * Converts this WeeklyRecurrence to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.WeeklyRecurrence
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        WeeklyRecurrence.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for WeeklyRecurrence
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.WeeklyRecurrence
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        WeeklyRecurrence.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.WeeklyRecurrence";
+                        };
+    
+                        return WeeklyRecurrence;
+                    })();
+    
+                    v1.LocationMetadata = (function() {
+    
+                        /**
+                         * Properties of a LocationMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @interface ILocationMetadata
+                         */
+    
+                        /**
+                         * Constructs a new LocationMetadata.
+                         * @memberof google.firestore.admin.v1
+                         * @classdesc Represents a LocationMetadata.
+                         * @implements ILocationMetadata
+                         * @constructor
+                         * @param {google.firestore.admin.v1.ILocationMetadata=} [properties] Properties to set
+                         */
+                        function LocationMetadata(properties) {
+                            if (properties)
+                                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                    if (properties[keys[i]] != null)
+                                        this[keys[i]] = properties[keys[i]];
+                        }
+    
+                        /**
+                         * Creates a LocationMetadata message from a plain object. Also converts values to their respective internal types.
+                         * @function fromObject
+                         * @memberof google.firestore.admin.v1.LocationMetadata
+                         * @static
+                         * @param {Object.<string,*>} object Plain object
+                         * @returns {google.firestore.admin.v1.LocationMetadata} LocationMetadata
+                         */
+                        LocationMetadata.fromObject = function fromObject(object) {
+                            if (object instanceof $root.google.firestore.admin.v1.LocationMetadata)
+                                return object;
+                            return new $root.google.firestore.admin.v1.LocationMetadata();
+                        };
+    
+                        /**
+                         * Creates a plain object from a LocationMetadata message. Also converts values to other types if specified.
+                         * @function toObject
+                         * @memberof google.firestore.admin.v1.LocationMetadata
+                         * @static
+                         * @param {google.firestore.admin.v1.LocationMetadata} message LocationMetadata
+                         * @param {$protobuf.IConversionOptions} [options] Conversion options
+                         * @returns {Object.<string,*>} Plain object
+                         */
+                        LocationMetadata.toObject = function toObject() {
+                            return {};
+                        };
+    
+                        /**
+                         * Converts this LocationMetadata to JSON.
+                         * @function toJSON
+                         * @memberof google.firestore.admin.v1.LocationMetadata
+                         * @instance
+                         * @returns {Object.<string,*>} JSON object
+                         */
+                        LocationMetadata.prototype.toJSON = function toJSON() {
+                            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                        };
+    
+                        /**
+                         * Gets the default type url for LocationMetadata
+                         * @function getTypeUrl
+                         * @memberof google.firestore.admin.v1.LocationMetadata
+                         * @static
+                         * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns {string} The default type url
+                         */
+                        LocationMetadata.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                            if (typeUrlPrefix === undefined) {
+                                typeUrlPrefix = "type.googleapis.com";
+                            }
+                            return typeUrlPrefix + "/google.firestore.admin.v1.LocationMetadata";
+                        };
+    
+                        return LocationMetadata;
+                    })();
+    
                     return v1;
                 })();
     
@@ -5376,6 +10088,412 @@
              */
             var api = {};
     
+            /**
+             * FieldBehavior enum.
+             * @name google.api.FieldBehavior
+             * @enum {string}
+             * @property {string} FIELD_BEHAVIOR_UNSPECIFIED=FIELD_BEHAVIOR_UNSPECIFIED FIELD_BEHAVIOR_UNSPECIFIED value
+             * @property {string} OPTIONAL=OPTIONAL OPTIONAL value
+             * @property {string} REQUIRED=REQUIRED REQUIRED value
+             * @property {string} OUTPUT_ONLY=OUTPUT_ONLY OUTPUT_ONLY value
+             * @property {string} INPUT_ONLY=INPUT_ONLY INPUT_ONLY value
+             * @property {string} IMMUTABLE=IMMUTABLE IMMUTABLE value
+             * @property {string} UNORDERED_LIST=UNORDERED_LIST UNORDERED_LIST value
+             * @property {string} NON_EMPTY_DEFAULT=NON_EMPTY_DEFAULT NON_EMPTY_DEFAULT value
+             * @property {string} IDENTIFIER=IDENTIFIER IDENTIFIER value
+             */
+            api.FieldBehavior = (function() {
+                var valuesById = {}, values = Object.create(valuesById);
+                values[valuesById[0] = "FIELD_BEHAVIOR_UNSPECIFIED"] = "FIELD_BEHAVIOR_UNSPECIFIED";
+                values[valuesById[1] = "OPTIONAL"] = "OPTIONAL";
+                values[valuesById[2] = "REQUIRED"] = "REQUIRED";
+                values[valuesById[3] = "OUTPUT_ONLY"] = "OUTPUT_ONLY";
+                values[valuesById[4] = "INPUT_ONLY"] = "INPUT_ONLY";
+                values[valuesById[5] = "IMMUTABLE"] = "IMMUTABLE";
+                values[valuesById[6] = "UNORDERED_LIST"] = "UNORDERED_LIST";
+                values[valuesById[7] = "NON_EMPTY_DEFAULT"] = "NON_EMPTY_DEFAULT";
+                values[valuesById[8] = "IDENTIFIER"] = "IDENTIFIER";
+                return values;
+            })();
+    
+            api.ResourceDescriptor = (function() {
+    
+                /**
+                 * Properties of a ResourceDescriptor.
+                 * @memberof google.api
+                 * @interface IResourceDescriptor
+                 * @property {string|null} [type] ResourceDescriptor type
+                 * @property {Array.<string>|null} [pattern] ResourceDescriptor pattern
+                 * @property {string|null} [nameField] ResourceDescriptor nameField
+                 * @property {google.api.ResourceDescriptor.History|null} [history] ResourceDescriptor history
+                 * @property {string|null} [plural] ResourceDescriptor plural
+                 * @property {string|null} [singular] ResourceDescriptor singular
+                 * @property {Array.<google.api.ResourceDescriptor.Style>|null} [style] ResourceDescriptor style
+                 */
+    
+                /**
+                 * Constructs a new ResourceDescriptor.
+                 * @memberof google.api
+                 * @classdesc Represents a ResourceDescriptor.
+                 * @implements IResourceDescriptor
+                 * @constructor
+                 * @param {google.api.IResourceDescriptor=} [properties] Properties to set
+                 */
+                function ResourceDescriptor(properties) {
+                    this.pattern = [];
+                    this.style = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * ResourceDescriptor type.
+                 * @member {string} type
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 */
+                ResourceDescriptor.prototype.type = "";
+    
+                /**
+                 * ResourceDescriptor pattern.
+                 * @member {Array.<string>} pattern
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 */
+                ResourceDescriptor.prototype.pattern = $util.emptyArray;
+    
+                /**
+                 * ResourceDescriptor nameField.
+                 * @member {string} nameField
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 */
+                ResourceDescriptor.prototype.nameField = "";
+    
+                /**
+                 * ResourceDescriptor history.
+                 * @member {google.api.ResourceDescriptor.History} history
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 */
+                ResourceDescriptor.prototype.history = 0;
+    
+                /**
+                 * ResourceDescriptor plural.
+                 * @member {string} plural
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 */
+                ResourceDescriptor.prototype.plural = "";
+    
+                /**
+                 * ResourceDescriptor singular.
+                 * @member {string} singular
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 */
+                ResourceDescriptor.prototype.singular = "";
+    
+                /**
+                 * ResourceDescriptor style.
+                 * @member {Array.<google.api.ResourceDescriptor.Style>} style
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 */
+                ResourceDescriptor.prototype.style = $util.emptyArray;
+    
+                /**
+                 * Creates a ResourceDescriptor message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.ResourceDescriptor
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.ResourceDescriptor} ResourceDescriptor
+                 */
+                ResourceDescriptor.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.ResourceDescriptor)
+                        return object;
+                    var message = new $root.google.api.ResourceDescriptor();
+                    if (object.type != null)
+                        message.type = String(object.type);
+                    if (object.pattern) {
+                        if (!Array.isArray(object.pattern))
+                            throw TypeError(".google.api.ResourceDescriptor.pattern: array expected");
+                        message.pattern = [];
+                        for (var i = 0; i < object.pattern.length; ++i)
+                            message.pattern[i] = String(object.pattern[i]);
+                    }
+                    if (object.nameField != null)
+                        message.nameField = String(object.nameField);
+                    switch (object.history) {
+                    default:
+                        if (typeof object.history === "number") {
+                            message.history = object.history;
+                            break;
+                        }
+                        break;
+                    case "HISTORY_UNSPECIFIED":
+                    case 0:
+                        message.history = 0;
+                        break;
+                    case "ORIGINALLY_SINGLE_PATTERN":
+                    case 1:
+                        message.history = 1;
+                        break;
+                    case "FUTURE_MULTI_PATTERN":
+                    case 2:
+                        message.history = 2;
+                        break;
+                    }
+                    if (object.plural != null)
+                        message.plural = String(object.plural);
+                    if (object.singular != null)
+                        message.singular = String(object.singular);
+                    if (object.style) {
+                        if (!Array.isArray(object.style))
+                            throw TypeError(".google.api.ResourceDescriptor.style: array expected");
+                        message.style = [];
+                        for (var i = 0; i < object.style.length; ++i)
+                            switch (object.style[i]) {
+                            default:
+                                if (typeof object.style[i] === "number") {
+                                    message.style[i] = object.style[i];
+                                    break;
+                                }
+                            case "STYLE_UNSPECIFIED":
+                            case 0:
+                                message.style[i] = 0;
+                                break;
+                            case "DECLARATIVE_FRIENDLY":
+                            case 1:
+                                message.style[i] = 1;
+                                break;
+                            }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a ResourceDescriptor message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.ResourceDescriptor
+                 * @static
+                 * @param {google.api.ResourceDescriptor} message ResourceDescriptor
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ResourceDescriptor.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults) {
+                        object.pattern = [];
+                        object.style = [];
+                    }
+                    if (options.defaults) {
+                        object.type = "";
+                        object.nameField = "";
+                        object.history = options.enums === String ? "HISTORY_UNSPECIFIED" : 0;
+                        object.plural = "";
+                        object.singular = "";
+                    }
+                    if (message.type != null && message.hasOwnProperty("type"))
+                        object.type = message.type;
+                    if (message.pattern && message.pattern.length) {
+                        object.pattern = [];
+                        for (var j = 0; j < message.pattern.length; ++j)
+                            object.pattern[j] = message.pattern[j];
+                    }
+                    if (message.nameField != null && message.hasOwnProperty("nameField"))
+                        object.nameField = message.nameField;
+                    if (message.history != null && message.hasOwnProperty("history"))
+                        object.history = options.enums === String ? $root.google.api.ResourceDescriptor.History[message.history] === undefined ? message.history : $root.google.api.ResourceDescriptor.History[message.history] : message.history;
+                    if (message.plural != null && message.hasOwnProperty("plural"))
+                        object.plural = message.plural;
+                    if (message.singular != null && message.hasOwnProperty("singular"))
+                        object.singular = message.singular;
+                    if (message.style && message.style.length) {
+                        object.style = [];
+                        for (var j = 0; j < message.style.length; ++j)
+                            object.style[j] = options.enums === String ? $root.google.api.ResourceDescriptor.Style[message.style[j]] === undefined ? message.style[j] : $root.google.api.ResourceDescriptor.Style[message.style[j]] : message.style[j];
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this ResourceDescriptor to JSON.
+                 * @function toJSON
+                 * @memberof google.api.ResourceDescriptor
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ResourceDescriptor.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for ResourceDescriptor
+                 * @function getTypeUrl
+                 * @memberof google.api.ResourceDescriptor
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                ResourceDescriptor.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.api.ResourceDescriptor";
+                };
+    
+                /**
+                 * History enum.
+                 * @name google.api.ResourceDescriptor.History
+                 * @enum {string}
+                 * @property {string} HISTORY_UNSPECIFIED=HISTORY_UNSPECIFIED HISTORY_UNSPECIFIED value
+                 * @property {string} ORIGINALLY_SINGLE_PATTERN=ORIGINALLY_SINGLE_PATTERN ORIGINALLY_SINGLE_PATTERN value
+                 * @property {string} FUTURE_MULTI_PATTERN=FUTURE_MULTI_PATTERN FUTURE_MULTI_PATTERN value
+                 */
+                ResourceDescriptor.History = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "HISTORY_UNSPECIFIED"] = "HISTORY_UNSPECIFIED";
+                    values[valuesById[1] = "ORIGINALLY_SINGLE_PATTERN"] = "ORIGINALLY_SINGLE_PATTERN";
+                    values[valuesById[2] = "FUTURE_MULTI_PATTERN"] = "FUTURE_MULTI_PATTERN";
+                    return values;
+                })();
+    
+                /**
+                 * Style enum.
+                 * @name google.api.ResourceDescriptor.Style
+                 * @enum {string}
+                 * @property {string} STYLE_UNSPECIFIED=STYLE_UNSPECIFIED STYLE_UNSPECIFIED value
+                 * @property {string} DECLARATIVE_FRIENDLY=DECLARATIVE_FRIENDLY DECLARATIVE_FRIENDLY value
+                 */
+                ResourceDescriptor.Style = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "STYLE_UNSPECIFIED"] = "STYLE_UNSPECIFIED";
+                    values[valuesById[1] = "DECLARATIVE_FRIENDLY"] = "DECLARATIVE_FRIENDLY";
+                    return values;
+                })();
+    
+                return ResourceDescriptor;
+            })();
+    
+            api.ResourceReference = (function() {
+    
+                /**
+                 * Properties of a ResourceReference.
+                 * @memberof google.api
+                 * @interface IResourceReference
+                 * @property {string|null} [type] ResourceReference type
+                 * @property {string|null} [childType] ResourceReference childType
+                 */
+    
+                /**
+                 * Constructs a new ResourceReference.
+                 * @memberof google.api
+                 * @classdesc Represents a ResourceReference.
+                 * @implements IResourceReference
+                 * @constructor
+                 * @param {google.api.IResourceReference=} [properties] Properties to set
+                 */
+                function ResourceReference(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * ResourceReference type.
+                 * @member {string} type
+                 * @memberof google.api.ResourceReference
+                 * @instance
+                 */
+                ResourceReference.prototype.type = "";
+    
+                /**
+                 * ResourceReference childType.
+                 * @member {string} childType
+                 * @memberof google.api.ResourceReference
+                 * @instance
+                 */
+                ResourceReference.prototype.childType = "";
+    
+                /**
+                 * Creates a ResourceReference message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.ResourceReference
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.ResourceReference} ResourceReference
+                 */
+                ResourceReference.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.ResourceReference)
+                        return object;
+                    var message = new $root.google.api.ResourceReference();
+                    if (object.type != null)
+                        message.type = String(object.type);
+                    if (object.childType != null)
+                        message.childType = String(object.childType);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a ResourceReference message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.ResourceReference
+                 * @static
+                 * @param {google.api.ResourceReference} message ResourceReference
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ResourceReference.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.type = "";
+                        object.childType = "";
+                    }
+                    if (message.type != null && message.hasOwnProperty("type"))
+                        object.type = message.type;
+                    if (message.childType != null && message.hasOwnProperty("childType"))
+                        object.childType = message.childType;
+                    return object;
+                };
+    
+                /**
+                 * Converts this ResourceReference to JSON.
+                 * @function toJSON
+                 * @memberof google.api.ResourceReference
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ResourceReference.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for ResourceReference
+                 * @function getTypeUrl
+                 * @memberof google.api.ResourceReference
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                ResourceReference.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.api.ResourceReference";
+                };
+    
+                return ResourceReference;
+            })();
+    
             api.Http = (function() {
     
                 /**
@@ -5383,6 +10501,7 @@
                  * @memberof google.api
                  * @interface IHttp
                  * @property {Array.<google.api.IHttpRule>|null} [rules] Http rules
+                 * @property {boolean|null} [fullyDecodeReservedExpansion] Http fullyDecodeReservedExpansion
                  */
     
                 /**
@@ -5410,6 +10529,14 @@
                 Http.prototype.rules = $util.emptyArray;
     
                 /**
+                 * Http fullyDecodeReservedExpansion.
+                 * @member {boolean} fullyDecodeReservedExpansion
+                 * @memberof google.api.Http
+                 * @instance
+                 */
+                Http.prototype.fullyDecodeReservedExpansion = false;
+    
+                /**
                  * Creates a Http message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.api.Http
@@ -5431,6 +10558,8 @@
                             message.rules[i] = $root.google.api.HttpRule.fromObject(object.rules[i]);
                         }
                     }
+                    if (object.fullyDecodeReservedExpansion != null)
+                        message.fullyDecodeReservedExpansion = Boolean(object.fullyDecodeReservedExpansion);
                     return message;
                 };
     
@@ -5449,11 +10578,15 @@
                     var object = {};
                     if (options.arrays || options.defaults)
                         object.rules = [];
+                    if (options.defaults)
+                        object.fullyDecodeReservedExpansion = false;
                     if (message.rules && message.rules.length) {
                         object.rules = [];
                         for (var j = 0; j < message.rules.length; ++j)
                             object.rules[j] = $root.google.api.HttpRule.toObject(message.rules[j], options);
                     }
+                    if (message.fullyDecodeReservedExpansion != null && message.hasOwnProperty("fullyDecodeReservedExpansion"))
+                        object.fullyDecodeReservedExpansion = message.fullyDecodeReservedExpansion;
                     return object;
                 };
     
@@ -5492,14 +10625,15 @@
                  * Properties of a HttpRule.
                  * @memberof google.api
                  * @interface IHttpRule
+                 * @property {string|null} [selector] HttpRule selector
                  * @property {string|null} [get] HttpRule get
                  * @property {string|null} [put] HttpRule put
                  * @property {string|null} [post] HttpRule post
                  * @property {string|null} ["delete"] HttpRule delete
                  * @property {string|null} [patch] HttpRule patch
                  * @property {google.api.ICustomHttpPattern|null} [custom] HttpRule custom
-                 * @property {string|null} [selector] HttpRule selector
                  * @property {string|null} [body] HttpRule body
+                 * @property {string|null} [responseBody] HttpRule responseBody
                  * @property {Array.<google.api.IHttpRule>|null} [additionalBindings] HttpRule additionalBindings
                  */
     
@@ -5518,6 +10652,14 @@
                             if (properties[keys[i]] != null)
                                 this[keys[i]] = properties[keys[i]];
                 }
+    
+                /**
+                 * HttpRule selector.
+                 * @member {string} selector
+                 * @memberof google.api.HttpRule
+                 * @instance
+                 */
+                HttpRule.prototype.selector = "";
     
                 /**
                  * HttpRule get.
@@ -5568,20 +10710,20 @@
                 HttpRule.prototype.custom = null;
     
                 /**
-                 * HttpRule selector.
-                 * @member {string} selector
-                 * @memberof google.api.HttpRule
-                 * @instance
-                 */
-                HttpRule.prototype.selector = "";
-    
-                /**
                  * HttpRule body.
                  * @member {string} body
                  * @memberof google.api.HttpRule
                  * @instance
                  */
                 HttpRule.prototype.body = "";
+    
+                /**
+                 * HttpRule responseBody.
+                 * @member {string} responseBody
+                 * @memberof google.api.HttpRule
+                 * @instance
+                 */
+                HttpRule.prototype.responseBody = "";
     
                 /**
                  * HttpRule additionalBindings.
@@ -5617,6 +10759,8 @@
                     if (object instanceof $root.google.api.HttpRule)
                         return object;
                     var message = new $root.google.api.HttpRule();
+                    if (object.selector != null)
+                        message.selector = String(object.selector);
                     if (object.get != null)
                         message.get = String(object.get);
                     if (object.put != null)
@@ -5632,10 +10776,10 @@
                             throw TypeError(".google.api.HttpRule.custom: object expected");
                         message.custom = $root.google.api.CustomHttpPattern.fromObject(object.custom);
                     }
-                    if (object.selector != null)
-                        message.selector = String(object.selector);
                     if (object.body != null)
                         message.body = String(object.body);
+                    if (object.responseBody != null)
+                        message.responseBody = String(object.responseBody);
                     if (object.additionalBindings) {
                         if (!Array.isArray(object.additionalBindings))
                             throw TypeError(".google.api.HttpRule.additionalBindings: array expected");
@@ -5667,6 +10811,7 @@
                     if (options.defaults) {
                         object.selector = "";
                         object.body = "";
+                        object.responseBody = "";
                     }
                     if (message.selector != null && message.hasOwnProperty("selector"))
                         object.selector = message.selector;
@@ -5707,6 +10852,8 @@
                         for (var j = 0; j < message.additionalBindings.length; ++j)
                             object.additionalBindings[j] = $root.google.api.HttpRule.toObject(message.additionalBindings[j], options);
                     }
+                    if (message.responseBody != null && message.hasOwnProperty("responseBody"))
+                        object.responseBody = message.responseBody;
                     return object;
                 };
     
@@ -5860,6 +11007,7 @@
                  * @interface ICommonLanguageSettings
                  * @property {string|null} [referenceDocsUri] CommonLanguageSettings referenceDocsUri
                  * @property {Array.<google.api.ClientLibraryDestination>|null} [destinations] CommonLanguageSettings destinations
+                 * @property {google.api.ISelectiveGapicGeneration|null} [selectiveGapicGeneration] CommonLanguageSettings selectiveGapicGeneration
                  */
     
                 /**
@@ -5893,6 +11041,14 @@
                  * @instance
                  */
                 CommonLanguageSettings.prototype.destinations = $util.emptyArray;
+    
+                /**
+                 * CommonLanguageSettings selectiveGapicGeneration.
+                 * @member {google.api.ISelectiveGapicGeneration|null|undefined} selectiveGapicGeneration
+                 * @memberof google.api.CommonLanguageSettings
+                 * @instance
+                 */
+                CommonLanguageSettings.prototype.selectiveGapicGeneration = null;
     
                 /**
                  * Creates a CommonLanguageSettings message from a plain object. Also converts values to their respective internal types.
@@ -5933,6 +11089,11 @@
                                 break;
                             }
                     }
+                    if (object.selectiveGapicGeneration != null) {
+                        if (typeof object.selectiveGapicGeneration !== "object")
+                            throw TypeError(".google.api.CommonLanguageSettings.selectiveGapicGeneration: object expected");
+                        message.selectiveGapicGeneration = $root.google.api.SelectiveGapicGeneration.fromObject(object.selectiveGapicGeneration);
+                    }
                     return message;
                 };
     
@@ -5951,8 +11112,10 @@
                     var object = {};
                     if (options.arrays || options.defaults)
                         object.destinations = [];
-                    if (options.defaults)
+                    if (options.defaults) {
                         object.referenceDocsUri = "";
+                        object.selectiveGapicGeneration = null;
+                    }
                     if (message.referenceDocsUri != null && message.hasOwnProperty("referenceDocsUri"))
                         object.referenceDocsUri = message.referenceDocsUri;
                     if (message.destinations && message.destinations.length) {
@@ -5960,6 +11123,8 @@
                         for (var j = 0; j < message.destinations.length; ++j)
                             object.destinations[j] = options.enums === String ? $root.google.api.ClientLibraryDestination[message.destinations[j]] === undefined ? message.destinations[j] : $root.google.api.ClientLibraryDestination[message.destinations[j]] : message.destinations[j];
                     }
+                    if (message.selectiveGapicGeneration != null && message.hasOwnProperty("selectiveGapicGeneration"))
+                        object.selectiveGapicGeneration = $root.google.api.SelectiveGapicGeneration.toObject(message.selectiveGapicGeneration, options);
                     return object;
                 };
     
@@ -6309,6 +11474,7 @@
                  * @property {google.api.ClientLibraryOrganization|null} [organization] Publishing organization
                  * @property {Array.<google.api.IClientLibrarySettings>|null} [librarySettings] Publishing librarySettings
                  * @property {string|null} [protoReferenceDocumentationUri] Publishing protoReferenceDocumentationUri
+                 * @property {string|null} [restReferenceDocumentationUri] Publishing restReferenceDocumentationUri
                  */
     
                 /**
@@ -6410,6 +11576,14 @@
                 Publishing.prototype.protoReferenceDocumentationUri = "";
     
                 /**
+                 * Publishing restReferenceDocumentationUri.
+                 * @member {string} restReferenceDocumentationUri
+                 * @memberof google.api.Publishing
+                 * @instance
+                 */
+                Publishing.prototype.restReferenceDocumentationUri = "";
+    
+                /**
                  * Creates a Publishing message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.api.Publishing
@@ -6500,6 +11674,8 @@
                     }
                     if (object.protoReferenceDocumentationUri != null)
                         message.protoReferenceDocumentationUri = String(object.protoReferenceDocumentationUri);
+                    if (object.restReferenceDocumentationUri != null)
+                        message.restReferenceDocumentationUri = String(object.restReferenceDocumentationUri);
                     return message;
                 };
     
@@ -6529,6 +11705,7 @@
                         object.docTagPrefix = "";
                         object.organization = options.enums === String ? "CLIENT_LIBRARY_ORGANIZATION_UNSPECIFIED" : 0;
                         object.protoReferenceDocumentationUri = "";
+                        object.restReferenceDocumentationUri = "";
                     }
                     if (message.methodSettings && message.methodSettings.length) {
                         object.methodSettings = [];
@@ -6559,6 +11736,8 @@
                     }
                     if (message.protoReferenceDocumentationUri != null && message.hasOwnProperty("protoReferenceDocumentationUri"))
                         object.protoReferenceDocumentationUri = message.protoReferenceDocumentationUri;
+                    if (message.restReferenceDocumentationUri != null && message.hasOwnProperty("restReferenceDocumentationUri"))
+                        object.restReferenceDocumentationUri = message.restReferenceDocumentationUri;
                     return object;
                 };
     
@@ -6941,6 +12120,7 @@
                  * @memberof google.api
                  * @interface IPythonSettings
                  * @property {google.api.ICommonLanguageSettings|null} [common] PythonSettings common
+                 * @property {google.api.PythonSettings.IExperimentalFeatures|null} [experimentalFeatures] PythonSettings experimentalFeatures
                  */
     
                 /**
@@ -6967,6 +12147,14 @@
                 PythonSettings.prototype.common = null;
     
                 /**
+                 * PythonSettings experimentalFeatures.
+                 * @member {google.api.PythonSettings.IExperimentalFeatures|null|undefined} experimentalFeatures
+                 * @memberof google.api.PythonSettings
+                 * @instance
+                 */
+                PythonSettings.prototype.experimentalFeatures = null;
+    
+                /**
                  * Creates a PythonSettings message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.api.PythonSettings
@@ -6982,6 +12170,11 @@
                         if (typeof object.common !== "object")
                             throw TypeError(".google.api.PythonSettings.common: object expected");
                         message.common = $root.google.api.CommonLanguageSettings.fromObject(object.common);
+                    }
+                    if (object.experimentalFeatures != null) {
+                        if (typeof object.experimentalFeatures !== "object")
+                            throw TypeError(".google.api.PythonSettings.experimentalFeatures: object expected");
+                        message.experimentalFeatures = $root.google.api.PythonSettings.ExperimentalFeatures.fromObject(object.experimentalFeatures);
                     }
                     return message;
                 };
@@ -6999,10 +12192,14 @@
                     if (!options)
                         options = {};
                     var object = {};
-                    if (options.defaults)
+                    if (options.defaults) {
                         object.common = null;
+                        object.experimentalFeatures = null;
+                    }
                     if (message.common != null && message.hasOwnProperty("common"))
                         object.common = $root.google.api.CommonLanguageSettings.toObject(message.common, options);
+                    if (message.experimentalFeatures != null && message.hasOwnProperty("experimentalFeatures"))
+                        object.experimentalFeatures = $root.google.api.PythonSettings.ExperimentalFeatures.toObject(message.experimentalFeatures, options);
                     return object;
                 };
     
@@ -7031,6 +12228,119 @@
                     }
                     return typeUrlPrefix + "/google.api.PythonSettings";
                 };
+    
+                PythonSettings.ExperimentalFeatures = (function() {
+    
+                    /**
+                     * Properties of an ExperimentalFeatures.
+                     * @memberof google.api.PythonSettings
+                     * @interface IExperimentalFeatures
+                     * @property {boolean|null} [restAsyncIoEnabled] ExperimentalFeatures restAsyncIoEnabled
+                     * @property {boolean|null} [protobufPythonicTypesEnabled] ExperimentalFeatures protobufPythonicTypesEnabled
+                     */
+    
+                    /**
+                     * Constructs a new ExperimentalFeatures.
+                     * @memberof google.api.PythonSettings
+                     * @classdesc Represents an ExperimentalFeatures.
+                     * @implements IExperimentalFeatures
+                     * @constructor
+                     * @param {google.api.PythonSettings.IExperimentalFeatures=} [properties] Properties to set
+                     */
+                    function ExperimentalFeatures(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * ExperimentalFeatures restAsyncIoEnabled.
+                     * @member {boolean} restAsyncIoEnabled
+                     * @memberof google.api.PythonSettings.ExperimentalFeatures
+                     * @instance
+                     */
+                    ExperimentalFeatures.prototype.restAsyncIoEnabled = false;
+    
+                    /**
+                     * ExperimentalFeatures protobufPythonicTypesEnabled.
+                     * @member {boolean} protobufPythonicTypesEnabled
+                     * @memberof google.api.PythonSettings.ExperimentalFeatures
+                     * @instance
+                     */
+                    ExperimentalFeatures.prototype.protobufPythonicTypesEnabled = false;
+    
+                    /**
+                     * Creates an ExperimentalFeatures message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.api.PythonSettings.ExperimentalFeatures
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.api.PythonSettings.ExperimentalFeatures} ExperimentalFeatures
+                     */
+                    ExperimentalFeatures.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.api.PythonSettings.ExperimentalFeatures)
+                            return object;
+                        var message = new $root.google.api.PythonSettings.ExperimentalFeatures();
+                        if (object.restAsyncIoEnabled != null)
+                            message.restAsyncIoEnabled = Boolean(object.restAsyncIoEnabled);
+                        if (object.protobufPythonicTypesEnabled != null)
+                            message.protobufPythonicTypesEnabled = Boolean(object.protobufPythonicTypesEnabled);
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an ExperimentalFeatures message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.api.PythonSettings.ExperimentalFeatures
+                     * @static
+                     * @param {google.api.PythonSettings.ExperimentalFeatures} message ExperimentalFeatures
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    ExperimentalFeatures.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.restAsyncIoEnabled = false;
+                            object.protobufPythonicTypesEnabled = false;
+                        }
+                        if (message.restAsyncIoEnabled != null && message.hasOwnProperty("restAsyncIoEnabled"))
+                            object.restAsyncIoEnabled = message.restAsyncIoEnabled;
+                        if (message.protobufPythonicTypesEnabled != null && message.hasOwnProperty("protobufPythonicTypesEnabled"))
+                            object.protobufPythonicTypesEnabled = message.protobufPythonicTypesEnabled;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this ExperimentalFeatures to JSON.
+                     * @function toJSON
+                     * @memberof google.api.PythonSettings.ExperimentalFeatures
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    ExperimentalFeatures.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for ExperimentalFeatures
+                     * @function getTypeUrl
+                     * @memberof google.api.PythonSettings.ExperimentalFeatures
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    ExperimentalFeatures.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.api.PythonSettings.ExperimentalFeatures";
+                    };
+    
+                    return ExperimentalFeatures;
+                })();
     
                 return PythonSettings;
             })();
@@ -7465,6 +12775,7 @@
                  * @memberof google.api
                  * @interface IGoSettings
                  * @property {google.api.ICommonLanguageSettings|null} [common] GoSettings common
+                 * @property {Object.<string,string>|null} [renamedServices] GoSettings renamedServices
                  */
     
                 /**
@@ -7476,6 +12787,7 @@
                  * @param {google.api.IGoSettings=} [properties] Properties to set
                  */
                 function GoSettings(properties) {
+                    this.renamedServices = {};
                     if (properties)
                         for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                             if (properties[keys[i]] != null)
@@ -7489,6 +12801,14 @@
                  * @instance
                  */
                 GoSettings.prototype.common = null;
+    
+                /**
+                 * GoSettings renamedServices.
+                 * @member {Object.<string,string>} renamedServices
+                 * @memberof google.api.GoSettings
+                 * @instance
+                 */
+                GoSettings.prototype.renamedServices = $util.emptyObject;
     
                 /**
                  * Creates a GoSettings message from a plain object. Also converts values to their respective internal types.
@@ -7507,6 +12827,13 @@
                             throw TypeError(".google.api.GoSettings.common: object expected");
                         message.common = $root.google.api.CommonLanguageSettings.fromObject(object.common);
                     }
+                    if (object.renamedServices) {
+                        if (typeof object.renamedServices !== "object")
+                            throw TypeError(".google.api.GoSettings.renamedServices: object expected");
+                        message.renamedServices = {};
+                        for (var keys = Object.keys(object.renamedServices), i = 0; i < keys.length; ++i)
+                            message.renamedServices[keys[i]] = String(object.renamedServices[keys[i]]);
+                    }
                     return message;
                 };
     
@@ -7523,10 +12850,18 @@
                     if (!options)
                         options = {};
                     var object = {};
+                    if (options.objects || options.defaults)
+                        object.renamedServices = {};
                     if (options.defaults)
                         object.common = null;
                     if (message.common != null && message.hasOwnProperty("common"))
                         object.common = $root.google.api.CommonLanguageSettings.toObject(message.common, options);
+                    var keys2;
+                    if (message.renamedServices && (keys2 = Object.keys(message.renamedServices)).length) {
+                        object.renamedServices = {};
+                        for (var j = 0; j < keys2.length; ++j)
+                            object.renamedServices[keys2[j]] = message.renamedServices[keys2[j]];
+                    }
                     return object;
                 };
     
@@ -7567,6 +12902,7 @@
                  * @interface IMethodSettings
                  * @property {string|null} [selector] MethodSettings selector
                  * @property {google.api.MethodSettings.ILongRunning|null} [longRunning] MethodSettings longRunning
+                 * @property {Array.<string>|null} [autoPopulatedFields] MethodSettings autoPopulatedFields
                  */
     
                 /**
@@ -7578,6 +12914,7 @@
                  * @param {google.api.IMethodSettings=} [properties] Properties to set
                  */
                 function MethodSettings(properties) {
+                    this.autoPopulatedFields = [];
                     if (properties)
                         for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                             if (properties[keys[i]] != null)
@@ -7601,6 +12938,14 @@
                 MethodSettings.prototype.longRunning = null;
     
                 /**
+                 * MethodSettings autoPopulatedFields.
+                 * @member {Array.<string>} autoPopulatedFields
+                 * @memberof google.api.MethodSettings
+                 * @instance
+                 */
+                MethodSettings.prototype.autoPopulatedFields = $util.emptyArray;
+    
+                /**
                  * Creates a MethodSettings message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.api.MethodSettings
@@ -7619,6 +12964,13 @@
                             throw TypeError(".google.api.MethodSettings.longRunning: object expected");
                         message.longRunning = $root.google.api.MethodSettings.LongRunning.fromObject(object.longRunning);
                     }
+                    if (object.autoPopulatedFields) {
+                        if (!Array.isArray(object.autoPopulatedFields))
+                            throw TypeError(".google.api.MethodSettings.autoPopulatedFields: array expected");
+                        message.autoPopulatedFields = [];
+                        for (var i = 0; i < object.autoPopulatedFields.length; ++i)
+                            message.autoPopulatedFields[i] = String(object.autoPopulatedFields[i]);
+                    }
                     return message;
                 };
     
@@ -7635,6 +12987,8 @@
                     if (!options)
                         options = {};
                     var object = {};
+                    if (options.arrays || options.defaults)
+                        object.autoPopulatedFields = [];
                     if (options.defaults) {
                         object.selector = "";
                         object.longRunning = null;
@@ -7643,6 +12997,11 @@
                         object.selector = message.selector;
                     if (message.longRunning != null && message.hasOwnProperty("longRunning"))
                         object.longRunning = $root.google.api.MethodSettings.LongRunning.toObject(message.longRunning, options);
+                    if (message.autoPopulatedFields && message.autoPopulatedFields.length) {
+                        object.autoPopulatedFields = [];
+                        for (var j = 0; j < message.autoPopulatedFields.length; ++j)
+                            object.autoPopulatedFields[j] = message.autoPopulatedFields[j];
+                    }
                     return object;
                 };
     
@@ -7867,30 +13226,126 @@
                 return values;
             })();
     
-            /**
-             * FieldBehavior enum.
-             * @name google.api.FieldBehavior
-             * @enum {string}
-             * @property {string} FIELD_BEHAVIOR_UNSPECIFIED=FIELD_BEHAVIOR_UNSPECIFIED FIELD_BEHAVIOR_UNSPECIFIED value
-             * @property {string} OPTIONAL=OPTIONAL OPTIONAL value
-             * @property {string} REQUIRED=REQUIRED REQUIRED value
-             * @property {string} OUTPUT_ONLY=OUTPUT_ONLY OUTPUT_ONLY value
-             * @property {string} INPUT_ONLY=INPUT_ONLY INPUT_ONLY value
-             * @property {string} IMMUTABLE=IMMUTABLE IMMUTABLE value
-             * @property {string} UNORDERED_LIST=UNORDERED_LIST UNORDERED_LIST value
-             * @property {string} NON_EMPTY_DEFAULT=NON_EMPTY_DEFAULT NON_EMPTY_DEFAULT value
-             */
-            api.FieldBehavior = (function() {
-                var valuesById = {}, values = Object.create(valuesById);
-                values[valuesById[0] = "FIELD_BEHAVIOR_UNSPECIFIED"] = "FIELD_BEHAVIOR_UNSPECIFIED";
-                values[valuesById[1] = "OPTIONAL"] = "OPTIONAL";
-                values[valuesById[2] = "REQUIRED"] = "REQUIRED";
-                values[valuesById[3] = "OUTPUT_ONLY"] = "OUTPUT_ONLY";
-                values[valuesById[4] = "INPUT_ONLY"] = "INPUT_ONLY";
-                values[valuesById[5] = "IMMUTABLE"] = "IMMUTABLE";
-                values[valuesById[6] = "UNORDERED_LIST"] = "UNORDERED_LIST";
-                values[valuesById[7] = "NON_EMPTY_DEFAULT"] = "NON_EMPTY_DEFAULT";
-                return values;
+            api.SelectiveGapicGeneration = (function() {
+    
+                /**
+                 * Properties of a SelectiveGapicGeneration.
+                 * @memberof google.api
+                 * @interface ISelectiveGapicGeneration
+                 * @property {Array.<string>|null} [methods] SelectiveGapicGeneration methods
+                 * @property {boolean|null} [generateOmittedAsInternal] SelectiveGapicGeneration generateOmittedAsInternal
+                 */
+    
+                /**
+                 * Constructs a new SelectiveGapicGeneration.
+                 * @memberof google.api
+                 * @classdesc Represents a SelectiveGapicGeneration.
+                 * @implements ISelectiveGapicGeneration
+                 * @constructor
+                 * @param {google.api.ISelectiveGapicGeneration=} [properties] Properties to set
+                 */
+                function SelectiveGapicGeneration(properties) {
+                    this.methods = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * SelectiveGapicGeneration methods.
+                 * @member {Array.<string>} methods
+                 * @memberof google.api.SelectiveGapicGeneration
+                 * @instance
+                 */
+                SelectiveGapicGeneration.prototype.methods = $util.emptyArray;
+    
+                /**
+                 * SelectiveGapicGeneration generateOmittedAsInternal.
+                 * @member {boolean} generateOmittedAsInternal
+                 * @memberof google.api.SelectiveGapicGeneration
+                 * @instance
+                 */
+                SelectiveGapicGeneration.prototype.generateOmittedAsInternal = false;
+    
+                /**
+                 * Creates a SelectiveGapicGeneration message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.SelectiveGapicGeneration
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.SelectiveGapicGeneration} SelectiveGapicGeneration
+                 */
+                SelectiveGapicGeneration.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.SelectiveGapicGeneration)
+                        return object;
+                    var message = new $root.google.api.SelectiveGapicGeneration();
+                    if (object.methods) {
+                        if (!Array.isArray(object.methods))
+                            throw TypeError(".google.api.SelectiveGapicGeneration.methods: array expected");
+                        message.methods = [];
+                        for (var i = 0; i < object.methods.length; ++i)
+                            message.methods[i] = String(object.methods[i]);
+                    }
+                    if (object.generateOmittedAsInternal != null)
+                        message.generateOmittedAsInternal = Boolean(object.generateOmittedAsInternal);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a SelectiveGapicGeneration message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.SelectiveGapicGeneration
+                 * @static
+                 * @param {google.api.SelectiveGapicGeneration} message SelectiveGapicGeneration
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                SelectiveGapicGeneration.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.methods = [];
+                    if (options.defaults)
+                        object.generateOmittedAsInternal = false;
+                    if (message.methods && message.methods.length) {
+                        object.methods = [];
+                        for (var j = 0; j < message.methods.length; ++j)
+                            object.methods[j] = message.methods[j];
+                    }
+                    if (message.generateOmittedAsInternal != null && message.hasOwnProperty("generateOmittedAsInternal"))
+                        object.generateOmittedAsInternal = message.generateOmittedAsInternal;
+                    return object;
+                };
+    
+                /**
+                 * Converts this SelectiveGapicGeneration to JSON.
+                 * @function toJSON
+                 * @memberof google.api.SelectiveGapicGeneration
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                SelectiveGapicGeneration.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for SelectiveGapicGeneration
+                 * @function getTypeUrl
+                 * @memberof google.api.SelectiveGapicGeneration
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                SelectiveGapicGeneration.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.api.SelectiveGapicGeneration";
+                };
+    
+                return SelectiveGapicGeneration;
             })();
     
             /**
@@ -7917,384 +13372,6 @@
                 values[valuesById[4] = "GA"] = "GA";
                 values[valuesById[5] = "DEPRECATED"] = "DEPRECATED";
                 return values;
-            })();
-    
-            api.ResourceDescriptor = (function() {
-    
-                /**
-                 * Properties of a ResourceDescriptor.
-                 * @memberof google.api
-                 * @interface IResourceDescriptor
-                 * @property {string|null} [type] ResourceDescriptor type
-                 * @property {Array.<string>|null} [pattern] ResourceDescriptor pattern
-                 * @property {string|null} [nameField] ResourceDescriptor nameField
-                 * @property {google.api.ResourceDescriptor.History|null} [history] ResourceDescriptor history
-                 * @property {string|null} [plural] ResourceDescriptor plural
-                 * @property {string|null} [singular] ResourceDescriptor singular
-                 * @property {Array.<google.api.ResourceDescriptor.Style>|null} [style] ResourceDescriptor style
-                 */
-    
-                /**
-                 * Constructs a new ResourceDescriptor.
-                 * @memberof google.api
-                 * @classdesc Represents a ResourceDescriptor.
-                 * @implements IResourceDescriptor
-                 * @constructor
-                 * @param {google.api.IResourceDescriptor=} [properties] Properties to set
-                 */
-                function ResourceDescriptor(properties) {
-                    this.pattern = [];
-                    this.style = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * ResourceDescriptor type.
-                 * @member {string} type
-                 * @memberof google.api.ResourceDescriptor
-                 * @instance
-                 */
-                ResourceDescriptor.prototype.type = "";
-    
-                /**
-                 * ResourceDescriptor pattern.
-                 * @member {Array.<string>} pattern
-                 * @memberof google.api.ResourceDescriptor
-                 * @instance
-                 */
-                ResourceDescriptor.prototype.pattern = $util.emptyArray;
-    
-                /**
-                 * ResourceDescriptor nameField.
-                 * @member {string} nameField
-                 * @memberof google.api.ResourceDescriptor
-                 * @instance
-                 */
-                ResourceDescriptor.prototype.nameField = "";
-    
-                /**
-                 * ResourceDescriptor history.
-                 * @member {google.api.ResourceDescriptor.History} history
-                 * @memberof google.api.ResourceDescriptor
-                 * @instance
-                 */
-                ResourceDescriptor.prototype.history = 0;
-    
-                /**
-                 * ResourceDescriptor plural.
-                 * @member {string} plural
-                 * @memberof google.api.ResourceDescriptor
-                 * @instance
-                 */
-                ResourceDescriptor.prototype.plural = "";
-    
-                /**
-                 * ResourceDescriptor singular.
-                 * @member {string} singular
-                 * @memberof google.api.ResourceDescriptor
-                 * @instance
-                 */
-                ResourceDescriptor.prototype.singular = "";
-    
-                /**
-                 * ResourceDescriptor style.
-                 * @member {Array.<google.api.ResourceDescriptor.Style>} style
-                 * @memberof google.api.ResourceDescriptor
-                 * @instance
-                 */
-                ResourceDescriptor.prototype.style = $util.emptyArray;
-    
-                /**
-                 * Creates a ResourceDescriptor message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.api.ResourceDescriptor
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.api.ResourceDescriptor} ResourceDescriptor
-                 */
-                ResourceDescriptor.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.api.ResourceDescriptor)
-                        return object;
-                    var message = new $root.google.api.ResourceDescriptor();
-                    if (object.type != null)
-                        message.type = String(object.type);
-                    if (object.pattern) {
-                        if (!Array.isArray(object.pattern))
-                            throw TypeError(".google.api.ResourceDescriptor.pattern: array expected");
-                        message.pattern = [];
-                        for (var i = 0; i < object.pattern.length; ++i)
-                            message.pattern[i] = String(object.pattern[i]);
-                    }
-                    if (object.nameField != null)
-                        message.nameField = String(object.nameField);
-                    switch (object.history) {
-                    default:
-                        if (typeof object.history === "number") {
-                            message.history = object.history;
-                            break;
-                        }
-                        break;
-                    case "HISTORY_UNSPECIFIED":
-                    case 0:
-                        message.history = 0;
-                        break;
-                    case "ORIGINALLY_SINGLE_PATTERN":
-                    case 1:
-                        message.history = 1;
-                        break;
-                    case "FUTURE_MULTI_PATTERN":
-                    case 2:
-                        message.history = 2;
-                        break;
-                    }
-                    if (object.plural != null)
-                        message.plural = String(object.plural);
-                    if (object.singular != null)
-                        message.singular = String(object.singular);
-                    if (object.style) {
-                        if (!Array.isArray(object.style))
-                            throw TypeError(".google.api.ResourceDescriptor.style: array expected");
-                        message.style = [];
-                        for (var i = 0; i < object.style.length; ++i)
-                            switch (object.style[i]) {
-                            default:
-                                if (typeof object.style[i] === "number") {
-                                    message.style[i] = object.style[i];
-                                    break;
-                                }
-                            case "STYLE_UNSPECIFIED":
-                            case 0:
-                                message.style[i] = 0;
-                                break;
-                            case "DECLARATIVE_FRIENDLY":
-                            case 1:
-                                message.style[i] = 1;
-                                break;
-                            }
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a ResourceDescriptor message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.api.ResourceDescriptor
-                 * @static
-                 * @param {google.api.ResourceDescriptor} message ResourceDescriptor
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                ResourceDescriptor.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults) {
-                        object.pattern = [];
-                        object.style = [];
-                    }
-                    if (options.defaults) {
-                        object.type = "";
-                        object.nameField = "";
-                        object.history = options.enums === String ? "HISTORY_UNSPECIFIED" : 0;
-                        object.plural = "";
-                        object.singular = "";
-                    }
-                    if (message.type != null && message.hasOwnProperty("type"))
-                        object.type = message.type;
-                    if (message.pattern && message.pattern.length) {
-                        object.pattern = [];
-                        for (var j = 0; j < message.pattern.length; ++j)
-                            object.pattern[j] = message.pattern[j];
-                    }
-                    if (message.nameField != null && message.hasOwnProperty("nameField"))
-                        object.nameField = message.nameField;
-                    if (message.history != null && message.hasOwnProperty("history"))
-                        object.history = options.enums === String ? $root.google.api.ResourceDescriptor.History[message.history] === undefined ? message.history : $root.google.api.ResourceDescriptor.History[message.history] : message.history;
-                    if (message.plural != null && message.hasOwnProperty("plural"))
-                        object.plural = message.plural;
-                    if (message.singular != null && message.hasOwnProperty("singular"))
-                        object.singular = message.singular;
-                    if (message.style && message.style.length) {
-                        object.style = [];
-                        for (var j = 0; j < message.style.length; ++j)
-                            object.style[j] = options.enums === String ? $root.google.api.ResourceDescriptor.Style[message.style[j]] === undefined ? message.style[j] : $root.google.api.ResourceDescriptor.Style[message.style[j]] : message.style[j];
-                    }
-                    return object;
-                };
-    
-                /**
-                 * Converts this ResourceDescriptor to JSON.
-                 * @function toJSON
-                 * @memberof google.api.ResourceDescriptor
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                ResourceDescriptor.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                /**
-                 * Gets the default type url for ResourceDescriptor
-                 * @function getTypeUrl
-                 * @memberof google.api.ResourceDescriptor
-                 * @static
-                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                 * @returns {string} The default type url
-                 */
-                ResourceDescriptor.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                    if (typeUrlPrefix === undefined) {
-                        typeUrlPrefix = "type.googleapis.com";
-                    }
-                    return typeUrlPrefix + "/google.api.ResourceDescriptor";
-                };
-    
-                /**
-                 * History enum.
-                 * @name google.api.ResourceDescriptor.History
-                 * @enum {string}
-                 * @property {string} HISTORY_UNSPECIFIED=HISTORY_UNSPECIFIED HISTORY_UNSPECIFIED value
-                 * @property {string} ORIGINALLY_SINGLE_PATTERN=ORIGINALLY_SINGLE_PATTERN ORIGINALLY_SINGLE_PATTERN value
-                 * @property {string} FUTURE_MULTI_PATTERN=FUTURE_MULTI_PATTERN FUTURE_MULTI_PATTERN value
-                 */
-                ResourceDescriptor.History = (function() {
-                    var valuesById = {}, values = Object.create(valuesById);
-                    values[valuesById[0] = "HISTORY_UNSPECIFIED"] = "HISTORY_UNSPECIFIED";
-                    values[valuesById[1] = "ORIGINALLY_SINGLE_PATTERN"] = "ORIGINALLY_SINGLE_PATTERN";
-                    values[valuesById[2] = "FUTURE_MULTI_PATTERN"] = "FUTURE_MULTI_PATTERN";
-                    return values;
-                })();
-    
-                /**
-                 * Style enum.
-                 * @name google.api.ResourceDescriptor.Style
-                 * @enum {string}
-                 * @property {string} STYLE_UNSPECIFIED=STYLE_UNSPECIFIED STYLE_UNSPECIFIED value
-                 * @property {string} DECLARATIVE_FRIENDLY=DECLARATIVE_FRIENDLY DECLARATIVE_FRIENDLY value
-                 */
-                ResourceDescriptor.Style = (function() {
-                    var valuesById = {}, values = Object.create(valuesById);
-                    values[valuesById[0] = "STYLE_UNSPECIFIED"] = "STYLE_UNSPECIFIED";
-                    values[valuesById[1] = "DECLARATIVE_FRIENDLY"] = "DECLARATIVE_FRIENDLY";
-                    return values;
-                })();
-    
-                return ResourceDescriptor;
-            })();
-    
-            api.ResourceReference = (function() {
-    
-                /**
-                 * Properties of a ResourceReference.
-                 * @memberof google.api
-                 * @interface IResourceReference
-                 * @property {string|null} [type] ResourceReference type
-                 * @property {string|null} [childType] ResourceReference childType
-                 */
-    
-                /**
-                 * Constructs a new ResourceReference.
-                 * @memberof google.api
-                 * @classdesc Represents a ResourceReference.
-                 * @implements IResourceReference
-                 * @constructor
-                 * @param {google.api.IResourceReference=} [properties] Properties to set
-                 */
-                function ResourceReference(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * ResourceReference type.
-                 * @member {string} type
-                 * @memberof google.api.ResourceReference
-                 * @instance
-                 */
-                ResourceReference.prototype.type = "";
-    
-                /**
-                 * ResourceReference childType.
-                 * @member {string} childType
-                 * @memberof google.api.ResourceReference
-                 * @instance
-                 */
-                ResourceReference.prototype.childType = "";
-    
-                /**
-                 * Creates a ResourceReference message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.api.ResourceReference
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.api.ResourceReference} ResourceReference
-                 */
-                ResourceReference.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.api.ResourceReference)
-                        return object;
-                    var message = new $root.google.api.ResourceReference();
-                    if (object.type != null)
-                        message.type = String(object.type);
-                    if (object.childType != null)
-                        message.childType = String(object.childType);
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a ResourceReference message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.api.ResourceReference
-                 * @static
-                 * @param {google.api.ResourceReference} message ResourceReference
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                ResourceReference.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        object.type = "";
-                        object.childType = "";
-                    }
-                    if (message.type != null && message.hasOwnProperty("type"))
-                        object.type = message.type;
-                    if (message.childType != null && message.hasOwnProperty("childType"))
-                        object.childType = message.childType;
-                    return object;
-                };
-    
-                /**
-                 * Converts this ResourceReference to JSON.
-                 * @function toJSON
-                 * @memberof google.api.ResourceReference
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                ResourceReference.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                /**
-                 * Gets the default type url for ResourceReference
-                 * @function getTypeUrl
-                 * @memberof google.api.ResourceReference
-                 * @static
-                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                 * @returns {string} The default type url
-                 */
-                ResourceReference.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                    if (typeUrlPrefix === undefined) {
-                        typeUrlPrefix = "type.googleapis.com";
-                    }
-                    return typeUrlPrefix + "/google.api.ResourceReference";
-                };
-    
-                return ResourceReference;
             })();
     
             return api;
@@ -8419,6 +13496,38 @@
                 return FileDescriptorSet;
             })();
     
+            /**
+             * Edition enum.
+             * @name google.protobuf.Edition
+             * @enum {string}
+             * @property {string} EDITION_UNKNOWN=EDITION_UNKNOWN EDITION_UNKNOWN value
+             * @property {string} EDITION_PROTO2=EDITION_PROTO2 EDITION_PROTO2 value
+             * @property {string} EDITION_PROTO3=EDITION_PROTO3 EDITION_PROTO3 value
+             * @property {string} EDITION_2023=EDITION_2023 EDITION_2023 value
+             * @property {string} EDITION_2024=EDITION_2024 EDITION_2024 value
+             * @property {string} EDITION_1_TEST_ONLY=EDITION_1_TEST_ONLY EDITION_1_TEST_ONLY value
+             * @property {string} EDITION_2_TEST_ONLY=EDITION_2_TEST_ONLY EDITION_2_TEST_ONLY value
+             * @property {string} EDITION_99997_TEST_ONLY=EDITION_99997_TEST_ONLY EDITION_99997_TEST_ONLY value
+             * @property {string} EDITION_99998_TEST_ONLY=EDITION_99998_TEST_ONLY EDITION_99998_TEST_ONLY value
+             * @property {string} EDITION_99999_TEST_ONLY=EDITION_99999_TEST_ONLY EDITION_99999_TEST_ONLY value
+             * @property {string} EDITION_MAX=EDITION_MAX EDITION_MAX value
+             */
+            protobuf.Edition = (function() {
+                var valuesById = {}, values = Object.create(valuesById);
+                values[valuesById[0] = "EDITION_UNKNOWN"] = "EDITION_UNKNOWN";
+                values[valuesById[998] = "EDITION_PROTO2"] = "EDITION_PROTO2";
+                values[valuesById[999] = "EDITION_PROTO3"] = "EDITION_PROTO3";
+                values[valuesById[1000] = "EDITION_2023"] = "EDITION_2023";
+                values[valuesById[1001] = "EDITION_2024"] = "EDITION_2024";
+                values[valuesById[1] = "EDITION_1_TEST_ONLY"] = "EDITION_1_TEST_ONLY";
+                values[valuesById[2] = "EDITION_2_TEST_ONLY"] = "EDITION_2_TEST_ONLY";
+                values[valuesById[99997] = "EDITION_99997_TEST_ONLY"] = "EDITION_99997_TEST_ONLY";
+                values[valuesById[99998] = "EDITION_99998_TEST_ONLY"] = "EDITION_99998_TEST_ONLY";
+                values[valuesById[99999] = "EDITION_99999_TEST_ONLY"] = "EDITION_99999_TEST_ONLY";
+                values[valuesById[2147483647] = "EDITION_MAX"] = "EDITION_MAX";
+                return values;
+            })();
+    
             protobuf.FileDescriptorProto = (function() {
     
                 /**
@@ -8437,6 +13546,7 @@
                  * @property {google.protobuf.IFileOptions|null} [options] FileDescriptorProto options
                  * @property {google.protobuf.ISourceCodeInfo|null} [sourceCodeInfo] FileDescriptorProto sourceCodeInfo
                  * @property {string|null} [syntax] FileDescriptorProto syntax
+                 * @property {google.protobuf.Edition|null} [edition] FileDescriptorProto edition
                  */
     
                 /**
@@ -8558,6 +13668,14 @@
                 FileDescriptorProto.prototype.syntax = "";
     
                 /**
+                 * FileDescriptorProto edition.
+                 * @member {google.protobuf.Edition} edition
+                 * @memberof google.protobuf.FileDescriptorProto
+                 * @instance
+                 */
+                FileDescriptorProto.prototype.edition = 0;
+    
+                /**
                  * Creates a FileDescriptorProto message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.protobuf.FileDescriptorProto
@@ -8646,6 +13764,58 @@
                     }
                     if (object.syntax != null)
                         message.syntax = String(object.syntax);
+                    switch (object.edition) {
+                    default:
+                        if (typeof object.edition === "number") {
+                            message.edition = object.edition;
+                            break;
+                        }
+                        break;
+                    case "EDITION_UNKNOWN":
+                    case 0:
+                        message.edition = 0;
+                        break;
+                    case "EDITION_PROTO2":
+                    case 998:
+                        message.edition = 998;
+                        break;
+                    case "EDITION_PROTO3":
+                    case 999:
+                        message.edition = 999;
+                        break;
+                    case "EDITION_2023":
+                    case 1000:
+                        message.edition = 1000;
+                        break;
+                    case "EDITION_2024":
+                    case 1001:
+                        message.edition = 1001;
+                        break;
+                    case "EDITION_1_TEST_ONLY":
+                    case 1:
+                        message.edition = 1;
+                        break;
+                    case "EDITION_2_TEST_ONLY":
+                    case 2:
+                        message.edition = 2;
+                        break;
+                    case "EDITION_99997_TEST_ONLY":
+                    case 99997:
+                        message.edition = 99997;
+                        break;
+                    case "EDITION_99998_TEST_ONLY":
+                    case 99998:
+                        message.edition = 99998;
+                        break;
+                    case "EDITION_99999_TEST_ONLY":
+                    case 99999:
+                        message.edition = 99999;
+                        break;
+                    case "EDITION_MAX":
+                    case 2147483647:
+                        message.edition = 2147483647;
+                        break;
+                    }
                     return message;
                 };
     
@@ -8677,6 +13847,7 @@
                         object.options = null;
                         object.sourceCodeInfo = null;
                         object.syntax = "";
+                        object.edition = options.enums === String ? "EDITION_UNKNOWN" : 0;
                     }
                     if (message.name != null && message.hasOwnProperty("name"))
                         object.name = message.name;
@@ -8723,6 +13894,8 @@
                     }
                     if (message.syntax != null && message.hasOwnProperty("syntax"))
                         object.syntax = message.syntax;
+                    if (message.edition != null && message.hasOwnProperty("edition"))
+                        object.edition = options.enums === String ? $root.google.protobuf.Edition[message.edition] === undefined ? message.edition : $root.google.protobuf.Edition[message.edition] : message.edition;
                     return object;
                 };
     
@@ -9083,6 +14256,7 @@
                      * @interface IExtensionRange
                      * @property {number|null} [start] ExtensionRange start
                      * @property {number|null} [end] ExtensionRange end
+                     * @property {google.protobuf.IExtensionRangeOptions|null} [options] ExtensionRange options
                      */
     
                     /**
@@ -9117,6 +14291,14 @@
                     ExtensionRange.prototype.end = 0;
     
                     /**
+                     * ExtensionRange options.
+                     * @member {google.protobuf.IExtensionRangeOptions|null|undefined} options
+                     * @memberof google.protobuf.DescriptorProto.ExtensionRange
+                     * @instance
+                     */
+                    ExtensionRange.prototype.options = null;
+    
+                    /**
                      * Creates an ExtensionRange message from a plain object. Also converts values to their respective internal types.
                      * @function fromObject
                      * @memberof google.protobuf.DescriptorProto.ExtensionRange
@@ -9132,6 +14314,11 @@
                             message.start = object.start | 0;
                         if (object.end != null)
                             message.end = object.end | 0;
+                        if (object.options != null) {
+                            if (typeof object.options !== "object")
+                                throw TypeError(".google.protobuf.DescriptorProto.ExtensionRange.options: object expected");
+                            message.options = $root.google.protobuf.ExtensionRangeOptions.fromObject(object.options);
+                        }
                         return message;
                     };
     
@@ -9151,11 +14338,14 @@
                         if (options.defaults) {
                             object.start = 0;
                             object.end = 0;
+                            object.options = null;
                         }
                         if (message.start != null && message.hasOwnProperty("start"))
                             object.start = message.start;
                         if (message.end != null && message.hasOwnProperty("end"))
                             object.end = message.end;
+                        if (message.options != null && message.hasOwnProperty("options"))
+                            object.options = $root.google.protobuf.ExtensionRangeOptions.toObject(message.options, options);
                         return object;
                     };
     
@@ -9304,6 +14494,359 @@
                 return DescriptorProto;
             })();
     
+            protobuf.ExtensionRangeOptions = (function() {
+    
+                /**
+                 * Properties of an ExtensionRangeOptions.
+                 * @memberof google.protobuf
+                 * @interface IExtensionRangeOptions
+                 * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] ExtensionRangeOptions uninterpretedOption
+                 * @property {Array.<google.protobuf.ExtensionRangeOptions.IDeclaration>|null} [declaration] ExtensionRangeOptions declaration
+                 * @property {google.protobuf.IFeatureSet|null} [features] ExtensionRangeOptions features
+                 * @property {google.protobuf.ExtensionRangeOptions.VerificationState|null} [verification] ExtensionRangeOptions verification
+                 */
+    
+                /**
+                 * Constructs a new ExtensionRangeOptions.
+                 * @memberof google.protobuf
+                 * @classdesc Represents an ExtensionRangeOptions.
+                 * @implements IExtensionRangeOptions
+                 * @constructor
+                 * @param {google.protobuf.IExtensionRangeOptions=} [properties] Properties to set
+                 */
+                function ExtensionRangeOptions(properties) {
+                    this.uninterpretedOption = [];
+                    this.declaration = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * ExtensionRangeOptions uninterpretedOption.
+                 * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
+                 * @memberof google.protobuf.ExtensionRangeOptions
+                 * @instance
+                 */
+                ExtensionRangeOptions.prototype.uninterpretedOption = $util.emptyArray;
+    
+                /**
+                 * ExtensionRangeOptions declaration.
+                 * @member {Array.<google.protobuf.ExtensionRangeOptions.IDeclaration>} declaration
+                 * @memberof google.protobuf.ExtensionRangeOptions
+                 * @instance
+                 */
+                ExtensionRangeOptions.prototype.declaration = $util.emptyArray;
+    
+                /**
+                 * ExtensionRangeOptions features.
+                 * @member {google.protobuf.IFeatureSet|null|undefined} features
+                 * @memberof google.protobuf.ExtensionRangeOptions
+                 * @instance
+                 */
+                ExtensionRangeOptions.prototype.features = null;
+    
+                /**
+                 * ExtensionRangeOptions verification.
+                 * @member {google.protobuf.ExtensionRangeOptions.VerificationState} verification
+                 * @memberof google.protobuf.ExtensionRangeOptions
+                 * @instance
+                 */
+                ExtensionRangeOptions.prototype.verification = 1;
+    
+                /**
+                 * Creates an ExtensionRangeOptions message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.ExtensionRangeOptions
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.ExtensionRangeOptions} ExtensionRangeOptions
+                 */
+                ExtensionRangeOptions.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.ExtensionRangeOptions)
+                        return object;
+                    var message = new $root.google.protobuf.ExtensionRangeOptions();
+                    if (object.uninterpretedOption) {
+                        if (!Array.isArray(object.uninterpretedOption))
+                            throw TypeError(".google.protobuf.ExtensionRangeOptions.uninterpretedOption: array expected");
+                        message.uninterpretedOption = [];
+                        for (var i = 0; i < object.uninterpretedOption.length; ++i) {
+                            if (typeof object.uninterpretedOption[i] !== "object")
+                                throw TypeError(".google.protobuf.ExtensionRangeOptions.uninterpretedOption: object expected");
+                            message.uninterpretedOption[i] = $root.google.protobuf.UninterpretedOption.fromObject(object.uninterpretedOption[i]);
+                        }
+                    }
+                    if (object.declaration) {
+                        if (!Array.isArray(object.declaration))
+                            throw TypeError(".google.protobuf.ExtensionRangeOptions.declaration: array expected");
+                        message.declaration = [];
+                        for (var i = 0; i < object.declaration.length; ++i) {
+                            if (typeof object.declaration[i] !== "object")
+                                throw TypeError(".google.protobuf.ExtensionRangeOptions.declaration: object expected");
+                            message.declaration[i] = $root.google.protobuf.ExtensionRangeOptions.Declaration.fromObject(object.declaration[i]);
+                        }
+                    }
+                    if (object.features != null) {
+                        if (typeof object.features !== "object")
+                            throw TypeError(".google.protobuf.ExtensionRangeOptions.features: object expected");
+                        message.features = $root.google.protobuf.FeatureSet.fromObject(object.features);
+                    }
+                    switch (object.verification) {
+                    case "DECLARATION":
+                    case 0:
+                        message.verification = 0;
+                        break;
+                    default:
+                        if (typeof object.verification === "number") {
+                            message.verification = object.verification;
+                            break;
+                        }
+                        break;
+                    case "UNVERIFIED":
+                    case 1:
+                        message.verification = 1;
+                        break;
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an ExtensionRangeOptions message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.ExtensionRangeOptions
+                 * @static
+                 * @param {google.protobuf.ExtensionRangeOptions} message ExtensionRangeOptions
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                ExtensionRangeOptions.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults) {
+                        object.declaration = [];
+                        object.uninterpretedOption = [];
+                    }
+                    if (options.defaults) {
+                        object.verification = options.enums === String ? "UNVERIFIED" : 1;
+                        object.features = null;
+                    }
+                    if (message.declaration && message.declaration.length) {
+                        object.declaration = [];
+                        for (var j = 0; j < message.declaration.length; ++j)
+                            object.declaration[j] = $root.google.protobuf.ExtensionRangeOptions.Declaration.toObject(message.declaration[j], options);
+                    }
+                    if (message.verification != null && message.hasOwnProperty("verification"))
+                        object.verification = options.enums === String ? $root.google.protobuf.ExtensionRangeOptions.VerificationState[message.verification] === undefined ? message.verification : $root.google.protobuf.ExtensionRangeOptions.VerificationState[message.verification] : message.verification;
+                    if (message.features != null && message.hasOwnProperty("features"))
+                        object.features = $root.google.protobuf.FeatureSet.toObject(message.features, options);
+                    if (message.uninterpretedOption && message.uninterpretedOption.length) {
+                        object.uninterpretedOption = [];
+                        for (var j = 0; j < message.uninterpretedOption.length; ++j)
+                            object.uninterpretedOption[j] = $root.google.protobuf.UninterpretedOption.toObject(message.uninterpretedOption[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this ExtensionRangeOptions to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.ExtensionRangeOptions
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                ExtensionRangeOptions.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for ExtensionRangeOptions
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.ExtensionRangeOptions
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                ExtensionRangeOptions.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.ExtensionRangeOptions";
+                };
+    
+                ExtensionRangeOptions.Declaration = (function() {
+    
+                    /**
+                     * Properties of a Declaration.
+                     * @memberof google.protobuf.ExtensionRangeOptions
+                     * @interface IDeclaration
+                     * @property {number|null} [number] Declaration number
+                     * @property {string|null} [fullName] Declaration fullName
+                     * @property {string|null} [type] Declaration type
+                     * @property {boolean|null} [reserved] Declaration reserved
+                     * @property {boolean|null} [repeated] Declaration repeated
+                     */
+    
+                    /**
+                     * Constructs a new Declaration.
+                     * @memberof google.protobuf.ExtensionRangeOptions
+                     * @classdesc Represents a Declaration.
+                     * @implements IDeclaration
+                     * @constructor
+                     * @param {google.protobuf.ExtensionRangeOptions.IDeclaration=} [properties] Properties to set
+                     */
+                    function Declaration(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * Declaration number.
+                     * @member {number} number
+                     * @memberof google.protobuf.ExtensionRangeOptions.Declaration
+                     * @instance
+                     */
+                    Declaration.prototype.number = 0;
+    
+                    /**
+                     * Declaration fullName.
+                     * @member {string} fullName
+                     * @memberof google.protobuf.ExtensionRangeOptions.Declaration
+                     * @instance
+                     */
+                    Declaration.prototype.fullName = "";
+    
+                    /**
+                     * Declaration type.
+                     * @member {string} type
+                     * @memberof google.protobuf.ExtensionRangeOptions.Declaration
+                     * @instance
+                     */
+                    Declaration.prototype.type = "";
+    
+                    /**
+                     * Declaration reserved.
+                     * @member {boolean} reserved
+                     * @memberof google.protobuf.ExtensionRangeOptions.Declaration
+                     * @instance
+                     */
+                    Declaration.prototype.reserved = false;
+    
+                    /**
+                     * Declaration repeated.
+                     * @member {boolean} repeated
+                     * @memberof google.protobuf.ExtensionRangeOptions.Declaration
+                     * @instance
+                     */
+                    Declaration.prototype.repeated = false;
+    
+                    /**
+                     * Creates a Declaration message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.protobuf.ExtensionRangeOptions.Declaration
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.protobuf.ExtensionRangeOptions.Declaration} Declaration
+                     */
+                    Declaration.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.protobuf.ExtensionRangeOptions.Declaration)
+                            return object;
+                        var message = new $root.google.protobuf.ExtensionRangeOptions.Declaration();
+                        if (object.number != null)
+                            message.number = object.number | 0;
+                        if (object.fullName != null)
+                            message.fullName = String(object.fullName);
+                        if (object.type != null)
+                            message.type = String(object.type);
+                        if (object.reserved != null)
+                            message.reserved = Boolean(object.reserved);
+                        if (object.repeated != null)
+                            message.repeated = Boolean(object.repeated);
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a Declaration message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.protobuf.ExtensionRangeOptions.Declaration
+                     * @static
+                     * @param {google.protobuf.ExtensionRangeOptions.Declaration} message Declaration
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    Declaration.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.number = 0;
+                            object.fullName = "";
+                            object.type = "";
+                            object.reserved = false;
+                            object.repeated = false;
+                        }
+                        if (message.number != null && message.hasOwnProperty("number"))
+                            object.number = message.number;
+                        if (message.fullName != null && message.hasOwnProperty("fullName"))
+                            object.fullName = message.fullName;
+                        if (message.type != null && message.hasOwnProperty("type"))
+                            object.type = message.type;
+                        if (message.reserved != null && message.hasOwnProperty("reserved"))
+                            object.reserved = message.reserved;
+                        if (message.repeated != null && message.hasOwnProperty("repeated"))
+                            object.repeated = message.repeated;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this Declaration to JSON.
+                     * @function toJSON
+                     * @memberof google.protobuf.ExtensionRangeOptions.Declaration
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    Declaration.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for Declaration
+                     * @function getTypeUrl
+                     * @memberof google.protobuf.ExtensionRangeOptions.Declaration
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    Declaration.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.protobuf.ExtensionRangeOptions.Declaration";
+                    };
+    
+                    return Declaration;
+                })();
+    
+                /**
+                 * VerificationState enum.
+                 * @name google.protobuf.ExtensionRangeOptions.VerificationState
+                 * @enum {string}
+                 * @property {string} DECLARATION=DECLARATION DECLARATION value
+                 * @property {string} UNVERIFIED=UNVERIFIED UNVERIFIED value
+                 */
+                ExtensionRangeOptions.VerificationState = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "DECLARATION"] = "DECLARATION";
+                    values[valuesById[1] = "UNVERIFIED"] = "UNVERIFIED";
+                    return values;
+                })();
+    
+                return ExtensionRangeOptions;
+            })();
+    
             protobuf.FieldDescriptorProto = (function() {
     
                 /**
@@ -9320,6 +14863,7 @@
                  * @property {number|null} [oneofIndex] FieldDescriptorProto oneofIndex
                  * @property {string|null} [jsonName] FieldDescriptorProto jsonName
                  * @property {google.protobuf.IFieldOptions|null} [options] FieldDescriptorProto options
+                 * @property {boolean|null} [proto3Optional] FieldDescriptorProto proto3Optional
                  */
     
                 /**
@@ -9418,6 +14962,14 @@
                 FieldDescriptorProto.prototype.options = null;
     
                 /**
+                 * FieldDescriptorProto proto3Optional.
+                 * @member {boolean} proto3Optional
+                 * @memberof google.protobuf.FieldDescriptorProto
+                 * @instance
+                 */
+                FieldDescriptorProto.prototype.proto3Optional = false;
+    
+                /**
                  * Creates a FieldDescriptorProto message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.protobuf.FieldDescriptorProto
@@ -9444,13 +14996,13 @@
                     case 1:
                         message.label = 1;
                         break;
-                    case "LABEL_REQUIRED":
-                    case 2:
-                        message.label = 2;
-                        break;
                     case "LABEL_REPEATED":
                     case 3:
                         message.label = 3;
+                        break;
+                    case "LABEL_REQUIRED":
+                    case 2:
+                        message.label = 2;
                         break;
                     }
                     switch (object.type) {
@@ -9548,6 +15100,8 @@
                             throw TypeError(".google.protobuf.FieldDescriptorProto.options: object expected");
                         message.options = $root.google.protobuf.FieldOptions.fromObject(object.options);
                     }
+                    if (object.proto3Optional != null)
+                        message.proto3Optional = Boolean(object.proto3Optional);
                     return message;
                 };
     
@@ -9575,6 +15129,7 @@
                         object.options = null;
                         object.oneofIndex = 0;
                         object.jsonName = "";
+                        object.proto3Optional = false;
                     }
                     if (message.name != null && message.hasOwnProperty("name"))
                         object.name = message.name;
@@ -9596,6 +15151,8 @@
                         object.oneofIndex = message.oneofIndex;
                     if (message.jsonName != null && message.hasOwnProperty("jsonName"))
                         object.jsonName = message.jsonName;
+                    if (message.proto3Optional != null && message.hasOwnProperty("proto3Optional"))
+                        object.proto3Optional = message.proto3Optional;
                     return object;
                 };
     
@@ -9676,14 +15233,14 @@
                  * @name google.protobuf.FieldDescriptorProto.Label
                  * @enum {string}
                  * @property {string} LABEL_OPTIONAL=LABEL_OPTIONAL LABEL_OPTIONAL value
-                 * @property {string} LABEL_REQUIRED=LABEL_REQUIRED LABEL_REQUIRED value
                  * @property {string} LABEL_REPEATED=LABEL_REPEATED LABEL_REPEATED value
+                 * @property {string} LABEL_REQUIRED=LABEL_REQUIRED LABEL_REQUIRED value
                  */
                 FieldDescriptorProto.Label = (function() {
                     var valuesById = {}, values = Object.create(valuesById);
                     values[valuesById[1] = "LABEL_OPTIONAL"] = "LABEL_OPTIONAL";
-                    values[valuesById[2] = "LABEL_REQUIRED"] = "LABEL_REQUIRED";
                     values[valuesById[3] = "LABEL_REPEATED"] = "LABEL_REPEATED";
+                    values[valuesById[2] = "LABEL_REQUIRED"] = "LABEL_REQUIRED";
                     return values;
                 })();
     
@@ -9815,6 +15372,8 @@
                  * @property {string|null} [name] EnumDescriptorProto name
                  * @property {Array.<google.protobuf.IEnumValueDescriptorProto>|null} [value] EnumDescriptorProto value
                  * @property {google.protobuf.IEnumOptions|null} [options] EnumDescriptorProto options
+                 * @property {Array.<google.protobuf.EnumDescriptorProto.IEnumReservedRange>|null} [reservedRange] EnumDescriptorProto reservedRange
+                 * @property {Array.<string>|null} [reservedName] EnumDescriptorProto reservedName
                  */
     
                 /**
@@ -9827,6 +15386,8 @@
                  */
                 function EnumDescriptorProto(properties) {
                     this.value = [];
+                    this.reservedRange = [];
+                    this.reservedName = [];
                     if (properties)
                         for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                             if (properties[keys[i]] != null)
@@ -9858,6 +15419,22 @@
                 EnumDescriptorProto.prototype.options = null;
     
                 /**
+                 * EnumDescriptorProto reservedRange.
+                 * @member {Array.<google.protobuf.EnumDescriptorProto.IEnumReservedRange>} reservedRange
+                 * @memberof google.protobuf.EnumDescriptorProto
+                 * @instance
+                 */
+                EnumDescriptorProto.prototype.reservedRange = $util.emptyArray;
+    
+                /**
+                 * EnumDescriptorProto reservedName.
+                 * @member {Array.<string>} reservedName
+                 * @memberof google.protobuf.EnumDescriptorProto
+                 * @instance
+                 */
+                EnumDescriptorProto.prototype.reservedName = $util.emptyArray;
+    
+                /**
                  * Creates an EnumDescriptorProto message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.protobuf.EnumDescriptorProto
@@ -9886,6 +15463,23 @@
                             throw TypeError(".google.protobuf.EnumDescriptorProto.options: object expected");
                         message.options = $root.google.protobuf.EnumOptions.fromObject(object.options);
                     }
+                    if (object.reservedRange) {
+                        if (!Array.isArray(object.reservedRange))
+                            throw TypeError(".google.protobuf.EnumDescriptorProto.reservedRange: array expected");
+                        message.reservedRange = [];
+                        for (var i = 0; i < object.reservedRange.length; ++i) {
+                            if (typeof object.reservedRange[i] !== "object")
+                                throw TypeError(".google.protobuf.EnumDescriptorProto.reservedRange: object expected");
+                            message.reservedRange[i] = $root.google.protobuf.EnumDescriptorProto.EnumReservedRange.fromObject(object.reservedRange[i]);
+                        }
+                    }
+                    if (object.reservedName) {
+                        if (!Array.isArray(object.reservedName))
+                            throw TypeError(".google.protobuf.EnumDescriptorProto.reservedName: array expected");
+                        message.reservedName = [];
+                        for (var i = 0; i < object.reservedName.length; ++i)
+                            message.reservedName[i] = String(object.reservedName[i]);
+                    }
                     return message;
                 };
     
@@ -9902,8 +15496,11 @@
                     if (!options)
                         options = {};
                     var object = {};
-                    if (options.arrays || options.defaults)
+                    if (options.arrays || options.defaults) {
                         object.value = [];
+                        object.reservedRange = [];
+                        object.reservedName = [];
+                    }
                     if (options.defaults) {
                         object.name = "";
                         object.options = null;
@@ -9917,6 +15514,16 @@
                     }
                     if (message.options != null && message.hasOwnProperty("options"))
                         object.options = $root.google.protobuf.EnumOptions.toObject(message.options, options);
+                    if (message.reservedRange && message.reservedRange.length) {
+                        object.reservedRange = [];
+                        for (var j = 0; j < message.reservedRange.length; ++j)
+                            object.reservedRange[j] = $root.google.protobuf.EnumDescriptorProto.EnumReservedRange.toObject(message.reservedRange[j], options);
+                    }
+                    if (message.reservedName && message.reservedName.length) {
+                        object.reservedName = [];
+                        for (var j = 0; j < message.reservedName.length; ++j)
+                            object.reservedName[j] = message.reservedName[j];
+                    }
                     return object;
                 };
     
@@ -9945,6 +15552,119 @@
                     }
                     return typeUrlPrefix + "/google.protobuf.EnumDescriptorProto";
                 };
+    
+                EnumDescriptorProto.EnumReservedRange = (function() {
+    
+                    /**
+                     * Properties of an EnumReservedRange.
+                     * @memberof google.protobuf.EnumDescriptorProto
+                     * @interface IEnumReservedRange
+                     * @property {number|null} [start] EnumReservedRange start
+                     * @property {number|null} [end] EnumReservedRange end
+                     */
+    
+                    /**
+                     * Constructs a new EnumReservedRange.
+                     * @memberof google.protobuf.EnumDescriptorProto
+                     * @classdesc Represents an EnumReservedRange.
+                     * @implements IEnumReservedRange
+                     * @constructor
+                     * @param {google.protobuf.EnumDescriptorProto.IEnumReservedRange=} [properties] Properties to set
+                     */
+                    function EnumReservedRange(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * EnumReservedRange start.
+                     * @member {number} start
+                     * @memberof google.protobuf.EnumDescriptorProto.EnumReservedRange
+                     * @instance
+                     */
+                    EnumReservedRange.prototype.start = 0;
+    
+                    /**
+                     * EnumReservedRange end.
+                     * @member {number} end
+                     * @memberof google.protobuf.EnumDescriptorProto.EnumReservedRange
+                     * @instance
+                     */
+                    EnumReservedRange.prototype.end = 0;
+    
+                    /**
+                     * Creates an EnumReservedRange message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.protobuf.EnumDescriptorProto.EnumReservedRange
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.protobuf.EnumDescriptorProto.EnumReservedRange} EnumReservedRange
+                     */
+                    EnumReservedRange.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.protobuf.EnumDescriptorProto.EnumReservedRange)
+                            return object;
+                        var message = new $root.google.protobuf.EnumDescriptorProto.EnumReservedRange();
+                        if (object.start != null)
+                            message.start = object.start | 0;
+                        if (object.end != null)
+                            message.end = object.end | 0;
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an EnumReservedRange message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.protobuf.EnumDescriptorProto.EnumReservedRange
+                     * @static
+                     * @param {google.protobuf.EnumDescriptorProto.EnumReservedRange} message EnumReservedRange
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    EnumReservedRange.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.start = 0;
+                            object.end = 0;
+                        }
+                        if (message.start != null && message.hasOwnProperty("start"))
+                            object.start = message.start;
+                        if (message.end != null && message.hasOwnProperty("end"))
+                            object.end = message.end;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this EnumReservedRange to JSON.
+                     * @function toJSON
+                     * @memberof google.protobuf.EnumDescriptorProto.EnumReservedRange
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    EnumReservedRange.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for EnumReservedRange
+                     * @function getTypeUrl
+                     * @memberof google.protobuf.EnumDescriptorProto.EnumReservedRange
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    EnumReservedRange.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.protobuf.EnumDescriptorProto.EnumReservedRange";
+                    };
+    
+                    return EnumReservedRange;
+                })();
     
                 return EnumDescriptorProto;
             })();
@@ -10414,6 +16134,12 @@
                  * @property {boolean|null} [ccEnableArenas] FileOptions ccEnableArenas
                  * @property {string|null} [objcClassPrefix] FileOptions objcClassPrefix
                  * @property {string|null} [csharpNamespace] FileOptions csharpNamespace
+                 * @property {string|null} [swiftPrefix] FileOptions swiftPrefix
+                 * @property {string|null} [phpClassPrefix] FileOptions phpClassPrefix
+                 * @property {string|null} [phpNamespace] FileOptions phpNamespace
+                 * @property {string|null} [phpMetadataNamespace] FileOptions phpMetadataNamespace
+                 * @property {string|null} [rubyPackage] FileOptions rubyPackage
+                 * @property {google.protobuf.IFeatureSet|null} [features] FileOptions features
                  * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] FileOptions uninterpretedOption
                  * @property {Array.<google.api.IResourceDescriptor>|null} [".google.api.resourceDefinition"] FileOptions .google.api.resourceDefinition
                  */
@@ -10529,7 +16255,7 @@
                  * @memberof google.protobuf.FileOptions
                  * @instance
                  */
-                FileOptions.prototype.ccEnableArenas = false;
+                FileOptions.prototype.ccEnableArenas = true;
     
                 /**
                  * FileOptions objcClassPrefix.
@@ -10546,6 +16272,54 @@
                  * @instance
                  */
                 FileOptions.prototype.csharpNamespace = "";
+    
+                /**
+                 * FileOptions swiftPrefix.
+                 * @member {string} swiftPrefix
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.swiftPrefix = "";
+    
+                /**
+                 * FileOptions phpClassPrefix.
+                 * @member {string} phpClassPrefix
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.phpClassPrefix = "";
+    
+                /**
+                 * FileOptions phpNamespace.
+                 * @member {string} phpNamespace
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.phpNamespace = "";
+    
+                /**
+                 * FileOptions phpMetadataNamespace.
+                 * @member {string} phpMetadataNamespace
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.phpMetadataNamespace = "";
+    
+                /**
+                 * FileOptions rubyPackage.
+                 * @member {string} rubyPackage
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.rubyPackage = "";
+    
+                /**
+                 * FileOptions features.
+                 * @member {google.protobuf.IFeatureSet|null|undefined} features
+                 * @memberof google.protobuf.FileOptions
+                 * @instance
+                 */
+                FileOptions.prototype.features = null;
     
                 /**
                  * FileOptions uninterpretedOption.
@@ -10621,6 +16395,21 @@
                         message.objcClassPrefix = String(object.objcClassPrefix);
                     if (object.csharpNamespace != null)
                         message.csharpNamespace = String(object.csharpNamespace);
+                    if (object.swiftPrefix != null)
+                        message.swiftPrefix = String(object.swiftPrefix);
+                    if (object.phpClassPrefix != null)
+                        message.phpClassPrefix = String(object.phpClassPrefix);
+                    if (object.phpNamespace != null)
+                        message.phpNamespace = String(object.phpNamespace);
+                    if (object.phpMetadataNamespace != null)
+                        message.phpMetadataNamespace = String(object.phpMetadataNamespace);
+                    if (object.rubyPackage != null)
+                        message.rubyPackage = String(object.rubyPackage);
+                    if (object.features != null) {
+                        if (typeof object.features !== "object")
+                            throw TypeError(".google.protobuf.FileOptions.features: object expected");
+                        message.features = $root.google.protobuf.FeatureSet.fromObject(object.features);
+                    }
                     if (object.uninterpretedOption) {
                         if (!Array.isArray(object.uninterpretedOption))
                             throw TypeError(".google.protobuf.FileOptions.uninterpretedOption: array expected");
@@ -10673,9 +16462,15 @@
                         object.javaGenerateEqualsAndHash = false;
                         object.deprecated = false;
                         object.javaStringCheckUtf8 = false;
-                        object.ccEnableArenas = false;
+                        object.ccEnableArenas = true;
                         object.objcClassPrefix = "";
                         object.csharpNamespace = "";
+                        object.swiftPrefix = "";
+                        object.phpClassPrefix = "";
+                        object.phpNamespace = "";
+                        object.phpMetadataNamespace = "";
+                        object.rubyPackage = "";
+                        object.features = null;
                     }
                     if (message.javaPackage != null && message.hasOwnProperty("javaPackage"))
                         object.javaPackage = message.javaPackage;
@@ -10705,6 +16500,18 @@
                         object.objcClassPrefix = message.objcClassPrefix;
                     if (message.csharpNamespace != null && message.hasOwnProperty("csharpNamespace"))
                         object.csharpNamespace = message.csharpNamespace;
+                    if (message.swiftPrefix != null && message.hasOwnProperty("swiftPrefix"))
+                        object.swiftPrefix = message.swiftPrefix;
+                    if (message.phpClassPrefix != null && message.hasOwnProperty("phpClassPrefix"))
+                        object.phpClassPrefix = message.phpClassPrefix;
+                    if (message.phpNamespace != null && message.hasOwnProperty("phpNamespace"))
+                        object.phpNamespace = message.phpNamespace;
+                    if (message.phpMetadataNamespace != null && message.hasOwnProperty("phpMetadataNamespace"))
+                        object.phpMetadataNamespace = message.phpMetadataNamespace;
+                    if (message.rubyPackage != null && message.hasOwnProperty("rubyPackage"))
+                        object.rubyPackage = message.rubyPackage;
+                    if (message.features != null && message.hasOwnProperty("features"))
+                        object.features = $root.google.protobuf.FeatureSet.toObject(message.features, options);
                     if (message.uninterpretedOption && message.uninterpretedOption.length) {
                         object.uninterpretedOption = [];
                         for (var j = 0; j < message.uninterpretedOption.length; ++j)
@@ -10773,6 +16580,8 @@
                  * @property {boolean|null} [noStandardDescriptorAccessor] MessageOptions noStandardDescriptorAccessor
                  * @property {boolean|null} [deprecated] MessageOptions deprecated
                  * @property {boolean|null} [mapEntry] MessageOptions mapEntry
+                 * @property {boolean|null} [deprecatedLegacyJsonFieldConflicts] MessageOptions deprecatedLegacyJsonFieldConflicts
+                 * @property {google.protobuf.IFeatureSet|null} [features] MessageOptions features
                  * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] MessageOptions uninterpretedOption
                  * @property {google.api.IResourceDescriptor|null} [".google.api.resource"] MessageOptions .google.api.resource
                  */
@@ -10826,6 +16635,22 @@
                 MessageOptions.prototype.mapEntry = false;
     
                 /**
+                 * MessageOptions deprecatedLegacyJsonFieldConflicts.
+                 * @member {boolean} deprecatedLegacyJsonFieldConflicts
+                 * @memberof google.protobuf.MessageOptions
+                 * @instance
+                 */
+                MessageOptions.prototype.deprecatedLegacyJsonFieldConflicts = false;
+    
+                /**
+                 * MessageOptions features.
+                 * @member {google.protobuf.IFeatureSet|null|undefined} features
+                 * @memberof google.protobuf.MessageOptions
+                 * @instance
+                 */
+                MessageOptions.prototype.features = null;
+    
+                /**
                  * MessageOptions uninterpretedOption.
                  * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
                  * @memberof google.protobuf.MessageOptions
@@ -10861,6 +16686,13 @@
                         message.deprecated = Boolean(object.deprecated);
                     if (object.mapEntry != null)
                         message.mapEntry = Boolean(object.mapEntry);
+                    if (object.deprecatedLegacyJsonFieldConflicts != null)
+                        message.deprecatedLegacyJsonFieldConflicts = Boolean(object.deprecatedLegacyJsonFieldConflicts);
+                    if (object.features != null) {
+                        if (typeof object.features !== "object")
+                            throw TypeError(".google.protobuf.MessageOptions.features: object expected");
+                        message.features = $root.google.protobuf.FeatureSet.fromObject(object.features);
+                    }
                     if (object.uninterpretedOption) {
                         if (!Array.isArray(object.uninterpretedOption))
                             throw TypeError(".google.protobuf.MessageOptions.uninterpretedOption: array expected");
@@ -10899,6 +16731,8 @@
                         object.noStandardDescriptorAccessor = false;
                         object.deprecated = false;
                         object.mapEntry = false;
+                        object.deprecatedLegacyJsonFieldConflicts = false;
+                        object.features = null;
                         object[".google.api.resource"] = null;
                     }
                     if (message.messageSetWireFormat != null && message.hasOwnProperty("messageSetWireFormat"))
@@ -10909,6 +16743,10 @@
                         object.deprecated = message.deprecated;
                     if (message.mapEntry != null && message.hasOwnProperty("mapEntry"))
                         object.mapEntry = message.mapEntry;
+                    if (message.deprecatedLegacyJsonFieldConflicts != null && message.hasOwnProperty("deprecatedLegacyJsonFieldConflicts"))
+                        object.deprecatedLegacyJsonFieldConflicts = message.deprecatedLegacyJsonFieldConflicts;
+                    if (message.features != null && message.hasOwnProperty("features"))
+                        object.features = $root.google.protobuf.FeatureSet.toObject(message.features, options);
                     if (message.uninterpretedOption && message.uninterpretedOption.length) {
                         object.uninterpretedOption = [];
                         for (var j = 0; j < message.uninterpretedOption.length; ++j)
@@ -10958,8 +16796,14 @@
                  * @property {boolean|null} [packed] FieldOptions packed
                  * @property {google.protobuf.FieldOptions.JSType|null} [jstype] FieldOptions jstype
                  * @property {boolean|null} [lazy] FieldOptions lazy
+                 * @property {boolean|null} [unverifiedLazy] FieldOptions unverifiedLazy
                  * @property {boolean|null} [deprecated] FieldOptions deprecated
                  * @property {boolean|null} [weak] FieldOptions weak
+                 * @property {boolean|null} [debugRedact] FieldOptions debugRedact
+                 * @property {google.protobuf.FieldOptions.OptionRetention|null} [retention] FieldOptions retention
+                 * @property {Array.<google.protobuf.FieldOptions.OptionTargetType>|null} [targets] FieldOptions targets
+                 * @property {Array.<google.protobuf.FieldOptions.IEditionDefault>|null} [editionDefaults] FieldOptions editionDefaults
+                 * @property {google.protobuf.IFeatureSet|null} [features] FieldOptions features
                  * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] FieldOptions uninterpretedOption
                  * @property {Array.<google.api.FieldBehavior>|null} [".google.api.fieldBehavior"] FieldOptions .google.api.fieldBehavior
                  * @property {google.api.IResourceReference|null} [".google.api.resourceReference"] FieldOptions .google.api.resourceReference
@@ -10974,6 +16818,8 @@
                  * @param {google.protobuf.IFieldOptions=} [properties] Properties to set
                  */
                 function FieldOptions(properties) {
+                    this.targets = [];
+                    this.editionDefaults = [];
                     this.uninterpretedOption = [];
                     this[".google.api.fieldBehavior"] = [];
                     if (properties)
@@ -11015,6 +16861,14 @@
                 FieldOptions.prototype.lazy = false;
     
                 /**
+                 * FieldOptions unverifiedLazy.
+                 * @member {boolean} unverifiedLazy
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 */
+                FieldOptions.prototype.unverifiedLazy = false;
+    
+                /**
                  * FieldOptions deprecated.
                  * @member {boolean} deprecated
                  * @memberof google.protobuf.FieldOptions
@@ -11029,6 +16883,46 @@
                  * @instance
                  */
                 FieldOptions.prototype.weak = false;
+    
+                /**
+                 * FieldOptions debugRedact.
+                 * @member {boolean} debugRedact
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 */
+                FieldOptions.prototype.debugRedact = false;
+    
+                /**
+                 * FieldOptions retention.
+                 * @member {google.protobuf.FieldOptions.OptionRetention} retention
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 */
+                FieldOptions.prototype.retention = 0;
+    
+                /**
+                 * FieldOptions targets.
+                 * @member {Array.<google.protobuf.FieldOptions.OptionTargetType>} targets
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 */
+                FieldOptions.prototype.targets = $util.emptyArray;
+    
+                /**
+                 * FieldOptions editionDefaults.
+                 * @member {Array.<google.protobuf.FieldOptions.IEditionDefault>} editionDefaults
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 */
+                FieldOptions.prototype.editionDefaults = $util.emptyArray;
+    
+                /**
+                 * FieldOptions features.
+                 * @member {google.protobuf.IFeatureSet|null|undefined} features
+                 * @memberof google.protobuf.FieldOptions
+                 * @instance
+                 */
+                FieldOptions.prototype.features = null;
     
                 /**
                  * FieldOptions uninterpretedOption.
@@ -11110,10 +17004,102 @@
                     }
                     if (object.lazy != null)
                         message.lazy = Boolean(object.lazy);
+                    if (object.unverifiedLazy != null)
+                        message.unverifiedLazy = Boolean(object.unverifiedLazy);
                     if (object.deprecated != null)
                         message.deprecated = Boolean(object.deprecated);
                     if (object.weak != null)
                         message.weak = Boolean(object.weak);
+                    if (object.debugRedact != null)
+                        message.debugRedact = Boolean(object.debugRedact);
+                    switch (object.retention) {
+                    default:
+                        if (typeof object.retention === "number") {
+                            message.retention = object.retention;
+                            break;
+                        }
+                        break;
+                    case "RETENTION_UNKNOWN":
+                    case 0:
+                        message.retention = 0;
+                        break;
+                    case "RETENTION_RUNTIME":
+                    case 1:
+                        message.retention = 1;
+                        break;
+                    case "RETENTION_SOURCE":
+                    case 2:
+                        message.retention = 2;
+                        break;
+                    }
+                    if (object.targets) {
+                        if (!Array.isArray(object.targets))
+                            throw TypeError(".google.protobuf.FieldOptions.targets: array expected");
+                        message.targets = [];
+                        for (var i = 0; i < object.targets.length; ++i)
+                            switch (object.targets[i]) {
+                            default:
+                                if (typeof object.targets[i] === "number") {
+                                    message.targets[i] = object.targets[i];
+                                    break;
+                                }
+                            case "TARGET_TYPE_UNKNOWN":
+                            case 0:
+                                message.targets[i] = 0;
+                                break;
+                            case "TARGET_TYPE_FILE":
+                            case 1:
+                                message.targets[i] = 1;
+                                break;
+                            case "TARGET_TYPE_EXTENSION_RANGE":
+                            case 2:
+                                message.targets[i] = 2;
+                                break;
+                            case "TARGET_TYPE_MESSAGE":
+                            case 3:
+                                message.targets[i] = 3;
+                                break;
+                            case "TARGET_TYPE_FIELD":
+                            case 4:
+                                message.targets[i] = 4;
+                                break;
+                            case "TARGET_TYPE_ONEOF":
+                            case 5:
+                                message.targets[i] = 5;
+                                break;
+                            case "TARGET_TYPE_ENUM":
+                            case 6:
+                                message.targets[i] = 6;
+                                break;
+                            case "TARGET_TYPE_ENUM_ENTRY":
+                            case 7:
+                                message.targets[i] = 7;
+                                break;
+                            case "TARGET_TYPE_SERVICE":
+                            case 8:
+                                message.targets[i] = 8;
+                                break;
+                            case "TARGET_TYPE_METHOD":
+                            case 9:
+                                message.targets[i] = 9;
+                                break;
+                            }
+                    }
+                    if (object.editionDefaults) {
+                        if (!Array.isArray(object.editionDefaults))
+                            throw TypeError(".google.protobuf.FieldOptions.editionDefaults: array expected");
+                        message.editionDefaults = [];
+                        for (var i = 0; i < object.editionDefaults.length; ++i) {
+                            if (typeof object.editionDefaults[i] !== "object")
+                                throw TypeError(".google.protobuf.FieldOptions.editionDefaults: object expected");
+                            message.editionDefaults[i] = $root.google.protobuf.FieldOptions.EditionDefault.fromObject(object.editionDefaults[i]);
+                        }
+                    }
+                    if (object.features != null) {
+                        if (typeof object.features !== "object")
+                            throw TypeError(".google.protobuf.FieldOptions.features: object expected");
+                        message.features = $root.google.protobuf.FeatureSet.fromObject(object.features);
+                    }
                     if (object.uninterpretedOption) {
                         if (!Array.isArray(object.uninterpretedOption))
                             throw TypeError(".google.protobuf.FieldOptions.uninterpretedOption: array expected");
@@ -11167,6 +17153,10 @@
                             case 7:
                                 message[".google.api.fieldBehavior"][i] = 7;
                                 break;
+                            case "IDENTIFIER":
+                            case 8:
+                                message[".google.api.fieldBehavior"][i] = 8;
+                                break;
                             }
                     }
                     if (object[".google.api.resourceReference"] != null) {
@@ -11191,6 +17181,8 @@
                         options = {};
                     var object = {};
                     if (options.arrays || options.defaults) {
+                        object.targets = [];
+                        object.editionDefaults = [];
                         object.uninterpretedOption = [];
                         object[".google.api.fieldBehavior"] = [];
                     }
@@ -11201,6 +17193,10 @@
                         object.lazy = false;
                         object.jstype = options.enums === String ? "JS_NORMAL" : 0;
                         object.weak = false;
+                        object.unverifiedLazy = false;
+                        object.debugRedact = false;
+                        object.retention = options.enums === String ? "RETENTION_UNKNOWN" : 0;
+                        object.features = null;
                         object[".google.api.resourceReference"] = null;
                     }
                     if (message.ctype != null && message.hasOwnProperty("ctype"))
@@ -11215,6 +17211,24 @@
                         object.jstype = options.enums === String ? $root.google.protobuf.FieldOptions.JSType[message.jstype] === undefined ? message.jstype : $root.google.protobuf.FieldOptions.JSType[message.jstype] : message.jstype;
                     if (message.weak != null && message.hasOwnProperty("weak"))
                         object.weak = message.weak;
+                    if (message.unverifiedLazy != null && message.hasOwnProperty("unverifiedLazy"))
+                        object.unverifiedLazy = message.unverifiedLazy;
+                    if (message.debugRedact != null && message.hasOwnProperty("debugRedact"))
+                        object.debugRedact = message.debugRedact;
+                    if (message.retention != null && message.hasOwnProperty("retention"))
+                        object.retention = options.enums === String ? $root.google.protobuf.FieldOptions.OptionRetention[message.retention] === undefined ? message.retention : $root.google.protobuf.FieldOptions.OptionRetention[message.retention] : message.retention;
+                    if (message.targets && message.targets.length) {
+                        object.targets = [];
+                        for (var j = 0; j < message.targets.length; ++j)
+                            object.targets[j] = options.enums === String ? $root.google.protobuf.FieldOptions.OptionTargetType[message.targets[j]] === undefined ? message.targets[j] : $root.google.protobuf.FieldOptions.OptionTargetType[message.targets[j]] : message.targets[j];
+                    }
+                    if (message.editionDefaults && message.editionDefaults.length) {
+                        object.editionDefaults = [];
+                        for (var j = 0; j < message.editionDefaults.length; ++j)
+                            object.editionDefaults[j] = $root.google.protobuf.FieldOptions.EditionDefault.toObject(message.editionDefaults[j], options);
+                    }
+                    if (message.features != null && message.hasOwnProperty("features"))
+                        object.features = $root.google.protobuf.FeatureSet.toObject(message.features, options);
                     if (message.uninterpretedOption && message.uninterpretedOption.length) {
                         object.uninterpretedOption = [];
                         for (var j = 0; j < message.uninterpretedOption.length; ++j)
@@ -11288,6 +17302,215 @@
                     return values;
                 })();
     
+                /**
+                 * OptionRetention enum.
+                 * @name google.protobuf.FieldOptions.OptionRetention
+                 * @enum {string}
+                 * @property {string} RETENTION_UNKNOWN=RETENTION_UNKNOWN RETENTION_UNKNOWN value
+                 * @property {string} RETENTION_RUNTIME=RETENTION_RUNTIME RETENTION_RUNTIME value
+                 * @property {string} RETENTION_SOURCE=RETENTION_SOURCE RETENTION_SOURCE value
+                 */
+                FieldOptions.OptionRetention = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "RETENTION_UNKNOWN"] = "RETENTION_UNKNOWN";
+                    values[valuesById[1] = "RETENTION_RUNTIME"] = "RETENTION_RUNTIME";
+                    values[valuesById[2] = "RETENTION_SOURCE"] = "RETENTION_SOURCE";
+                    return values;
+                })();
+    
+                /**
+                 * OptionTargetType enum.
+                 * @name google.protobuf.FieldOptions.OptionTargetType
+                 * @enum {string}
+                 * @property {string} TARGET_TYPE_UNKNOWN=TARGET_TYPE_UNKNOWN TARGET_TYPE_UNKNOWN value
+                 * @property {string} TARGET_TYPE_FILE=TARGET_TYPE_FILE TARGET_TYPE_FILE value
+                 * @property {string} TARGET_TYPE_EXTENSION_RANGE=TARGET_TYPE_EXTENSION_RANGE TARGET_TYPE_EXTENSION_RANGE value
+                 * @property {string} TARGET_TYPE_MESSAGE=TARGET_TYPE_MESSAGE TARGET_TYPE_MESSAGE value
+                 * @property {string} TARGET_TYPE_FIELD=TARGET_TYPE_FIELD TARGET_TYPE_FIELD value
+                 * @property {string} TARGET_TYPE_ONEOF=TARGET_TYPE_ONEOF TARGET_TYPE_ONEOF value
+                 * @property {string} TARGET_TYPE_ENUM=TARGET_TYPE_ENUM TARGET_TYPE_ENUM value
+                 * @property {string} TARGET_TYPE_ENUM_ENTRY=TARGET_TYPE_ENUM_ENTRY TARGET_TYPE_ENUM_ENTRY value
+                 * @property {string} TARGET_TYPE_SERVICE=TARGET_TYPE_SERVICE TARGET_TYPE_SERVICE value
+                 * @property {string} TARGET_TYPE_METHOD=TARGET_TYPE_METHOD TARGET_TYPE_METHOD value
+                 */
+                FieldOptions.OptionTargetType = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "TARGET_TYPE_UNKNOWN"] = "TARGET_TYPE_UNKNOWN";
+                    values[valuesById[1] = "TARGET_TYPE_FILE"] = "TARGET_TYPE_FILE";
+                    values[valuesById[2] = "TARGET_TYPE_EXTENSION_RANGE"] = "TARGET_TYPE_EXTENSION_RANGE";
+                    values[valuesById[3] = "TARGET_TYPE_MESSAGE"] = "TARGET_TYPE_MESSAGE";
+                    values[valuesById[4] = "TARGET_TYPE_FIELD"] = "TARGET_TYPE_FIELD";
+                    values[valuesById[5] = "TARGET_TYPE_ONEOF"] = "TARGET_TYPE_ONEOF";
+                    values[valuesById[6] = "TARGET_TYPE_ENUM"] = "TARGET_TYPE_ENUM";
+                    values[valuesById[7] = "TARGET_TYPE_ENUM_ENTRY"] = "TARGET_TYPE_ENUM_ENTRY";
+                    values[valuesById[8] = "TARGET_TYPE_SERVICE"] = "TARGET_TYPE_SERVICE";
+                    values[valuesById[9] = "TARGET_TYPE_METHOD"] = "TARGET_TYPE_METHOD";
+                    return values;
+                })();
+    
+                FieldOptions.EditionDefault = (function() {
+    
+                    /**
+                     * Properties of an EditionDefault.
+                     * @memberof google.protobuf.FieldOptions
+                     * @interface IEditionDefault
+                     * @property {google.protobuf.Edition|null} [edition] EditionDefault edition
+                     * @property {string|null} [value] EditionDefault value
+                     */
+    
+                    /**
+                     * Constructs a new EditionDefault.
+                     * @memberof google.protobuf.FieldOptions
+                     * @classdesc Represents an EditionDefault.
+                     * @implements IEditionDefault
+                     * @constructor
+                     * @param {google.protobuf.FieldOptions.IEditionDefault=} [properties] Properties to set
+                     */
+                    function EditionDefault(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * EditionDefault edition.
+                     * @member {google.protobuf.Edition} edition
+                     * @memberof google.protobuf.FieldOptions.EditionDefault
+                     * @instance
+                     */
+                    EditionDefault.prototype.edition = 0;
+    
+                    /**
+                     * EditionDefault value.
+                     * @member {string} value
+                     * @memberof google.protobuf.FieldOptions.EditionDefault
+                     * @instance
+                     */
+                    EditionDefault.prototype.value = "";
+    
+                    /**
+                     * Creates an EditionDefault message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.protobuf.FieldOptions.EditionDefault
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.protobuf.FieldOptions.EditionDefault} EditionDefault
+                     */
+                    EditionDefault.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.protobuf.FieldOptions.EditionDefault)
+                            return object;
+                        var message = new $root.google.protobuf.FieldOptions.EditionDefault();
+                        switch (object.edition) {
+                        default:
+                            if (typeof object.edition === "number") {
+                                message.edition = object.edition;
+                                break;
+                            }
+                            break;
+                        case "EDITION_UNKNOWN":
+                        case 0:
+                            message.edition = 0;
+                            break;
+                        case "EDITION_PROTO2":
+                        case 998:
+                            message.edition = 998;
+                            break;
+                        case "EDITION_PROTO3":
+                        case 999:
+                            message.edition = 999;
+                            break;
+                        case "EDITION_2023":
+                        case 1000:
+                            message.edition = 1000;
+                            break;
+                        case "EDITION_2024":
+                        case 1001:
+                            message.edition = 1001;
+                            break;
+                        case "EDITION_1_TEST_ONLY":
+                        case 1:
+                            message.edition = 1;
+                            break;
+                        case "EDITION_2_TEST_ONLY":
+                        case 2:
+                            message.edition = 2;
+                            break;
+                        case "EDITION_99997_TEST_ONLY":
+                        case 99997:
+                            message.edition = 99997;
+                            break;
+                        case "EDITION_99998_TEST_ONLY":
+                        case 99998:
+                            message.edition = 99998;
+                            break;
+                        case "EDITION_99999_TEST_ONLY":
+                        case 99999:
+                            message.edition = 99999;
+                            break;
+                        case "EDITION_MAX":
+                        case 2147483647:
+                            message.edition = 2147483647;
+                            break;
+                        }
+                        if (object.value != null)
+                            message.value = String(object.value);
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from an EditionDefault message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.protobuf.FieldOptions.EditionDefault
+                     * @static
+                     * @param {google.protobuf.FieldOptions.EditionDefault} message EditionDefault
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    EditionDefault.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.value = "";
+                            object.edition = options.enums === String ? "EDITION_UNKNOWN" : 0;
+                        }
+                        if (message.value != null && message.hasOwnProperty("value"))
+                            object.value = message.value;
+                        if (message.edition != null && message.hasOwnProperty("edition"))
+                            object.edition = options.enums === String ? $root.google.protobuf.Edition[message.edition] === undefined ? message.edition : $root.google.protobuf.Edition[message.edition] : message.edition;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this EditionDefault to JSON.
+                     * @function toJSON
+                     * @memberof google.protobuf.FieldOptions.EditionDefault
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    EditionDefault.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for EditionDefault
+                     * @function getTypeUrl
+                     * @memberof google.protobuf.FieldOptions.EditionDefault
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    EditionDefault.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.protobuf.FieldOptions.EditionDefault";
+                    };
+    
+                    return EditionDefault;
+                })();
+    
                 return FieldOptions;
             })();
     
@@ -11297,6 +17520,7 @@
                  * Properties of an OneofOptions.
                  * @memberof google.protobuf
                  * @interface IOneofOptions
+                 * @property {google.protobuf.IFeatureSet|null} [features] OneofOptions features
                  * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] OneofOptions uninterpretedOption
                  */
     
@@ -11315,6 +17539,14 @@
                             if (properties[keys[i]] != null)
                                 this[keys[i]] = properties[keys[i]];
                 }
+    
+                /**
+                 * OneofOptions features.
+                 * @member {google.protobuf.IFeatureSet|null|undefined} features
+                 * @memberof google.protobuf.OneofOptions
+                 * @instance
+                 */
+                OneofOptions.prototype.features = null;
     
                 /**
                  * OneofOptions uninterpretedOption.
@@ -11336,6 +17568,11 @@
                     if (object instanceof $root.google.protobuf.OneofOptions)
                         return object;
                     var message = new $root.google.protobuf.OneofOptions();
+                    if (object.features != null) {
+                        if (typeof object.features !== "object")
+                            throw TypeError(".google.protobuf.OneofOptions.features: object expected");
+                        message.features = $root.google.protobuf.FeatureSet.fromObject(object.features);
+                    }
                     if (object.uninterpretedOption) {
                         if (!Array.isArray(object.uninterpretedOption))
                             throw TypeError(".google.protobuf.OneofOptions.uninterpretedOption: array expected");
@@ -11364,6 +17601,10 @@
                     var object = {};
                     if (options.arrays || options.defaults)
                         object.uninterpretedOption = [];
+                    if (options.defaults)
+                        object.features = null;
+                    if (message.features != null && message.hasOwnProperty("features"))
+                        object.features = $root.google.protobuf.FeatureSet.toObject(message.features, options);
                     if (message.uninterpretedOption && message.uninterpretedOption.length) {
                         object.uninterpretedOption = [];
                         for (var j = 0; j < message.uninterpretedOption.length; ++j)
@@ -11409,6 +17650,8 @@
                  * @interface IEnumOptions
                  * @property {boolean|null} [allowAlias] EnumOptions allowAlias
                  * @property {boolean|null} [deprecated] EnumOptions deprecated
+                 * @property {boolean|null} [deprecatedLegacyJsonFieldConflicts] EnumOptions deprecatedLegacyJsonFieldConflicts
+                 * @property {google.protobuf.IFeatureSet|null} [features] EnumOptions features
                  * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] EnumOptions uninterpretedOption
                  */
     
@@ -11445,6 +17688,22 @@
                 EnumOptions.prototype.deprecated = false;
     
                 /**
+                 * EnumOptions deprecatedLegacyJsonFieldConflicts.
+                 * @member {boolean} deprecatedLegacyJsonFieldConflicts
+                 * @memberof google.protobuf.EnumOptions
+                 * @instance
+                 */
+                EnumOptions.prototype.deprecatedLegacyJsonFieldConflicts = false;
+    
+                /**
+                 * EnumOptions features.
+                 * @member {google.protobuf.IFeatureSet|null|undefined} features
+                 * @memberof google.protobuf.EnumOptions
+                 * @instance
+                 */
+                EnumOptions.prototype.features = null;
+    
+                /**
                  * EnumOptions uninterpretedOption.
                  * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
                  * @memberof google.protobuf.EnumOptions
@@ -11468,6 +17727,13 @@
                         message.allowAlias = Boolean(object.allowAlias);
                     if (object.deprecated != null)
                         message.deprecated = Boolean(object.deprecated);
+                    if (object.deprecatedLegacyJsonFieldConflicts != null)
+                        message.deprecatedLegacyJsonFieldConflicts = Boolean(object.deprecatedLegacyJsonFieldConflicts);
+                    if (object.features != null) {
+                        if (typeof object.features !== "object")
+                            throw TypeError(".google.protobuf.EnumOptions.features: object expected");
+                        message.features = $root.google.protobuf.FeatureSet.fromObject(object.features);
+                    }
                     if (object.uninterpretedOption) {
                         if (!Array.isArray(object.uninterpretedOption))
                             throw TypeError(".google.protobuf.EnumOptions.uninterpretedOption: array expected");
@@ -11499,11 +17765,17 @@
                     if (options.defaults) {
                         object.allowAlias = false;
                         object.deprecated = false;
+                        object.deprecatedLegacyJsonFieldConflicts = false;
+                        object.features = null;
                     }
                     if (message.allowAlias != null && message.hasOwnProperty("allowAlias"))
                         object.allowAlias = message.allowAlias;
                     if (message.deprecated != null && message.hasOwnProperty("deprecated"))
                         object.deprecated = message.deprecated;
+                    if (message.deprecatedLegacyJsonFieldConflicts != null && message.hasOwnProperty("deprecatedLegacyJsonFieldConflicts"))
+                        object.deprecatedLegacyJsonFieldConflicts = message.deprecatedLegacyJsonFieldConflicts;
+                    if (message.features != null && message.hasOwnProperty("features"))
+                        object.features = $root.google.protobuf.FeatureSet.toObject(message.features, options);
                     if (message.uninterpretedOption && message.uninterpretedOption.length) {
                         object.uninterpretedOption = [];
                         for (var j = 0; j < message.uninterpretedOption.length; ++j)
@@ -11548,6 +17820,8 @@
                  * @memberof google.protobuf
                  * @interface IEnumValueOptions
                  * @property {boolean|null} [deprecated] EnumValueOptions deprecated
+                 * @property {google.protobuf.IFeatureSet|null} [features] EnumValueOptions features
+                 * @property {boolean|null} [debugRedact] EnumValueOptions debugRedact
                  * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] EnumValueOptions uninterpretedOption
                  */
     
@@ -11576,6 +17850,22 @@
                 EnumValueOptions.prototype.deprecated = false;
     
                 /**
+                 * EnumValueOptions features.
+                 * @member {google.protobuf.IFeatureSet|null|undefined} features
+                 * @memberof google.protobuf.EnumValueOptions
+                 * @instance
+                 */
+                EnumValueOptions.prototype.features = null;
+    
+                /**
+                 * EnumValueOptions debugRedact.
+                 * @member {boolean} debugRedact
+                 * @memberof google.protobuf.EnumValueOptions
+                 * @instance
+                 */
+                EnumValueOptions.prototype.debugRedact = false;
+    
+                /**
                  * EnumValueOptions uninterpretedOption.
                  * @member {Array.<google.protobuf.IUninterpretedOption>} uninterpretedOption
                  * @memberof google.protobuf.EnumValueOptions
@@ -11597,6 +17887,13 @@
                     var message = new $root.google.protobuf.EnumValueOptions();
                     if (object.deprecated != null)
                         message.deprecated = Boolean(object.deprecated);
+                    if (object.features != null) {
+                        if (typeof object.features !== "object")
+                            throw TypeError(".google.protobuf.EnumValueOptions.features: object expected");
+                        message.features = $root.google.protobuf.FeatureSet.fromObject(object.features);
+                    }
+                    if (object.debugRedact != null)
+                        message.debugRedact = Boolean(object.debugRedact);
                     if (object.uninterpretedOption) {
                         if (!Array.isArray(object.uninterpretedOption))
                             throw TypeError(".google.protobuf.EnumValueOptions.uninterpretedOption: array expected");
@@ -11625,10 +17922,17 @@
                     var object = {};
                     if (options.arrays || options.defaults)
                         object.uninterpretedOption = [];
-                    if (options.defaults)
+                    if (options.defaults) {
                         object.deprecated = false;
+                        object.features = null;
+                        object.debugRedact = false;
+                    }
                     if (message.deprecated != null && message.hasOwnProperty("deprecated"))
                         object.deprecated = message.deprecated;
+                    if (message.features != null && message.hasOwnProperty("features"))
+                        object.features = $root.google.protobuf.FeatureSet.toObject(message.features, options);
+                    if (message.debugRedact != null && message.hasOwnProperty("debugRedact"))
+                        object.debugRedact = message.debugRedact;
                     if (message.uninterpretedOption && message.uninterpretedOption.length) {
                         object.uninterpretedOption = [];
                         for (var j = 0; j < message.uninterpretedOption.length; ++j)
@@ -11672,10 +17976,12 @@
                  * Properties of a ServiceOptions.
                  * @memberof google.protobuf
                  * @interface IServiceOptions
+                 * @property {google.protobuf.IFeatureSet|null} [features] ServiceOptions features
                  * @property {boolean|null} [deprecated] ServiceOptions deprecated
                  * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] ServiceOptions uninterpretedOption
                  * @property {string|null} [".google.api.defaultHost"] ServiceOptions .google.api.defaultHost
                  * @property {string|null} [".google.api.oauthScopes"] ServiceOptions .google.api.oauthScopes
+                 * @property {string|null} [".google.api.apiVersion"] ServiceOptions .google.api.apiVersion
                  */
     
                 /**
@@ -11693,6 +17999,14 @@
                             if (properties[keys[i]] != null)
                                 this[keys[i]] = properties[keys[i]];
                 }
+    
+                /**
+                 * ServiceOptions features.
+                 * @member {google.protobuf.IFeatureSet|null|undefined} features
+                 * @memberof google.protobuf.ServiceOptions
+                 * @instance
+                 */
+                ServiceOptions.prototype.features = null;
     
                 /**
                  * ServiceOptions deprecated.
@@ -11727,6 +18041,14 @@
                 ServiceOptions.prototype[".google.api.oauthScopes"] = "";
     
                 /**
+                 * ServiceOptions .google.api.apiVersion.
+                 * @member {string} .google.api.apiVersion
+                 * @memberof google.protobuf.ServiceOptions
+                 * @instance
+                 */
+                ServiceOptions.prototype[".google.api.apiVersion"] = "";
+    
+                /**
                  * Creates a ServiceOptions message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.protobuf.ServiceOptions
@@ -11738,6 +18060,11 @@
                     if (object instanceof $root.google.protobuf.ServiceOptions)
                         return object;
                     var message = new $root.google.protobuf.ServiceOptions();
+                    if (object.features != null) {
+                        if (typeof object.features !== "object")
+                            throw TypeError(".google.protobuf.ServiceOptions.features: object expected");
+                        message.features = $root.google.protobuf.FeatureSet.fromObject(object.features);
+                    }
                     if (object.deprecated != null)
                         message.deprecated = Boolean(object.deprecated);
                     if (object.uninterpretedOption) {
@@ -11754,6 +18081,8 @@
                         message[".google.api.defaultHost"] = String(object[".google.api.defaultHost"]);
                     if (object[".google.api.oauthScopes"] != null)
                         message[".google.api.oauthScopes"] = String(object[".google.api.oauthScopes"]);
+                    if (object[".google.api.apiVersion"] != null)
+                        message[".google.api.apiVersion"] = String(object[".google.api.apiVersion"]);
                     return message;
                 };
     
@@ -11774,11 +18103,15 @@
                         object.uninterpretedOption = [];
                     if (options.defaults) {
                         object.deprecated = false;
+                        object.features = null;
                         object[".google.api.defaultHost"] = "";
                         object[".google.api.oauthScopes"] = "";
+                        object[".google.api.apiVersion"] = "";
                     }
                     if (message.deprecated != null && message.hasOwnProperty("deprecated"))
                         object.deprecated = message.deprecated;
+                    if (message.features != null && message.hasOwnProperty("features"))
+                        object.features = $root.google.protobuf.FeatureSet.toObject(message.features, options);
                     if (message.uninterpretedOption && message.uninterpretedOption.length) {
                         object.uninterpretedOption = [];
                         for (var j = 0; j < message.uninterpretedOption.length; ++j)
@@ -11788,6 +18121,8 @@
                         object[".google.api.defaultHost"] = message[".google.api.defaultHost"];
                     if (message[".google.api.oauthScopes"] != null && message.hasOwnProperty(".google.api.oauthScopes"))
                         object[".google.api.oauthScopes"] = message[".google.api.oauthScopes"];
+                    if (message[".google.api.apiVersion"] != null && message.hasOwnProperty(".google.api.apiVersion"))
+                        object[".google.api.apiVersion"] = message[".google.api.apiVersion"];
                     return object;
                 };
     
@@ -11827,6 +18162,8 @@
                  * @memberof google.protobuf
                  * @interface IMethodOptions
                  * @property {boolean|null} [deprecated] MethodOptions deprecated
+                 * @property {google.protobuf.MethodOptions.IdempotencyLevel|null} [idempotencyLevel] MethodOptions idempotencyLevel
+                 * @property {google.protobuf.IFeatureSet|null} [features] MethodOptions features
                  * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] MethodOptions uninterpretedOption
                  * @property {google.api.IHttpRule|null} [".google.api.http"] MethodOptions .google.api.http
                  * @property {Array.<string>|null} [".google.api.methodSignature"] MethodOptions .google.api.methodSignature
@@ -11857,6 +18194,22 @@
                  * @instance
                  */
                 MethodOptions.prototype.deprecated = false;
+    
+                /**
+                 * MethodOptions idempotencyLevel.
+                 * @member {google.protobuf.MethodOptions.IdempotencyLevel} idempotencyLevel
+                 * @memberof google.protobuf.MethodOptions
+                 * @instance
+                 */
+                MethodOptions.prototype.idempotencyLevel = 0;
+    
+                /**
+                 * MethodOptions features.
+                 * @member {google.protobuf.IFeatureSet|null|undefined} features
+                 * @memberof google.protobuf.MethodOptions
+                 * @instance
+                 */
+                MethodOptions.prototype.features = null;
     
                 /**
                  * MethodOptions uninterpretedOption.
@@ -11904,6 +18257,31 @@
                     var message = new $root.google.protobuf.MethodOptions();
                     if (object.deprecated != null)
                         message.deprecated = Boolean(object.deprecated);
+                    switch (object.idempotencyLevel) {
+                    default:
+                        if (typeof object.idempotencyLevel === "number") {
+                            message.idempotencyLevel = object.idempotencyLevel;
+                            break;
+                        }
+                        break;
+                    case "IDEMPOTENCY_UNKNOWN":
+                    case 0:
+                        message.idempotencyLevel = 0;
+                        break;
+                    case "NO_SIDE_EFFECTS":
+                    case 1:
+                        message.idempotencyLevel = 1;
+                        break;
+                    case "IDEMPOTENT":
+                    case 2:
+                        message.idempotencyLevel = 2;
+                        break;
+                    }
+                    if (object.features != null) {
+                        if (typeof object.features !== "object")
+                            throw TypeError(".google.protobuf.MethodOptions.features: object expected");
+                        message.features = $root.google.protobuf.FeatureSet.fromObject(object.features);
+                    }
                     if (object.uninterpretedOption) {
                         if (!Array.isArray(object.uninterpretedOption))
                             throw TypeError(".google.protobuf.MethodOptions.uninterpretedOption: array expected");
@@ -11953,11 +18331,17 @@
                     }
                     if (options.defaults) {
                         object.deprecated = false;
+                        object.idempotencyLevel = options.enums === String ? "IDEMPOTENCY_UNKNOWN" : 0;
+                        object.features = null;
                         object[".google.longrunning.operationInfo"] = null;
                         object[".google.api.http"] = null;
                     }
                     if (message.deprecated != null && message.hasOwnProperty("deprecated"))
                         object.deprecated = message.deprecated;
+                    if (message.idempotencyLevel != null && message.hasOwnProperty("idempotencyLevel"))
+                        object.idempotencyLevel = options.enums === String ? $root.google.protobuf.MethodOptions.IdempotencyLevel[message.idempotencyLevel] === undefined ? message.idempotencyLevel : $root.google.protobuf.MethodOptions.IdempotencyLevel[message.idempotencyLevel] : message.idempotencyLevel;
+                    if (message.features != null && message.hasOwnProperty("features"))
+                        object.features = $root.google.protobuf.FeatureSet.toObject(message.features, options);
                     if (message.uninterpretedOption && message.uninterpretedOption.length) {
                         object.uninterpretedOption = [];
                         for (var j = 0; j < message.uninterpretedOption.length; ++j)
@@ -12000,6 +18384,22 @@
                     }
                     return typeUrlPrefix + "/google.protobuf.MethodOptions";
                 };
+    
+                /**
+                 * IdempotencyLevel enum.
+                 * @name google.protobuf.MethodOptions.IdempotencyLevel
+                 * @enum {string}
+                 * @property {string} IDEMPOTENCY_UNKNOWN=IDEMPOTENCY_UNKNOWN IDEMPOTENCY_UNKNOWN value
+                 * @property {string} NO_SIDE_EFFECTS=NO_SIDE_EFFECTS NO_SIDE_EFFECTS value
+                 * @property {string} IDEMPOTENT=IDEMPOTENT IDEMPOTENT value
+                 */
+                MethodOptions.IdempotencyLevel = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "IDEMPOTENCY_UNKNOWN"] = "IDEMPOTENCY_UNKNOWN";
+                    values[valuesById[1] = "NO_SIDE_EFFECTS"] = "NO_SIDE_EFFECTS";
+                    values[valuesById[2] = "IDEMPOTENT"] = "IDEMPOTENT";
+                    return values;
+                })();
     
                 return MethodOptions;
             })();
@@ -12348,6 +18748,791 @@
                 })();
     
                 return UninterpretedOption;
+            })();
+    
+            protobuf.FeatureSet = (function() {
+    
+                /**
+                 * Properties of a FeatureSet.
+                 * @memberof google.protobuf
+                 * @interface IFeatureSet
+                 * @property {google.protobuf.FeatureSet.FieldPresence|null} [fieldPresence] FeatureSet fieldPresence
+                 * @property {google.protobuf.FeatureSet.EnumType|null} [enumType] FeatureSet enumType
+                 * @property {google.protobuf.FeatureSet.RepeatedFieldEncoding|null} [repeatedFieldEncoding] FeatureSet repeatedFieldEncoding
+                 * @property {google.protobuf.FeatureSet.Utf8Validation|null} [utf8Validation] FeatureSet utf8Validation
+                 * @property {google.protobuf.FeatureSet.MessageEncoding|null} [messageEncoding] FeatureSet messageEncoding
+                 * @property {google.protobuf.FeatureSet.JsonFormat|null} [jsonFormat] FeatureSet jsonFormat
+                 */
+    
+                /**
+                 * Constructs a new FeatureSet.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a FeatureSet.
+                 * @implements IFeatureSet
+                 * @constructor
+                 * @param {google.protobuf.IFeatureSet=} [properties] Properties to set
+                 */
+                function FeatureSet(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * FeatureSet fieldPresence.
+                 * @member {google.protobuf.FeatureSet.FieldPresence} fieldPresence
+                 * @memberof google.protobuf.FeatureSet
+                 * @instance
+                 */
+                FeatureSet.prototype.fieldPresence = 0;
+    
+                /**
+                 * FeatureSet enumType.
+                 * @member {google.protobuf.FeatureSet.EnumType} enumType
+                 * @memberof google.protobuf.FeatureSet
+                 * @instance
+                 */
+                FeatureSet.prototype.enumType = 0;
+    
+                /**
+                 * FeatureSet repeatedFieldEncoding.
+                 * @member {google.protobuf.FeatureSet.RepeatedFieldEncoding} repeatedFieldEncoding
+                 * @memberof google.protobuf.FeatureSet
+                 * @instance
+                 */
+                FeatureSet.prototype.repeatedFieldEncoding = 0;
+    
+                /**
+                 * FeatureSet utf8Validation.
+                 * @member {google.protobuf.FeatureSet.Utf8Validation} utf8Validation
+                 * @memberof google.protobuf.FeatureSet
+                 * @instance
+                 */
+                FeatureSet.prototype.utf8Validation = 0;
+    
+                /**
+                 * FeatureSet messageEncoding.
+                 * @member {google.protobuf.FeatureSet.MessageEncoding} messageEncoding
+                 * @memberof google.protobuf.FeatureSet
+                 * @instance
+                 */
+                FeatureSet.prototype.messageEncoding = 0;
+    
+                /**
+                 * FeatureSet jsonFormat.
+                 * @member {google.protobuf.FeatureSet.JsonFormat} jsonFormat
+                 * @memberof google.protobuf.FeatureSet
+                 * @instance
+                 */
+                FeatureSet.prototype.jsonFormat = 0;
+    
+                /**
+                 * Creates a FeatureSet message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.FeatureSet
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.FeatureSet} FeatureSet
+                 */
+                FeatureSet.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.FeatureSet)
+                        return object;
+                    var message = new $root.google.protobuf.FeatureSet();
+                    switch (object.fieldPresence) {
+                    default:
+                        if (typeof object.fieldPresence === "number") {
+                            message.fieldPresence = object.fieldPresence;
+                            break;
+                        }
+                        break;
+                    case "FIELD_PRESENCE_UNKNOWN":
+                    case 0:
+                        message.fieldPresence = 0;
+                        break;
+                    case "EXPLICIT":
+                    case 1:
+                        message.fieldPresence = 1;
+                        break;
+                    case "IMPLICIT":
+                    case 2:
+                        message.fieldPresence = 2;
+                        break;
+                    case "LEGACY_REQUIRED":
+                    case 3:
+                        message.fieldPresence = 3;
+                        break;
+                    }
+                    switch (object.enumType) {
+                    default:
+                        if (typeof object.enumType === "number") {
+                            message.enumType = object.enumType;
+                            break;
+                        }
+                        break;
+                    case "ENUM_TYPE_UNKNOWN":
+                    case 0:
+                        message.enumType = 0;
+                        break;
+                    case "OPEN":
+                    case 1:
+                        message.enumType = 1;
+                        break;
+                    case "CLOSED":
+                    case 2:
+                        message.enumType = 2;
+                        break;
+                    }
+                    switch (object.repeatedFieldEncoding) {
+                    default:
+                        if (typeof object.repeatedFieldEncoding === "number") {
+                            message.repeatedFieldEncoding = object.repeatedFieldEncoding;
+                            break;
+                        }
+                        break;
+                    case "REPEATED_FIELD_ENCODING_UNKNOWN":
+                    case 0:
+                        message.repeatedFieldEncoding = 0;
+                        break;
+                    case "PACKED":
+                    case 1:
+                        message.repeatedFieldEncoding = 1;
+                        break;
+                    case "EXPANDED":
+                    case 2:
+                        message.repeatedFieldEncoding = 2;
+                        break;
+                    }
+                    switch (object.utf8Validation) {
+                    default:
+                        if (typeof object.utf8Validation === "number") {
+                            message.utf8Validation = object.utf8Validation;
+                            break;
+                        }
+                        break;
+                    case "UTF8_VALIDATION_UNKNOWN":
+                    case 0:
+                        message.utf8Validation = 0;
+                        break;
+                    case "VERIFY":
+                    case 2:
+                        message.utf8Validation = 2;
+                        break;
+                    case "NONE":
+                    case 3:
+                        message.utf8Validation = 3;
+                        break;
+                    }
+                    switch (object.messageEncoding) {
+                    default:
+                        if (typeof object.messageEncoding === "number") {
+                            message.messageEncoding = object.messageEncoding;
+                            break;
+                        }
+                        break;
+                    case "MESSAGE_ENCODING_UNKNOWN":
+                    case 0:
+                        message.messageEncoding = 0;
+                        break;
+                    case "LENGTH_PREFIXED":
+                    case 1:
+                        message.messageEncoding = 1;
+                        break;
+                    case "DELIMITED":
+                    case 2:
+                        message.messageEncoding = 2;
+                        break;
+                    }
+                    switch (object.jsonFormat) {
+                    default:
+                        if (typeof object.jsonFormat === "number") {
+                            message.jsonFormat = object.jsonFormat;
+                            break;
+                        }
+                        break;
+                    case "JSON_FORMAT_UNKNOWN":
+                    case 0:
+                        message.jsonFormat = 0;
+                        break;
+                    case "ALLOW":
+                    case 1:
+                        message.jsonFormat = 1;
+                        break;
+                    case "LEGACY_BEST_EFFORT":
+                    case 2:
+                        message.jsonFormat = 2;
+                        break;
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a FeatureSet message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.FeatureSet
+                 * @static
+                 * @param {google.protobuf.FeatureSet} message FeatureSet
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                FeatureSet.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.fieldPresence = options.enums === String ? "FIELD_PRESENCE_UNKNOWN" : 0;
+                        object.enumType = options.enums === String ? "ENUM_TYPE_UNKNOWN" : 0;
+                        object.repeatedFieldEncoding = options.enums === String ? "REPEATED_FIELD_ENCODING_UNKNOWN" : 0;
+                        object.utf8Validation = options.enums === String ? "UTF8_VALIDATION_UNKNOWN" : 0;
+                        object.messageEncoding = options.enums === String ? "MESSAGE_ENCODING_UNKNOWN" : 0;
+                        object.jsonFormat = options.enums === String ? "JSON_FORMAT_UNKNOWN" : 0;
+                    }
+                    if (message.fieldPresence != null && message.hasOwnProperty("fieldPresence"))
+                        object.fieldPresence = options.enums === String ? $root.google.protobuf.FeatureSet.FieldPresence[message.fieldPresence] === undefined ? message.fieldPresence : $root.google.protobuf.FeatureSet.FieldPresence[message.fieldPresence] : message.fieldPresence;
+                    if (message.enumType != null && message.hasOwnProperty("enumType"))
+                        object.enumType = options.enums === String ? $root.google.protobuf.FeatureSet.EnumType[message.enumType] === undefined ? message.enumType : $root.google.protobuf.FeatureSet.EnumType[message.enumType] : message.enumType;
+                    if (message.repeatedFieldEncoding != null && message.hasOwnProperty("repeatedFieldEncoding"))
+                        object.repeatedFieldEncoding = options.enums === String ? $root.google.protobuf.FeatureSet.RepeatedFieldEncoding[message.repeatedFieldEncoding] === undefined ? message.repeatedFieldEncoding : $root.google.protobuf.FeatureSet.RepeatedFieldEncoding[message.repeatedFieldEncoding] : message.repeatedFieldEncoding;
+                    if (message.utf8Validation != null && message.hasOwnProperty("utf8Validation"))
+                        object.utf8Validation = options.enums === String ? $root.google.protobuf.FeatureSet.Utf8Validation[message.utf8Validation] === undefined ? message.utf8Validation : $root.google.protobuf.FeatureSet.Utf8Validation[message.utf8Validation] : message.utf8Validation;
+                    if (message.messageEncoding != null && message.hasOwnProperty("messageEncoding"))
+                        object.messageEncoding = options.enums === String ? $root.google.protobuf.FeatureSet.MessageEncoding[message.messageEncoding] === undefined ? message.messageEncoding : $root.google.protobuf.FeatureSet.MessageEncoding[message.messageEncoding] : message.messageEncoding;
+                    if (message.jsonFormat != null && message.hasOwnProperty("jsonFormat"))
+                        object.jsonFormat = options.enums === String ? $root.google.protobuf.FeatureSet.JsonFormat[message.jsonFormat] === undefined ? message.jsonFormat : $root.google.protobuf.FeatureSet.JsonFormat[message.jsonFormat] : message.jsonFormat;
+                    return object;
+                };
+    
+                /**
+                 * Converts this FeatureSet to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.FeatureSet
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                FeatureSet.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for FeatureSet
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.FeatureSet
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                FeatureSet.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.FeatureSet";
+                };
+    
+                /**
+                 * FieldPresence enum.
+                 * @name google.protobuf.FeatureSet.FieldPresence
+                 * @enum {string}
+                 * @property {string} FIELD_PRESENCE_UNKNOWN=FIELD_PRESENCE_UNKNOWN FIELD_PRESENCE_UNKNOWN value
+                 * @property {string} EXPLICIT=EXPLICIT EXPLICIT value
+                 * @property {string} IMPLICIT=IMPLICIT IMPLICIT value
+                 * @property {string} LEGACY_REQUIRED=LEGACY_REQUIRED LEGACY_REQUIRED value
+                 */
+                FeatureSet.FieldPresence = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "FIELD_PRESENCE_UNKNOWN"] = "FIELD_PRESENCE_UNKNOWN";
+                    values[valuesById[1] = "EXPLICIT"] = "EXPLICIT";
+                    values[valuesById[2] = "IMPLICIT"] = "IMPLICIT";
+                    values[valuesById[3] = "LEGACY_REQUIRED"] = "LEGACY_REQUIRED";
+                    return values;
+                })();
+    
+                /**
+                 * EnumType enum.
+                 * @name google.protobuf.FeatureSet.EnumType
+                 * @enum {string}
+                 * @property {string} ENUM_TYPE_UNKNOWN=ENUM_TYPE_UNKNOWN ENUM_TYPE_UNKNOWN value
+                 * @property {string} OPEN=OPEN OPEN value
+                 * @property {string} CLOSED=CLOSED CLOSED value
+                 */
+                FeatureSet.EnumType = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "ENUM_TYPE_UNKNOWN"] = "ENUM_TYPE_UNKNOWN";
+                    values[valuesById[1] = "OPEN"] = "OPEN";
+                    values[valuesById[2] = "CLOSED"] = "CLOSED";
+                    return values;
+                })();
+    
+                /**
+                 * RepeatedFieldEncoding enum.
+                 * @name google.protobuf.FeatureSet.RepeatedFieldEncoding
+                 * @enum {string}
+                 * @property {string} REPEATED_FIELD_ENCODING_UNKNOWN=REPEATED_FIELD_ENCODING_UNKNOWN REPEATED_FIELD_ENCODING_UNKNOWN value
+                 * @property {string} PACKED=PACKED PACKED value
+                 * @property {string} EXPANDED=EXPANDED EXPANDED value
+                 */
+                FeatureSet.RepeatedFieldEncoding = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "REPEATED_FIELD_ENCODING_UNKNOWN"] = "REPEATED_FIELD_ENCODING_UNKNOWN";
+                    values[valuesById[1] = "PACKED"] = "PACKED";
+                    values[valuesById[2] = "EXPANDED"] = "EXPANDED";
+                    return values;
+                })();
+    
+                /**
+                 * Utf8Validation enum.
+                 * @name google.protobuf.FeatureSet.Utf8Validation
+                 * @enum {string}
+                 * @property {string} UTF8_VALIDATION_UNKNOWN=UTF8_VALIDATION_UNKNOWN UTF8_VALIDATION_UNKNOWN value
+                 * @property {string} VERIFY=VERIFY VERIFY value
+                 * @property {string} NONE=NONE NONE value
+                 */
+                FeatureSet.Utf8Validation = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "UTF8_VALIDATION_UNKNOWN"] = "UTF8_VALIDATION_UNKNOWN";
+                    values[valuesById[2] = "VERIFY"] = "VERIFY";
+                    values[valuesById[3] = "NONE"] = "NONE";
+                    return values;
+                })();
+    
+                /**
+                 * MessageEncoding enum.
+                 * @name google.protobuf.FeatureSet.MessageEncoding
+                 * @enum {string}
+                 * @property {string} MESSAGE_ENCODING_UNKNOWN=MESSAGE_ENCODING_UNKNOWN MESSAGE_ENCODING_UNKNOWN value
+                 * @property {string} LENGTH_PREFIXED=LENGTH_PREFIXED LENGTH_PREFIXED value
+                 * @property {string} DELIMITED=DELIMITED DELIMITED value
+                 */
+                FeatureSet.MessageEncoding = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "MESSAGE_ENCODING_UNKNOWN"] = "MESSAGE_ENCODING_UNKNOWN";
+                    values[valuesById[1] = "LENGTH_PREFIXED"] = "LENGTH_PREFIXED";
+                    values[valuesById[2] = "DELIMITED"] = "DELIMITED";
+                    return values;
+                })();
+    
+                /**
+                 * JsonFormat enum.
+                 * @name google.protobuf.FeatureSet.JsonFormat
+                 * @enum {string}
+                 * @property {string} JSON_FORMAT_UNKNOWN=JSON_FORMAT_UNKNOWN JSON_FORMAT_UNKNOWN value
+                 * @property {string} ALLOW=ALLOW ALLOW value
+                 * @property {string} LEGACY_BEST_EFFORT=LEGACY_BEST_EFFORT LEGACY_BEST_EFFORT value
+                 */
+                FeatureSet.JsonFormat = (function() {
+                    var valuesById = {}, values = Object.create(valuesById);
+                    values[valuesById[0] = "JSON_FORMAT_UNKNOWN"] = "JSON_FORMAT_UNKNOWN";
+                    values[valuesById[1] = "ALLOW"] = "ALLOW";
+                    values[valuesById[2] = "LEGACY_BEST_EFFORT"] = "LEGACY_BEST_EFFORT";
+                    return values;
+                })();
+    
+                return FeatureSet;
+            })();
+    
+            protobuf.FeatureSetDefaults = (function() {
+    
+                /**
+                 * Properties of a FeatureSetDefaults.
+                 * @memberof google.protobuf
+                 * @interface IFeatureSetDefaults
+                 * @property {Array.<google.protobuf.FeatureSetDefaults.IFeatureSetEditionDefault>|null} [defaults] FeatureSetDefaults defaults
+                 * @property {google.protobuf.Edition|null} [minimumEdition] FeatureSetDefaults minimumEdition
+                 * @property {google.protobuf.Edition|null} [maximumEdition] FeatureSetDefaults maximumEdition
+                 */
+    
+                /**
+                 * Constructs a new FeatureSetDefaults.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a FeatureSetDefaults.
+                 * @implements IFeatureSetDefaults
+                 * @constructor
+                 * @param {google.protobuf.IFeatureSetDefaults=} [properties] Properties to set
+                 */
+                function FeatureSetDefaults(properties) {
+                    this.defaults = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * FeatureSetDefaults defaults.
+                 * @member {Array.<google.protobuf.FeatureSetDefaults.IFeatureSetEditionDefault>} defaults
+                 * @memberof google.protobuf.FeatureSetDefaults
+                 * @instance
+                 */
+                FeatureSetDefaults.prototype.defaults = $util.emptyArray;
+    
+                /**
+                 * FeatureSetDefaults minimumEdition.
+                 * @member {google.protobuf.Edition} minimumEdition
+                 * @memberof google.protobuf.FeatureSetDefaults
+                 * @instance
+                 */
+                FeatureSetDefaults.prototype.minimumEdition = 0;
+    
+                /**
+                 * FeatureSetDefaults maximumEdition.
+                 * @member {google.protobuf.Edition} maximumEdition
+                 * @memberof google.protobuf.FeatureSetDefaults
+                 * @instance
+                 */
+                FeatureSetDefaults.prototype.maximumEdition = 0;
+    
+                /**
+                 * Creates a FeatureSetDefaults message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.FeatureSetDefaults
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.FeatureSetDefaults} FeatureSetDefaults
+                 */
+                FeatureSetDefaults.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.FeatureSetDefaults)
+                        return object;
+                    var message = new $root.google.protobuf.FeatureSetDefaults();
+                    if (object.defaults) {
+                        if (!Array.isArray(object.defaults))
+                            throw TypeError(".google.protobuf.FeatureSetDefaults.defaults: array expected");
+                        message.defaults = [];
+                        for (var i = 0; i < object.defaults.length; ++i) {
+                            if (typeof object.defaults[i] !== "object")
+                                throw TypeError(".google.protobuf.FeatureSetDefaults.defaults: object expected");
+                            message.defaults[i] = $root.google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault.fromObject(object.defaults[i]);
+                        }
+                    }
+                    switch (object.minimumEdition) {
+                    default:
+                        if (typeof object.minimumEdition === "number") {
+                            message.minimumEdition = object.minimumEdition;
+                            break;
+                        }
+                        break;
+                    case "EDITION_UNKNOWN":
+                    case 0:
+                        message.minimumEdition = 0;
+                        break;
+                    case "EDITION_PROTO2":
+                    case 998:
+                        message.minimumEdition = 998;
+                        break;
+                    case "EDITION_PROTO3":
+                    case 999:
+                        message.minimumEdition = 999;
+                        break;
+                    case "EDITION_2023":
+                    case 1000:
+                        message.minimumEdition = 1000;
+                        break;
+                    case "EDITION_2024":
+                    case 1001:
+                        message.minimumEdition = 1001;
+                        break;
+                    case "EDITION_1_TEST_ONLY":
+                    case 1:
+                        message.minimumEdition = 1;
+                        break;
+                    case "EDITION_2_TEST_ONLY":
+                    case 2:
+                        message.minimumEdition = 2;
+                        break;
+                    case "EDITION_99997_TEST_ONLY":
+                    case 99997:
+                        message.minimumEdition = 99997;
+                        break;
+                    case "EDITION_99998_TEST_ONLY":
+                    case 99998:
+                        message.minimumEdition = 99998;
+                        break;
+                    case "EDITION_99999_TEST_ONLY":
+                    case 99999:
+                        message.minimumEdition = 99999;
+                        break;
+                    case "EDITION_MAX":
+                    case 2147483647:
+                        message.minimumEdition = 2147483647;
+                        break;
+                    }
+                    switch (object.maximumEdition) {
+                    default:
+                        if (typeof object.maximumEdition === "number") {
+                            message.maximumEdition = object.maximumEdition;
+                            break;
+                        }
+                        break;
+                    case "EDITION_UNKNOWN":
+                    case 0:
+                        message.maximumEdition = 0;
+                        break;
+                    case "EDITION_PROTO2":
+                    case 998:
+                        message.maximumEdition = 998;
+                        break;
+                    case "EDITION_PROTO3":
+                    case 999:
+                        message.maximumEdition = 999;
+                        break;
+                    case "EDITION_2023":
+                    case 1000:
+                        message.maximumEdition = 1000;
+                        break;
+                    case "EDITION_2024":
+                    case 1001:
+                        message.maximumEdition = 1001;
+                        break;
+                    case "EDITION_1_TEST_ONLY":
+                    case 1:
+                        message.maximumEdition = 1;
+                        break;
+                    case "EDITION_2_TEST_ONLY":
+                    case 2:
+                        message.maximumEdition = 2;
+                        break;
+                    case "EDITION_99997_TEST_ONLY":
+                    case 99997:
+                        message.maximumEdition = 99997;
+                        break;
+                    case "EDITION_99998_TEST_ONLY":
+                    case 99998:
+                        message.maximumEdition = 99998;
+                        break;
+                    case "EDITION_99999_TEST_ONLY":
+                    case 99999:
+                        message.maximumEdition = 99999;
+                        break;
+                    case "EDITION_MAX":
+                    case 2147483647:
+                        message.maximumEdition = 2147483647;
+                        break;
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a FeatureSetDefaults message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.FeatureSetDefaults
+                 * @static
+                 * @param {google.protobuf.FeatureSetDefaults} message FeatureSetDefaults
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                FeatureSetDefaults.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.defaults = [];
+                    if (options.defaults) {
+                        object.minimumEdition = options.enums === String ? "EDITION_UNKNOWN" : 0;
+                        object.maximumEdition = options.enums === String ? "EDITION_UNKNOWN" : 0;
+                    }
+                    if (message.defaults && message.defaults.length) {
+                        object.defaults = [];
+                        for (var j = 0; j < message.defaults.length; ++j)
+                            object.defaults[j] = $root.google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault.toObject(message.defaults[j], options);
+                    }
+                    if (message.minimumEdition != null && message.hasOwnProperty("minimumEdition"))
+                        object.minimumEdition = options.enums === String ? $root.google.protobuf.Edition[message.minimumEdition] === undefined ? message.minimumEdition : $root.google.protobuf.Edition[message.minimumEdition] : message.minimumEdition;
+                    if (message.maximumEdition != null && message.hasOwnProperty("maximumEdition"))
+                        object.maximumEdition = options.enums === String ? $root.google.protobuf.Edition[message.maximumEdition] === undefined ? message.maximumEdition : $root.google.protobuf.Edition[message.maximumEdition] : message.maximumEdition;
+                    return object;
+                };
+    
+                /**
+                 * Converts this FeatureSetDefaults to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.FeatureSetDefaults
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                FeatureSetDefaults.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for FeatureSetDefaults
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.FeatureSetDefaults
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                FeatureSetDefaults.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.FeatureSetDefaults";
+                };
+    
+                FeatureSetDefaults.FeatureSetEditionDefault = (function() {
+    
+                    /**
+                     * Properties of a FeatureSetEditionDefault.
+                     * @memberof google.protobuf.FeatureSetDefaults
+                     * @interface IFeatureSetEditionDefault
+                     * @property {google.protobuf.Edition|null} [edition] FeatureSetEditionDefault edition
+                     * @property {google.protobuf.IFeatureSet|null} [features] FeatureSetEditionDefault features
+                     */
+    
+                    /**
+                     * Constructs a new FeatureSetEditionDefault.
+                     * @memberof google.protobuf.FeatureSetDefaults
+                     * @classdesc Represents a FeatureSetEditionDefault.
+                     * @implements IFeatureSetEditionDefault
+                     * @constructor
+                     * @param {google.protobuf.FeatureSetDefaults.IFeatureSetEditionDefault=} [properties] Properties to set
+                     */
+                    function FeatureSetEditionDefault(properties) {
+                        if (properties)
+                            for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                                if (properties[keys[i]] != null)
+                                    this[keys[i]] = properties[keys[i]];
+                    }
+    
+                    /**
+                     * FeatureSetEditionDefault edition.
+                     * @member {google.protobuf.Edition} edition
+                     * @memberof google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault
+                     * @instance
+                     */
+                    FeatureSetEditionDefault.prototype.edition = 0;
+    
+                    /**
+                     * FeatureSetEditionDefault features.
+                     * @member {google.protobuf.IFeatureSet|null|undefined} features
+                     * @memberof google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault
+                     * @instance
+                     */
+                    FeatureSetEditionDefault.prototype.features = null;
+    
+                    /**
+                     * Creates a FeatureSetEditionDefault message from a plain object. Also converts values to their respective internal types.
+                     * @function fromObject
+                     * @memberof google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault
+                     * @static
+                     * @param {Object.<string,*>} object Plain object
+                     * @returns {google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault} FeatureSetEditionDefault
+                     */
+                    FeatureSetEditionDefault.fromObject = function fromObject(object) {
+                        if (object instanceof $root.google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault)
+                            return object;
+                        var message = new $root.google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault();
+                        switch (object.edition) {
+                        default:
+                            if (typeof object.edition === "number") {
+                                message.edition = object.edition;
+                                break;
+                            }
+                            break;
+                        case "EDITION_UNKNOWN":
+                        case 0:
+                            message.edition = 0;
+                            break;
+                        case "EDITION_PROTO2":
+                        case 998:
+                            message.edition = 998;
+                            break;
+                        case "EDITION_PROTO3":
+                        case 999:
+                            message.edition = 999;
+                            break;
+                        case "EDITION_2023":
+                        case 1000:
+                            message.edition = 1000;
+                            break;
+                        case "EDITION_2024":
+                        case 1001:
+                            message.edition = 1001;
+                            break;
+                        case "EDITION_1_TEST_ONLY":
+                        case 1:
+                            message.edition = 1;
+                            break;
+                        case "EDITION_2_TEST_ONLY":
+                        case 2:
+                            message.edition = 2;
+                            break;
+                        case "EDITION_99997_TEST_ONLY":
+                        case 99997:
+                            message.edition = 99997;
+                            break;
+                        case "EDITION_99998_TEST_ONLY":
+                        case 99998:
+                            message.edition = 99998;
+                            break;
+                        case "EDITION_99999_TEST_ONLY":
+                        case 99999:
+                            message.edition = 99999;
+                            break;
+                        case "EDITION_MAX":
+                        case 2147483647:
+                            message.edition = 2147483647;
+                            break;
+                        }
+                        if (object.features != null) {
+                            if (typeof object.features !== "object")
+                                throw TypeError(".google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault.features: object expected");
+                            message.features = $root.google.protobuf.FeatureSet.fromObject(object.features);
+                        }
+                        return message;
+                    };
+    
+                    /**
+                     * Creates a plain object from a FeatureSetEditionDefault message. Also converts values to other types if specified.
+                     * @function toObject
+                     * @memberof google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault
+                     * @static
+                     * @param {google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault} message FeatureSetEditionDefault
+                     * @param {$protobuf.IConversionOptions} [options] Conversion options
+                     * @returns {Object.<string,*>} Plain object
+                     */
+                    FeatureSetEditionDefault.toObject = function toObject(message, options) {
+                        if (!options)
+                            options = {};
+                        var object = {};
+                        if (options.defaults) {
+                            object.features = null;
+                            object.edition = options.enums === String ? "EDITION_UNKNOWN" : 0;
+                        }
+                        if (message.features != null && message.hasOwnProperty("features"))
+                            object.features = $root.google.protobuf.FeatureSet.toObject(message.features, options);
+                        if (message.edition != null && message.hasOwnProperty("edition"))
+                            object.edition = options.enums === String ? $root.google.protobuf.Edition[message.edition] === undefined ? message.edition : $root.google.protobuf.Edition[message.edition] : message.edition;
+                        return object;
+                    };
+    
+                    /**
+                     * Converts this FeatureSetEditionDefault to JSON.
+                     * @function toJSON
+                     * @memberof google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault
+                     * @instance
+                     * @returns {Object.<string,*>} JSON object
+                     */
+                    FeatureSetEditionDefault.prototype.toJSON = function toJSON() {
+                        return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                    };
+    
+                    /**
+                     * Gets the default type url for FeatureSetEditionDefault
+                     * @function getTypeUrl
+                     * @memberof google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault
+                     * @static
+                     * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns {string} The default type url
+                     */
+                    FeatureSetEditionDefault.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                        if (typeUrlPrefix === undefined) {
+                            typeUrlPrefix = "type.googleapis.com";
+                        }
+                        return typeUrlPrefix + "/google.protobuf.FeatureSetDefaults.FeatureSetEditionDefault";
+                    };
+    
+                    return FeatureSetEditionDefault;
+                })();
+    
+                return FeatureSetDefaults;
             })();
     
             protobuf.SourceCodeInfo = (function() {
@@ -12761,6 +19946,7 @@
                      * @property {string|null} [sourceFile] Annotation sourceFile
                      * @property {number|null} [begin] Annotation begin
                      * @property {number|null} [end] Annotation end
+                     * @property {google.protobuf.GeneratedCodeInfo.Annotation.Semantic|null} [semantic] Annotation semantic
                      */
     
                     /**
@@ -12812,6 +19998,14 @@
                     Annotation.prototype.end = 0;
     
                     /**
+                     * Annotation semantic.
+                     * @member {google.protobuf.GeneratedCodeInfo.Annotation.Semantic} semantic
+                     * @memberof google.protobuf.GeneratedCodeInfo.Annotation
+                     * @instance
+                     */
+                    Annotation.prototype.semantic = 0;
+    
+                    /**
                      * Creates an Annotation message from a plain object. Also converts values to their respective internal types.
                      * @function fromObject
                      * @memberof google.protobuf.GeneratedCodeInfo.Annotation
@@ -12836,6 +20030,26 @@
                             message.begin = object.begin | 0;
                         if (object.end != null)
                             message.end = object.end | 0;
+                        switch (object.semantic) {
+                        default:
+                            if (typeof object.semantic === "number") {
+                                message.semantic = object.semantic;
+                                break;
+                            }
+                            break;
+                        case "NONE":
+                        case 0:
+                            message.semantic = 0;
+                            break;
+                        case "SET":
+                        case 1:
+                            message.semantic = 1;
+                            break;
+                        case "ALIAS":
+                        case 2:
+                            message.semantic = 2;
+                            break;
+                        }
                         return message;
                     };
     
@@ -12858,6 +20072,7 @@
                             object.sourceFile = "";
                             object.begin = 0;
                             object.end = 0;
+                            object.semantic = options.enums === String ? "NONE" : 0;
                         }
                         if (message.path && message.path.length) {
                             object.path = [];
@@ -12870,6 +20085,8 @@
                             object.begin = message.begin;
                         if (message.end != null && message.hasOwnProperty("end"))
                             object.end = message.end;
+                        if (message.semantic != null && message.hasOwnProperty("semantic"))
+                            object.semantic = options.enums === String ? $root.google.protobuf.GeneratedCodeInfo.Annotation.Semantic[message.semantic] === undefined ? message.semantic : $root.google.protobuf.GeneratedCodeInfo.Annotation.Semantic[message.semantic] : message.semantic;
                         return object;
                     };
     
@@ -12899,10 +20116,402 @@
                         return typeUrlPrefix + "/google.protobuf.GeneratedCodeInfo.Annotation";
                     };
     
+                    /**
+                     * Semantic enum.
+                     * @name google.protobuf.GeneratedCodeInfo.Annotation.Semantic
+                     * @enum {string}
+                     * @property {string} NONE=NONE NONE value
+                     * @property {string} SET=SET SET value
+                     * @property {string} ALIAS=ALIAS ALIAS value
+                     */
+                    Annotation.Semantic = (function() {
+                        var valuesById = {}, values = Object.create(valuesById);
+                        values[valuesById[0] = "NONE"] = "NONE";
+                        values[valuesById[1] = "SET"] = "SET";
+                        values[valuesById[2] = "ALIAS"] = "ALIAS";
+                        return values;
+                    })();
+    
                     return Annotation;
                 })();
     
                 return GeneratedCodeInfo;
+            })();
+    
+            protobuf.Timestamp = (function() {
+    
+                /**
+                 * Properties of a Timestamp.
+                 * @memberof google.protobuf
+                 * @interface ITimestamp
+                 * @property {number|string|null} [seconds] Timestamp seconds
+                 * @property {number|null} [nanos] Timestamp nanos
+                 */
+    
+                /**
+                 * Constructs a new Timestamp.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a Timestamp.
+                 * @implements ITimestamp
+                 * @constructor
+                 * @param {google.protobuf.ITimestamp=} [properties] Properties to set
+                 */
+                function Timestamp(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * Timestamp seconds.
+                 * @member {number|string} seconds
+                 * @memberof google.protobuf.Timestamp
+                 * @instance
+                 */
+                Timestamp.prototype.seconds = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+                /**
+                 * Timestamp nanos.
+                 * @member {number} nanos
+                 * @memberof google.protobuf.Timestamp
+                 * @instance
+                 */
+                Timestamp.prototype.nanos = 0;
+    
+                /**
+                 * Creates a Timestamp message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Timestamp
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Timestamp} Timestamp
+                 */
+                Timestamp.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Timestamp)
+                        return object;
+                    var message = new $root.google.protobuf.Timestamp();
+                    if (object.seconds != null)
+                        if ($util.Long)
+                            (message.seconds = $util.Long.fromValue(object.seconds)).unsigned = false;
+                        else if (typeof object.seconds === "string")
+                            message.seconds = parseInt(object.seconds, 10);
+                        else if (typeof object.seconds === "number")
+                            message.seconds = object.seconds;
+                        else if (typeof object.seconds === "object")
+                            message.seconds = new $util.LongBits(object.seconds.low >>> 0, object.seconds.high >>> 0).toNumber();
+                    if (object.nanos != null)
+                        message.nanos = object.nanos | 0;
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a Timestamp message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Timestamp
+                 * @static
+                 * @param {google.protobuf.Timestamp} message Timestamp
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Timestamp.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        if ($util.Long) {
+                            var long = new $util.Long(0, 0, false);
+                            object.seconds = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                        } else
+                            object.seconds = options.longs === String ? "0" : 0;
+                        object.nanos = 0;
+                    }
+                    if (message.seconds != null && message.hasOwnProperty("seconds"))
+                        if (typeof message.seconds === "number")
+                            object.seconds = options.longs === String ? String(message.seconds) : message.seconds;
+                        else
+                            object.seconds = options.longs === String ? $util.Long.prototype.toString.call(message.seconds) : options.longs === Number ? new $util.LongBits(message.seconds.low >>> 0, message.seconds.high >>> 0).toNumber() : message.seconds;
+                    if (message.nanos != null && message.hasOwnProperty("nanos"))
+                        object.nanos = message.nanos;
+                    return object;
+                };
+    
+                /**
+                 * Converts this Timestamp to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Timestamp
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Timestamp.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for Timestamp
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.Timestamp
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                Timestamp.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.Timestamp";
+                };
+    
+                return Timestamp;
+            })();
+    
+            protobuf.Duration = (function() {
+    
+                /**
+                 * Properties of a Duration.
+                 * @memberof google.protobuf
+                 * @interface IDuration
+                 * @property {number|string|null} [seconds] Duration seconds
+                 * @property {number|null} [nanos] Duration nanos
+                 */
+    
+                /**
+                 * Constructs a new Duration.
+                 * @memberof google.protobuf
+                 * @classdesc Represents a Duration.
+                 * @implements IDuration
+                 * @constructor
+                 * @param {google.protobuf.IDuration=} [properties] Properties to set
+                 */
+                function Duration(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * Duration seconds.
+                 * @member {number|string} seconds
+                 * @memberof google.protobuf.Duration
+                 * @instance
+                 */
+                Duration.prototype.seconds = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+    
+                /**
+                 * Duration nanos.
+                 * @member {number} nanos
+                 * @memberof google.protobuf.Duration
+                 * @instance
+                 */
+                Duration.prototype.nanos = 0;
+    
+                /**
+                 * Creates a Duration message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Duration
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Duration} Duration
+                 */
+                Duration.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Duration)
+                        return object;
+                    var message = new $root.google.protobuf.Duration();
+                    if (object.seconds != null)
+                        if ($util.Long)
+                            (message.seconds = $util.Long.fromValue(object.seconds)).unsigned = false;
+                        else if (typeof object.seconds === "string")
+                            message.seconds = parseInt(object.seconds, 10);
+                        else if (typeof object.seconds === "number")
+                            message.seconds = object.seconds;
+                        else if (typeof object.seconds === "object")
+                            message.seconds = new $util.LongBits(object.seconds.low >>> 0, object.seconds.high >>> 0).toNumber();
+                    if (object.nanos != null)
+                        message.nanos = object.nanos | 0;
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a Duration message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Duration
+                 * @static
+                 * @param {google.protobuf.Duration} message Duration
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Duration.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        if ($util.Long) {
+                            var long = new $util.Long(0, 0, false);
+                            object.seconds = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                        } else
+                            object.seconds = options.longs === String ? "0" : 0;
+                        object.nanos = 0;
+                    }
+                    if (message.seconds != null && message.hasOwnProperty("seconds"))
+                        if (typeof message.seconds === "number")
+                            object.seconds = options.longs === String ? String(message.seconds) : message.seconds;
+                        else
+                            object.seconds = options.longs === String ? $util.Long.prototype.toString.call(message.seconds) : options.longs === Number ? new $util.LongBits(message.seconds.low >>> 0, message.seconds.high >>> 0).toNumber() : message.seconds;
+                    if (message.nanos != null && message.hasOwnProperty("nanos"))
+                        object.nanos = message.nanos;
+                    return object;
+                };
+    
+                /**
+                 * Converts this Duration to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Duration
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Duration.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for Duration
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.Duration
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                Duration.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.Duration";
+                };
+    
+                return Duration;
+            })();
+    
+            protobuf.Any = (function() {
+    
+                /**
+                 * Properties of an Any.
+                 * @memberof google.protobuf
+                 * @interface IAny
+                 * @property {string|null} [type_url] Any type_url
+                 * @property {Uint8Array|null} [value] Any value
+                 */
+    
+                /**
+                 * Constructs a new Any.
+                 * @memberof google.protobuf
+                 * @classdesc Represents an Any.
+                 * @implements IAny
+                 * @constructor
+                 * @param {google.protobuf.IAny=} [properties] Properties to set
+                 */
+                function Any(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * Any type_url.
+                 * @member {string} type_url
+                 * @memberof google.protobuf.Any
+                 * @instance
+                 */
+                Any.prototype.type_url = "";
+    
+                /**
+                 * Any value.
+                 * @member {Uint8Array} value
+                 * @memberof google.protobuf.Any
+                 * @instance
+                 */
+                Any.prototype.value = $util.newBuffer([]);
+    
+                /**
+                 * Creates an Any message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.protobuf.Any
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.protobuf.Any} Any
+                 */
+                Any.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.protobuf.Any)
+                        return object;
+                    var message = new $root.google.protobuf.Any();
+                    if (object.type_url != null)
+                        message.type_url = String(object.type_url);
+                    if (object.value != null)
+                        if (typeof object.value === "string")
+                            $util.base64.decode(object.value, message.value = $util.newBuffer($util.base64.length(object.value)), 0);
+                        else if (object.value.length >= 0)
+                            message.value = object.value;
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from an Any message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.protobuf.Any
+                 * @static
+                 * @param {google.protobuf.Any} message Any
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Any.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.type_url = "";
+                        if (options.bytes === String)
+                            object.value = "";
+                        else {
+                            object.value = [];
+                            if (options.bytes !== Array)
+                                object.value = $util.newBuffer(object.value);
+                        }
+                    }
+                    if (message.type_url != null && message.hasOwnProperty("type_url"))
+                        object.type_url = message.type_url;
+                    if (message.value != null && message.hasOwnProperty("value"))
+                        object.value = options.bytes === String ? $util.base64.encode(message.value, 0, message.value.length) : options.bytes === Array ? Array.prototype.slice.call(message.value) : message.value;
+                    return object;
+                };
+    
+                /**
+                 * Converts this Any to JSON.
+                 * @function toJSON
+                 * @memberof google.protobuf.Any
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Any.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for Any
+                 * @function getTypeUrl
+                 * @memberof google.protobuf.Any
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                Any.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.protobuf.Any";
+                };
+    
+                return Any;
             })();
     
             protobuf.Empty = (function() {
@@ -13089,255 +20698,6 @@
                 };
     
                 return FieldMask;
-            })();
-    
-            protobuf.Timestamp = (function() {
-    
-                /**
-                 * Properties of a Timestamp.
-                 * @memberof google.protobuf
-                 * @interface ITimestamp
-                 * @property {number|string|null} [seconds] Timestamp seconds
-                 * @property {number|null} [nanos] Timestamp nanos
-                 */
-    
-                /**
-                 * Constructs a new Timestamp.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a Timestamp.
-                 * @implements ITimestamp
-                 * @constructor
-                 * @param {google.protobuf.ITimestamp=} [properties] Properties to set
-                 */
-                function Timestamp(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * Timestamp seconds.
-                 * @member {number|string} seconds
-                 * @memberof google.protobuf.Timestamp
-                 * @instance
-                 */
-                Timestamp.prototype.seconds = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
-    
-                /**
-                 * Timestamp nanos.
-                 * @member {number} nanos
-                 * @memberof google.protobuf.Timestamp
-                 * @instance
-                 */
-                Timestamp.prototype.nanos = 0;
-    
-                /**
-                 * Creates a Timestamp message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.Timestamp
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.Timestamp} Timestamp
-                 */
-                Timestamp.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.Timestamp)
-                        return object;
-                    var message = new $root.google.protobuf.Timestamp();
-                    if (object.seconds != null)
-                        if ($util.Long)
-                            (message.seconds = $util.Long.fromValue(object.seconds)).unsigned = false;
-                        else if (typeof object.seconds === "string")
-                            message.seconds = parseInt(object.seconds, 10);
-                        else if (typeof object.seconds === "number")
-                            message.seconds = object.seconds;
-                        else if (typeof object.seconds === "object")
-                            message.seconds = new $util.LongBits(object.seconds.low >>> 0, object.seconds.high >>> 0).toNumber();
-                    if (object.nanos != null)
-                        message.nanos = object.nanos | 0;
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a Timestamp message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.Timestamp
-                 * @static
-                 * @param {google.protobuf.Timestamp} message Timestamp
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                Timestamp.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        if ($util.Long) {
-                            var long = new $util.Long(0, 0, false);
-                            object.seconds = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-                        } else
-                            object.seconds = options.longs === String ? "0" : 0;
-                        object.nanos = 0;
-                    }
-                    if (message.seconds != null && message.hasOwnProperty("seconds"))
-                        if (typeof message.seconds === "number")
-                            object.seconds = options.longs === String ? String(message.seconds) : message.seconds;
-                        else
-                            object.seconds = options.longs === String ? $util.Long.prototype.toString.call(message.seconds) : options.longs === Number ? new $util.LongBits(message.seconds.low >>> 0, message.seconds.high >>> 0).toNumber() : message.seconds;
-                    if (message.nanos != null && message.hasOwnProperty("nanos"))
-                        object.nanos = message.nanos;
-                    return object;
-                };
-    
-                /**
-                 * Converts this Timestamp to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.Timestamp
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                Timestamp.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                /**
-                 * Gets the default type url for Timestamp
-                 * @function getTypeUrl
-                 * @memberof google.protobuf.Timestamp
-                 * @static
-                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                 * @returns {string} The default type url
-                 */
-                Timestamp.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                    if (typeUrlPrefix === undefined) {
-                        typeUrlPrefix = "type.googleapis.com";
-                    }
-                    return typeUrlPrefix + "/google.protobuf.Timestamp";
-                };
-    
-                return Timestamp;
-            })();
-    
-            protobuf.Any = (function() {
-    
-                /**
-                 * Properties of an Any.
-                 * @memberof google.protobuf
-                 * @interface IAny
-                 * @property {string|null} [type_url] Any type_url
-                 * @property {Uint8Array|null} [value] Any value
-                 */
-    
-                /**
-                 * Constructs a new Any.
-                 * @memberof google.protobuf
-                 * @classdesc Represents an Any.
-                 * @implements IAny
-                 * @constructor
-                 * @param {google.protobuf.IAny=} [properties] Properties to set
-                 */
-                function Any(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * Any type_url.
-                 * @member {string} type_url
-                 * @memberof google.protobuf.Any
-                 * @instance
-                 */
-                Any.prototype.type_url = "";
-    
-                /**
-                 * Any value.
-                 * @member {Uint8Array} value
-                 * @memberof google.protobuf.Any
-                 * @instance
-                 */
-                Any.prototype.value = $util.newBuffer([]);
-    
-                /**
-                 * Creates an Any message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.Any
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.Any} Any
-                 */
-                Any.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.Any)
-                        return object;
-                    var message = new $root.google.protobuf.Any();
-                    if (object.type_url != null)
-                        message.type_url = String(object.type_url);
-                    if (object.value != null)
-                        if (typeof object.value === "string")
-                            $util.base64.decode(object.value, message.value = $util.newBuffer($util.base64.length(object.value)), 0);
-                        else if (object.value.length >= 0)
-                            message.value = object.value;
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from an Any message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.Any
-                 * @static
-                 * @param {google.protobuf.Any} message Any
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                Any.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        object.type_url = "";
-                        if (options.bytes === String)
-                            object.value = "";
-                        else {
-                            object.value = [];
-                            if (options.bytes !== Array)
-                                object.value = $util.newBuffer(object.value);
-                        }
-                    }
-                    if (message.type_url != null && message.hasOwnProperty("type_url"))
-                        object.type_url = message.type_url;
-                    if (message.value != null && message.hasOwnProperty("value"))
-                        object.value = options.bytes === String ? $util.base64.encode(message.value, 0, message.value.length) : options.bytes === Array ? Array.prototype.slice.call(message.value) : message.value;
-                    return object;
-                };
-    
-                /**
-                 * Converts this Any to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.Any
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                Any.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                /**
-                 * Gets the default type url for Any
-                 * @function getTypeUrl
-                 * @memberof google.protobuf.Any
-                 * @static
-                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                 * @returns {string} The default type url
-                 */
-                Any.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                    if (typeUrlPrefix === undefined) {
-                        typeUrlPrefix = "type.googleapis.com";
-                    }
-                    return typeUrlPrefix + "/google.protobuf.Any";
-                };
-    
-                return Any;
             })();
     
             protobuf.Struct = (function() {
@@ -14701,133 +22061,6 @@
                 return BytesValue;
             })();
     
-            protobuf.Duration = (function() {
-    
-                /**
-                 * Properties of a Duration.
-                 * @memberof google.protobuf
-                 * @interface IDuration
-                 * @property {number|string|null} [seconds] Duration seconds
-                 * @property {number|null} [nanos] Duration nanos
-                 */
-    
-                /**
-                 * Constructs a new Duration.
-                 * @memberof google.protobuf
-                 * @classdesc Represents a Duration.
-                 * @implements IDuration
-                 * @constructor
-                 * @param {google.protobuf.IDuration=} [properties] Properties to set
-                 */
-                function Duration(properties) {
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * Duration seconds.
-                 * @member {number|string} seconds
-                 * @memberof google.protobuf.Duration
-                 * @instance
-                 */
-                Duration.prototype.seconds = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
-    
-                /**
-                 * Duration nanos.
-                 * @member {number} nanos
-                 * @memberof google.protobuf.Duration
-                 * @instance
-                 */
-                Duration.prototype.nanos = 0;
-    
-                /**
-                 * Creates a Duration message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.protobuf.Duration
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.protobuf.Duration} Duration
-                 */
-                Duration.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.protobuf.Duration)
-                        return object;
-                    var message = new $root.google.protobuf.Duration();
-                    if (object.seconds != null)
-                        if ($util.Long)
-                            (message.seconds = $util.Long.fromValue(object.seconds)).unsigned = false;
-                        else if (typeof object.seconds === "string")
-                            message.seconds = parseInt(object.seconds, 10);
-                        else if (typeof object.seconds === "number")
-                            message.seconds = object.seconds;
-                        else if (typeof object.seconds === "object")
-                            message.seconds = new $util.LongBits(object.seconds.low >>> 0, object.seconds.high >>> 0).toNumber();
-                    if (object.nanos != null)
-                        message.nanos = object.nanos | 0;
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a Duration message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.protobuf.Duration
-                 * @static
-                 * @param {google.protobuf.Duration} message Duration
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                Duration.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.defaults) {
-                        if ($util.Long) {
-                            var long = new $util.Long(0, 0, false);
-                            object.seconds = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-                        } else
-                            object.seconds = options.longs === String ? "0" : 0;
-                        object.nanos = 0;
-                    }
-                    if (message.seconds != null && message.hasOwnProperty("seconds"))
-                        if (typeof message.seconds === "number")
-                            object.seconds = options.longs === String ? String(message.seconds) : message.seconds;
-                        else
-                            object.seconds = options.longs === String ? $util.Long.prototype.toString.call(message.seconds) : options.longs === Number ? new $util.LongBits(message.seconds.low >>> 0, message.seconds.high >>> 0).toNumber() : message.seconds;
-                    if (message.nanos != null && message.hasOwnProperty("nanos"))
-                        object.nanos = message.nanos;
-                    return object;
-                };
-    
-                /**
-                 * Converts this Duration to JSON.
-                 * @function toJSON
-                 * @memberof google.protobuf.Duration
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                Duration.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                /**
-                 * Gets the default type url for Duration
-                 * @function getTypeUrl
-                 * @memberof google.protobuf.Duration
-                 * @static
-                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                 * @returns {string} The default type url
-                 */
-                Duration.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                    if (typeUrlPrefix === undefined) {
-                        typeUrlPrefix = "type.googleapis.com";
-                    }
-                    return typeUrlPrefix + "/google.protobuf.Duration";
-                };
-    
-                return Duration;
-            })();
-    
             return protobuf;
         })();
     
@@ -14839,6 +22072,32 @@
              * @namespace
              */
             var type = {};
+    
+            /**
+             * DayOfWeek enum.
+             * @name google.type.DayOfWeek
+             * @enum {string}
+             * @property {string} DAY_OF_WEEK_UNSPECIFIED=DAY_OF_WEEK_UNSPECIFIED DAY_OF_WEEK_UNSPECIFIED value
+             * @property {string} MONDAY=MONDAY MONDAY value
+             * @property {string} TUESDAY=TUESDAY TUESDAY value
+             * @property {string} WEDNESDAY=WEDNESDAY WEDNESDAY value
+             * @property {string} THURSDAY=THURSDAY THURSDAY value
+             * @property {string} FRIDAY=FRIDAY FRIDAY value
+             * @property {string} SATURDAY=SATURDAY SATURDAY value
+             * @property {string} SUNDAY=SUNDAY SUNDAY value
+             */
+            type.DayOfWeek = (function() {
+                var valuesById = {}, values = Object.create(valuesById);
+                values[valuesById[0] = "DAY_OF_WEEK_UNSPECIFIED"] = "DAY_OF_WEEK_UNSPECIFIED";
+                values[valuesById[1] = "MONDAY"] = "MONDAY";
+                values[valuesById[2] = "TUESDAY"] = "TUESDAY";
+                values[valuesById[3] = "WEDNESDAY"] = "WEDNESDAY";
+                values[valuesById[4] = "THURSDAY"] = "THURSDAY";
+                values[valuesById[5] = "FRIDAY"] = "FRIDAY";
+                values[valuesById[6] = "SATURDAY"] = "SATURDAY";
+                values[valuesById[7] = "SUNDAY"] = "SUNDAY";
+                return values;
+            })();
     
             type.LatLng = (function() {
     
@@ -14954,158 +22213,6 @@
             })();
     
             return type;
-        })();
-    
-        google.rpc = (function() {
-    
-            /**
-             * Namespace rpc.
-             * @memberof google
-             * @namespace
-             */
-            var rpc = {};
-    
-            rpc.Status = (function() {
-    
-                /**
-                 * Properties of a Status.
-                 * @memberof google.rpc
-                 * @interface IStatus
-                 * @property {number|null} [code] Status code
-                 * @property {string|null} [message] Status message
-                 * @property {Array.<google.protobuf.IAny>|null} [details] Status details
-                 */
-    
-                /**
-                 * Constructs a new Status.
-                 * @memberof google.rpc
-                 * @classdesc Represents a Status.
-                 * @implements IStatus
-                 * @constructor
-                 * @param {google.rpc.IStatus=} [properties] Properties to set
-                 */
-                function Status(properties) {
-                    this.details = [];
-                    if (properties)
-                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                            if (properties[keys[i]] != null)
-                                this[keys[i]] = properties[keys[i]];
-                }
-    
-                /**
-                 * Status code.
-                 * @member {number} code
-                 * @memberof google.rpc.Status
-                 * @instance
-                 */
-                Status.prototype.code = 0;
-    
-                /**
-                 * Status message.
-                 * @member {string} message
-                 * @memberof google.rpc.Status
-                 * @instance
-                 */
-                Status.prototype.message = "";
-    
-                /**
-                 * Status details.
-                 * @member {Array.<google.protobuf.IAny>} details
-                 * @memberof google.rpc.Status
-                 * @instance
-                 */
-                Status.prototype.details = $util.emptyArray;
-    
-                /**
-                 * Creates a Status message from a plain object. Also converts values to their respective internal types.
-                 * @function fromObject
-                 * @memberof google.rpc.Status
-                 * @static
-                 * @param {Object.<string,*>} object Plain object
-                 * @returns {google.rpc.Status} Status
-                 */
-                Status.fromObject = function fromObject(object) {
-                    if (object instanceof $root.google.rpc.Status)
-                        return object;
-                    var message = new $root.google.rpc.Status();
-                    if (object.code != null)
-                        message.code = object.code | 0;
-                    if (object.message != null)
-                        message.message = String(object.message);
-                    if (object.details) {
-                        if (!Array.isArray(object.details))
-                            throw TypeError(".google.rpc.Status.details: array expected");
-                        message.details = [];
-                        for (var i = 0; i < object.details.length; ++i) {
-                            if (typeof object.details[i] !== "object")
-                                throw TypeError(".google.rpc.Status.details: object expected");
-                            message.details[i] = $root.google.protobuf.Any.fromObject(object.details[i]);
-                        }
-                    }
-                    return message;
-                };
-    
-                /**
-                 * Creates a plain object from a Status message. Also converts values to other types if specified.
-                 * @function toObject
-                 * @memberof google.rpc.Status
-                 * @static
-                 * @param {google.rpc.Status} message Status
-                 * @param {$protobuf.IConversionOptions} [options] Conversion options
-                 * @returns {Object.<string,*>} Plain object
-                 */
-                Status.toObject = function toObject(message, options) {
-                    if (!options)
-                        options = {};
-                    var object = {};
-                    if (options.arrays || options.defaults)
-                        object.details = [];
-                    if (options.defaults) {
-                        object.code = 0;
-                        object.message = "";
-                    }
-                    if (message.code != null && message.hasOwnProperty("code"))
-                        object.code = message.code;
-                    if (message.message != null && message.hasOwnProperty("message"))
-                        object.message = message.message;
-                    if (message.details && message.details.length) {
-                        object.details = [];
-                        for (var j = 0; j < message.details.length; ++j)
-                            object.details[j] = $root.google.protobuf.Any.toObject(message.details[j], options);
-                    }
-                    return object;
-                };
-    
-                /**
-                 * Converts this Status to JSON.
-                 * @function toJSON
-                 * @memberof google.rpc.Status
-                 * @instance
-                 * @returns {Object.<string,*>} JSON object
-                 */
-                Status.prototype.toJSON = function toJSON() {
-                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-                };
-    
-                /**
-                 * Gets the default type url for Status
-                 * @function getTypeUrl
-                 * @memberof google.rpc.Status
-                 * @static
-                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-                 * @returns {string} The default type url
-                 */
-                Status.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
-                    if (typeUrlPrefix === undefined) {
-                        typeUrlPrefix = "type.googleapis.com";
-                    }
-                    return typeUrlPrefix + "/google.rpc.Status";
-                };
-    
-                return Status;
-            })();
-    
-            return rpc;
         })();
     
         google.longrunning = (function() {
@@ -16275,6 +23382,158 @@
             })();
     
             return longrunning;
+        })();
+    
+        google.rpc = (function() {
+    
+            /**
+             * Namespace rpc.
+             * @memberof google
+             * @namespace
+             */
+            var rpc = {};
+    
+            rpc.Status = (function() {
+    
+                /**
+                 * Properties of a Status.
+                 * @memberof google.rpc
+                 * @interface IStatus
+                 * @property {number|null} [code] Status code
+                 * @property {string|null} [message] Status message
+                 * @property {Array.<google.protobuf.IAny>|null} [details] Status details
+                 */
+    
+                /**
+                 * Constructs a new Status.
+                 * @memberof google.rpc
+                 * @classdesc Represents a Status.
+                 * @implements IStatus
+                 * @constructor
+                 * @param {google.rpc.IStatus=} [properties] Properties to set
+                 */
+                function Status(properties) {
+                    this.details = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * Status code.
+                 * @member {number} code
+                 * @memberof google.rpc.Status
+                 * @instance
+                 */
+                Status.prototype.code = 0;
+    
+                /**
+                 * Status message.
+                 * @member {string} message
+                 * @memberof google.rpc.Status
+                 * @instance
+                 */
+                Status.prototype.message = "";
+    
+                /**
+                 * Status details.
+                 * @member {Array.<google.protobuf.IAny>} details
+                 * @memberof google.rpc.Status
+                 * @instance
+                 */
+                Status.prototype.details = $util.emptyArray;
+    
+                /**
+                 * Creates a Status message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.rpc.Status
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.rpc.Status} Status
+                 */
+                Status.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.rpc.Status)
+                        return object;
+                    var message = new $root.google.rpc.Status();
+                    if (object.code != null)
+                        message.code = object.code | 0;
+                    if (object.message != null)
+                        message.message = String(object.message);
+                    if (object.details) {
+                        if (!Array.isArray(object.details))
+                            throw TypeError(".google.rpc.Status.details: array expected");
+                        message.details = [];
+                        for (var i = 0; i < object.details.length; ++i) {
+                            if (typeof object.details[i] !== "object")
+                                throw TypeError(".google.rpc.Status.details: object expected");
+                            message.details[i] = $root.google.protobuf.Any.fromObject(object.details[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a Status message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.rpc.Status
+                 * @static
+                 * @param {google.rpc.Status} message Status
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                Status.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.details = [];
+                    if (options.defaults) {
+                        object.code = 0;
+                        object.message = "";
+                    }
+                    if (message.code != null && message.hasOwnProperty("code"))
+                        object.code = message.code;
+                    if (message.message != null && message.hasOwnProperty("message"))
+                        object.message = message.message;
+                    if (message.details && message.details.length) {
+                        object.details = [];
+                        for (var j = 0; j < message.details.length; ++j)
+                            object.details[j] = $root.google.protobuf.Any.toObject(message.details[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this Status to JSON.
+                 * @function toJSON
+                 * @memberof google.rpc.Status
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                Status.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for Status
+                 * @function getTypeUrl
+                 * @memberof google.rpc.Status
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                Status.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.rpc.Status";
+                };
+    
+                return Status;
+            })();
+    
+            return rpc;
         })();
     
         return google;

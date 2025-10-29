@@ -17,7 +17,9 @@
 import * as firestore from '@google-cloud/firestore';
 import * as protos from '../protos/firestore_v1_proto_api';
 
-import {FieldOrder, Query, QueryOptions} from './reference';
+import {FieldOrder} from './reference/field-order';
+import {Query} from './reference/query';
+import {QueryOptions} from './reference/query-options';
 import {FieldPath} from './path';
 import {Serializer} from './serializer';
 import {Firestore} from './index';
@@ -50,7 +52,7 @@ export class QueryPartition<
       DbModelType
     >,
     private readonly _startAt: api.IValue[] | undefined,
-    private readonly _endBefore: api.IValue[] | undefined
+    private readonly _endBefore: api.IValue[] | undefined,
   ) {
     this._serializer = new Serializer(_firestore);
   }
@@ -84,7 +86,7 @@ export class QueryPartition<
   get startAt(): unknown[] | undefined {
     if (this._startAt && !this._memoizedStartAt) {
       this._memoizedStartAt = this._startAt.map(v =>
-        this._serializer.decodeValue(v)
+        this._serializer.decodeValue(v),
       );
     }
 
@@ -120,7 +122,7 @@ export class QueryPartition<
   get endBefore(): unknown[] | undefined {
     if (this._endBefore && !this._memoizedEndBefore) {
       this._memoizedEndBefore = this._endBefore.map(v =>
-        this._serializer.decodeValue(v)
+        this._serializer.decodeValue(v),
       );
     }
 
@@ -149,7 +151,7 @@ export class QueryPartition<
     // created query.
     let queryOptions = QueryOptions.forCollectionGroupQuery(
       this._collectionId,
-      this._converter
+      this._converter,
     );
     queryOptions = queryOptions.with({
       fieldOrders: [new FieldOrder(FieldPath.documentId())],

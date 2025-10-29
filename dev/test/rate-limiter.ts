@@ -26,7 +26,7 @@ describe('RateLimiter', () => {
       /* multiplier= */ 1.5,
       /* multiplierMillis= */ 5 * 60 * 1000,
       /* maximumCapacity= */ 1000000,
-      /* startTime= */ new Date(0).getTime()
+      /* startTime= */ new Date(0).getTime(),
     );
   });
 
@@ -63,7 +63,7 @@ describe('RateLimiter', () => {
 
     // Rejects requests made before lastRefillTime
     expect(() =>
-      limiter.tryMakeRequest(751, new Date((5 * 60 + 2) * 1000).getTime())
+      limiter.tryMakeRequest(751, new Date((5 * 60 + 2) * 1000).getTime()),
     ).to.throw('Request time should not be before the last token refill time.');
   });
 
@@ -96,21 +96,21 @@ describe('RateLimiter', () => {
   it('calculates the maximum number of operations correctly', async () => {
     expect(limiter.calculateCapacity(new Date(0).getTime())).to.equal(500);
     expect(
-      limiter.calculateCapacity(new Date(5 * 60 * 1000).getTime())
+      limiter.calculateCapacity(new Date(5 * 60 * 1000).getTime()),
     ).to.equal(750);
     expect(
-      limiter.calculateCapacity(new Date(10 * 60 * 1000).getTime())
+      limiter.calculateCapacity(new Date(10 * 60 * 1000).getTime()),
     ).to.equal(1125);
     expect(
-      limiter.calculateCapacity(new Date(15 * 60 * 1000).getTime())
+      limiter.calculateCapacity(new Date(15 * 60 * 1000).getTime()),
     ).to.equal(1687);
     expect(
-      limiter.calculateCapacity(new Date(90 * 60 * 1000).getTime())
+      limiter.calculateCapacity(new Date(90 * 60 * 1000).getTime()),
     ).to.equal(738945);
 
     // Check that maximum rate limit is enforced.
     expect(
-      limiter.calculateCapacity(new Date(1000 * 60 * 1000).getTime())
+      limiter.calculateCapacity(new Date(1000 * 60 * 1000).getTime()),
     ).to.equal(1000000);
   });
 });
