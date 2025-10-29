@@ -24,6 +24,7 @@ import Firestore, {
 import {validateFieldPath} from '../path';
 import {
   ExecutionUtil,
+  aliasedAggregateToMap,
   fieldOrExpression,
   isAliasedAggregate,
   isBooleanExpr,
@@ -35,6 +36,7 @@ import {
   isPipeline,
   isSelectable,
   isString,
+  selectablesToMap,
   toField,
   vectorToExpr,
 } from './pipeline-util';
@@ -50,10 +52,9 @@ import {isOptionalEqual, isPlainObject} from '../util';
 import {
   AggregateFunction,
   AliasedAggregate,
-  Expr,
-  AliasedExpr,
+  Expression,
   Field,
-  BooleanExpr,
+  BooleanExpression,
   Ordering,
   constant,
   _mapValue,
@@ -252,14 +253,25 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
 
   /**
    * @beta
+   * Convert the given VectorQuery into an equivalent Pipeline.
+   *
+   * @param query A VectorQuery to be converted into a Pipeline.
+   *
+   * @throws {@FirestoreError} Thrown if the provided VectorQuer targets a different project or database than the Pipeline.
+   */
+  createFrom(query: firestore.VectorQuery): Pipeline;
+
+  /**
+   * @beta
    * Convert the given Query into an equivalent Pipeline.
    *
    * @param query A Query to be converted into a Pipeline.
    *
-   * @throws {@FirestoreError} Thrown if any of the provided DocumentReferences target a different project or database than the pipeline.
+   * @throws {@FirestoreError} Thrown if the provided VectorQuer targets a different project or database than the Pipeline.
    */
-  createFrom(query: firestore.Query): Pipeline {
-    return (query as unknown as Query)._pipeline();
+  createFrom(query: firestore.Query): Pipeline;
+  createFrom(query: firestore.Query | firestore.VectorQuery): Pipeline {
+    return (query as unknown as {_pipeline(): Pipeline})._pipeline();
   }
 
   _validateReference(
@@ -323,14 +335,14 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
  * // Example 2: Filter documents where 'genre' is 'Science Fiction' and 'published' is after 1950
  * const results2 = await db.pipeline()
  *     .collection('books')
- *     .where(and(field('genre').eq('Science Fiction'), field('published').gt(1950)))
+ *     .where(and(field('genre').equal('Science Fiction'), field('published').greaterThan(1950)))
  *     .execute();
  *
  * // Example 3: Calculate the average rating of books published after 1980
  * const results3 = await db.pipeline()
  *     .collection('books')
- *     .where(field('published').gt(1980))
- *     .aggregate(avg(field('rating')).as('averageRating'))
+ *     .where(field('published').greaterThan(1980))
+ *     .aggregate(average(field('rating')).as('averageRating'))
  *     .execute();
  * ```
  */
@@ -357,8 +369,8 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * The added fields are defined using {@link Selectable}s, which can be:
    *
    * - {@link Field}: References an existing document field.
-   * - {@link Expr}: Either a literal value (see {@link Constant}) or a computed value
-   *   (see {@FunctionExpr}) with an assigned alias using {@link Expr#as}.
+   * - {@link Expression}: Either a literal value (see {@link Constant}) or a computed value
+   *   (see {@FunctionExpression}) with an assigned alias using {@link Expression#as}.
    *
    * Example:
    *
@@ -389,8 +401,8 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * The added fields are defined using {@link Selectable}s, which can be:
    *
    * - {@link Field}: References an existing document field.
-   * - {@link Expr}: Either a literal value (see {@link Constant}) or a computed value
-   *   (see {@FunctionExpr}) with an assigned alias using {@link Expr#as}.
+   * - {@link Expression}: Either a literal value (see {@link Constant}) or a computed value
+   *   (see {@FunctionExpression}) with an assigned alias using {@link Expression#as}.
    *
    * Example:
    *
@@ -418,7 +430,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     )
       ? [fieldOrOptions, ...additionalFields]
       : fieldOrOptions.fields;
-    const normalizedFields: Map<string, Expr> = selectablesToMap(fields);
+    const normalizedFields: Map<string, Expression> = selectablesToMap(fields);
 
     this._validateUserData('select', normalizedFields);
 
@@ -510,7 +522,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *   <li>{@code string}: Name of an existing field</li>
    *   <li>{@link Field}: References an existing field.</li>
    *   <li>{@link Function}: Represents the result of a function with an assigned alias name using
-   *       {@link Expr#as}</li>
+   *       {@link Expression#as}</li>
    * </ul>
    *
    * <p>If no selections are provided, the output of this stage is empty. Use {@link
@@ -548,7 +560,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *   <li>{@code string}: Name of an existing field</li>
    *   <li>{@link Field}: References an existing field.</li>
    *   <li>{@link Function}: Represents the result of a function with an assigned alias name using
-   *       {@link Expr#as}</li>
+   *       {@link Expression#as}</li>
    * </ul>
    *
    * <p>If no selections are provided, the output of this stage is empty. Use {@link
@@ -586,7 +598,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
       isSelectable(selectionOrOptions) || isString(selectionOrOptions)
         ? [selectionOrOptions, ...additionalSelections]
         : selectionOrOptions.selections;
-    const normalizedSelections: Map<string, Expr> =
+    const normalizedSelections: Map<string, Expression> =
       selectablesToMap(selections);
 
     this._validateUserData('select', normalizedSelections);
@@ -601,15 +613,15 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   /**
    * @beta
    * Filters the documents from previous stages to only include those matching the specified {@link
-   * BooleanExpr}.
+   * BooleanExpression}.
    *
    * <p>This stage allows you to apply conditions to the data, similar to a "WHERE" clause in SQL.
    * You can filter documents based on their field values, using implementations of {@link
-   * BooleanExpr}, typically including but not limited to:
+   * BooleanExpression}, typically including but not limited to:
    *
    * <ul>
-   *   <li>field comparators: {@link Function#eq}, {@link Function#lt} (less than), {@link
-   *       Function#gt} (greater than), etc.</li>
+   *   <li>field comparators: {@link Function#equal}, {@link Function#lessThan} (less than), {@link
+   *       Function#greaterThan} (greater than), etc.</li>
    *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
    *   <li>advanced functions: {@link Function#regexMatch}, {@link
    *       Function#arrayContains}, etc.</li>
@@ -621,28 +633,28 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * firestore.pipeline().collection("books")
    *   .where(
    *     and(
-   *         gt(field("rating"), 4.0),   // Filter for ratings greater than 4.0
-   *         field("genre").eq("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
+   *         greaterThan(field("rating"), 4.0),   // Filter for ratings greater than 4.0
+   *         field("genre").equal("Science Fiction") // Equivalent to greaterThan("genre", "Science Fiction")
    *     )
    *   );
    * ```
    *
-   * @param condition The {@link BooleanExpr} to apply.
+   * @param condition The {@link BooleanExpression} to apply.
    * @return A new Pipeline object with this stage appended to the stage list.
    */
-  where(condition: firestore.Pipelines.BooleanExpr): Pipeline;
+  where(condition: firestore.Pipelines.BooleanExpression): Pipeline;
   /**
    * @beta
    * Filters the documents from previous stages to only include those matching the specified {@link
-   * BooleanExpr}.
+   * BooleanExpression}.
    *
    * <p>This stage allows you to apply conditions to the data, similar to a "WHERE" clause in SQL.
    * You can filter documents based on their field values, using implementations of {@link
-   * BooleanExpr}, typically including but not limited to:
+   * BooleanExpression}, typically including but not limited to:
    *
    * <ul>
-   *   <li>field comparators: {@link Function#eq}, {@link Function#lt} (less than), {@link
-   *       Function#gt} (greater than), etc.</li>
+   *   <li>field comparators: {@link Function#equal}, {@link Function#lessThan} (less than), {@link
+   *       Function#greaterThan} (greater than), etc.</li>
    *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
    *   <li>advanced functions: {@link Function#regexMatch}, {@link
    *       Function#arrayContains}, etc.</li>
@@ -654,8 +666,8 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * firestore.pipeline().collection("books")
    *   .where(
    *     and(
-   *         gt(field("rating"), 4.0),   // Filter for ratings greater than 4.0
-   *         field("genre").eq("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
+   *         greaterThan(field("rating"), 4.0),   // Filter for ratings greater than 4.0
+   *         field("genre").equal("Science Fiction") // Equivalent to greaterThan("genre", "Science Fiction")
    *     )
    *   );
    * ```
@@ -666,17 +678,18 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   where(options: firestore.Pipelines.WhereStageOptions): Pipeline;
   where(
     conditionOrOptions:
-      | firestore.Pipelines.BooleanExpr
+      | firestore.Pipelines.BooleanExpression
       | firestore.Pipelines.WhereStageOptions
   ): Pipeline {
     const options = isBooleanExpr(conditionOrOptions) ? {} : conditionOrOptions;
 
-    const condition: firestore.Pipelines.BooleanExpr = isBooleanExpr(
+    const condition: firestore.Pipelines.BooleanExpression = isBooleanExpr(
       conditionOrOptions
     )
       ? conditionOrOptions
       : conditionOrOptions.condition;
-    const convertedCondition: BooleanExpr = condition as BooleanExpr;
+    const convertedCondition: BooleanExpression =
+      condition as BooleanExpression;
     this._validateUserData('where', convertedCondition);
 
     const internalOptions: InternalWhereStageOptions = {
@@ -822,14 +835,14 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * Returns a set of distinct values from the inputs to this stage.
    *
    * This stage runs through the results from previous stages to include only results with
-   * unique combinations of {@link Expr} values ({@link Field}, {@link Function}, etc).
+   * unique combinations of {@link Expression} values ({@link Field}, {@link Function}, etc).
    *
    * The parameters to this stage are defined using {@link Selectable} expressions or strings:
    *
    * - {@code string}: Name of an existing field
    * - {@link Field}: References an existing document field.
-   * - {@link AliasedExpr}: Represents the result of a function with an assigned alias name
-   *   using {@link Expr#as}.
+   * - {@link AliasedExpression}: Represents the result of a function with an assigned alias name
+   *   using {@link Expression#as}.
    *
    * Example:
    *
@@ -855,14 +868,14 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * Returns a set of distinct values from the inputs to this stage.
    *
    * This stage runs through the results from previous stages to include only results with
-   * unique combinations of {@link Expr} values ({@link Field}, {@link Function}, etc).
+   * unique combinations of {@link Expression} values ({@link Field}, {@link Function}, etc).
    *
    * The parameters to this stage are defined using {@link Selectable} expressions or strings:
    *
    * - {@code string}: Name of an existing field
    * - {@link Field}: References an existing document field.
-   * - {@link AliasedExpr}: Represents the result of a function with an assigned alias name
-   *   using {@link Expr#as}.
+   * - {@link AliasedExpression}: Represents the result of a function with an assigned alias name
+   *   using {@link Expression#as}.
    *
    * Example:
    *
@@ -893,7 +906,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
       isString(groupOrOptions) || isSelectable(groupOrOptions)
         ? [groupOrOptions, ...additionalGroups]
         : groupOrOptions.groups;
-    const convertedGroups: Map<string, Expr> = selectablesToMap(groups);
+    const convertedGroups: Map<string, Expression> = selectablesToMap(groups);
     this._validateUserData('distinct', convertedGroups);
 
     const internalOptions: InternalDistinctStageOptions = {
@@ -910,7 +923,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *
    * <p>This stage allows you to calculate aggregate values over a set of documents. You define the
    * aggregations to perform using {@link AliasedAggregate} expressions which are typically results of
-   * calling {@link Expr#as} on {@link AggregateFunction} instances.
+   * calling {@link Expression#as} on {@link AggregateFunction} instances.
    *
    * <p>Example:
    *
@@ -918,7 +931,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * // Calculate the average rating and the total number of books
    * firestore.pipeline().collection("books")
    *     .aggregate(
-   *         field("rating").avg().as("averageRating"),
+   *         field("rating").average().as("averageRating"),
    *         countAll().as("totalBooks")
    *     );
    * ```
@@ -947,7 +960,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *       specifying groups is the same as putting the entire inputs into one group.</li>
    *   <li>**Accumulators:** One or more accumulation operations to perform within each group. These
    *       are defined using {@link AliasedAggregate} expressions, which are typically created by
-   *       calling {@link Expr#as} on {@link AggregateFunction} instances. Each aggregation
+   *       calling {@link Expression#as} on {@link AggregateFunction} instances. Each aggregation
    *       calculates a value (e.g., sum, average, count) based on the documents within its group.</li>
    * </ul>
    *
@@ -957,7 +970,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * // Calculate the average rating for each genre.
    * firestore.pipeline().collection("books")
    *   .aggregate({
-   *       accumulators: [avg(field("rating")).as("avg_rating")]
+   *       accumulators: [average(field("rating")).as("avg_rating")]
    *       groups: ["genre"]
    *       });
    * ```
@@ -983,7 +996,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
       aliasedAggregateToMap(accumulators);
     const groups: Array<firestore.Pipelines.Selectable | string> =
       isAliasedAggregate(targetOrOptions) ? [] : targetOrOptions.groups ?? [];
-    const convertedGroups: Map<string, Expr> = selectablesToMap(groups);
+    const convertedGroups: Map<string, Expression> = selectablesToMap(groups);
     this._validateUserData('aggregate', convertedGroups);
 
     const internalOptions: InternalAggregateStageOptions = {
@@ -1109,10 +1122,10 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * // }
    * ```
    *
-   * @param expr An {@link Expr} that when returned evaluates to a map.
+   * @param expr An {@link Expression} that when returned evaluates to a map.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
-  replaceWith(expr: firestore.Pipelines.Expr): Pipeline;
+  replaceWith(expr: firestore.Pipelines.Expression): Pipeline;
   /**
    * @beta
    * Fully overwrites all fields in a document with those coming from a map.
@@ -1153,14 +1166,14 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   replaceWith(options: firestore.Pipelines.ReplaceWithStageOptions): Pipeline;
   replaceWith(
     valueOrOptions:
-      | firestore.Pipelines.Expr
+      | firestore.Pipelines.Expression
       | string
       | firestore.Pipelines.ReplaceWithStageOptions
   ): Pipeline {
     const options =
       isString(valueOrOptions) || isExpr(valueOrOptions) ? {} : valueOrOptions;
 
-    const fieldNameOrExpr: string | firestore.Pipelines.Expr =
+    const fieldNameOrExpr: string | firestore.Pipelines.Expression =
       isString(valueOrOptions) || isExpr(valueOrOptions)
         ? valueOrOptions
         : valueOrOptions.map;
@@ -1388,8 +1401,8 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     )
       ? selectableOrOptions
       : selectableOrOptions.selectable;
-    const alias = selectable.alias;
-    const expr = selectable.expr as Expr;
+    const alias = selectable._alias;
+    const expr = selectable._expr as Expression;
 
     const indexFieldName = isSelectable(selectableOrOptions)
       ? indexField
@@ -1500,7 +1513,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * ```typescript
    * // Assume we don't have a built-in 'where' stage
    * firestore.pipeline().collection('books')
-   *     .rawStage('where', [field('published').lt(1900)]) // Custom 'where' stage
+   *     .rawStage('where', [field('published').lessThan(1900)]) // Custom 'where' stage
    *     .select('title', 'author');
    * ```
    *
@@ -1512,14 +1525,14 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   rawStage(
     name: string,
     params: unknown[],
-    options?: {[key: string]: Expr | unknown}
+    options?: {[key: string]: Expression | unknown}
   ): Pipeline {
     // Convert input values to Expressions.
     // We treat objects as mapValues and arrays as arrayValues,
     // this is unlike the default conversion for objects and arrays
     // passed to an expression.
     const expressionParams = params.map((value: unknown) => {
-      if (value instanceof Expr) {
+      if (value instanceof Expression) {
         return value;
       } else if (value instanceof AggregateFunction) {
         return value;
@@ -1563,7 +1576,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    *
    * ```typescript
    * const futureResults = await firestore.pipeline().collection('books')
-   *     .where(gt(field('rating'), 4.5))
+   *     .where(greaterThan(field('rating'), 4.5))
    *     .select('title', 'author', 'rating')
    *     .execute();
    * ```
@@ -1618,7 +1631,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * @example
    * ```typescript
    * firestore.pipeline().collection('books')
-   *     .where(gt(field('rating'), 4.5))
+   *     .where(greaterThan(field('rating'), 4.5))
    *     .select('title', 'author', 'rating')
    *     .stream()
    *     .on('data', (pipelineResult) => {})
@@ -1640,6 +1653,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   }
 
   /**
+   * @beta
    * Validates user data for each expression in the expressionMap.
    * @param name Name of the calling function. Used for error messages when invalid user data is encountered.
    * @param val
@@ -1664,43 +1678,6 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   }
 }
 
-function selectablesToMap(
-  selectables: (firestore.Pipelines.Selectable | string)[]
-): Map<string, Expr> {
-  const result = new Map<string, Expr>();
-  for (const selectable of selectables) {
-    if (typeof selectable === 'string') {
-      result.set(
-        selectable as string,
-        new Field(FieldPath.fromArgument(selectable))
-      );
-    } else if (selectable instanceof Field) {
-      result.set((selectable as Field).fieldName(), selectable);
-    } else if (selectable instanceof AliasedExpr) {
-      const expr = selectable as AliasedExpr;
-      result.set(expr.alias, expr.expr as unknown as Expr);
-    } else {
-      throw new Error('unexpected selectable: ' + JSON.stringify(selectable));
-    }
-  }
-  return result;
-}
-
-function aliasedAggregateToMap(
-  aliasedAggregatees: firestore.Pipelines.AliasedAggregate[]
-): Map<string, AggregateFunction> {
-  return aliasedAggregatees.reduce(
-    (
-      map: Map<string, AggregateFunction>,
-      selectable: firestore.Pipelines.AliasedAggregate
-    ) => {
-      map.set(selectable.alias, selectable.aggregate as AggregateFunction);
-      return map;
-    },
-    new Map() as Map<string, AggregateFunction>
-  );
-}
-
 /**
  * @beta
  * A wrapper object to access explain stats if explain or analyze
@@ -1710,6 +1687,7 @@ export class ExplainStats implements firestore.Pipelines.ExplainStats {
   private static protoRoot: ProtoRoot | undefined = undefined;
 
   /**
+   * @beta
    * @private
    * @internal
    */
@@ -1723,6 +1701,7 @@ export class ExplainStats implements firestore.Pipelines.ExplainStats {
   }
 
   /**
+   * @beta
    * @private
    * @internal
    * @hideconstructor
@@ -1731,6 +1710,7 @@ export class ExplainStats implements firestore.Pipelines.ExplainStats {
   constructor(private readonly explainStatsData: google.protobuf.IAny) {}
 
   /**
+   * @beta
    * Decode an ExplainStats proto message into a value.
    * @private
    * @internal
@@ -1886,6 +1866,7 @@ export class PipelineResult implements firestore.Pipelines.PipelineResult {
   public readonly _updateTime: Timestamp | undefined;
 
   /**
+   * @beta
    * @private
    * @internal
    *
@@ -1901,6 +1882,7 @@ export class PipelineResult implements firestore.Pipelines.PipelineResult {
   constructor(
     serializer: Serializer,
     /**
+     * @beta
      * @internal
      * @private
      **/
@@ -1958,23 +1940,6 @@ export class PipelineResult implements firestore.Pipelines.PipelineResult {
    */
   get updateTime(): Timestamp | undefined {
     return this._updateTime;
-  }
-
-  /**
-   * @beta
-   * The time at which the pipeline producing this result is executed.
-   *
-   * @type {Timestamp}
-   * @readonly
-   *
-   */
-  get executionTime(): Timestamp {
-    if (this._executionTime === undefined) {
-      throw new Error(
-        "'executionTime' is expected to exist, but it is undefined"
-      );
-    }
-    return this._executionTime;
   }
 
   /**
@@ -2038,6 +2003,7 @@ export class PipelineResult implements firestore.Pipelines.PipelineResult {
   }
 
   /**
+   * @beta
    * Retrieves the field specified by 'fieldPath' in its Protobuf JS
    * representation.
    *

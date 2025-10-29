@@ -27,7 +27,7 @@ import Firestore, {
   VectorValue,
 } from '../index';
 import {logger} from '../logger';
-import {QualifiedResourcePath} from '../path';
+import {FieldPath, QualifiedResourcePath} from '../path';
 import {CompositeFilterInternal} from '../reference/composite-filter-internal';
 import {NOOP_MESSAGE} from '../reference/constants';
 import {FieldFilterInternal} from '../reference/field-filter-internal';
@@ -50,8 +50,8 @@ import {
 import api = protos.google.firestore.v1;
 
 import {
-  Expr,
-  BooleanExpr,
+  Expression,
+  BooleanExpression,
   and,
   or,
   field as createField,
@@ -61,8 +61,8 @@ import {
   Constant,
   field,
   Ordering,
-  gt,
-  lt,
+  greaterThan,
+  lessThan,
   Field,
   AggregateFunction,
 } from './expression';
@@ -440,9 +440,9 @@ export function whereConditionsFromCursor(
   cursor: QueryCursor,
   orderings: Ordering[],
   position: 'before' | 'after'
-): BooleanExpr {
+): BooleanExpression {
   // The filterFunc is either greater than or less than
-  const filterFunc = position === 'before' ? lt : gt;
+  const filterFunc = position === 'before' ? lessThan : greaterThan;
   const cursors = cursor.values.map(value => Constant._fromProto(value));
   const size = cursors.length;
 
@@ -450,14 +450,17 @@ export function whereConditionsFromCursor(
   let value = cursors[size - 1];
 
   // Add condition for last bound
-  let condition: BooleanExpr = filterFunc(field, value);
+  let condition: BooleanExpression = filterFunc(field, value);
   if (
     (position === 'after' && cursor.before) ||
     (position === 'before' && !cursor.before)
   ) {
     // When the cursor bound is inclusive, then the last bound
     // can be equal to the value, otherwise it's not equal
-    condition = or(condition, field.eq(value) as unknown as BooleanExpr);
+    condition = or(
+      condition,
+      field.equal(value) as unknown as BooleanExpression
+    );
   }
 
   // Iterate backwards over the remaining bounds, adding
@@ -467,11 +470,11 @@ export function whereConditionsFromCursor(
     value = cursors[i];
 
     // For each field in the orderings, the condition is either
-    // a) lt|gt the cursor value,
-    // b) or equal the cursor value and lt|gt the cursor values for other fields
+    // a) lessThan|greaterThan the cursor value,
+    // b) or equal the cursor value and lessThan|greaterThan the cursor values for other fields
     condition = or(
       filterFunc(field, value),
-      and(field.eq(value) as unknown as BooleanExpr, condition)
+      and(field.equal(value) as unknown as BooleanExpression, condition)
     );
   }
 
@@ -491,53 +494,40 @@ export function reverseOrderings(orderings: Ordering[]): Ordering[] {
 export function toPipelineBooleanExpr(
   f: FilterInternal,
   serializer: Serializer
-): BooleanExpr {
+): BooleanExpression {
   if (f instanceof FieldFilterInternal) {
     const field = createField(f.field);
-    if (f.isNanChecking()) {
-      if (f.nanOp() === 'IS_NAN') {
-        return and(field.exists(), field.isNan());
-      } else {
-        return and(field.exists(), field.isNotNan());
+
+    // Comparison filters
+    const value = isFirestoreValue(f.value)
+      ? f.value
+      : serializer.encodeValue(f.value);
+    switch (f.op) {
+      case 'LESS_THAN':
+        return and(field.exists(), field.lessThan(value));
+      case 'LESS_THAN_OR_EQUAL':
+        return and(field.exists(), field.lessThanOrEqual(value));
+      case 'GREATER_THAN':
+        return and(field.exists(), field.greaterThan(value));
+      case 'GREATER_THAN_OR_EQUAL':
+        return and(field.exists(), field.greaterThanOrEqual(value));
+      case 'EQUAL':
+        return and(field.exists(), field.equal(value));
+      case 'NOT_EQUAL':
+        return and(field.exists(), field.notEqual(value));
+      case 'ARRAY_CONTAINS':
+        return and(field.exists(), field.arrayContains(value));
+      case 'IN': {
+        const values = value?.arrayValue?.values?.map(val => constant(val));
+        return and(field.exists(), field.equalAny(values!));
       }
-    } else if (f.isNullChecking()) {
-      if (f.nullOp() === 'IS_NULL') {
-        return and(field.exists(), field.isNull());
-      } else {
-        return and(field.exists(), field.isNotNull());
+      case 'ARRAY_CONTAINS_ANY': {
+        const values = value?.arrayValue?.values?.map(val => constant(val));
+        return and(field.exists(), field.arrayContainsAny(values!));
       }
-    } else {
-      // Comparison filters
-      const value = isFirestoreValue(f.value)
-        ? f.value
-        : serializer.encodeValue(f.value);
-      switch (f.op) {
-        case 'LESS_THAN':
-          return and(field.exists(), field.lt(value));
-        case 'LESS_THAN_OR_EQUAL':
-          return and(field.exists(), field.lte(value));
-        case 'GREATER_THAN':
-          return and(field.exists(), field.gt(value));
-        case 'GREATER_THAN_OR_EQUAL':
-          return and(field.exists(), field.gte(value));
-        case 'EQUAL':
-          return and(field.exists(), field.eq(value));
-        case 'NOT_EQUAL':
-          return and(field.exists(), field.neq(value));
-        case 'ARRAY_CONTAINS':
-          return and(field.exists(), field.arrayContains(value));
-        case 'IN': {
-          const values = value?.arrayValue?.values?.map(val => constant(val));
-          return and(field.exists(), field.eqAny(values!));
-        }
-        case 'ARRAY_CONTAINS_ANY': {
-          const values = value?.arrayValue?.values?.map(val => constant(val));
-          return and(field.exists(), field.arrayContainsAny(values!));
-        }
-        case 'NOT_IN': {
-          const values = value?.arrayValue?.values?.map(val => constant(val));
-          return and(field.exists(), field.notEqAny(values!));
-        }
+      case 'NOT_IN': {
+        const values = value?.arrayValue?.values?.map(val => constant(val));
+        return and(field.exists(), field.notEqualAny(values!));
       }
     }
   } else if (f instanceof CompositeFilterInternal) {
@@ -575,7 +565,9 @@ export function isSelectable(
 ): val is firestore.Pipelines.Selectable {
   const candidate = val as firestore.Pipelines.Selectable;
   return (
-    candidate.selectable && isString(candidate.alias) && isExpr(candidate.expr)
+    candidate.selectable &&
+    isString(candidate._alias) &&
+    isExpr(candidate._expr)
   );
 }
 
@@ -593,19 +585,19 @@ export function isAliasedAggregate(
 ): val is firestore.Pipelines.AliasedAggregate {
   const candidate = val as firestore.Pipelines.AliasedAggregate;
   return (
-    isString(candidate.alias) &&
-    candidate.aggregate instanceof AggregateFunction
+    isString(candidate._alias) &&
+    candidate._aggregate instanceof AggregateFunction
   );
 }
 
-export function isExpr(val: unknown): val is firestore.Pipelines.Expr {
-  return val instanceof Expr;
+export function isExpr(val: unknown): val is firestore.Pipelines.Expression {
+  return val instanceof Expression;
 }
 
 export function isBooleanExpr(
   val: unknown
-): val is firestore.Pipelines.BooleanExpr {
-  return val instanceof BooleanExpr;
+): val is firestore.Pipelines.BooleanExpression {
+  return val instanceof BooleanExpression;
 }
 
 export function isField(val: unknown): val is firestore.Pipelines.Field {
@@ -623,19 +615,19 @@ export function isCollectionReference(
 }
 
 /**
- * Converts a value to an Expr, Returning either a Constant, MapFunction,
+ * Converts a value to an Expression, Returning either a Constant, MapFunction,
  * ArrayFunction, or the input itself (if it's already an expression).
  *
  * @private
  * @internal
  * @param value
  */
-export function valueToDefaultExpr(value: unknown): Expr {
-  let result: Expr | undefined;
+export function valueToDefaultExpr(value: unknown): Expression {
+  let result: Expression | undefined;
   if (isFirestoreValue(value)) {
     return constant(value);
   }
-  if (value instanceof Expr) {
+  if (value instanceof Expression) {
     return value;
   } else if (isPlainObject(value)) {
     result = map(value as Record<string, unknown>);
@@ -651,7 +643,7 @@ export function valueToDefaultExpr(value: unknown): Expr {
 }
 
 /**
- * Converts a value to an Expr, Returning either a Constant, MapFunction,
+ * Converts a value to an Expression, Returning either a Constant, MapFunction,
  * ArrayFunction, or the input itself (if it's already an expression).
  *
  * @private
@@ -659,9 +651,9 @@ export function valueToDefaultExpr(value: unknown): Expr {
  * @param value
  */
 export function vectorToExpr(
-  value: firestore.VectorValue | number[] | Expr
-): Expr {
-  if (value instanceof Expr) {
+  value: firestore.VectorValue | number[] | Expression
+): Expression {
+  if (value instanceof Expression) {
     return value;
   } else if (value instanceof VectorValue) {
     const result = constant(value);
@@ -677,7 +669,7 @@ export function vectorToExpr(
 }
 
 /**
- * Converts a value to an Expr, Returning either a Constant, MapFunction,
+ * Converts a value to an Expression, Returning either a Constant, MapFunction,
  * ArrayFunction, or the input itself (if it's already an expression).
  * If the input is a string, it is assumed to be a field name, and a
  * field(value) is returned.
@@ -686,7 +678,7 @@ export function vectorToExpr(
  * @internal
  * @param value
  */
-export function fieldOrExpression(value: unknown): Expr {
+export function fieldOrExpression(value: unknown): Expression {
   if (isString(value)) {
     const result = field(value);
     result._createdFromLiteral = true;
@@ -724,4 +716,47 @@ export function fieldOrSelectable(value: string | Selectable): Selectable {
   } else {
     return value;
   }
+}
+
+export function selectablesToMap(
+  selectables: (firestore.Pipelines.Selectable | string)[]
+): Map<string, Expression> {
+  const result = new Map<string, Expression>();
+  for (const selectable of selectables) {
+    let alias: string;
+    let expression: Expression;
+    if (typeof selectable === 'string') {
+      alias = selectable as string;
+      expression = new Field(FieldPath.fromArgument(selectable));
+    } else {
+      alias = selectable._alias;
+      expression = selectable._expr as unknown as Expression;
+    }
+
+    if (result.get(alias) !== undefined) {
+      throw new Error(`Duplicate alias or field '${alias}'`);
+    }
+
+    result.set(alias, expression);
+  }
+  return result;
+}
+
+export function aliasedAggregateToMap(
+  aliasedAggregatees: firestore.Pipelines.AliasedAggregate[]
+): Map<string, AggregateFunction> {
+  return aliasedAggregatees.reduce(
+    (
+      map: Map<string, AggregateFunction>,
+      selectable: firestore.Pipelines.AliasedAggregate
+    ) => {
+      if (map.get(selectable._alias) !== undefined) {
+        throw new Error(`Duplicate alias or field '${selectable._alias}'`);
+      }
+
+      map.set(selectable._alias, selectable._aggregate as AggregateFunction);
+      return map;
+    },
+    new Map() as Map<string, AggregateFunction>
+  );
 }

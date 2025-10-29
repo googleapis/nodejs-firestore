@@ -43,7 +43,7 @@ async function quickstartPipelines() {
     .pipeline()
     .collection('posts')
     .select('rating', field('title').toUpper().as('lowercaseTitle'))
-    .where(field('rating').gt(5));
+    .where(field('rating').greaterThan(5));
 
   // Execute the Pipeline against the Firestore server.
   const pipelineSnapshot = await myPipeline.execute();

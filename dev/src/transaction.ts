@@ -313,7 +313,7 @@ export class Transaction implements firestore.Transaction {
    * const futureResults = await transaction
    *   .execute(
    *     firestore.pipeline().collection("books")
-   *       .where(gt(field("rating"), 4.5))
+   *       .where(greaterThan(field("rating"), 4.5))
    *       .select("title", "author", "rating"));
    * ```
    *
@@ -330,8 +330,9 @@ export class Transaction implements firestore.Transaction {
         this.executePipelineFn
       ).then(results => {
         const executionTime = results.reduce((maxTime, result) => {
-          return result.executionTime.valueOf() > maxTime.valueOf()
-            ? result.executionTime
+          return result._executionTime &&
+            result._executionTime?.valueOf() > maxTime.valueOf()
+            ? result._executionTime
             : maxTime;
         }, Timestamp.fromMillis(0));
 

@@ -399,7 +399,7 @@ describe('stage option serialization', () => {
           .pipeline()
           .database()
           .where({
-            condition: field('foo').eq(1),
+            condition: field('foo').equal(1),
             rawOptions,
           }),
       stageIndex: 1,

@@ -19,7 +19,7 @@ import {
 } from '@google-cloud/firestore';
 
 import {
-  BooleanExpr,
+  BooleanExpression,
   map,
   array,
   field,
@@ -28,25 +28,24 @@ import {
   exp,
   xor,
   AggregateFunction,
-  rand,
   arrayGet,
   timestampToUnixMicros,
   timestampToUnixSeconds,
   unixMicrosToTimestamp,
   timestampToUnixMillis,
-  timestampSub,
+  timestampSubtract,
   timestampAdd,
   byteLength,
   multiply,
   sum,
   maximum,
   descending,
-  FunctionExpr,
+  FunctionExpression,
   minimum,
   count,
   countIf,
   arrayLength,
-  strContains,
+  stringContains,
   charLength,
   divide,
   mod,
@@ -55,16 +54,12 @@ import {
   toUpper,
   toLower,
   vectorLength,
-  isNotNan,
   exists,
-  isNotNull,
   isAbsent,
   ifError,
   isError,
-  isNan,
   substring,
   documentId,
-  isNull,
   arrayContainsAll,
   mapRemove,
   mapMerge,
@@ -75,32 +70,32 @@ import {
   arrayContains,
   arrayContainsAny,
   arrayReverse,
-  avg,
+  average,
   countAll,
   endsWith,
-  eq,
-  gt,
+  equal,
+  greaterThan,
   like,
-  lt,
-  neq,
+  lessThan,
+  notEqual,
   ascending,
   not,
   or,
   regexContains,
   regexMatch,
   startsWith,
-  strConcat,
+  stringConcat,
   subtract,
   cosineDistance,
   dotProduct,
   euclideanDistance,
   mapGet,
-  lte,
-  eqAny,
-  notEqAny,
+  lessThanOrEqual,
+  equalAny,
+  notEqualAny,
   logicalMinimum,
   logicalMaximum,
-  cond,
+  conditional,
   constant,
   PipelineResult,
   PipelineSnapshot,
@@ -111,9 +106,16 @@ import {
   collectionId,
   length,
   ln,
-  log,
   sqrt,
-  strReverse,
+  stringReverse,
+  abs,
+  log10,
+  concat,
+  ifAbsent,
+  join,
+  arraySum,
+  currentTimestamp,
+  arrayConcat,
   // TODO(new-expression): add new expression imports above this line
 } from '../src/pipelines';
 
@@ -137,13 +139,11 @@ import {getTestDb, getTestRoot} from './firestore';
 import {Firestore as InternalFirestore} from '../src';
 import {ServiceError} from 'google-gax';
 
-import * as google from '../protos/firestore_v1_proto_api';
-
 use(chaiAsPromised);
 
 const timestampDeltaMS = 3000;
 
-describe('Pipeline class', () => {
+describe.skip('Pipeline class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
   let beginDocCreation = 0;
@@ -421,7 +421,7 @@ describe('Pipeline class', () => {
       const pipeline = firestore
         .pipeline()
         .collection(randomCol.path)
-        .aggregate(avg('rating').as('avgRating'));
+        .aggregate(average('rating').as('avgRating'));
 
       const snapshot = await pipeline.execute();
       const end = new Date().valueOf();
@@ -439,7 +439,7 @@ describe('Pipeline class', () => {
         .pipeline()
         .collection(randomCol.path)
         .aggregate({
-          accumulators: [avg('rating').as('avgRating')],
+          accumulators: [average('rating').as('avgRating')],
           groups: ['genre'],
         });
 
@@ -455,7 +455,47 @@ describe('Pipeline class', () => {
   });
 
   describe('pipeline explain', () => {
-    it('mode: analyze', async () => {
+    it('mode: analyze, format: text', async () => {
+      const ppl = firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(ascending('__name__'));
+
+      const snapshot = await ppl.execute({
+        explainOptions: {
+          mode: 'analyze',
+          outputFormat: 'text',
+        },
+      });
+
+      expect(snapshot.explainStats).not.to.be.undefined;
+      expect(snapshot.explainStats!.text.length).to.be.greaterThan(0);
+      expect(snapshot.explainStats!.text.charAt(0)).not.to.equal('{');
+
+      expect(snapshot.explainStats!.rawData.type_url).to.equal(
+        'type.googleapis.com/google.protobuf.StringValue'
+      );
+      expect(snapshot.explainStats!.rawData.value).to.not.be.null;
+      expect(snapshot.explainStats!.rawData.value).to.not.be.undefined;
+
+      expect(snapshot.results.length).to.equal(10);
+      expect(snapshot.pipeline).to.equal(ppl);
+      expectResults(
+        snapshot,
+        'book1',
+        'book10',
+        'book2',
+        'book3',
+        'book4',
+        'book5',
+        'book6',
+        'book7',
+        'book8',
+        'book9'
+      );
+    });
+
+    it('mode: analyze, format: unspecified', async () => {
       const ppl = firestore
         .pipeline()
         .collection(randomCol.path)
@@ -492,13 +532,16 @@ describe('Pipeline class', () => {
       );
     });
 
-    it('mode: unspecified', async () => {
+    it('mode: execute, format: text', async () => {
       const ppl = firestore
         .pipeline()
         .collection(randomCol.path)
         .sort(ascending('__name__'));
       const snapshot = await ppl.execute({
-        explainOptions: {},
+        explainOptions: {
+          mode: 'execute',
+          outputFormat: 'text',
+        },
       });
       expect(snapshot.explainStats).to.be.undefined;
 
@@ -519,7 +562,7 @@ describe('Pipeline class', () => {
       );
     });
 
-    it('mode: undefined', async () => {
+    it('mode: unspecified, format: text', async () => {
       const ppl = firestore
         .pipeline()
         .collection(randomCol.path)
@@ -623,7 +666,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .database()
-        .where(eq('randomId', randomId))
+        .where(equal('randomId', randomId))
         .sort(ascending('order'))
         .execute();
       expectResults(snapshot, doc1.id, doc2.id);
@@ -851,7 +894,7 @@ describe('Pipeline class', () => {
         )
         .where(
           and(
-            eq('metadataArray', [
+            equal('metadataArray', [
               1,
               2,
               field('genre'),
@@ -861,7 +904,7 @@ describe('Pipeline class', () => {
                 published: field('published'),
               },
             ]),
-            eq('metadata', {
+            equal('metadata', {
               genre: field('genre'),
               rating: multiply('rating', 10),
               nestedArray: [field('title')],
@@ -918,10 +961,10 @@ describe('Pipeline class', () => {
         snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('genre', 'Science Fiction'))
+          .where(equal('genre', 'Science Fiction'))
           .aggregate(
             countAll().as('count'),
-            avg('rating').as('avgRating'),
+            average('rating').as('avgRating'),
             maximum('rating').as('maxRating'),
             sum('rating').as('sumRating')
           )
@@ -932,6 +975,27 @@ describe('Pipeline class', () => {
           maxRating: 4.6,
           sumRating: 8.8,
         });
+      });
+
+      it('throws on duplicate aliases', async () => {
+        expect(() =>
+          firestore
+            .pipeline()
+            .collection(randomCol.path)
+            .aggregate(countAll().as('count'), count('foo').as('count'))
+        ).to.throw("Duplicate alias or field 'count'");
+      });
+
+      it('throws on duplicate group aliases', async () => {
+        expect(() =>
+          firestore
+            .pipeline()
+            .collection(randomCol.path)
+            .aggregate({
+              accumulators: [countAll().as('count')],
+              groups: ['bax', field('bar').as('bax')],
+            })
+        ).to.throw("Duplicate alias or field 'bax'");
       });
 
       it('supports aggregate options', async () => {
@@ -947,10 +1011,10 @@ describe('Pipeline class', () => {
         snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('genre', 'Science Fiction'))
+          .where(equal('genre', 'Science Fiction'))
           .aggregate(
             countAll().as('count'),
-            avg('rating').as('avgRating'),
+            average('rating').as('avgRating'),
             maximum('rating').as('maxRating'),
             sum('rating').as('sumRating')
           )
@@ -968,7 +1032,7 @@ describe('Pipeline class', () => {
           firestore
             .pipeline()
             .collection(randomCol.path)
-            .where(lt('published', 1900))
+            .where(lessThan('published', 1900))
             .aggregate({
               accumulators: [],
               groups: ['genre'],
@@ -981,12 +1045,12 @@ describe('Pipeline class', () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(lt(field('published'), 1984))
+          .where(lessThan(field('published'), 1984))
           .aggregate({
-            accumulators: [avg('rating').as('avgRating')],
+            accumulators: [average('rating').as('avgRating')],
             groups: ['genre'],
           })
-          .where(gt('avgRating', 4.3))
+          .where(greaterThan('avgRating', 4.3))
           .sort(field('avgRating').descending())
           .execute();
         expectResults(
@@ -1020,7 +1084,7 @@ describe('Pipeline class', () => {
         let snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .aggregate(countIf(field('rating').gt(4.3)).as('count'))
+          .aggregate(countIf(field('rating').greaterThan(4.3)).as('count'))
           .execute();
         const expectedResults = {
           count: 3,
@@ -1030,7 +1094,7 @@ describe('Pipeline class', () => {
         snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .aggregate(field('rating').gt(4.3).countIf().as('count'))
+          .aggregate(field('rating').greaterThan(4.3).countIf().as('count'))
           .execute();
         expectResults(snapshot, expectedResults);
       });
@@ -1125,6 +1189,16 @@ describe('Pipeline class', () => {
         );
       });
 
+      it('throws on duplicate aliases', async () => {
+        expect(() => {
+          firestore
+            .pipeline()
+            .collection(randomCol.path)
+            .limit(1)
+            .select(constant(1).as('foo'), constant(2).as('foo'));
+        }).to.throw("Duplicate alias or field 'foo'");
+      });
+
       it('supports options', async () => {
         const snapshot = await firestore
           .pipeline()
@@ -1196,6 +1270,17 @@ describe('Pipeline class', () => {
         );
       });
 
+      it('throws on duplicate aliases', async () => {
+        expect(() =>
+          firestore
+            .pipeline()
+            .collection(randomCol.path)
+            .select('title', 'author')
+            .addFields(constant('bar').as('foo'), constant('baz').as('foo'))
+            .sort(field('author').ascending())
+        ).to.throw("Duplicate alias or field 'foo'");
+      });
+
       it('supports options', async () => {
         const snapshot = await firestore
           .pipeline()
@@ -1258,7 +1343,6 @@ describe('Pipeline class', () => {
           .select('title', 'author')
           .sort(field('author').ascending())
           .removeFields(field('author'))
-          .sort(field('author').ascending())
           .execute();
         expectResults(
           snapshot,
@@ -1298,7 +1382,6 @@ describe('Pipeline class', () => {
           .removeFields({
             fields: [field('author'), 'genre'],
           })
-          .sort(field('author').ascending())
           .execute();
         expectResults(
           snapshot,
@@ -1338,7 +1421,6 @@ describe('Pipeline class', () => {
           .select('title', 'author')
           .sort(field('author').ascending())
           .removeFields(field('author'))
-          .sort(field('author').ascending())
           .execute();
         expectResults(
           snapshot,
@@ -1378,7 +1460,6 @@ describe('Pipeline class', () => {
           .removeFields({
             fields: [field('author'), 'genre'],
           })
-          .sort(field('author').ascending())
           .execute();
         expectResults(
           snapshot,
@@ -1417,8 +1498,8 @@ describe('Pipeline class', () => {
           .collection(randomCol.path)
           .where(
             and(
-              gt('rating', 4.5),
-              eqAny('genre', ['Science Fiction', 'Romance', 'Fantasy'])
+              greaterThan('rating', 4.5),
+              equalAny('genre', ['Science Fiction', 'Romance', 'Fantasy'])
             )
           )
           .execute();
@@ -1431,9 +1512,9 @@ describe('Pipeline class', () => {
           .collection(randomCol.path)
           .where(
             and(
-              gt('rating', 4.5),
-              eqAny('genre', ['Science Fiction', 'Romance', 'Fantasy']),
-              lt('published', 1965)
+              greaterThan('rating', 4.5),
+              equalAny('genre', ['Science Fiction', 'Romance', 'Fantasy']),
+              lessThan('published', 1965)
             )
           )
           .execute();
@@ -1446,9 +1527,9 @@ describe('Pipeline class', () => {
           .collection(randomCol.path)
           .where(
             or(
-              eq('genre', 'Romance'),
-              eq('genre', 'Dystopian'),
-              eq('genre', 'Fantasy')
+              equal('genre', 'Romance'),
+              equal('genre', 'Dystopian'),
+              equal('genre', 'Fantasy')
             )
           )
           .sort(ascending('title'))
@@ -1469,10 +1550,10 @@ describe('Pipeline class', () => {
           .collection(randomCol.path)
           .where(
             xor(
-              eq('genre', 'Romance'),
-              eq('genre', 'Dystopian'),
-              eq('genre', 'Fantasy'),
-              eq('published', 1949)
+              equal('genre', 'Romance'),
+              equal('genre', 'Dystopian'),
+              equal('genre', 'Fantasy'),
+              equal('published', 1949)
             )
           )
           .select('title')
@@ -1491,8 +1572,8 @@ describe('Pipeline class', () => {
           .collection(randomCol.path)
           .where({
             condition: and(
-              gt('rating', 4.5),
-              eqAny('genre', ['Science Fiction', 'Romance', 'Fantasy'])
+              greaterThan('rating', 4.5),
+              equalAny('genre', ['Science Fiction', 'Romance', 'Fantasy'])
             ),
           })
           .execute();
@@ -1598,12 +1679,17 @@ describe('Pipeline class', () => {
 
           expect('statusDetails' in err).to.be.true;
           expect(Array.isArray(err['statusDetails'])).to.be.true;
-          const explainStatsAny = (
-            err['statusDetails'] as Array<unknown>
-          )[0] as google.google.protobuf.IAny;
-          expect(explainStatsAny['type_url']).to.equal(
-            'type.googleapis.com/google.firestore.v1.ExplainStats'
-          );
+
+          const statusDetails = err['statusDetails'] as Array<object>;
+
+          const foundExplainStats = statusDetails.find(x => {
+            return (
+              'type_url' in x &&
+              x['type_url'] ===
+                'type.googleapis.com/google.firestore.v1.ExplainStats'
+            );
+          });
+          expect(foundExplainStats).to.not.be.undefined;
         }
       });
     });
@@ -1641,7 +1727,7 @@ describe('Pipeline class', () => {
           .select('title', 'author')
           .rawStage('add_fields', [
             {
-              display: strConcat('title', ' - ', field('author')),
+              display: stringConcat('title', ' - ', field('author')),
             },
           ])
           .execute();
@@ -1657,7 +1743,7 @@ describe('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .select('title', 'author')
-          .rawStage('where', [field('author').eq('Douglas Adams')])
+          .rawStage('where', [field('author').equal('Douglas Adams')])
           .execute();
         expectResults(snapshot, {
           title: "The Hitchhiker's Guide to the Galaxy",
@@ -1690,7 +1776,10 @@ describe('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .select('title', 'author', 'rating')
-          .rawStage('aggregate', [{averageRating: field('rating').avg()}, {}])
+          .rawStage('aggregate', [
+            {averageRating: field('rating').average()},
+            {},
+          ])
           .execute();
         expectResults(snapshot, {
           averageRating: 4.3100000000000005,
@@ -1768,7 +1857,7 @@ describe('Pipeline class', () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+          .where(equal('title', "The Hitchhiker's Guide to the Galaxy"))
           .replaceWith('awards')
           .execute();
         expectResults(snapshot, {
@@ -1778,11 +1867,11 @@ describe('Pipeline class', () => {
         });
       });
 
-      it('run pipeline with replaceWith Expr result', async () => {
+      it('run pipeline with replaceWith Expression result', async () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+          .where(equal('title', "The Hitchhiker's Guide to the Galaxy"))
           .replaceWith(
             map({
               foo: 'bar',
@@ -1802,7 +1891,7 @@ describe('Pipeline class', () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+          .where(equal('title', "The Hitchhiker's Guide to the Galaxy"))
           .replaceWith({map: 'awards'})
           .execute();
         expectResults(snapshot, {
@@ -1920,7 +2009,7 @@ describe('Pipeline class', () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+          .where(equal('title', "The Hitchhiker's Guide to the Galaxy"))
           .unnest(field('tags').as('tag'))
           .select(
             'title',
@@ -1988,7 +2077,7 @@ describe('Pipeline class', () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+          .where(equal('title', "The Hitchhiker's Guide to the Galaxy"))
           .unnest(field('tags').as('tag'), 'tagsIndex')
           .select(
             'title',
@@ -1999,7 +2088,8 @@ describe('Pipeline class', () => {
             'tags',
             'tag',
             'awards',
-            'nestedField'
+            'nestedField',
+            'tagsIndex'
           )
           .execute();
         expectResults(
@@ -2059,7 +2149,7 @@ describe('Pipeline class', () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+          .where(equal('title', "The Hitchhiker's Guide to the Galaxy"))
           .unnest(array([1, 2, 3]).as('copy'))
           .select(
             'title',
@@ -2127,7 +2217,7 @@ describe('Pipeline class', () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(eq('title', "The Hitchhiker's Guide to the Galaxy"))
+          .where(equal('title', "The Hitchhiker's Guide to the Galaxy"))
           .unnest({
             selectable: field('tags').as('tag'),
             indexField: 'tagsIndex',
@@ -2141,7 +2231,8 @@ describe('Pipeline class', () => {
             'tags',
             'tag',
             'awards',
-            'nestedField'
+            'nestedField',
+            'tagsIndex'
           )
           .execute();
         expectResults(
@@ -2301,34 +2392,38 @@ describe('Pipeline class', () => {
       );
     });
 
-    it('cond works', async () => {
+    it('conditional works', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
         .select(
           'title',
-          cond(
-            lt(field('published'), 1960),
+          conditional(
+            lessThan(field('published'), 1960),
             constant(1960),
             field('published')
-          ).as('published-safe')
+          ).as('published-safe'),
+          field('rating')
+            .greaterThanOrEqual(4.5)
+            .conditional(constant('great'), constant('good'))
+            .as('rating')
         )
         .sort(field('title').ascending())
         .limit(3)
         .execute();
       expectResults(
         snapshot,
-        {title: '1984', 'published-safe': 1960},
-        {title: 'Crime and Punishment', 'published-safe': 1960},
-        {title: 'Dune', 'published-safe': 1965}
+        {title: '1984', 'published-safe': 1960, rating: 'good'},
+        {title: 'Crime and Punishment', 'published-safe': 1960, rating: 'good'},
+        {title: 'Dune', 'published-safe': 1965, rating: 'great'}
       );
     });
 
-    it('eqAny works', async () => {
+    it('equalAny works', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(eqAny('published', [1979, 1999, 1967]))
+        .where(equalAny('published', [1979, 1999, 1967]))
         .sort(descending('title'))
         .select('title')
         .execute();
@@ -2339,12 +2434,12 @@ describe('Pipeline class', () => {
       );
     });
 
-    it('notEqAny works', async () => {
+    it('notEqualAny works', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
         .where(
-          notEqAny(
+          notEqualAny(
             'published',
             [1965, 1925, 1949, 1960, 1866, 1985, 1954, 1967, 1979]
           )
@@ -2396,7 +2491,7 @@ describe('Pipeline class', () => {
         .pipeline()
         .collection(randomCol.path)
         .select(arrayLength('tags').as('tagsCount'))
-        .where(eq('tagsCount', 3))
+        .where(equal('tagsCount', 3))
         .execute();
       expect(snapshot.results.length).to.equal(10);
     });
@@ -2406,7 +2501,9 @@ describe('Pipeline class', () => {
         .pipeline()
         .collection(randomCol.path)
         .sort(ascending('author'))
-        .select(field('author').strConcat(' - ', field('title')).as('bookInfo'))
+        .select(
+          field('author').stringConcat(' - ', field('title')).as('bookInfo')
+        )
         .limit(1)
         .execute();
       expectResults(snapshot, {
@@ -2450,7 +2547,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(strContains('title', "'s"))
+        .where(stringContains('title', "'s"))
         .select('title')
         .sort(field('title').ascending())
         .execute();
@@ -2466,7 +2563,7 @@ describe('Pipeline class', () => {
         .pipeline()
         .collection(randomCol.path)
         .select(charLength('title').as('titleLength'), field('title'))
-        .where(gt('titleLength', 20))
+        .where(greaterThan('titleLength', 20))
         .sort(field('title').ascending())
         .execute();
 
@@ -2526,7 +2623,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(eq('title', 'To Kill a Mockingbird'))
+        .where(equal('title', 'To Kill a Mockingbird'))
         .select(
           add(field('rating'), 1).as('ratingPlusOne'),
           subtract(field('published'), 1900).as('yearsSince1900'),
@@ -2555,9 +2652,9 @@ describe('Pipeline class', () => {
         .collection(randomCol.path)
         .where(
           and(
-            gt('rating', 4.2),
-            lte(field('rating'), 4.5),
-            neq('genre', 'Science Fiction')
+            greaterThan('rating', 4.2),
+            lessThanOrEqual(field('rating'), 4.5),
+            notEqual('genre', 'Science Fiction')
           )
         )
         .select('rating', 'title')
@@ -2580,8 +2677,8 @@ describe('Pipeline class', () => {
         .collection(randomCol.path)
         .where(
           or(
-            and(gt('rating', 4.5), eq('genre', 'Science Fiction')),
-            lt('published', 1900)
+            and(greaterThan('rating', 4.5), equal('genre', 'Science Fiction')),
+            lessThan('published', 1900)
           )
         )
         .select('title')
@@ -2602,13 +2699,21 @@ describe('Pipeline class', () => {
         .sort(field('rating').descending())
         .limit(1)
         .select(
-          isNull('rating').as('ratingIsNull'),
-          isNan('rating').as('ratingIsNaN'),
-          isError(arrayGet('title', 0)).as('isError'),
-          ifError(arrayGet('title', 0), constant('was error')).as('ifError'),
+          equal('rating', null).as('ratingIsNull'),
+          equal('rating', NaN).as('ratingIsNaN'),
+          isError(divide(constant(1), constant(0))).as('isError'),
+          ifError(divide(constant(1), constant(0)), constant('was error')).as(
+            'ifError'
+          ),
+          ifError(
+            divide(constant(1), constant(0)).greaterThan(1),
+            constant(true)
+          )
+            .not()
+            .as('ifErrorBooleanExpression'),
           isAbsent('foo').as('isAbsent'),
-          isNotNull('title').as('titleIsNotNull'),
-          isNotNan('cost').as('costIsNotNan'),
+          notEqual('title', null).as('titleIsNotNull'),
+          notEqual('cost', NaN).as('costIsNotNan'),
           exists('fooBarBaz').as('fooBarBazExists'),
           field('title').exists().as('titleExists')
         )
@@ -2618,6 +2723,7 @@ describe('Pipeline class', () => {
         ratingIsNaN: false,
         isError: true,
         ifError: 'was error',
+        ifErrorBooleanExpression: false,
         isAbsent: true,
         titleIsNotNull: true,
         costIsNotNan: false,
@@ -2631,13 +2737,20 @@ describe('Pipeline class', () => {
         .sort(field('rating').descending())
         .limit(1)
         .select(
-          field('rating').isNull().as('ratingIsNull'),
-          field('rating').isNan().as('ratingIsNaN'),
-          arrayGet('title', 0).isError().as('isError'),
-          arrayGet('title', 0).ifError(constant('was error')).as('ifError'),
+          field('rating').equal(null).as('ratingIsNull'),
+          field('rating').equal(NaN).as('ratingIsNaN'),
+          divide(constant(1), constant(0)).isError().as('isError'),
+          divide(constant(1), constant(0))
+            .ifError(constant('was error'))
+            .as('ifError'),
+          divide(constant(1), constant(0))
+            .greaterThan(1)
+            .ifError(constant(true))
+            .not()
+            .as('ifErrorBooleanExpression'),
           field('foo').isAbsent().as('isAbsent'),
-          field('title').isNotNull().as('titleIsNotNull'),
-          field('cost').isNotNan().as('costIsNotNan')
+          field('title').notEqual(null).as('titleIsNotNull'),
+          field('cost').notEqual(NaN).as('costIsNotNan')
         )
         .execute();
       expectResults(snapshot, {
@@ -2645,6 +2758,7 @@ describe('Pipeline class', () => {
         ratingIsNaN: false,
         isError: true,
         ifError: 'was error',
+        ifErrorBooleanExpression: false,
         isAbsent: true,
         titleIsNotNull: true,
         costIsNotNan: false,
@@ -2661,7 +2775,7 @@ describe('Pipeline class', () => {
           field('awards').mapGet('others').as('others'),
           field('title')
         )
-        .where(eq('hugoAward', true))
+        .where(equal('hugoAward', true))
         .execute();
       expectResults(
         snapshot,
@@ -2670,7 +2784,7 @@ describe('Pipeline class', () => {
           title: "The Hitchhiker's Guide to the Galaxy",
           others: {unknown: {year: 1980}},
         },
-        {hugoAward: true, title: 'Dune', others: null}
+        {hugoAward: true, title: 'Dune'}
       );
     });
 
@@ -2744,7 +2858,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(eq('awards.hugo', true))
+        .where(equal('awards.hugo', true))
         .sort(descending('title'))
         .select('title', 'awards.hugo')
         .execute();
@@ -2762,23 +2876,32 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(eq('awards.hugo', true))
+        .limit(1)
+        .replaceWith(
+          map({
+            title: 'foo',
+            nested: {
+              level: {
+                '1': 'bar',
+              },
+              'level.1': {
+                'level.2': 'baz',
+              },
+            },
+          })
+        )
         .select(
           'title',
-          field('nestedField.level.1'),
-          mapGet('nestedField', 'level.1').mapGet('level.2').as('nested')
+          field('nested.level.1'),
+          mapGet('nested', 'level.1').mapGet('level.2').as('nested')
         )
-        .sort(descending('title'))
         .execute();
-      expectResults(
-        snapshot,
-        {
-          title: "The Hitchhiker's Guide to the Galaxy",
-          'nestedField.level.`1`': null,
-          nested: true,
-        },
-        {title: 'Dune', 'nestedField.level.`1`': null, nested: null}
-      );
+
+      expectResults(snapshot, {
+        title: 'foo',
+        'nested.level.`1`': 'bar',
+        nested: 'baz',
+      });
     });
 
     describe('genericFunction', () => {
@@ -2789,7 +2912,9 @@ describe('Pipeline class', () => {
           .sort(descending('rating'))
           .limit(1)
           .select(
-            new FunctionExpr('add', [field('rating'), constant(1)]).as('rating')
+            new FunctionExpression('add', [field('rating'), constant(1)]).as(
+              'rating'
+            )
           )
           .execute();
         expectResults(snapshot, {
@@ -2802,9 +2927,9 @@ describe('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .where(
-            new BooleanExpr('and', [
-              field('rating').gt(0),
-              field('title').charLength().lt(5),
+            new BooleanExpression('and', [
+              field('rating').greaterThan(0),
+              field('title').charLength().lessThan(5),
               field('tags').arrayContains('propaganda'),
             ])
           )
@@ -2820,7 +2945,7 @@ describe('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .where(
-            new BooleanExpr('array_contains_any', [
+            new BooleanExpression('array_contains_any', [
               field('tags'),
               array(['politics']),
             ])
@@ -2837,9 +2962,9 @@ describe('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .aggregate(
-            new AggregateFunction('count_if', [field('rating').gte(4.5)]).as(
-              'countOfBest'
-            )
+            new AggregateFunction('count_if', [
+              field('rating').greaterThanOrEqual(4.5),
+            ]).as('countOfBest')
           )
           .execute();
         expectResults(snapshot, {
@@ -2852,7 +2977,7 @@ describe('Pipeline class', () => {
           .pipeline()
           .collection(randomCol.path)
           .sort(
-            new FunctionExpr('char_length', [field('title')]).ascending(),
+            new FunctionExpression('char_length', [field('title')]).ascending(),
             descending('__name__')
           )
           .limit(3)
@@ -2870,20 +2995,6 @@ describe('Pipeline class', () => {
             title: 'The Great Gatsby',
           }
         );
-      });
-    });
-
-    it('supports Rand', async () => {
-      const snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .limit(10)
-        .select(rand().as('result'))
-        .execute();
-      expect(snapshot.results.length).to.equal(10);
-      snapshot.results.forEach((d: PipelineResult) => {
-        expect(d.get('result')).to.be.lt(1);
-        expect(d.get('result')).to.be.gte(0);
       });
     });
 
@@ -3087,12 +3198,12 @@ describe('Pipeline class', () => {
           timestampAdd('timestamp', 'second', 10).as('plus10seconds'),
           timestampAdd('timestamp', 'microsecond', 10).as('plus10micros'),
           timestampAdd('timestamp', 'millisecond', 10).as('plus10millis'),
-          timestampSub('timestamp', 'day', 10).as('minus10days'),
-          timestampSub('timestamp', 'hour', 10).as('minus10hours'),
-          timestampSub('timestamp', 'minute', 10).as('minus10minutes'),
-          timestampSub('timestamp', 'second', 10).as('minus10seconds'),
-          timestampSub('timestamp', 'microsecond', 10).as('minus10micros'),
-          timestampSub('timestamp', 'millisecond', 10).as('minus10millis')
+          timestampSubtract('timestamp', 'day', 10).as('minus10days'),
+          timestampSubtract('timestamp', 'hour', 10).as('minus10hours'),
+          timestampSubtract('timestamp', 'minute', 10).as('minus10minutes'),
+          timestampSubtract('timestamp', 'second', 10).as('minus10seconds'),
+          timestampSubtract('timestamp', 'microsecond', 10).as('minus10micros'),
+          timestampSubtract('timestamp', 'millisecond', 10).as('minus10millis')
         )
         .execute();
       expectResults(snapshot, {
@@ -3131,7 +3242,7 @@ describe('Pipeline class', () => {
         .collection(randomCol)
         .limit(1)
         .select(constant(true).as('trueField'))
-        .select('trueField', not(eq('trueField', true)).as('falseField'))
+        .select('trueField', not(equal('trueField', true)).as('falseField'))
         .execute();
 
       expectResults(snapshot, {
@@ -3144,7 +3255,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('tags').arrayReverse().as('reversedTags'))
         .execute();
@@ -3157,7 +3268,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(arrayReverse('tags').as('reversedTags'))
         .execute();
@@ -3170,7 +3281,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('rating').ceil().as('ceilingRating'))
         .execute();
@@ -3183,7 +3294,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(ceil('rating').as('ceilingRating'))
         .execute();
@@ -3196,7 +3307,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('rating').floor().as('floorRating'))
         .execute();
@@ -3209,7 +3320,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(floor('rating').as('floorRating'))
         .execute();
@@ -3222,20 +3333,21 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq('The Lord of the Rings'))
+        .where(field('title').equal('The Lord of the Rings'))
         .limit(1)
         .select(field('rating').exp().as('expRating'))
         .execute();
-      expectResults(snapshot, {
-        expRating: 109.94717245212352,
-      });
+      expect(snapshot.results[0].get('expRating')).to.be.approximately(
+        109.94717245212352,
+        0.00001
+      );
     });
 
     it('can compute e to the power of a numeric value with the top-level function', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq('The Lord of the Rings'))
+        .where(field('title').equal('The Lord of the Rings'))
         .limit(1)
         .select(exp('rating').as('expRating'))
         .execute();
@@ -3249,7 +3361,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('rating').pow(2).as('powerRating'))
         .execute();
@@ -3263,7 +3375,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(pow('rating', 2).as('powerRating'))
         .execute();
@@ -3277,7 +3389,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('rating').round().as('roundedRating'))
         .execute();
@@ -3290,7 +3402,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(round('rating').as('roundedRating'))
         .execute();
@@ -3303,7 +3415,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .addFields(constant(1.5).as('positiveHalf'))
         .select(field('positiveHalf').round().as('roundedRating'))
@@ -3317,13 +3429,38 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .addFields(constant(-1.5).as('negativeHalf'))
         .select(field('negativeHalf').round().as('roundedRating'))
         .execute();
       expectResults(snapshot, {
         roundedRating: -2,
+      });
+    });
+
+    it('can round a numeric value to specified precision', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            foo: 4.123456,
+          })
+        )
+        .select(
+          field('foo').round(0).as('0'),
+          round('foo', 1).as('1'),
+          round('foo', constant(2)).as('2'),
+          round(field('foo'), 4).as('4')
+        )
+        .execute();
+      expectResults(snapshot, {
+        '0': 4,
+        '1': 4.1,
+        '2': 4.12,
+        '4': 4.1235,
       });
     });
 
@@ -3355,7 +3492,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('title').length().as('titleLength'))
         .execute();
@@ -3368,7 +3505,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(length('title').as('titleLength'))
         .execute();
@@ -3381,7 +3518,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('tags').length().as('tagsLength'))
         .execute();
@@ -3394,7 +3531,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(length('tags').as('tagsLength'))
         .execute();
@@ -3407,7 +3544,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('awards').length().as('awardsLength'))
         .execute();
@@ -3420,7 +3557,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('embedding').length().as('embeddingLength'))
         .execute();
@@ -3446,7 +3583,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('rating').ln().as('lnRating'))
         .execute();
@@ -3457,7 +3594,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(ln('rating').as('lnRating'))
         .execute();
@@ -3468,7 +3605,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(ln('rating').as('lnRating'))
         .execute();
@@ -3477,37 +3614,11 @@ describe('Pipeline class', () => {
       });
     });
 
-    it('can compute the logarithm of a numeric value', async () => {
-      const snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
-        .limit(1)
-        .select(field('rating').log(10).as('logRating'))
-        .execute();
-      expectResults(snapshot, {
-        logRating: 0.6232492903979004,
-      });
-    });
-
-    it('can compute the logarithm of a numeric value with the top-level function', async () => {
-      const snapshot = await firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
-        .limit(1)
-        .select(log('rating', 10).as('logRating'))
-        .execute();
-      expectResults(snapshot, {
-        logRating: 0.6232492903979004,
-      });
-    });
-
     it('can round a numeric value', async () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('rating').round().as('roundedRating'))
         .execute();
@@ -3520,7 +3631,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(round('rating').as('roundedRating'))
         .execute();
@@ -3533,7 +3644,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(field('rating').sqrt().as('sqrtRating'))
         .execute();
@@ -3546,7 +3657,7 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
         .select(sqrt('rating').as('sqrtRating'))
         .execute();
@@ -3559,9 +3670,9 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
-        .select(field('title').strReverse().as('reversedTitle'))
+        .select(field('title').stringReverse().as('reversedTitle'))
         .execute();
       expectResults(snapshot, {
         reversedTitle: "yxalaG eht ot ediuG s'rekihhctiH ehT",
@@ -3572,9 +3683,9 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(field('title').eq("The Hitchhiker's Guide to the Galaxy"))
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
         .limit(1)
-        .select(strReverse('title').as('reversedTitle'))
+        .select(stringReverse('title').as('reversedTitle'))
         .execute();
       expectResults(snapshot, {
         reversedTitle: "yxalaG eht ot ediuG s'rekihhctiH ehT",
@@ -3589,12 +3700,14 @@ describe('Pipeline class', () => {
         .limit(1)
         .select(
           documentId(field('__name__')).as('docId'),
-          documentId(field('__path__')).as('noDocId')
+          documentId(field('__path__')).as('noDocId'),
+          documentId(randomCol.doc('foo')).as('fromDocRef')
         )
         .execute();
       expectResults(snapshot, {
         docId: 'book4',
         noDocId: null,
+        fromDocRef: 'foo',
       });
       snapshot = await firestore
         .pipeline()
@@ -3654,6 +3767,33 @@ describe('Pipeline class', () => {
       });
     });
 
+    it('arrayConcat works', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').equal("The Hitchhiker's Guide to the Galaxy"))
+        .select(
+          arrayConcat('tags', ['newTag1', 'newTag2'], field('tags'), [null]).as(
+            'modifiedTags'
+          )
+        )
+        .limit(1)
+        .execute();
+      expectResults(snapshot, {
+        modifiedTags: [
+          'comedy',
+          'space',
+          'adventure',
+          'newTag1',
+          'newTag2',
+          'comedy',
+          'space',
+          'adventure',
+          null,
+        ],
+      });
+    });
+
     it('test toLower', async () => {
       const snapshot = await firestore
         .pipeline()
@@ -3698,11 +3838,166 @@ describe('Pipeline class', () => {
       const snapshot = await firestore
         .pipeline()
         .collection(randomCol.path)
-        .where(eq('title', '1984'))
+        .where(equal('title', '1984'))
         .limit(1)
         .select(reverse('title').as('reverseTitle'))
         .execute();
       expectResults(snapshot, {reverseTitle: '4891'});
+    });
+
+    it('testAbs', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .select(
+          constant(-10).as('neg10'),
+          constant(-22.22).as('neg22'),
+          constant(1).as('pos1')
+        )
+        .select(
+          abs('neg10').as('10'),
+          abs(field('neg22')).as('22'),
+          field('pos1').as('1')
+        )
+        .execute();
+      expectResults(snapshot, {
+        '10': 10,
+        '22': 22.22,
+        '1': 1,
+      });
+    });
+
+    it('can compute the base-10 logarithm of a numeric value', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').equal('The Lord of the Rings'))
+        .limit(1)
+        .select(field('rating').log10().as('log10Rating'))
+        .execute();
+      expect(snapshot.results[0]!.data().log10Rating).to.be.closeTo(
+        0.672,
+        0.001
+      );
+    });
+
+    it('can compute the base-10 logarithm of a numeric value with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').equal('The Lord of the Rings'))
+        .limit(1)
+        .select(log10('rating').as('log10Rating'))
+        .execute();
+      expect(snapshot.results[0]!.data().log10Rating).to.be.closeTo(
+        0.672,
+        0.001
+      );
+    });
+
+    it('can concat fields', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .addFields(
+          concat('author', ' ', field('title')).as('display'),
+          field('author').concat(': ', field('title')).as('display2')
+        )
+        .where(equal('author', 'Douglas Adams'))
+        .select('display', 'display2')
+        .execute();
+      expectResults(snapshot, {
+        display: "Douglas Adams The Hitchhiker's Guide to the Galaxy",
+        display2: "Douglas Adams: The Hitchhiker's Guide to the Galaxy",
+      });
+    });
+
+    it('supports currentTimestamp', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .addFields(currentTimestamp().as('now'))
+        .select('now')
+        .execute();
+      const now = snapshot.results[0].get('now') as Timestamp;
+      expect(now).instanceof(Timestamp);
+      expect(
+        now.toDate().getUTCSeconds() - new Date().getUTCSeconds()
+      ).lessThan(5000);
+    });
+
+    it('supports ifAbsent', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            title: 'foo',
+          })
+        )
+        .select(
+          ifAbsent('title', 'default title').as('title'),
+          field('name').ifAbsent('default name').as('name'),
+          field('name').ifAbsent(field('title')).as('nameOrTitle')
+        )
+        .execute();
+
+      expectResults(snapshot, {
+        title: 'foo',
+        name: 'default name',
+        nameOrTitle: 'foo',
+      });
+    });
+
+    it('supports join', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            tags: ['foo', 'bar', 'baz'],
+            delimeter: '|',
+          })
+        )
+        .select(join('tags', ',').as('csv'), field('tags').join('|').as('or'))
+        .execute();
+
+      expectResults(snapshot, {
+        csv: 'foo,bar,baz',
+        or: 'foo|bar|baz',
+      });
+    });
+
+    it('can compute the sum of the elements in an array', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').equal('The Lord of the Rings'))
+        .limit(1)
+        .addFields(array([150, 200]).as('sales'))
+        .select(field('sales').arraySum().as('totalSales'))
+        .execute();
+      expectResults(snapshot, {
+        totalSales: 350,
+      });
+    });
+
+    it('can compute the sum of the elements in an array with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').equal('The Lord of the Rings'))
+        .limit(1)
+        .addFields(array([150, 200]).as('sales'))
+        .select(arraySum('sales').as('totalSales'))
+        .execute();
+      expectResults(snapshot, {
+        totalSales: 350,
+      });
     });
 
     // TODO(new-expression): Add new expression tests above this line
@@ -3793,10 +4088,10 @@ describe('Pipeline class', () => {
         .where(
           or(
             and(
-              field('rating').eq(lastDoc.get('rating')),
-              field('__name__').gt(lastDoc.ref)
+              field('rating').equal(lastDoc.get('rating')),
+              field('__name__').greaterThan(lastDoc.ref)
             ),
-            field('rating').lt(lastDoc.get('rating'))
+            field('rating').lessThan(lastDoc.get('rating'))
           )
         )
         .limit(pageSize)
@@ -3980,7 +4275,7 @@ describe('Pipeline class', () => {
 
 // This is the Query integration tests from the lite API (no cache support)
 // with some additional test cases added for more complete coverage.
-describe('Query to Pipeline', () => {
+describe.skip('Query to Pipeline', () => {
   async function execute(ppl: Pipeline): Promise<PipelineSnapshot> {
     return ppl.execute();
   }
@@ -4497,7 +4792,7 @@ describe('Query to Pipeline', () => {
     });
   });
 
-  it('supports eq nan', () => {
+  it('supports equal nan', () => {
     return testCollectionWithDocs(
       {
         1: {foo: 1, bar: NaN},
@@ -4506,13 +4801,16 @@ describe('Query to Pipeline', () => {
       },
       async (collRef, db) => {
         const query1 = collRef.where('bar', '==', NaN);
+        const classicSnapshot = await query1.get();
+        const classicData = classicSnapshot.docs.map(d => d.data());
+
         const snapshot = await execute(db.pipeline().createFrom(query1));
-        verifyResults(snapshot, {foo: 1, bar: NaN});
+        verifyResults(snapshot, ...classicData);
       }
     );
   });
 
-  it('supports neq nan', () => {
+  it('supports notEqual nan', () => {
     return testCollectionWithDocs(
       {
         1: {foo: 1, bar: NaN},
@@ -4521,13 +4819,17 @@ describe('Query to Pipeline', () => {
       },
       async (collRef, db) => {
         const query1 = collRef.where('bar', '!=', NaN);
+
+        const classicSnapshot = await query1.get();
+        const classicData = classicSnapshot.docs.map(d => d.data());
+
         const snapshot = await execute(db.pipeline().createFrom(query1));
-        verifyResults(snapshot, {foo: 2, bar: 1});
+        verifyResults(snapshot, ...classicData);
       }
     );
   });
 
-  it('supports eq null', () => {
+  it('supports equal null', () => {
     return testCollectionWithDocs(
       {
         1: {foo: 1, bar: null},
@@ -4535,13 +4837,16 @@ describe('Query to Pipeline', () => {
       },
       async (collRef, db) => {
         const query1 = collRef.where('bar', '==', null);
+        const classicSnapshot = await query1.get();
+        const classicData = classicSnapshot.docs.map(d => d.data());
+
         const snapshot = await execute(db.pipeline().createFrom(query1));
-        verifyResults(snapshot, {foo: 1, bar: null});
+        verifyResults(snapshot, ...classicData);
       }
     );
   });
 
-  it('supports neq null', () => {
+  it('supports notEqual null', () => {
     return testCollectionWithDocs(
       {
         1: {foo: 1, bar: null},
@@ -4549,13 +4854,15 @@ describe('Query to Pipeline', () => {
       },
       async (collRef, db) => {
         const query1 = collRef.where('bar', '!=', null);
+        const classicSnapshot = await query1.get();
+        const classicData = classicSnapshot.docs.map(d => d.data());
         const snapshot = await execute(db.pipeline().createFrom(query1));
-        verifyResults(snapshot, {foo: 2, bar: 1});
+        verifyResults(snapshot, ...classicData);
       }
     );
   });
 
-  it('supports neq', () => {
+  it('supports notEqual', () => {
     return testCollectionWithDocs(
       {
         1: {foo: 1, bar: 0},

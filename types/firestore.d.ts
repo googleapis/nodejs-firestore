@@ -925,7 +925,7 @@ declare namespace FirebaseFirestore {
      * const futureResults = await transaction
      *   .execute(
      *     firestore.pipeline().collection("books")
-     *       .where(gt(Field.of("rating"), 4.5))
+     *       .where(greaterThan(Field.of("rating"), 4.5))
      *       .select("title", "author", "rating"));
      * ```
      *
@@ -3122,28 +3122,24 @@ declare namespace FirebaseFirestore {
      */
     distanceThreshold?: number;
   }
-
-  /**
-   * @beta
-   */
   export namespace Pipelines {
     /**
      * @beta
      * Represents an expression that has been assigned an alias using the `.as()` method.
      *
-     * This class wraps an existing {@link Expr} and associates it with a user-defined alias,
+     * This class wraps an existing {@link Expression} and associates it with a user-defined alias,
      * allowing the expression's result to be referred to by a different name in the output
      * of a Firestore pipeline query, particularly within `select()` operations.
      *
      * @internal
      */
-    export type ExprType =
+    export type ExpressionType =
       | 'Field'
       | 'Constant'
       | 'Function'
       | 'AggregateFunction'
       | 'ListOfExprs'
-      | 'AliasedExpr';
+      | 'AliasedExpression';
     /**
      * @beta
      * Represents an expression that can be evaluated to a value within the execution of a {@link
@@ -3156,11 +3152,11 @@ declare namespace FirebaseFirestore {
      * - **Literals:** Represent constant values (strings, numbers, booleans).
      * - **Function calls:** Apply functions to one or more expressions.
      *
-     * The `Expr` class provides a fluent API for building expressions. You can chain together
+     * The `Expression` class provides a fluent API for building expressions. You can chain together
      * method calls to create complex expressions.
      */
-    export abstract class Expr {
-      abstract readonly exprType: ExprType;
+    export abstract class Expression {
+      abstract readonly expressionType: ExpressionType;
       /**
        * @beta
        * Creates an expression that adds this expression to another expression.
@@ -3172,12 +3168,12 @@ declare namespace FirebaseFirestore {
        *
        * @param second The expression or literal to add to this expression.
        * @param others Optional additional expressions or literals to add to this expression.
-       * @return A new `Expr` representing the addition operation.
+       * @return A new `Expression` representing the addition operation.
        */
       add(
-        second: Expr | unknown,
-        ...others: Array<Expr | unknown>
-      ): FunctionExpr;
+        second: Expression | unknown,
+        ...others: Array<Expression | unknown>
+      ): FunctionExpression;
       /**
        * @beta
        * Creates an expression that subtracts another expression from this expression.
@@ -3188,9 +3184,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param subtrahend The expression to subtract from this expression.
-       * @return A new `Expr` representing the subtraction operation.
+       * @return A new `Expression` representing the subtraction operation.
        */
-      subtract(subtrahend: Expr): FunctionExpr;
+      subtract(subtrahend: Expression): FunctionExpression;
       /**
        * @beta
        * Creates an expression that subtracts a constant value from this expression.
@@ -3201,9 +3197,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param subtrahend The constant value to subtract.
-       * @return A new `Expr` representing the subtraction operation.
+       * @return A new `Expression` representing the subtraction operation.
        */
-      subtract(subtrahend: number): FunctionExpr;
+      subtract(subtrahend: number): FunctionExpression;
       /**
        * @beta
        * Creates an expression that multiplies this expression by another expression.
@@ -3215,12 +3211,12 @@ declare namespace FirebaseFirestore {
        *
        * @param second The second expression or literal to multiply by.
        * @param others Optional additional expressions or literals to multiply by.
-       * @return A new `Expr` representing the multiplication operation.
+       * @return A new `Expression` representing the multiplication operation.
        */
       multiply(
-        second: Expr | number,
-        ...others: Array<Expr | number>
-      ): FunctionExpr;
+        second: Expression | number,
+        ...others: Array<Expression | number>
+      ): FunctionExpression;
       /**
        * @beta
        * Creates an expression that divides this expression by another expression.
@@ -3231,9 +3227,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param divisor The expression to divide by.
-       * @return A new `Expr` representing the division operation.
+       * @return A new `Expression` representing the division operation.
        */
-      divide(divisor: Expr): FunctionExpr;
+      divide(divisor: Expression): FunctionExpression;
       /**
        * @beta
        * Creates an expression that divides this expression by a constant value.
@@ -3244,9 +3240,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param divisor The constant value to divide by.
-       * @return A new `Expr` representing the division operation.
+       * @return A new `Expression` representing the division operation.
        */
-      divide(divisor: number): FunctionExpr;
+      divide(divisor: number): FunctionExpression;
       /**
        * @beta
        * Creates an expression that calculates the modulo (remainder) of dividing this expression by another expression.
@@ -3257,9 +3253,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param expression The expression to divide by.
-       * @return A new `Expr` representing the modulo operation.
+       * @return A new `Expression` representing the modulo operation.
        */
-      mod(expression: Expr): FunctionExpr;
+      mod(expression: Expression): FunctionExpression;
       /**
        * @beta
        * Creates an expression that calculates the modulo (remainder) of dividing this expression by a constant value.
@@ -3270,9 +3266,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param value The constant value to divide by.
-       * @return A new `Expr` representing the modulo operation.
+       * @return A new `Expression` representing the modulo operation.
        */
-      mod(value: number): FunctionExpr;
+      mod(value: number): FunctionExpression;
 
       /**
        * @beta
@@ -3280,29 +3276,29 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'age' field is equal to the value of another field named 'otherAge'.
-       * field("age").eq(field("otherAge"));
+       * field("age").equal(field("otherAge"));
        *
        * // Check if the 'status' field is equal to a string literal.
-       * field("status").eq("active");
+       * field("status").equal("active");
        * ```
        *
        * @param expression The expression to compare for equality.
-       * @return A new `BooleanExpr` representing the equality comparison.
+       * @return A new `BooleanExpression` representing the equality comparison.
        */
-      eq(expression: Expr): BooleanExpr;
+      equal(expression: Expression): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if this expression is equal to a constant value.
        *
        * ```typescript
        * // Check if the 'city' field is equal to "London"
-       * field("city").eq("London");
+       * field("city").equal("London");
        * ```
        *
        * @param value The constant value to compare for equality.
-       * @return A new `Expr` representing the equality comparison.
+       * @return A new `Expression` representing the equality comparison.
        */
-      eq(value: unknown): BooleanExpr;
+      equal(value: unknown): BooleanExpression;
 
       /**
        * @beta
@@ -3310,26 +3306,26 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'status' field is not equal to "completed"
-       * field("status").neq("completed");
+       * field("status").notEqual("completed");
        * ```
        *
        * @param expression The expression to compare for inequality.
-       * @return A new {@link BooleanExpr} representing the inequality comparison.
+       * @return A new {@link BooleanExpression} representing the inequality comparison.
        */
-      neq(expression: Expr): BooleanExpr;
+      notEqual(expression: Expression): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if this expression is not equal to a constant value.
        *
        * ```typescript
        * // Check if the 'country' field is not equal to "USA"
-       * field("country").neq("USA");
+       * field("country").notEqual("USA");
        * ```
        *
        * @param value The constant value to compare for inequality.
-       * @return A new `Expr` representing the inequality comparison.
+       * @return A new `Expression` representing the inequality comparison.
        */
-      neq(value: unknown): BooleanExpr;
+      notEqual(value: unknown): BooleanExpression;
 
       /**
        * @beta
@@ -3337,26 +3333,26 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'age' field is less than 'limit'
-       * field("age").lt(field('limit'));
+       * field("age").lessThan(field('limit'));
        * ```
        *
        * @param expression The expression to compare against.
-       * @return A new `BooleanExpr` representing the less than comparison.
+       * @return A new `BooleanExpression` representing the less than comparison.
        */
-      lt(expression: Expr): BooleanExpr;
+      lessThan(expression: Expression): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if this expression is less than a constant value.
        *
        * ```typescript
        * // Check if the 'price' field is less than 50
-       * field("price").lt(50);
+       * field("price").lessThan(50);
        * ```
        *
        * @param value The constant value to compare for less than.
-       * @return A new `Expr` representing the less than comparison.
+       * @return A new `Expression` representing the less than comparison.
        */
-      lt(value: unknown): BooleanExpr;
+      lessThan(value: unknown): BooleanExpression;
 
       /**
        * @beta
@@ -3364,26 +3360,26 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'quantity' field is less than or equal to 20
-       * field("quantity").lte(constant(20));
+       * field("quantity").lessThanOrEqual(constant(20));
        * ```
        *
        * @param expression The expression to compare against.
-       * @return A new `BooleanExpr` representing the less than or equal to comparison.
+       * @return A new `BooleanExpression` representing the less than or equal to comparison.
        */
-      lte(expression: Expr): BooleanExpr;
+      lessThanOrEqual(expression: Expression): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if this expression is less than or equal to a constant value.
        *
        * ```typescript
        * // Check if the 'score' field is less than or equal to 70
-       * field("score").lte(70);
+       * field("score").lessThanOrEqual(70);
        * ```
        *
        * @param value The constant value to compare for less than or equal to.
-       * @return A new `Expr` representing the less than or equal to comparison.
+       * @return A new `Expression` representing the less than or equal to comparison.
        */
-      lte(value: unknown): BooleanExpr;
+      lessThanOrEqual(value: unknown): BooleanExpression;
 
       /**
        * @beta
@@ -3391,26 +3387,26 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'age' field is greater than the 'limit' field
-       * field("age").gt(field("limit"));
+       * field("age").greaterThan(field("limit"));
        * ```
        *
        * @param expression The expression to compare for greater than.
-       * @return A new {@link BooleanExpr} representing the greater than comparison.
+       * @return A new {@link BooleanExpression} representing the greater than comparison.
        */
-      gt(expression: Expr): BooleanExpr;
+      greaterThan(expression: Expression): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if this expression is greater than a constant value.
        *
        * ```typescript
        * // Check if the 'price' field is greater than 100
-       * field("price").gt(100);
+       * field("price").greaterThan(100);
        * ```
        *
        * @param value The constant value to compare for greater than.
-       * @return A new `Expr` representing the greater than comparison.
+       * @return A new `Expression` representing the greater than comparison.
        */
-      gt(value: unknown): BooleanExpr;
+      greaterThan(value: unknown): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if this expression is greater than or equal to another
@@ -3418,13 +3414,13 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'quantity' field is greater than or equal to field 'requirement' plus 1
-       * field("quantity").gte(field('requirement').add(1));
+       * field("quantity").greaterThanOrEqual(field('requirement').add(1));
        * ```
        *
        * @param expression The expression to compare for greater than or equal to.
-       * @return A new `Expr` representing the greater than or equal to comparison.
+       * @return A new `Expression` representing the greater than or equal to comparison.
        */
-      gte(expression: Expr): BooleanExpr;
+      greaterThanOrEqual(expression: Expression): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if this expression is greater than or equal to a constant
@@ -3432,13 +3428,31 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'score' field is greater than or equal to 80
-       * field("score").gte(80);
+       * field("score").greaterThanOrEqual(80);
        * ```
        *
        * @param value The constant value to compare for greater than or equal to.
-       * @return A new `Expr` representing the greater than or equal to comparison.
+       * @return A new `Expression` representing the greater than or equal to comparison.
        */
-      gte(value: unknown): BooleanExpr;
+      greaterThanOrEqual(value: unknown): BooleanExpression;
+
+      /**
+       * @beta
+       * Creates an expression that concatenates an array expression with one or more other arrays.
+       *
+       * ```typescript
+       * // Combine the 'items' array with another array field.
+       * field("items").arrayConcat(field("otherItems"));
+       * ```
+       * @param secondArray Second array expression or array literal to concatenate.
+       * @param otherArrays Optional additional array expressions or array literals to concatenate.
+       * @return A new `Expr` representing the concatenated array.
+       */
+      arrayConcat(
+        secondArray: Expression | unknown[],
+        ...otherArrays: Array<Expression | unknown[]>
+      ): FunctionExpression;
+
       /**
        * @beta
        * Creates an expression that checks if an array contains a specific element.
@@ -3449,9 +3463,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param expression The element to search for in the array.
-       * @return A new `Expr` representing the 'array_contains' comparison.
+       * @return A new `Expression` representing the 'array_contains' comparison.
        */
-      arrayContains(expression: Expr): BooleanExpr;
+      arrayContains(expression: Expression): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if an array contains a specific value.
@@ -3462,9 +3476,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param value The element to search for in the array.
-       * @return A new `Expr` representing the 'array_contains' comparison.
+       * @return A new `Expression` representing the 'array_contains' comparison.
        */
-      arrayContains(value: unknown): BooleanExpr;
+      arrayContains(value: unknown): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if an array contains all the specified elements.
@@ -3475,9 +3489,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param values The elements to check for in the array.
-       * @return A new `Expr` representing the 'array_contains_all' comparison.
+       * @return A new `Expression` representing the 'array_contains_all' comparison.
        */
-      arrayContainsAll(values: Array<Expr | unknown>): BooleanExpr;
+      arrayContainsAll(values: Array<Expression | unknown>): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if an array contains all the specified elements.
@@ -3488,9 +3502,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param arrayExpression The elements to check for in the array.
-       * @return A new `Expr` representing the 'array_contains_all' comparison.
+       * @return A new `Expression` representing the 'array_contains_all' comparison.
        */
-      arrayContainsAll(arrayExpression: Expr): BooleanExpr;
+      arrayContainsAll(arrayExpression: Expression): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if an array contains any of the specified elements.
@@ -3501,9 +3515,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param values The elements to check for in the array.
-       * @return A new `Expr` representing the 'array_contains_any' comparison.
+       * @return A new `Expression` representing the 'array_contains_any' comparison.
        */
-      arrayContainsAny(values: Array<Expr | unknown>): BooleanExpr;
+      arrayContainsAny(values: Array<Expression | unknown>): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if an array contains any of the specified elements.
@@ -3515,9 +3529,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param arrayExpression The elements to check for in the array.
-       * @return A new `Expr` representing the 'array_contains_any' comparison.
+       * @return A new `Expression` representing the 'array_contains_any' comparison.
        */
-      arrayContainsAny(arrayExpression: Expr): BooleanExpr;
+      arrayContainsAny(arrayExpression: Expression): BooleanExpression;
       /**
        * @beta
        * Creates an expression that calculates the length of an array.
@@ -3527,9 +3541,9 @@ declare namespace FirebaseFirestore {
        * field("cart").arrayLength();
        * ```
        *
-       * @return A new `Expr` representing the length of the array.
+       * @return A new `Expression` representing the length of the array.
        */
-      arrayLength(): FunctionExpr;
+      arrayLength(): FunctionExpression;
 
       /**
        * @beta
@@ -3538,13 +3552,13 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'category' field is either "Electronics" or the value of field 'primaryType'
-       * field("category").eqAny(["Electronics", field("primaryType")]);
+       * field("category").equalAny(["Electronics", field("primaryType")]);
        * ```
        *
        * @param values An array of values or expressions to check against.
-       * @return A new `BooleanExpr` representing the 'IN' comparison.
+       * @return A new `BooleanExpression` representing the 'IN' comparison.
        */
-      eqAny(values: Array<Expr | unknown>): BooleanExpr;
+      equalAny(values: Array<Expression | unknown>): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if this expression is equal to any of the provided values or
@@ -3552,13 +3566,13 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'category' field is either "Electronics" or the value of field 'primaryType'
-       * field("category").eqAny(array(["Electronics", field("primaryType")]));
+       * field("category").equalAny(array(["Electronics", field("primaryType")]));
        * ```
        *
        * @param arrayExpression An expression that evaluates to an array of values to check against.
-       * @return A new `Expr` representing the 'IN' comparison.
+       * @return A new `Expression` representing the 'IN' comparison.
        */
-      eqAny(arrayExpression: Expr): BooleanExpr;
+      equalAny(arrayExpression: Expression): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if this expression is not equal to any of the provided values or
@@ -3566,13 +3580,13 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
-       * field("status").notEqAny(["pending", field("rejectedStatus")]);
+       * field("status").notEqualAny(["pending", field("rejectedStatus")]);
        * ```
        *
        * @param values The values or expressions to check against.
-       * @return A new `Expr` representing the 'NotEqAny' comparison.
+       * @return A new `Expression` representing the 'NotEqAny' comparison.
        */
-      notEqAny(values: Array<Expr | unknown>): BooleanExpr;
+      notEqualAny(values: Array<Expression | unknown>): BooleanExpression;
 
       /**
        * @beta
@@ -3580,38 +3594,13 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'status' field is not equal to any value in the array returned by the 'rejectedStatuses' field.
-       * field("status").notEqAny(field('rejectedStatuses'));
+       * field("status").notEqualAny(field('rejectedStatuses'));
        * ```
        *
-       * @param arrayExpression An `Expr` that evaluates to an array of values to compare against.
-       * @return A new `BooleanExpr` representing the result of the 'not equal to any' comparison.
+       * @param arrayExpression An `Expression` that evaluates to an array of values to compare against.
+       * @return A new `BooleanExpression` representing the result of the 'not equal to any' comparison.
        */
-      notEqAny(arrayExpression: Expr): BooleanExpr;
-      /**
-       * @beta
-       * Creates an expression that checks if this expression evaluates to 'NaN' (Not a Number).
-       *
-       * ```typescript
-       * // Check if the result of a calculation is NaN
-       * field("value").divide(0).isNaN();
-       * ```
-       *
-       * @return A new `Expr` representing the 'isNaN' check.
-       */
-      isNan(): BooleanExpr;
-
-      /**
-       * @beta
-       * Creates an expression that checks if this expression evaluates to `null`.
-       *
-       * ```typescript
-       * // Check if the 'status' field is null.
-       * field("status").isNull();
-       * ```
-       *
-       * @return A new `BooleanExpr` representing the `isNull` check.
-       */
-      isNull(): BooleanExpr;
+      notEqualAny(arrayExpression: Expression): BooleanExpression;
 
       /**
        * @beta
@@ -3622,9 +3611,9 @@ declare namespace FirebaseFirestore {
        * field("phoneNumber").exists();
        * ```
        *
-       * @returns A new {@link BooleanExpr} representing the 'exists' check.
+       * @returns A new {@link BooleanExpression} representing the 'exists' check.
        */
-      exists(): BooleanExpr;
+      exists(): BooleanExpression;
       /**
        * @beta
        * Creates an expression that calculates the character length of a string in UTF-8.
@@ -3634,9 +3623,9 @@ declare namespace FirebaseFirestore {
        * field("name").charLength();
        * ```
        *
-       * @return A new `Expr` representing the length of the string.
+       * @return A new `Expression` representing the length of the string.
        */
-      charLength(): FunctionExpr;
+      charLength(): FunctionExpression;
 
       /**
        * @beta
@@ -3648,9 +3637,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param pattern The string pattern to search for. You can use "%" as a wildcard character within the pattern.
-       * @return A new {@link FunctionExpr} representing the 'like' comparison.
+       * @return A new {@link FunctionExpression} representing the 'like' comparison.
        */
-      like(pattern: string): FunctionExpr;
+      like(pattern: string): FunctionExpression;
 
       /**
        * @beta
@@ -3661,10 +3650,10 @@ declare namespace FirebaseFirestore {
        * field("description").like(field("searchPattern"));
        * ```
        *
-       * @param pattern An {@link Expr} that evaluates to the string pattern to search for. You can use "%" as a wildcard character within the pattern.
-       * @return A new {@link FunctionExpr} representing the 'like' comparison.
+       * @param pattern An {@link Expression} that evaluates to the string pattern to search for. You can use "%" as a wildcard character within the pattern.
+       * @return A new {@link FunctionExpression} representing the 'like' comparison.
        */
-      like(pattern: Expr): FunctionExpr;
+      like(pattern: Expression): FunctionExpression;
       /**
        * @beta
        * Creates an expression that checks if a string contains a specified regular expression as a
@@ -3676,9 +3665,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param pattern The regular expression to use for the search.
-       * @return A new `Expr` representing the 'contains' comparison.
+       * @return A new `Expression` representing the 'contains' comparison.
        */
-      regexContains(pattern: string): BooleanExpr;
+      regexContains(pattern: string): BooleanExpression;
 
       /**
        * @beta
@@ -3691,9 +3680,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param pattern The regular expression to use for the search.
-       * @return A new {@link BooleanExpr} representing the 'contains' comparison.
+       * @return A new {@link BooleanExpression} representing the 'contains' comparison.
        */
-      regexContains(pattern: Expr): BooleanExpr;
+      regexContains(pattern: Expression): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if a string matches a specified regular expression.
@@ -3704,9 +3693,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param pattern The regular expression to use for the match.
-       * @return A new `Expr` representing the regular expression match.
+       * @return A new `Expression` representing the regular expression match.
        */
-      regexMatch(pattern: string): BooleanExpr;
+      regexMatch(pattern: string): BooleanExpression;
 
       /**
        * @beta
@@ -3718,22 +3707,22 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param pattern An expression that evaluates to the regular expression string to use for the match.
-       * @return A new `BooleanExpr` representing the result of the regular expression match.
+       * @return A new `BooleanExpression` representing the result of the regular expression match.
        */
-      regexMatch(pattern: Expr): BooleanExpr;
+      regexMatch(pattern: Expression): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if a string contains a specified substring.
        *
        * ```typescript
        * // Check if the 'description' field contains "example".
-       * field("description").strContains("example");
+       * field("description").stringContains("example");
        * ```
        *
        * @param substring The substring to search for.
-       * @return A new `Expr` representing the 'contains' comparison.
+       * @return A new `Expression` representing the 'contains' comparison.
        */
-      strContains(substring: string): BooleanExpr;
+      stringContains(substring: string): BooleanExpression;
 
       /**
        * @beta
@@ -3741,13 +3730,13 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Check if the 'description' field contains the value of the 'keyword' field.
-       * field("description").strContains(field("keyword"));
+       * field("description").stringContains(field("keyword"));
        * ```
        *
        * @param expr The expression representing the substring to search for.
-       * @return A new {@link BooleanExpr} representing the 'contains' comparison.
+       * @return A new {@link BooleanExpression} representing the 'contains' comparison.
        */
-      strContains(expr: Expr): BooleanExpr;
+      stringContains(expr: Expression): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if a string starts with a given prefix.
@@ -3758,9 +3747,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param prefix The prefix to check for.
-       * @return A new `Expr` representing the 'starts with' comparison.
+       * @return A new `Expression` representing the 'starts with' comparison.
        */
-      startsWith(prefix: string): BooleanExpr;
+      startsWith(prefix: string): BooleanExpression;
 
       /**
        * @beta
@@ -3772,9 +3761,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param prefix An expression whose string value will be used as the prefix to check against.
-       * @returns A new `BooleanExpr` representing the 'starts with' comparison result.
+       * @returns A new `BooleanExpression` representing the 'starts with' comparison result.
        */
-      startsWith(prefix: Expr): BooleanExpr;
+      startsWith(prefix: Expression): BooleanExpression;
 
       /**
        * @beta
@@ -3786,9 +3775,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param suffix The postfix to check for.
-       * @return A new {@link BooleanExpr} representing the 'ends with' comparison.
+       * @return A new {@link BooleanExpression} representing the 'ends with' comparison.
        */
-      endsWith(suffix: string): BooleanExpr;
+      endsWith(suffix: string): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if a string ends with a given postfix (represented as an
@@ -3800,9 +3789,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param suffix The postfix expression to check for.
-       * @return A new `Expr` representing the 'ends with' comparison.
+       * @return A new `Expression` representing the 'ends with' comparison.
        */
-      endsWith(suffix: Expr): BooleanExpr;
+      endsWith(suffix: Expression): BooleanExpression;
       /**
        * @beta
        * Creates an expression that converts a string to lowercase.
@@ -3812,9 +3801,9 @@ declare namespace FirebaseFirestore {
        * field("name").toLower();
        * ```
        *
-       * @return A new `Expr` representing the lowercase string.
+       * @return A new `Expression` representing the lowercase string.
        */
-      toLower(): FunctionExpr;
+      toLower(): FunctionExpression;
       /**
        * @beta
        * Creates an expression that converts a string to uppercase.
@@ -3824,9 +3813,9 @@ declare namespace FirebaseFirestore {
        * field("title").toUpper();
        * ```
        *
-       * @return A new `Expr` representing the uppercase string.
+       * @return A new `Expression` representing the uppercase string.
        */
-      toUpper(): FunctionExpr;
+      toUpper(): FunctionExpression;
       /**
        * @beta
        * Creates an expression that removes leading and trailing whitespace from a string.
@@ -3836,38 +3825,38 @@ declare namespace FirebaseFirestore {
        * field("userInput").trim();
        * ```
        *
-       * @return A new `Expr` representing the trimmed string.
+       * @return A new `Expression` representing the trimmed string.
        */
-      trim(): FunctionExpr;
+      trim(): FunctionExpression;
       /**
        * @beta
        * Creates an expression that concatenates string expressions together.
        *
        * ```typescript
        * // Combine the 'firstName', " ", and 'lastName' fields into a single string
-       * field("firstName").strConcat(constant(" "), field("lastName"));
+       * field("firstName").stringConcat(constant(" "), field("lastName"));
        * ```
        *
        * @param secondString The additional expression or string literal to concatenate.
        * @param otherStrings Optional additional expressions or string literals to concatenate.
-       * @return A new `Expr` representing the concatenated string.
+       * @return A new `Expression` representing the concatenated string.
        */
-      strConcat(
-        secondString: Expr | string,
-        ...otherStrings: Array<Expr | string>
-      ): FunctionExpr;
+      stringConcat(
+        secondString: Expression | string,
+        ...otherStrings: Array<Expression | string>
+      ): FunctionExpression;
       /**
        * @beta
-       * Creates an expression that reverses this string expression.
+       * Creates an expression that reverses this string or bytes expression.
        *
        * ```typescript
        * // Reverse the value of the 'myString' field.
        * field("myString").reverse();
        * ```
        *
-       * @return A new {@code Expr} representing the reversed string.
+       * @return A new {@code Expression} representing the reversed string or bytes.
        */
-      reverse(): FunctionExpr;
+      reverse(): FunctionExpression;
       /**
        * @beta
        * Creates an expression that calculates the length of this string expression in bytes.
@@ -3877,9 +3866,9 @@ declare namespace FirebaseFirestore {
        * field("myString").byteLength();
        * ```
        *
-       * @return A new {@code Expr} representing the length of the string in bytes.
+       * @return A new {@code Expression} representing the length of the string in bytes.
        */
-      byteLength(): FunctionExpr;
+      byteLength(): FunctionExpression;
       /**
        * @beta
        * Creates an expression that computes the ceiling of a numeric value.
@@ -3889,9 +3878,9 @@ declare namespace FirebaseFirestore {
        * field("price").ceil();
        * ```
        *
-       * @return A new {@code Expr} representing the ceiling of the numeric value.
+       * @return A new {@code Expression} representing the ceiling of the numeric value.
        */
-      ceil(): FunctionExpr;
+      ceil(): FunctionExpression;
       /**
        * @beta
        * Creates an expression that computes the floor of a numeric value.
@@ -3901,9 +3890,22 @@ declare namespace FirebaseFirestore {
        * field("price").floor();
        * ```
        *
-       * @return A new {@code Expr} representing the floor of the numeric value.
+       * @return A new {@code Expression} representing the floor of the numeric value.
        */
-      floor(): FunctionExpr;
+      floor(): FunctionExpression;
+
+      /**
+       * @beta
+       * Creates an expression that computes the absolute value of a numeric value.
+       *
+       * ```typescript
+       * // Compute the absolute value of the 'price' field.
+       * field("price").abs();
+       * ```
+       *
+       * @return A new {@code Expr} representing the absolute value of the numeric value.
+       */
+      abs(): FunctionExpression;
 
       /**
        * @beta
@@ -3914,9 +3916,9 @@ declare namespace FirebaseFirestore {
        * field("value").exp();
        * ```
        *
-       * @return A new {@code FunctionExpr} representing `e` raised to the power of the numeric value.
+       * @return A new {@code FunctionExpression} representing `e` raised to the power of the numeric value.
        */
-      exp(): FunctionExpr;
+      exp(): FunctionExpression;
       /**
        * @beta
        * Creates an aggregation that counts the number of distinct values of the expression or field.
@@ -3934,9 +3936,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param subfield The key to access in the map.
-       * @return A new `Expr` representing the value associated with the given key in the map.
+       * @return A new `Expression` representing the value associated with the given key in the map.
        */
-      mapGet(subfield: string): FunctionExpr;
+      mapGet(subfield: string): FunctionExpression;
       /**
        * @beta
        * Creates an aggregation that counts the number of stage inputs with valid evaluations of the
@@ -3969,12 +3971,12 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Calculate the average age of users
-       * field("age").avg().as("averageAge");
+       * field("age").average().as("averageAge");
        * ```
        *
-       * @return A new `AggregateFunction` representing the 'avg' aggregation.
+       * @return A new `AggregateFunction` representing the 'average' aggregation.
        */
-      avg(): AggregateFunction;
+      average(): AggregateFunction;
       /**
        * @beta
        * Creates an aggregation that finds the minimum value of a field across multiple stage inputs.
@@ -4010,12 +4012,12 @@ declare namespace FirebaseFirestore {
        *
        * @param second The second expression or literal to compare with.
        * @param others Optional additional expressions or literals to compare with.
-       * @return A new {@code Expr} representing the logical max operation.
+       * @return A new {@code Expression} representing the logical max operation.
        */
       logicalMaximum(
-        second: Expr | unknown,
-        ...others: Array<Expr | unknown>
-      ): FunctionExpr;
+        second: Expression | unknown,
+        ...others: Array<Expression | unknown>
+      ): FunctionExpression;
       /**
        * @beta
        * Creates an expression that returns the smaller value between this expression and another expression, based on Firestore's value type ordering.
@@ -4027,12 +4029,12 @@ declare namespace FirebaseFirestore {
        *
        * @param second The second expression or literal to compare with.
        * @param others Optional additional expressions or literals to compare with.
-       * @return A new {@code Expr} representing the logical min operation.
+       * @return A new {@code Expression} representing the logical min operation.
        */
       logicalMinimum(
-        second: Expr | unknown,
-        ...others: Array<Expr | unknown>
-      ): FunctionExpr;
+        second: Expression | unknown,
+        ...others: Array<Expression | unknown>
+      ): FunctionExpression;
       /**
        * @beta
        * Creates an expression that calculates the length (number of dimensions) of this Firestore Vector expression.
@@ -4042,9 +4044,9 @@ declare namespace FirebaseFirestore {
        * field("embedding").vectorLength();
        * ```
        *
-       * @return A new {@code Expr} representing the length of the vector.
+       * @return A new {@code Expression} representing the length of the vector.
        */
-      vectorLength(): FunctionExpr;
+      vectorLength(): FunctionExpression;
       /**
        * @beta
        * Calculates the cosine distance between two vectors.
@@ -4054,10 +4056,10 @@ declare namespace FirebaseFirestore {
        * field("userVector").cosineDistance(field("itemVector"));
        * ```
        *
-       * @param vectorExpression The other vector (represented as an Expr) to compare against.
-       * @return A new `Expr` representing the cosine distance between the two vectors.
+       * @param vectorExpression The other vector (represented as an Expression) to compare against.
+       * @return A new `Expression` representing the cosine distance between the two vectors.
        */
-      cosineDistance(vectorExpression: Expr): FunctionExpr;
+      cosineDistance(vectorExpression: Expression): FunctionExpression;
 
       /**
        * @beta
@@ -4072,9 +4074,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param vector The other vector to compare against, provided as either a `VectorValue` object or a plain `number[]` array.
-       * @return A new `FunctionExpr` representing the Cosine distance between the two vectors.
+       * @return A new `FunctionExpression` representing the Cosine distance between the two vectors.
        */
-      cosineDistance(vector: VectorValue | number[]): FunctionExpr;
+      cosineDistance(vector: VectorValue | number[]): FunctionExpression;
       /**
        * @beta
        * Calculates the dot product between the current expression (representing a vector)
@@ -4087,10 +4089,10 @@ declare namespace FirebaseFirestore {
        * field("features").dotProduct(field("targetVector"));
        * ```
        *
-       * @param vectorExpression An {@link Expr} representing the second vector.
-       * @returns A new {@link FunctionExpr} representing the dot product of the two vectors.
+       * @param vectorExpression An {@link Expression} representing the second vector.
+       * @returns A new {@link FunctionExpression} representing the dot product of the two vectors.
        */
-      dotProduct(vectorExpression: Expr): FunctionExpr;
+      dotProduct(vectorExpression: Expression): FunctionExpression;
 
       /**
        * @beta
@@ -4102,9 +4104,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param vector The other vector to calculate the dot product with. This can be a `VectorValue` object or a plain array of numbers.
-       * @return A new `Expr` representing the dot product between the two vectors.
+       * @return A new `Expression` representing the dot product between the two vectors.
        */
-      dotProduct(vector: VectorValue | number[]): FunctionExpr;
+      dotProduct(vector: VectorValue | number[]): FunctionExpression;
 
       /**
        * @beta
@@ -4115,10 +4117,10 @@ declare namespace FirebaseFirestore {
        * field("vectorA").euclideanDistance(field("vectorB"));
        * ```
        *
-       * @param vectorExpression An {@link Expr} that evaluates to the second vector (an array of numbers) for the distance calculation.
-       * @return A new {@link FunctionExpr} representing the Euclidean distance between the two vectors.
+       * @param vectorExpression An {@link Expression} that evaluates to the second vector (an array of numbers) for the distance calculation.
+       * @return A new {@link FunctionExpression} representing the Euclidean distance between the two vectors.
        */
-      euclideanDistance(vectorExpression: Expr): FunctionExpr;
+      euclideanDistance(vectorExpression: Expression): FunctionExpression;
       /**
        * @beta
        * Calculates the Euclidean distance between two vectors.
@@ -4134,9 +4136,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param vector The other vector (as a `VectorValue` or `number[]`) to compare against.
-       * @return A new `Expr` representing the Euclidean distance between the two vectors.
+       * @return A new `Expression` representing the Euclidean distance between the two vectors.
        */
-      euclideanDistance(vector: VectorValue | number[]): FunctionExpr;
+      euclideanDistance(vector: VectorValue | number[]): FunctionExpression;
       /**
        * @beta
        * Creates an expression that interprets this expression as the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
@@ -4147,9 +4149,9 @@ declare namespace FirebaseFirestore {
        * field("microseconds").unixMicrosToTimestamp();
        * ```
        *
-       * @return A new {@code Expr} representing the timestamp.
+       * @return A new {@code Expression} representing the timestamp.
        */
-      unixMicrosToTimestamp(): FunctionExpr;
+      unixMicrosToTimestamp(): FunctionExpression;
       /**
        * @beta
        * Creates an expression that converts this timestamp expression to the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
@@ -4159,9 +4161,9 @@ declare namespace FirebaseFirestore {
        * field("timestamp").timestampToUnixMicros();
        * ```
        *
-       * @return A new {@code Expr} representing the number of microseconds since epoch.
+       * @return A new {@code Expression} representing the number of microseconds since epoch.
        */
-      timestampToUnixMicros(): FunctionExpr;
+      timestampToUnixMicros(): FunctionExpression;
       /**
        * @beta
        * Creates an expression that interprets this expression as the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
@@ -4172,9 +4174,9 @@ declare namespace FirebaseFirestore {
        * field("milliseconds").unixMillisToTimestamp();
        * ```
        *
-       * @return A new {@code Expr} representing the timestamp.
+       * @return A new {@code Expression} representing the timestamp.
        */
-      unixMillisToTimestamp(): FunctionExpr;
+      unixMillisToTimestamp(): FunctionExpression;
       /**
        * @beta
        * Creates an expression that converts this timestamp expression to the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
@@ -4184,9 +4186,9 @@ declare namespace FirebaseFirestore {
        * field("timestamp").timestampToUnixMillis();
        * ```
        *
-       * @return A new {@code Expr} representing the number of milliseconds since epoch.
+       * @return A new {@code Expression} representing the number of milliseconds since epoch.
        */
-      timestampToUnixMillis(): FunctionExpr;
+      timestampToUnixMillis(): FunctionExpression;
       /**
        * @beta
        * Creates an expression that interprets this expression as the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC)
@@ -4197,9 +4199,9 @@ declare namespace FirebaseFirestore {
        * field("seconds").unixSecondsToTimestamp();
        * ```
        *
-       * @return A new {@code Expr} representing the timestamp.
+       * @return A new {@code Expression} representing the timestamp.
        */
-      unixSecondsToTimestamp(): FunctionExpr;
+      unixSecondsToTimestamp(): FunctionExpression;
       /**
        * @beta
        * Creates an expression that converts this timestamp expression to the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC).
@@ -4209,9 +4211,9 @@ declare namespace FirebaseFirestore {
        * field("timestamp").timestampToUnixSeconds();
        * ```
        *
-       * @return A new {@code Expr} representing the number of seconds since epoch.
+       * @return A new {@code Expression} representing the number of seconds since epoch.
        */
-      timestampToUnixSeconds(): FunctionExpr;
+      timestampToUnixSeconds(): FunctionExpression;
       /**
        * @beta
        * Creates an expression that adds a specified amount of time to this timestamp expression.
@@ -4223,9 +4225,9 @@ declare namespace FirebaseFirestore {
        *
        * @param unit The expression evaluates to unit of time, must be one of 'microsecond', 'millisecond', 'second', 'minute', 'hour', 'day'.
        * @param amount The expression evaluates to amount of the unit.
-       * @return A new {@code Expr} representing the resulting timestamp.
+       * @return A new {@code Expression} representing the resulting timestamp.
        */
-      timestampAdd(unit: Expr, amount: Expr): FunctionExpr;
+      timestampAdd(unit: Expression, amount: Expression): FunctionExpression;
       /**
        * @beta
        * Creates an expression that adds a specified amount of time to this timestamp expression.
@@ -4237,7 +4239,7 @@ declare namespace FirebaseFirestore {
        *
        * @param unit The unit of time to add (e.g., "day", "hour").
        * @param amount The amount of time to add.
-       * @return A new {@code Expr} representing the resulting timestamp.
+       * @return A new {@code Expression} representing the resulting timestamp.
        */
       timestampAdd(
         unit:
@@ -4248,21 +4250,24 @@ declare namespace FirebaseFirestore {
           | 'hour'
           | 'day',
         amount: number
-      ): FunctionExpr;
+      ): FunctionExpression;
       /**
        * @beta
        * Creates an expression that subtracts a specified amount of time from this timestamp expression.
        *
        * ```typescript
        * // Subtract some duration determined by field 'unit' and 'amount' from the 'timestamp' field.
-       * field("timestamp").timestampSub(field("unit"), field("amount"));
+       * field("timestamp").timestampSubtract(field("unit"), field("amount"));
        * ```
        *
        * @param unit The expression evaluates to unit of time, must be one of 'microsecond', 'millisecond', 'second', 'minute', 'hour', 'day'.
        * @param amount The expression evaluates to amount of the unit.
-       * @return A new {@code Expr} representing the resulting timestamp.
+       * @return A new {@code Expression} representing the resulting timestamp.
        */
-      timestampSub(unit: Expr, amount: Expr): FunctionExpr;
+      timestampSubtract(
+        unit: Expression,
+        amount: Expression
+      ): FunctionExpression;
 
       /**
        * @beta
@@ -4270,14 +4275,14 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Subtract 1 day from the 'timestamp' field.
-       * field("timestamp").timestampSub("day", 1);
+       * field("timestamp").timestampSubtract("day", 1);
        * ```
        *
        * @param unit The unit of time to subtract. Supported units are 'microsecond', 'millisecond', 'second', 'minute', 'hour', and 'day'.
        * @param amount The amount of time to subtract.
-       * @return A new {@code FunctionExpr} representing the resulting timestamp after subtraction.
+       * @return A new {@code FunctionExpression} representing the resulting timestamp after subtraction.
        */
-      timestampSub(
+      timestampSubtract(
         unit:
           | 'microsecond'
           | 'millisecond'
@@ -4286,7 +4291,7 @@ declare namespace FirebaseFirestore {
           | 'hour'
           | 'day',
         amount: number
-      ): FunctionExpr;
+      ): FunctionExpression;
       /**
        * @beta
        * Creates an expression that returns the document ID from a DocumentReference.
@@ -4296,9 +4301,9 @@ declare namespace FirebaseFirestore {
        * field("__name__").documentId();
        * ```
        *
-       * @return A new {@code Expr} representing the documentId operation.
+       * @return A new {@code Expression} representing the documentId operation.
        */
-      documentId(): FunctionExpr;
+      documentId(): FunctionExpression;
       /**
        * @beta
        * Creates an expression that returns a substring of the results of this expression.
@@ -4307,7 +4312,7 @@ declare namespace FirebaseFirestore {
        * @param length Length of the substring. If not provided, the substring will
        * end at the end of the input.
        */
-      substring(position: number, length?: number): FunctionExpr;
+      substring(position: number, length?: number): FunctionExpression;
       /**
        * @beta
        * Creates an expression that returns a substring of the results of this expression.
@@ -4316,7 +4321,7 @@ declare namespace FirebaseFirestore {
        * @param length An expression returning the length of the substring. If not provided the
        * substring will end at the end of the input.
        */
-      substring(position: Expr, length?: Expr): FunctionExpr;
+      substring(position: Expression, length?: Expression): FunctionExpression;
       /**
        * @beta
        * Creates an expression that indexes into an array from the beginning or end
@@ -4329,9 +4334,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param index The index of the element to return.
-       * @return A new Expr representing the 'arrayGet' operation.
+       * @return A new Expression representing the 'arrayGet' operation.
        */
-      arrayGet(index: number): FunctionExpr;
+      arrayGet(index: number): FunctionExpression;
       /**
        * @beta
        * Creates an expression that indexes into an array from the beginning or end
@@ -4344,10 +4349,10 @@ declare namespace FirebaseFirestore {
        * field('tags').arrayGet(field('favoriteTag'));
        * ```
        *
-       * @param indexExpr An Expr evaluating to the index of the element to return.
-       * @return A new Expr representing the 'arrayGet' operation.
+       * @param indexExpr An Expression evaluating to the index of the element to return.
+       * @return A new Expression representing the 'arrayGet' operation.
        */
-      arrayGet(indexExpr: Expr): FunctionExpr;
+      arrayGet(indexExpr: Expression): FunctionExpression;
       /**
        * @beta
        * Creates an expression that checks if a given expression produces an error.
@@ -4357,9 +4362,9 @@ declare namespace FirebaseFirestore {
        * field("title").arrayContains(1).isError();
        * ```
        *
-       * @return A new {@code BooleanExpr} representing the 'isError' check.
+       * @return A new {@code BooleanExpression} representing the 'isError' check.
        */
-      isError(): BooleanExpr;
+      isError(): BooleanExpression;
       /**
        * @beta
        * Creates an expression that returns the result of the `catchExpr` argument
@@ -4373,9 +4378,9 @@ declare namespace FirebaseFirestore {
        *
        * @param catchExpr The catch expression that will be evaluated and
        * returned if this expression produces an error.
-       * @return A new {@code Expr} representing the 'ifError' operation.
+       * @return A new {@code Expression} representing the 'ifError' operation.
        */
-      ifError(catchExpr: Expr): FunctionExpr;
+      ifError(catchExpr: Expression): FunctionExpression;
       /**
        * @beta
        * Creates an expression that returns the `catch` argument if there is an
@@ -4389,9 +4394,9 @@ declare namespace FirebaseFirestore {
        *
        * @param catchValue The value that will be returned if this expression
        * produces an error.
-       * @return A new {@code Expr} representing the 'ifError' operation.
+       * @return A new {@code Expression} representing the 'ifError' operation.
        */
-      ifError(catchValue: unknown): FunctionExpr;
+      ifError(catchValue: unknown): FunctionExpression;
       /**
        * @beta
        * Creates an expression that returns `true` if the result of this expression
@@ -4402,34 +4407,9 @@ declare namespace FirebaseFirestore {
        * field("value").isAbsent();
        * ```
        *
-       * @return A new {@code BooleanExpr} representing the 'isAbsent' check.
+       * @return A new {@code BooleanExpression} representing the 'isAbsent' check.
        */
-      isAbsent(): BooleanExpr;
-
-      /**
-       * @beta
-       * Creates an expression that checks if the result of an expression is not null.
-       *
-       * ```typescript
-       * // Check if the value of the 'name' field is not null
-       * field("name").isNotNull();
-       * ```
-       *
-       * @return A new {@code BooleanExpr} representing the 'isNotNull' check.
-       */
-      isNotNull(): BooleanExpr;
-      /**
-       * @beta
-       * Creates an expression that checks if the results of this expression is NOT 'NaN' (Not a Number).
-       *
-       * ```typescript
-       * // Check if the result of a calculation is NOT NaN
-       * field("value").divide(0).isNotNan();
-       * ```
-       *
-       * @return A new {@code Expr} representing the 'isNaN' check.
-       */
-      isNotNan(): BooleanExpr;
+      isAbsent(): BooleanExpression;
 
       /**
        * @beta
@@ -4441,9 +4421,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param key The name of the key to remove from the input map.
-       * @returns A new {@code FunctionExpr} representing the 'mapRemove' operation.
+       * @returns A new {@code FunctionExpression} representing the 'mapRemove' operation.
        */
-      mapRemove(key: string): FunctionExpr;
+      mapRemove(key: string): FunctionExpression;
 
       /**
        * @beta
@@ -4455,9 +4435,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param keyExpr An expression that produces the name of the key to remove from the input map.
-       * @returns A new {@code FunctionExpr} representing the 'mapRemove' operation.
+       * @returns A new {@code FunctionExpression} representing the 'mapRemove' operation.
        */
-      mapRemove(keyExpr: Expr): FunctionExpr;
+      mapRemove(keyExpr: Expression): FunctionExpression;
 
       /**
        * @beta
@@ -4468,7 +4448,7 @@ declare namespace FirebaseFirestore {
        * ```typescript
        * // Merges the map in the 'settings' field with a literal map and a map
        * // conditionally returned by another expression.
-       * field('settings').mapMerge({ enabled: true }, cond(field('isAdmin'), { admin: true }, {}))
+       * field('settings').mapMerge({ enabled: true }, conditional(field('isAdmin'), { admin: true }, {}))
        * ```
        *
        * @param secondMap A required second map to merge. This can be a literal object
@@ -4476,12 +4456,12 @@ declare namespace FirebaseFirestore {
        * @param otherMaps Optional additional maps to merge. Each can be a literal
        * object or an expression that evaluates to a map.
        *
-       * @returns A new {@code FunctionExpr} representing the result of the map merge operation.
+       * @returns A new {@code FunctionExpression} representing the result of the map merge operation.
        */
       mapMerge(
-        secondMap: Record<string, unknown> | Expr,
-        ...otherMaps: Array<Record<string, unknown> | Expr>
-      ): FunctionExpr;
+        secondMap: Record<string, unknown> | Expression,
+        ...otherMaps: Array<Record<string, unknown> | Expression>
+      ): FunctionExpression;
       /**
        * @beta
        * Creates an expression that returns the value of this expression raised to the power of another expression.
@@ -4492,9 +4472,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param exponent The expression to raise this expression to the power of.
-       * @return A new `Expr` representing the power operation.
+       * @return A new `Expression` representing the power operation.
        */
-      pow(exponent: Expr): FunctionExpr;
+      pow(exponent: Expression): FunctionExpression;
       /**
        * @beta
        * Creates an expression that returns the value of this expression raised to the power of a constant value.
@@ -4505,9 +4485,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param exponent The constant value to raise this expression to the power of.
-       * @return A new `Expr` representing the power operation.
+       * @return A new `Expression` representing the power operation.
        */
-      pow(exponent: number): FunctionExpr;
+      pow(exponent: number): FunctionExpression;
       /**
        * @beta
        * Creates an expression that rounds a numeric value to the nearest whole number.
@@ -4517,9 +4497,49 @@ declare namespace FirebaseFirestore {
        * field("price").round();
        * ```
        *
+       * @return A new `Expression` representing the rounded value.
+       */
+      round(): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that rounds a numeric value to the nearest whole number.
+       *
+       * ```typescript
+       * // Round the value of the 'price' field.
+       * field("price").round();
+       * ```
+       *
+       * @return A new `Expression` representing the rounded value.
+       */
+      round(): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that rounds a numeric value to the specified number of decimal places.
+       *
+       * ```typescript
+       * // Round the value of the 'price' field to two decimal places.
+       * field("price").round(2);
+       * ```
+       *
+       * @param decimalPlaces A constant specifying the rounding precision in decimal places.
+       *
        * @return A new `Expr` representing the rounded value.
        */
-      round(): FunctionExpr;
+      round(decimalPlaces: number): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that rounds a numeric value to the specified number of decimal places.
+       *
+       * ```typescript
+       * // Round the value of the 'price' field to two decimal places.
+       * field("price").round(constant(2));
+       * ```
+       *
+       * @param decimalPlaces An expression specifying the rounding precision in decimal places.
+       *
+       * @return A new `Expr` representing the rounded value.
+       */
+      round(decimalPlaces: Expression): FunctionExpression;
       /**
        * @beta
        * Creates an expression that returns the collection ID from a path.
@@ -4529,9 +4549,9 @@ declare namespace FirebaseFirestore {
        * field("__name__").collectionId();
        * ```
        *
-       * @return A new {@code Expr} representing the collectionId operation.
+       * @return A new {@code Expression} representing the collectionId operation.
        */
-      collectionId(): FunctionExpr;
+      collectionId(): FunctionExpression;
       /**
        * @beta
        * Creates an expression that calculates the length of a string, array, map, vector, or bytes.
@@ -4544,9 +4564,9 @@ declare namespace FirebaseFirestore {
        * field("cart").length();
        * ```
        *
-       * @return A new `Expr` representing the length of the string, array, map, vector, or bytes.
+       * @return A new `Expression` representing the length of the string, array, map, vector, or bytes.
        */
-      length(): FunctionExpr;
+      length(): FunctionExpression;
       /**
        * @beta
        * Creates an expression that computes the natural logarithm of a numeric value.
@@ -4556,35 +4576,9 @@ declare namespace FirebaseFirestore {
        * field("value").ln();
        * ```
        *
-       * @return A new {@code Expr} representing the natural logarithm of the numeric value.
+       * @return A new {@code Expression} representing the natural logarithm of the numeric value.
        */
-      ln(): FunctionExpr;
-      /**
-       * @beta
-       * Creates an expression that computes the logarithm of this expression to a given base.
-       *
-       * ```typescript
-       * // Compute the logarithm of the 'value' field with base 10.
-       * field("value").log(10);
-       * ```
-       *
-       * @param base The base of the logarithm.
-       * @return A new {@code Expr} representing the logarithm of the numeric value.
-       */
-      log(base: number): FunctionExpr;
-      /**
-       * @beta
-       * Creates an expression that computes the logarithm of this expression to a given base.
-       *
-       * ```typescript
-       * // Compute the logarithm of the 'value' field with the base in the 'base' field.
-       * field("value").log(field("base"));
-       * ```
-       *
-       * @param base The base of the logarithm.
-       * @return A new {@code Expr} representing the logarithm of the numeric value.
-       */
-      log(base: Expr): FunctionExpr;
+      ln(): FunctionExpression;
       /**
        * @beta
        * Creates an expression that computes the square root of a numeric value.
@@ -4594,21 +4588,111 @@ declare namespace FirebaseFirestore {
        * field("value").sqrt();
        * ```
        *
-       * @return A new {@code Expr} representing the square root of the numeric value.
+       * @return A new {@code Expression} representing the square root of the numeric value.
        */
-      sqrt(): FunctionExpr;
+      sqrt(): FunctionExpression;
       /**
        * @beta
        * Creates an expression that reverses a string.
        *
        * ```typescript
        * // Reverse the value of the 'myString' field.
-       * field("myString").strReverse();
+       * field("myString").stringReverse();
        * ```
        *
-       * @return A new {@code Expr} representing the reversed string.
+       * @return A new {@code Expression} representing the reversed string.
        */
-      strReverse(): FunctionExpr;
+      stringReverse(): FunctionExpression;
+
+      /**
+       * @beta
+       * Creates an expression that returns the `elseValue` argument if this expression results in an absent value, else
+       * return the result of the this expression evaluation.
+       *
+       * ```typescript
+       * // Returns the value of the optional field 'optional_field', or returns 'default_value'
+       * // if the field is absent.
+       * field("optional_field").ifAbsent("default_value")
+       * ```
+       *
+       * @param elseValue The value that will be returned if this Expression evaluates to an absent value.
+       * @return A new [Expression] representing the ifAbsent operation.
+       */
+      ifAbsent(elseValue: unknown): Expression;
+
+      /**
+       * @beta
+       * Creates an expression that returns the `elseValue` argument if this expression results in an absent value, else
+       * return the result of this expression evaluation.
+       *
+       * ```typescript
+       * // Returns the value of the optional field 'optional_field', or if that is
+       * // absent, then returns the value of the field `
+       * field("optional_field").ifAbsent(field('default_field'))
+       * ```
+       *
+       * @param elseExpression The Expression that will be evaluated if this Expression evaluates to an absent value.
+       * @return A new [Expression] representing the ifAbsent operation.
+       */
+      ifAbsent(elseExpression: unknown): Expression;
+
+      ifAbsent(elseValueOrExpression: Expression | unknown): Expression;
+
+      /**
+       * @beta
+       * Creates an expression that joins the elements of an array into a string.
+       *
+       * ```typescript
+       * // Join the elements of the 'tags' field with the delimiter from the 'separator' field.
+       * field("tags").join(field("separator"))
+       * ```
+       *
+       * @param delimiterExpression The expression that evaluates to the delimiter string.
+       * @return A new Expression representing the join operation.
+       */
+      join(delimiterExpression: Expression): Expression;
+
+      /**
+       * @beta
+       * Creates an expression that joins the elements of an array field into a string.
+       *
+       * ```typescript
+       * // Join the elements of the 'tags' field with a comma and space.
+       * field("tags").join(", ")
+       * ```
+       *
+       * @param delimiter The string to use as a delimiter.
+       * @return A new Expression representing the join operation.
+       */
+      join(delimiter: string): Expression;
+
+      join(delimeterValueOrExpression: string | Expression): Expression;
+
+      /**
+       * @beta
+       * Creates an expression that computes the base-10 logarithm of a numeric value.
+       *
+       * ```typescript
+       * // Compute the base-10 logarithm of the 'value' field.
+       * field("value").log10();
+       * ```
+       *
+       * @return A new {@code Expr} representing the base-10 logarithm of the numeric value.
+       */
+      log10(): FunctionExpression;
+
+      /**
+       * @beta
+       * Creates an expression that computes the sum of the elements in an array.
+       *
+       * ```typescript
+       * // Compute the sum of the elements in the 'scores' field.
+       * field("scores").arraySum();
+       * ```
+       *
+       * @return A new {@code Expr} representing the sum of the elements in the array.
+       */
+      arraySum(): FunctionExpression;
       // TODO(new-expression): Add new expression method declarations above this line
       /**
        * @beta
@@ -4650,10 +4734,10 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param name The alias to assign to this expression.
-       * @return A new {@link AliasedExpr} that wraps this
+       * @return A new {@link AliasedExpression} that wraps this
        *     expression and associates it with the provided alias.
        */
-      as(name: string): AliasedExpr;
+      as(name: string): AliasedExpression;
     }
     /**
      * @beta
@@ -4661,8 +4745,16 @@ declare namespace FirebaseFirestore {
      */
     export interface Selectable {
       selectable: true;
-      readonly alias: string;
-      readonly expr: Expr;
+      /**
+       * @beta
+       * @internal
+       */
+      readonly _alias: string;
+      /**
+       * @beta
+       * @internal
+       */
+      readonly _expr: Expression;
     }
 
     /**
@@ -4674,9 +4766,9 @@ declare namespace FirebaseFirestore {
     export class AggregateFunction {
       /**
        * @beta
-       * @property exprType The type of the aggregate expression, indicating the specific aggregate function (e.g., COUNT, SUM, AVG).
+       * @property expressionType The type of the aggregate expression, indicating the specific aggregate function (e.g., COUNT, SUM, AVG).
        */
-      exprType: ExprType;
+      expressionType: ExpressionType;
 
       /**
        * @beta
@@ -4685,7 +4777,7 @@ declare namespace FirebaseFirestore {
        * @param name
        * @param params
        */
-      constructor(name: string, params: Expr[]);
+      constructor(name: string, params: Expression[]);
       /**
        * @beta
        * Assigns an alias to this AggregateFunction. The alias specifies the name that
@@ -4694,7 +4786,7 @@ declare namespace FirebaseFirestore {
        * ```typescript
        * // Calculate the average price of all items and assign it the alias "averagePrice".
        * pipeline().collection("items")
-       *   .aggregate(field("price").avg().as("averagePrice"));
+       *   .aggregate(field("price").average().as("averagePrice"));
        * ```
        *
        * @param name The alias to assign to this AggregateFunction.
@@ -4713,71 +4805,76 @@ declare namespace FirebaseFirestore {
       /**
        * @beta
        * The underlying {@link AggregateFunction} that this aliased aggregate wraps.
+       * @internal
        */
-      readonly aggregate: AggregateFunction;
+      readonly _aggregate: AggregateFunction;
 
       /**
        * @beta
        * Specifies the name of the property that will contain the aggregate result in the output document.
+       * @internal
        */
-      readonly alias: string;
+      readonly _alias: string;
     }
 
     /**
      * @beta
      * Represents an expression that has been assigned an alias using the `.as()` method.
      *
-     * This class wraps an existing {@link Expr} and associates it with a user-defined alias,
+     * This class wraps an existing {@link Expression} and associates it with a user-defined alias,
      * allowing the expression's result to be referred to by name in the output
      * of a Firestore pipeline query.
      */
-    export class AliasedExpr implements Selectable {
+    export class AliasedExpression implements Selectable {
       /**
        * @beta
-       * @internal Specifies that the instance is an AliasedExpr.
+       * @internal
+       * Specifies that the instance is an AliasedExpression.
        */
-      exprType: ExprType;
+      expressionType: ExpressionType;
 
       /**
        * @beta
-       * Specifies that this class is selectable, meaning it contains an {@link Expr} and an alias,
+       * Specifies that this class is selectable, meaning it contains an {@link Expression} and an alias,
        * and can be provided to the Select stage of a pipeline.
        */
       selectable: true;
 
       /**
        * @beta
+       * @internal
        * The underlying expression that is being aliased.
        */
-      readonly expr: Expr;
+      readonly _expr: Expression;
 
       /**
        * @beta
+       * @internal
        * Specifies the name of the property that will contain the aggregate result in the output document.
        */
-      readonly alias: string;
+      readonly _alias: string;
     }
 
     /**
      * @beta
      * Represents a reference to a field within a Firestore document or an output from a {@link Pipeline} stage.
      *
-     * This class extends {@link Expr}. It is a type of expression that can be evaluated
+     * This class extends {@link Expression}. It is a type of expression that can be evaluated
      * within Firestore Pipelines. It also implements {@link Selectable},
      * meaning instances of `Field` can be used to specify fields for selection in the {@link Pipeline.select} stage.
      *
      * `Field` instances are fundamental for constructing expressions that access document field values,
      * and for defining criteria for sorting, filtering, and projecting data in Firestore Pipelines.
      */
-    export class Field extends Expr implements Selectable {
+    export class Field extends Expression implements Selectable {
       /**
        * @beta
        * @internal Specifies that the instance is a Field.
        */
-      readonly exprType: ExprType;
+      readonly expressionType: ExpressionType;
       /**
        * @beta
-       * Specifies that this class is selectable, meaning it contains an {@link Expr} and an alias,
+       * Specifies that this class is selectable, meaning it contains an {@link Expression} and an alias,
        * and can be provided to the Select stage of a pipeline.
        */
       selectable: true;
@@ -4787,27 +4884,29 @@ declare namespace FirebaseFirestore {
        *
        * @example
        * ```typescript
-       * const name = field("price").fieldName();
+       * const name = field("price").fieldName;
        * console.log(name); // "price"
        * ```
        *
        * @returns The name of the field.
        */
-      fieldName(): string;
+      get fieldName(): string;
       /**
        * @beta
+       * @internal
        * Returns the alias of the field, which is the field-name itself.
        *
        * @returns The field name itself.
        */
-      get alias(): string;
+      get _alias(): string;
       /**
        * @beta
+       * @internal
        * Self-referential getter that returns this.
        *
        * @returns This {@link Field} object.
        */
-      get expr(): Expr;
+      get _expr(): Expression;
     }
     /**
      * @beta
@@ -4839,6 +4938,7 @@ declare namespace FirebaseFirestore {
 
     /**
      * @beta
+     * @internal
      * Represents a constant value that can be used as part of a Firestore pipeline expression.
      *
      * Instances of `Constant` are typically created via the top-level `constant()` function.
@@ -4851,128 +4951,128 @@ declare namespace FirebaseFirestore {
      * const hello = constant("hello");
      * ```
      */
-    export class Constant extends Expr {
-      readonly exprType: ExprType;
+    export class Constant extends Expression {
+      readonly expressionType: ExpressionType;
     }
     /**
      * @beta
-     * Creates a `Constant` instance for a number value.
+     * Creates an `Expression` instance for a number value.
      *
      * @param value The number value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: number): Constant;
+    export function constant(value: number): Expression;
     /**
      * @beta
-     * Creates a `Constant` instance for a string value.
+     * Creates an `Expression` instance for a string value.
      *
      * @param value The string value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: string): Constant;
+    export function constant(value: string): Expression;
     /**
      * @beta
-     * Creates a `Constant` instance for a boolean value.
+     * Creates an `Expression` instance for a boolean value.
      *
      * @param value The boolean value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: boolean): Constant;
+    export function constant(value: boolean): BooleanExpression;
     /**
      * @beta
-     * Creates a `Constant` instance for a null value.
+     * Creates an `Expression` instance for a null value.
      *
      * @param value The null value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: null): Constant;
+    export function constant(value: null): Expression;
     /**
      * @beta
-     * Creates a `Constant` instance for a GeoPoint value.
+     * Creates an `Expression` instance for a GeoPoint value.
      *
      * @param value The GeoPoint value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: GeoPoint): Constant;
+    export function constant(value: GeoPoint): Expression;
     /**
      * @beta
-     * Creates a `Constant` instance for a Timestamp value.
+     * Creates an `Expression` instance for a Timestamp value.
      *
      * @param value The Timestamp value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: Timestamp): Constant;
+    export function constant(value: Timestamp): Expression;
     /**
      * @beta
-     * Creates a `Constant` instance for a Date value.
+     * Creates an `Expression` instance for a Date value.
      *
      * @param value The Date value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: Date): Constant;
+    export function constant(value: Date): Expression;
     /**
      * @beta
-     * Creates a `Constant` instance for a Buffer | Uint8Array value.
+     * Creates an `Expression` instance for a Buffer | Uint8Array value.
      *
      * @param value The Buffer | Uint8Array value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: Buffer | Uint8Array): Constant;
+    export function constant(value: Buffer | Uint8Array): Expression;
     /**
      * @beta
-     * Creates a `Constant` instance for a DocumentReference value.
+     * Creates an `Expression` instance for a DocumentReference value.
      *
      * @param value The DocumentReference value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: DocumentReference): Constant;
+    export function constant(value: DocumentReference): Expression;
     /**
      * @beta
-     * Creates a `Constant` instance for a VectorValue value.
+     * Creates an `Expression` instance for a VectorValue value.
      *
      * @param value The VectorValue value.
-     * @return A new `Constant` instance.
+     * @return A new `Expression` instance.
      */
-    export function constant(value: VectorValue): Constant;
+    export function constant(value: VectorValue): Expression;
 
     /**
      * @beta
      * Represents an expression that encapsulates a function call within the Firestore Pipelines.
      *
-     * `FunctionExpr` extends {@link Expr} and is used to build complex queries and transformations
-     * by applying various functions (e.g., `and`, `eq`, `ceil`) to fields or other expressions.
+     * `FunctionExpression` extends {@link Expression} and is used to build complex queries and transformations
+     * by applying various functions (e.g., `and`, `equal`, `ceil`) to fields or other expressions.
      *
-     * You typically do not instantiate `FunctionExpr` directly. Instead, use the provided
-     * top-level functions (like {@link and}, {@link eq}, {@link ceil}) or methods available
-     * on {@link Expr} instances (e.g., {@link Expr#eq}, {@link Expr#lt}) to construct
-     * `FunctionExpr` instances.
+     * You typically do not instantiate `FunctionExpression` directly. Instead, use the provided
+     * top-level functions (like {@link and}, {@link equal}, {@link ceil}) or methods available
+     * on {@link Expression} instances (e.g., {@link Expression#equal}, {@link Expression#lessThan}) to construct
+     * `FunctionExpression` instances.
      *
      * ```typescript
-     * // Example of creating a FunctionExpr indirectly using helper functions:
-     * const priceGreaterThan10 = field("price").gt(10);
-     * const combinedCondition = and(priceGreaterThan10, field("category").eq("books"));
+     * // Example of creating a FunctionExpression indirectly using helper functions:
+     * const priceGreaterThan10 = field("price").greaterThan(10);
+     * const combinedCondition = and(priceGreaterThan10, field("category").equal("books"));
      *
-     * // 'priceGreaterThan10' and 'combinedCondition' are instances of FunctionExpr.
+     * // 'priceGreaterThan10' and 'combinedCondition' are instances of FunctionExpression.
      * ```
      */
-    export class FunctionExpr extends Expr {
+    export class FunctionExpression extends Expression {
       /**
        * @beta
        * @internal
-       * Indicates that this expression is a `FunctionExpr`.
+       * Indicates that this expression is a `FunctionExpression`.
        */
-      readonly exprType: ExprType;
+      readonly expressionType: ExpressionType;
       /**
        * @beta
        * @private
        * @internal
        *
-       * Initializes a new `FunctionExpr` instance with the given function name and parameters.
+       * Initializes a new `FunctionExpression` instance with the given function name and parameters.
        *
        * @param name The name of the function.
-       * @param params An array of `Expr` instances representing the parameters of the function.
+       * @param params An array of `Expression` instances representing the parameters of the function.
        */
-      constructor(name: string, params: Expr[]);
+      constructor(name: string, params: Expression[]);
     }
     /**
      * @beta
@@ -4981,7 +5081,7 @@ declare namespace FirebaseFirestore {
      * This expression type is useful for filter conditions.
      *
      */
-    export class BooleanExpr extends FunctionExpr {
+    export class BooleanExpression extends FunctionExpression {
       /**
        * @beta
        * @internal
@@ -4995,7 +5095,7 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * // Find the count of documents with a score greater than 90
-       * field("score").gt(90).countIf().as("highestScore");
+       * field("score").greaterThan(90).countIf().as("highestScore");
        * ```
        *
        * @return A new `AggregateFunction` representing the 'countIf' aggregation.
@@ -5010,9 +5110,9 @@ declare namespace FirebaseFirestore {
        * field("tags").arrayContains("completed").not();
        * ```
        *
-       * @return A new {@code Expr} representing the negated filter condition.
+       * @return A new {@code Expression} representing the negated filter condition.
        */
-      not(): BooleanExpr;
+      not(): BooleanExpression;
     }
     /**
      * @beta
@@ -5021,21 +5121,13 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Count the number of documents where 'is_active' field equals true
-     * countIf(field("is_active").eq(true)).as("numActiveDocuments");
+     * countIf(field("is_active").equal(true)).as("numActiveDocuments");
      * ```
      *
      * @param booleanExpr - The boolean expression to evaluate on each input.
      * @returns A new `AggregateFunction` representing the 'countIf' aggregation.
      */
-    export function countIf(booleanExpr: BooleanExpr): AggregateFunction;
-    /**
-     * @beta
-     * Creates an expression that return a pseudo-random value of type double in the
-     * range of [0, 1), inclusive of 0 and exclusive of 1.
-     *
-     * @returns A new `Expr` representing the 'rand' function.
-     */
-    export function rand(): FunctionExpr;
+    export function countIf(booleanExpr: BooleanExpression): AggregateFunction;
     /**
      * @beta
      * Creates an expression that indexes into an array from the beginning or end
@@ -5049,9 +5141,12 @@ declare namespace FirebaseFirestore {
      *
      * @param arrayField The name of the array field.
      * @param index The index of the element to return.
-     * @return A new Expr representing the 'arrayGet' operation.
+     * @return A new Expression representing the 'arrayGet' operation.
      */
-    export function arrayGet(arrayField: string, index: number): FunctionExpr;
+    export function arrayGet(
+      arrayField: string,
+      index: number
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that indexes into an array from the beginning or end
@@ -5065,10 +5160,13 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param arrayField The name of the array field.
-     * @param indexExpr An Expr evaluating to the index of the element to return.
-     * @return A new Expr representing the 'arrayGet' operation.
+     * @param indexExpr An Expression evaluating to the index of the element to return.
+     * @return A new Expression representing the 'arrayGet' operation.
      */
-    export function arrayGet(arrayField: string, indexExpr: Expr): FunctionExpr;
+    export function arrayGet(
+      arrayField: string,
+      indexExpr: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that indexes into an array from the beginning or end
@@ -5080,14 +5178,14 @@ declare namespace FirebaseFirestore {
      * arrayGet(field('tags'), 1);
      * ```
      *
-     * @param arrayExpression An Expr evaluating to an array.
+     * @param arrayExpression An Expression evaluating to an array.
      * @param index The index of the element to return.
-     * @return A new Expr representing the 'arrayGet' operation.
+     * @return A new Expression representing the 'arrayGet' operation.
      */
     export function arrayGet(
-      arrayExpression: Expr,
+      arrayExpression: Expression,
       index: number
-    ): FunctionExpr;
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that indexes into an array from the beginning or end
@@ -5100,14 +5198,14 @@ declare namespace FirebaseFirestore {
      * arrayGet(field('tags'), field('favoriteTag'));
      * ```
      *
-     * @param arrayExpression An Expr evaluating to an array.
-     * @param indexExpr An Expr evaluating to the index of the element to return.
-     * @return A new Expr representing the 'arrayGet' operation.
+     * @param arrayExpression An Expression evaluating to an array.
+     * @param indexExpr An Expression evaluating to the index of the element to return.
+     * @return A new Expression representing the 'arrayGet' operation.
      */
     export function arrayGet(
-      arrayExpression: Expr,
-      indexExpr: Expr
-    ): FunctionExpr;
+      arrayExpression: Expression,
+      indexExpr: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that checks if a given expression produces an error.
@@ -5118,9 +5216,32 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param value The expression to check.
-     * @return A new {@code Expr} representing the 'isError' check.
+     * @return A new {@code Expression} representing the 'isError' check.
      */
-    export function isError(value: Expr): BooleanExpr;
+    export function isError(value: Expression): BooleanExpression;
+    /**
+     * @beta
+     *
+     * Creates an expression that returns the `catch` argument if there is an
+     * error, else return the result of the `try` argument evaluation.
+     *
+     * This overload is useful when a BooleanExpression is required.
+     *
+     * ```typescript
+     * // Create an expression that protects against a divide by zero error
+     * // but always returns a boolean expression.
+     * ifError(constant(50).divide('length').gt(1), constant(false));
+     * ```
+     *
+     * @param tryExpr The try expression.
+     * @param catchExpr The catch expression that will be evaluated and
+     * returned if the tryExpr produces an error.
+     * @return A new {@code Expr} representing the 'ifError' operation.
+     */
+    export function ifError(
+      tryExpr: BooleanExpression,
+      catchExpr: BooleanExpression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that returns the `catch` argument if there is an
@@ -5135,9 +5256,12 @@ declare namespace FirebaseFirestore {
      * @param tryExpr The try expression.
      * @param catchExpr The catch expression that will be evaluated and
      * returned if the tryExpr produces an error.
-     * @return A new {@code Expr} representing the 'ifError' operation.
+     * @return A new {@code Expression} representing the 'ifError' operation.
      */
-    export function ifError(tryExpr: Expr, catchExpr: Expr): FunctionExpr;
+    export function ifError(
+      tryExpr: Expression,
+      catchExpr: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that returns the `catch` argument if there is an
@@ -5152,9 +5276,12 @@ declare namespace FirebaseFirestore {
      * @param tryExpr The try expression.
      * @param catchValue The value that will be returned if the tryExpr produces an
      * error.
-     * @return A new {@code Expr} representing the 'ifError' operation.
+     * @return A new {@code Expression} representing the 'ifError' operation.
      */
-    export function ifError(tryExpr: Expr, catchValue: unknown): FunctionExpr;
+    export function ifError(
+      tryExpr: Expression,
+      catchValue: unknown
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that returns `true` if a value is absent. Otherwise,
@@ -5166,9 +5293,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param value The expression to check.
-     * @return A new {@code Expr} representing the 'isAbsent' check.
+     * @return A new {@code Expression} representing the 'isAbsent' check.
      */
-    export function isAbsent(value: Expr): BooleanExpr;
+    export function isAbsent(value: Expression): BooleanExpression;
     /**
      * @beta
      * Creates an expression that returns `true` if a field is absent. Otherwise,
@@ -5180,93 +5307,10 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param field The field to check.
-     * @return A new {@code Expr} representing the 'isAbsent' check.
+     * @return A new {@code Expression} representing the 'isAbsent' check.
      */
-    export function isAbsent(field: string): BooleanExpr;
+    export function isAbsent(field: string): BooleanExpression;
 
-    /**
-     * @beta
-     * Creates an expression that checks if an expression evaluates to 'null'.
-     *
-     * ```typescript
-     * // Check if the 'lastLogin' field is null
-     * isNull(field("lastLogin"));
-     * ```
-     *
-     * @param value The expression to check for null.
-     * @return A new {@code BooleanExpr} representing the 'isNull' check.
-     */
-    export function isNull(value: Expr): BooleanExpr;
-
-    /**
-     * @beta
-     * Creates an expression that checks if a field's value evaluates to 'null'.
-     *
-     * ```typescript
-     * // Check if the 'endDate' field is null.
-     * isNull("endDate");
-     * ```
-     *
-     * @param value The name of the field to check.
-     * @return A new {@code BooleanExpr} representing the 'isNull' check.
-     */
-    export function isNull(value: string): BooleanExpr;
-
-    /**
-     * @beta
-     * Creates an expression that checks if the result of an expression is not null.
-     *
-     * ```typescript
-     * // Check if the value of the 'name' field is not null
-     * isNotNull(field("name"));
-     * ```
-     *
-     * @param value The expression to check.
-     * @return A new {@code BooleanExpr} representing the 'not null' check.
-     */
-    export function isNotNull(value: Expr): BooleanExpr;
-
-    /**
-     * @beta
-     * Creates an expression that checks if the value of a field is not null.
-     *
-     * ```typescript
-     * // Check if the value of the 'name' field is not null
-     * isNotNull("name");
-     * ```
-     *
-     * @param value The name of the field to check.
-     * @return A new {@code BooleanExpr} representing the 'not null' check.
-     */
-    export function isNotNull(value: string): BooleanExpr;
-
-    /**
-     * @beta
-     * Creates an expression that evaluates to `true` if the given expression's result is not `NaN` (Not a Number), and `false` otherwise.
-     *
-     * ```typescript
-     * // Check if the result of a calculation is NOT NaN
-     * isNotNan(field("value").divide(0));
-     * ```
-     *
-     * @param value The expression to check for `NaN`.
-     * @return A new {@code BooleanExpr} representing the result of the `isNotNaN` check.
-     */
-    export function isNotNan(value: Expr): BooleanExpr;
-
-    /**
-     * @beta
-     * Creates an expression that checks if a numeric value is not NaN (Not a Number).
-     *
-     * ```typescript
-     * // Check if the value of a field is not NaN
-     * isNotNan("value");
-     * ```
-     *
-     * @param value The name of the field to check.
-     * @return A new {@code BooleanExpr} representing the 'isNotNan' check.
-     */
-    export function isNotNan(value: string): BooleanExpr;
     /**
      * @beta
      * Creates an expression that removes a key from the map at the specified field name.
@@ -5279,7 +5323,10 @@ declare namespace FirebaseFirestore {
      * @param mapField The name of a field containing a map value.
      * @param key The name of the key to remove from the input map.
      */
-    export function mapRemove(mapField: string, key: string): FunctionExpr;
+    export function mapRemove(
+      mapField: string,
+      key: string
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -5292,9 +5339,12 @@ declare namespace FirebaseFirestore {
      *
      * @param mapExpr An expression that evaluates to a map value.
      * @param key The name of the key to remove from the input map.
-     * @returns A new {@link FunctionExpr} representing the map with the specified key removed.
+     * @returns A new {@link FunctionExpression} representing the map with the specified key removed.
      */
-    export function mapRemove(mapExpr: Expr, key: string): FunctionExpr;
+    export function mapRemove(
+      mapExpr: Expression,
+      key: string
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -5307,9 +5357,12 @@ declare namespace FirebaseFirestore {
      *
      * @param mapField The name of a field containing a map value.
      * @param keyExpr An expression that produces the name of the key to remove from the input map.
-     * @returns A new {@code FunctionExpr} representing the map after the key has been removed.
+     * @returns A new {@code FunctionExpression} representing the map after the key has been removed.
      */
-    export function mapRemove(mapField: string, keyExpr: Expr): FunctionExpr;
+    export function mapRemove(
+      mapField: string,
+      keyExpr: Expression
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -5326,9 +5379,12 @@ declare namespace FirebaseFirestore {
      *
      * @param mapExpr An expression that evaluates to a map value.
      * @param keyExpr An expression that evaluates to the string key to remove from the map.
-     * @returns A new {@link FunctionExpr} representing the map with the specified key removed.
+     * @returns A new {@link FunctionExpression} representing the map with the specified key removed.
      */
-    export function mapRemove(mapExpr: Expr, keyExpr: Expr): FunctionExpr;
+    export function mapRemove(
+      mapExpr: Expression,
+      keyExpr: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that merges multiple map values.
@@ -5336,7 +5392,7 @@ declare namespace FirebaseFirestore {
      * ```
      * // Merges the map in the settings field with, a map literal, and a map in
      * // that is conditionally returned by another expression
-     * mapMerge('settings', { enabled: true }, cond(field('isAdmin'), { admin: true}, {})
+     * mapMerge('settings', { enabled: true }, conditional(field('isAdmin'), { admin: true}, {})
      * ```
      *
      * @param mapField Name of a field containing a map value that will be merged.
@@ -5347,9 +5403,9 @@ declare namespace FirebaseFirestore {
      */
     export function mapMerge(
       mapField: string,
-      secondMap: Record<string, unknown> | Expr,
-      ...otherMaps: Array<Record<string, unknown> | Expr>
-    ): FunctionExpr;
+      secondMap: Record<string, unknown> | Expression,
+      ...otherMaps: Array<Record<string, unknown> | Expression>
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that merges multiple map values.
@@ -5357,7 +5413,7 @@ declare namespace FirebaseFirestore {
      * ```
      * // Merges the map in the settings field with, a map literal, and a map in
      * // that is conditionally returned by another expression
-     * mapMerge(field('settings'), { enabled: true }, cond(field('isAdmin'), { admin: true}, {})
+     * mapMerge(field('settings'), { enabled: true }, conditional(field('isAdmin'), { admin: true}, {})
      * ```
      *
      * @param firstMap An expression or literal map value that will be merged.
@@ -5367,10 +5423,10 @@ declare namespace FirebaseFirestore {
      * as a literal or an expression that returns a map.
      */
     export function mapMerge(
-      firstMap: Record<string, unknown> | Expr,
-      secondMap: Record<string, unknown> | Expr,
-      ...otherMaps: Array<Record<string, unknown> | Expr>
-    ): FunctionExpr;
+      firstMap: Record<string, unknown> | Expression,
+      secondMap: Record<string, unknown> | Expression,
+      ...otherMaps: Array<Record<string, unknown> | Expression>
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -5382,9 +5438,42 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param documentPathExpr An expression evaluating to a document path.
-     * @return A new {@code FunctionExpr} representing the document ID as a string.
+     * @return A new {@code FunctionExpression} representing the document ID as a string.
      */
-    export function documentId(documentPathExpr: Expr): FunctionExpr;
+    export function documentId(
+      documentPathExpr: Expression
+    ): FunctionExpression;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that returns the document ID from a path.
+     *
+     * ```typescript
+     * // Get the document ID from a path.
+     * documentId(myDocumentReference);
+     * ```
+     *
+     * @return A new {@code Expr} representing the documentId operation.
+     */
+    export function documentId(
+      documentPath: string | DocumentReference
+    ): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that returns the document ID from a path.
+     *
+     * ```typescript
+     * // Get the document ID from a path.
+     * documentId(field("__path__"));
+     * ```
+     *
+     * @return A new {@code Expression} representing the documentId operation.
+     */
+    export function documentId(
+      documentPathExpr: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that returns a substring of a string or byte array.
@@ -5397,7 +5486,7 @@ declare namespace FirebaseFirestore {
       field: string,
       position: number,
       length?: number
-    ): FunctionExpr;
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that returns a substring of a string or byte array.
@@ -5407,10 +5496,10 @@ declare namespace FirebaseFirestore {
      * @param length Length of the substring.
      */
     export function substring(
-      input: Expr,
+      input: Expression,
       position: number,
       length?: number
-    ): FunctionExpr;
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that returns a substring of a string or byte array.
@@ -5421,9 +5510,9 @@ declare namespace FirebaseFirestore {
      */
     export function substring(
       field: string,
-      position: Expr,
-      length?: Expr
-    ): FunctionExpr;
+      position: Expression,
+      length?: Expression
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -5437,13 +5526,13 @@ declare namespace FirebaseFirestore {
      * @param input An expression returning a string or byte array from which to extract the substring.
      * @param position An expression that returns the 0-based starting index of the substring.
      * @param length Optional. An expression that returns the length of the substring. If omitted, the substring extends to the end of the input.
-     * @return A new {@code FunctionExpr} representing the substring operation.
+     * @return A new {@code FunctionExpression} representing the substring operation.
      */
     export function substring(
-      input: Expr,
-      position: Expr,
-      length?: Expr
-    ): FunctionExpr;
+      input: Expression,
+      position: Expression,
+      length?: Expression
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -5462,13 +5551,13 @@ declare namespace FirebaseFirestore {
      * @param first The initial numeric expression or literal value.
      * @param second The second numeric expression or literal value to add.
      * @param others Optional: Additional numeric expressions or literal values to add.
-     * @return A new {@code FunctionExpr} representing the sum of all provided arguments.
+     * @return A new {@code FunctionExpression} representing the sum of all provided arguments.
      */
     export function add(
-      first: Expr,
-      second: Expr | unknown,
-      ...others: Array<Expr | unknown>
-    ): FunctionExpr;
+      first: Expression,
+      second: Expression | unknown,
+      ...others: Array<Expression | unknown>
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -5486,15 +5575,15 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field whose value will be the first operand in the addition.
-     * @param second The second operand, which can be an {@code Expr} or a literal value.
-     * @param others Optional additional operands, each of which can be an {@code Expr} or a literal value.
-     * @return A new {@code Expr} representing the addition operation.
+     * @param second The second operand, which can be an {@code Expression} or a literal value.
+     * @param others Optional additional operands, each of which can be an {@code Expression} or a literal value.
+     * @return A new {@code Expression} representing the addition operation.
      */
     export function add(
       fieldName: string,
-      second: Expr | unknown,
-      ...others: Array<Expr | unknown>
-    ): FunctionExpr;
+      second: Expression | unknown,
+      ...others: Array<Expression | unknown>
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that subtracts two expressions.
@@ -5506,9 +5595,12 @@ declare namespace FirebaseFirestore {
      *
      * @param minuend The expression to subtract from.
      * @param subtrahend The expression to subtract.
-     * @return A new {@code Expr} representing the subtraction operation.
+     * @return A new {@code Expression} representing the subtraction operation.
      */
-    export function subtract(minuend: Expr, subtrahend: Expr): FunctionExpr;
+    export function subtract(
+      minuend: Expression,
+      subtrahend: Expression
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -5521,9 +5613,12 @@ declare namespace FirebaseFirestore {
      *
      * @param minuend The expression to subtract from.
      * @param subtrahend The value to subtract.
-     * @return A new {@code Expr} representing the subtraction operation.
+     * @return A new {@code Expression} representing the subtraction operation.
      */
-    export function subtract(minuend: Expr, subtrahend: unknown): FunctionExpr;
+    export function subtract(
+      minuend: Expression,
+      subtrahend: unknown
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that subtracts an expression from a field's value.
@@ -5535,12 +5630,12 @@ declare namespace FirebaseFirestore {
      *
      * @param minuendFieldName The field name to subtract from.
      * @param subtrahend The expression to subtract.
-     * @return A new {@code Expr} representing the subtraction operation.
+     * @return A new {@code Expression} representing the subtraction operation.
      */
     export function subtract(
       minuendFieldName: string,
-      subtrahend: Expr
-    ): FunctionExpr;
+      subtrahend: Expression
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -5554,12 +5649,12 @@ declare namespace FirebaseFirestore {
      *
      * @param minuendFieldName The name of the field to subtract from.
      * @param subtrahend The value to subtract.
-     * @return A new {@code Expr} representing the subtraction operation.
+     * @return A new {@code Expression} representing the subtraction operation.
      */
     export function subtract(
       minuendFieldName: string,
       subtrahend: unknown
-    ): FunctionExpr;
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -5576,13 +5671,13 @@ declare namespace FirebaseFirestore {
      * @param first The first expression to multiply.
      * @param second The second expression or literal to multiply.
      * @param others Optional additional expressions or literals to multiply.
-     * @return A new {@code FunctionExpr} representing the multiplication operation.
+     * @return A new {@code FunctionExpression} representing the multiplication operation.
      */
     export function multiply(
-      first: Expr,
-      second: Expr | unknown,
-      ...others: Array<Expr | unknown>
-    ): FunctionExpr;
+      first: Expression,
+      second: Expression | unknown,
+      ...others: Array<Expression | unknown>
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -5594,15 +5689,15 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field whose value will be the initial operand of the multiplication.
-     * @param second The second operand, which can be an {@link Expr} or a literal value, to be multiplied.
-     * @param others Optional additional operands ({@link Expr} or literal values) to be included in the multiplication.
-     * @return A new {@link FunctionExpr} representing the multiplication operation.
+     * @param second The second operand, which can be an {@link Expression} or a literal value, to be multiplied.
+     * @param others Optional additional operands ({@link Expression} or literal values) to be included in the multiplication.
+     * @return A new {@link FunctionExpression} representing the multiplication operation.
      */
     export function multiply(
       fieldName: string,
-      second: Expr | unknown,
-      ...others: Array<Expr | unknown>
-    ): FunctionExpr;
+      second: Expression | unknown,
+      ...others: Array<Expression | unknown>
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that divides two expressions.
@@ -5614,9 +5709,12 @@ declare namespace FirebaseFirestore {
      *
      * @param dividend The expression to be divided.
      * @param divisor The expression to divide by.
-     * @return A new {@code Expr} representing the division operation.
+     * @return A new {@code Expression} representing the division operation.
      */
-    export function divide(dividend: Expr, divisor: Expr): FunctionExpr;
+    export function divide(
+      dividend: Expression,
+      divisor: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that divides an expression by a constant value.
@@ -5628,9 +5726,12 @@ declare namespace FirebaseFirestore {
      *
      * @param dividend The expression to be divided.
      * @param divisor The constant value to divide by.
-     * @return A new {@code Expr} representing the division operation.
+     * @return A new {@code Expression} representing the division operation.
      */
-    export function divide(dividend: Expr, divisor: unknown): FunctionExpr;
+    export function divide(
+      dividend: Expression,
+      divisor: unknown
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that divides a field's value by an expression.
@@ -5642,9 +5743,12 @@ declare namespace FirebaseFirestore {
      *
      * @param dividend The field name to be divided.
      * @param divisor The expression to divide by.
-     * @return A new {@code Expr} representing the division operation.
+     * @return A new {@code Expression} representing the division operation.
      */
-    export function divide(dividend: string, divisor: Expr): FunctionExpr;
+    export function divide(
+      dividend: string,
+      divisor: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that divides a field's value by a constant value.
@@ -5656,9 +5760,12 @@ declare namespace FirebaseFirestore {
      *
      * @param dividend The field name to be divided.
      * @param divisor The constant value to divide by.
-     * @return A new {@code Expr} representing the division operation.
+     * @return A new {@code Expression} representing the division operation.
      */
-    export function divide(dividend: string, divisor: unknown): FunctionExpr;
+    export function divide(
+      dividend: string,
+      divisor: unknown
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that calculates the modulo (remainder) of dividing two expressions.
@@ -5670,9 +5777,12 @@ declare namespace FirebaseFirestore {
      *
      * @param left The dividend expression.
      * @param right The divisor expression.
-     * @return A new {@code Expr} representing the modulo operation.
+     * @return A new {@code Expression} representing the modulo operation.
      */
-    export function mod(left: Expr, right: Expr): FunctionExpr;
+    export function mod(
+      left: Expression,
+      right: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that calculates the modulo (remainder) of dividing an expression by a constant.
@@ -5684,9 +5794,12 @@ declare namespace FirebaseFirestore {
      *
      * @param expression The dividend expression.
      * @param value The divisor constant.
-     * @return A new {@code Expr} representing the modulo operation.
+     * @return A new {@code Expression} representing the modulo operation.
      */
-    export function mod(expression: Expr, value: unknown): FunctionExpr;
+    export function mod(
+      expression: Expression,
+      value: unknown
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that calculates the modulo (remainder) of dividing a field's value by an expression.
@@ -5698,9 +5811,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The dividend field name.
      * @param expression The divisor expression.
-     * @return A new {@code Expr} representing the modulo operation.
+     * @return A new {@code Expression} representing the modulo operation.
      */
-    export function mod(fieldName: string, expression: Expr): FunctionExpr;
+    export function mod(
+      fieldName: string,
+      expression: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that calculates the modulo (remainder) of dividing a field's value by a constant.
@@ -5712,9 +5828,9 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The dividend field name.
      * @param value The divisor constant.
-     * @return A new {@code Expr} representing the modulo operation.
+     * @return A new {@code Expression} representing the modulo operation.
      */
-    export function mod(fieldName: string, value: unknown): FunctionExpr;
+    export function mod(fieldName: string, value: unknown): FunctionExpression;
 
     /**
      * @beta
@@ -5729,9 +5845,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param elements The JavaScript object literal whose properties will be used to create the Firestore map expression.
-     * @returns A new {@code FunctionExpr} representing the map function.
+     * @returns A new {@code FunctionExpression} representing the map function.
      */
-    export function map(elements: Record<string, unknown>): FunctionExpr;
+    export function map(elements: Record<string, unknown>): FunctionExpression;
     /**
      * @beta
      * Creates an expression that creates a Firestore array value from a given JavaScript array.
@@ -5743,9 +5859,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param elements The input array to evaluate in the expression.
-     * @return A new {@code Expr} representing the array function.
+     * @return A new {@code Expression} representing the array function.
      */
-    export function array(elements: unknown[]): FunctionExpr;
+    export function array(elements: unknown[]): FunctionExpression;
 
     /**
      * @beta
@@ -5753,28 +5869,34 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'age' field is equal to an expression
-     * eq(field("age"), field("minAge").add(10));
+     * equal(field("age"), field("minAge").add(10));
      * ```
      *
      * @param left The first expression to compare.
      * @param right The second expression to compare.
-     * @return A new `BooleanExpr` representing the equality comparison.
+     * @return A new `BooleanExpression` representing the equality comparison.
      */
-    export function eq(left: Expr, right: Expr): BooleanExpr;
+    export function equal(
+      left: Expression,
+      right: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if an expression is equal to a constant value.
      *
      * ```typescript
      * // Check if the 'age' field is equal to 21
-     * eq(field("age"), 21);
+     * equal(field("age"), 21);
      * ```
      *
      * @param expression The expression to compare.
      * @param value The constant value to compare to.
-     * @return A new `Expr` representing the equality comparison.
+     * @return A new `Expression` representing the equality comparison.
      */
-    export function eq(expression: Expr, value: unknown): BooleanExpr;
+    export function equal(
+      expression: Expression,
+      value: unknown
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -5782,56 +5904,65 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'age' field is equal to the 'limit' field
-     * eq("age", field("limit"));
+     * equal("age", field("limit"));
      * ```
      *
      * @param fieldName The name of the field to compare.
      * @param expression The expression to compare the field's value against.
-     * @return A new `BooleanExpr` representing the equality comparison.
+     * @return A new `BooleanExpression` representing the equality comparison.
      */
-    export function eq(fieldName: string, expression: Expr): BooleanExpr;
+    export function equal(
+      fieldName: string,
+      expression: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's value is equal to a constant value.
      *
      * ```typescript
      * // Check if the 'city' field is equal to string constant "London"
-     * eq("city", "London");
+     * equal("city", "London");
      * ```
      *
      * @param fieldName The field name to compare.
      * @param value The constant value to compare to.
-     * @return A new `Expr` representing the equality comparison.
+     * @return A new `Expression` representing the equality comparison.
      */
-    export function eq(fieldName: string, value: unknown): BooleanExpr;
+    export function equal(fieldName: string, value: unknown): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if two expressions are not equal.
      *
      * ```typescript
      * // Check if the 'status' field is not equal to field 'finalState'
-     * neq(field("status"), field("finalState"));
+     * notEqual(field("status"), field("finalState"));
      * ```
      *
      * @param left The first expression to compare.
      * @param right The second expression to compare.
-     * @return A new `Expr` representing the inequality comparison.
+     * @return A new `Expression` representing the inequality comparison.
      */
-    export function neq(left: Expr, right: Expr): BooleanExpr;
+    export function notEqual(
+      left: Expression,
+      right: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if an expression is not equal to a constant value.
      *
      * ```typescript
      * // Check if the 'status' field is not equal to "completed"
-     * neq(field("status"), "completed");
+     * notEqual(field("status"), "completed");
      * ```
      *
      * @param expression The expression to compare.
      * @param value The constant value to compare to.
-     * @return A new `Expr` representing the inequality comparison.
+     * @return A new `Expression` representing the inequality comparison.
      */
-    export function neq(expression: Expr, value: unknown): BooleanExpr;
+    export function notEqual(
+      expression: Expression,
+      value: unknown
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -5839,56 +5970,68 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'status' field is not equal to the value of 'expectedStatus'
-     * neq("status", field("expectedStatus"));
+     * notEqual("status", field("expectedStatus"));
      * ```
      *
      * @param fieldName The field name to compare.
      * @param expression The expression to compare to.
-     * @return A new {@link BooleanExpr} representing the inequality comparison.
+     * @return A new {@link BooleanExpression} representing the inequality comparison.
      */
-    export function neq(fieldName: string, expression: Expr): BooleanExpr;
+    export function notEqual(
+      fieldName: string,
+      expression: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's value is not equal to a constant value.
      *
      * ```typescript
      * // Check if the 'country' field is not equal to "USA"
-     * neq("country", "USA");
+     * notEqual("country", "USA");
      * ```
      *
      * @param fieldName The field name to compare.
      * @param value The constant value to compare to.
-     * @return A new `Expr` representing the inequality comparison.
+     * @return A new `Expression` representing the inequality comparison.
      */
-    export function neq(fieldName: string, value: unknown): BooleanExpr;
+    export function notEqual(
+      fieldName: string,
+      value: unknown
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if the first expression is less than the second expression.
      *
      * ```typescript
      * // Check if the 'age' field is less than 30
-     * lt(field("age"), field("limit"));
+     * lessThan(field("age"), field("limit"));
      * ```
      *
      * @param left The first expression to compare.
      * @param right The second expression to compare.
-     * @return A new `Expr` representing the less than comparison.
+     * @return A new `Expression` representing the less than comparison.
      */
-    export function lt(left: Expr, right: Expr): BooleanExpr;
+    export function lessThan(
+      left: Expression,
+      right: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if an expression is less than a constant value.
      *
      * ```typescript
      * // Check if the 'age' field is less than 30
-     * lt(field("age"), 30);
+     * lessThan(field("age"), 30);
      * ```
      *
      * @param expression The expression to compare.
      * @param value The constant value to compare to.
-     * @return A new `Expr` representing the less than comparison.
+     * @return A new `Expression` representing the less than comparison.
      */
-    export function lt(expression: Expr, value: unknown): BooleanExpr;
+    export function lessThan(
+      expression: Expression,
+      value: unknown
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -5896,28 +6039,34 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'age' field is less than the 'limit' field
-     * lt("age", field("limit"));
+     * lessThan("age", field("limit"));
      * ```
      *
      * @param fieldName The field name to compare.
      * @param expression The expression to compare to.
-     * @return A new `BooleanExpr` representing the less than comparison.
+     * @return A new `BooleanExpression` representing the less than comparison.
      */
-    export function lt(fieldName: string, expression: Expr): BooleanExpr;
+    export function lessThan(
+      fieldName: string,
+      expression: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's value is less than a constant value.
      *
      * ```typescript
      * // Check if the 'price' field is less than 50
-     * lt("price", 50);
+     * lessThan("price", 50);
      * ```
      *
      * @param fieldName The field name to compare.
      * @param value The constant value to compare to.
-     * @return A new `Expr` representing the less than comparison.
+     * @return A new `Expression` representing the less than comparison.
      */
-    export function lt(fieldName: string, value: unknown): BooleanExpr;
+    export function lessThan(
+      fieldName: string,
+      value: unknown
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if the first expression is less than or equal to the second
@@ -5925,14 +6074,17 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'quantity' field is less than or equal to 20
-     * lte(field("quantity"), field("limit"));
+     * lessThanOrEqual(field("quantity"), field("limit"));
      * ```
      *
      * @param left The first expression to compare.
      * @param right The second expression to compare.
-     * @return A new `Expr` representing the less than or equal to comparison.
+     * @return A new `Expression` representing the less than or equal to comparison.
      */
-    export function lte(left: Expr, right: Expr): BooleanExpr;
+    export function lessThanOrEqual(
+      left: Expression,
+      right: Expression
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -5940,14 +6092,17 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'quantity' field is less than or equal to 20
-     * lte(field("quantity"), 20);
+     * lessThanOrEqual(field("quantity"), 20);
      * ```
      *
-     * @param expression The {@link Expr} to compare.
+     * @param expression The {@link Expression} to compare.
      * @param value The constant value to compare against.
-     * @return A new {@link BooleanExpr} representing the less than or equal to comparison.
+     * @return A new {@link BooleanExpression} representing the less than or equal to comparison.
      */
-    export function lte(expression: Expr, value: unknown): BooleanExpr;
+    export function lessThanOrEqual(
+      expression: Expression,
+      value: unknown
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -5955,28 +6110,34 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'quantity' field is less than or equal to the 'limit' field
-     * lte("quantity", field("limit"));
+     * lessThanOrEqual("quantity", field("limit"));
      * ```
      *
      * @param fieldName The name of the field whose value will be compared.
      * @param expression The expression to compare against the field's value.
-     * @return A new {@link BooleanExpr} representing the less than or equal to comparison.
+     * @return A new {@link BooleanExpression} representing the less than or equal to comparison.
      */
-    export function lte(fieldName: string, expression: Expr): BooleanExpr;
+    export function lessThanOrEqual(
+      fieldName: string,
+      expression: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's value is less than or equal to a constant value.
      *
      * ```typescript
      * // Check if the 'score' field is less than or equal to 70
-     * lte("score", 70);
+     * lessThanOrEqual("score", 70);
      * ```
      *
      * @param fieldName The field name to compare.
      * @param value The constant value to compare to.
-     * @return A new `Expr` representing the less than or equal to comparison.
+     * @return A new `Expression` representing the less than or equal to comparison.
      */
-    export function lte(fieldName: string, value: unknown): BooleanExpr;
+    export function lessThanOrEqual(
+      fieldName: string,
+      value: unknown
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if the first expression is greater than the second
@@ -5984,28 +6145,34 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'age' field is greater than 18
-     * gt(field("age"), Constant(9).add(9));
+     * greaterThan(field("age"), constant(9).add(9));
      * ```
      *
      * @param left The first expression to compare.
      * @param right The second expression to compare.
-     * @return A new `Expr` representing the greater than comparison.
+     * @return A new `Expression` representing the greater than comparison.
      */
-    export function gt(left: Expr, right: Expr): BooleanExpr;
+    export function greaterThan(
+      left: Expression,
+      right: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if an expression is greater than a constant value.
      *
      * ```typescript
      * // Check if the 'age' field is greater than 18
-     * gt(field("age"), 18);
+     * greaterThan(field("age"), 18);
      * ```
      *
      * @param expression The expression to compare.
      * @param value The constant value to compare to.
-     * @return A new `Expr` representing the greater than comparison.
+     * @return A new `Expression` representing the greater than comparison.
      */
-    export function gt(expression: Expr, value: unknown): BooleanExpr;
+    export function greaterThan(
+      expression: Expression,
+      value: unknown
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -6013,28 +6180,34 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the value of field 'age' is greater than the value of field 'limit'
-     * gt("age", field("limit"));
+     * greaterThan("age", field("limit"));
      * ```
      *
      * @param fieldName The name of the field to compare.
      * @param expression The expression to compare against.
-     * @return A new {@link BooleanExpr} representing the greater than comparison.
+     * @return A new {@link BooleanExpression} representing the greater than comparison.
      */
-    export function gt(fieldName: string, expression: Expr): BooleanExpr;
+    export function greaterThan(
+      fieldName: string,
+      expression: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's value is greater than a constant value.
      *
      * ```typescript
      * // Check if the 'price' field is greater than 100
-     * gt("price", 100);
+     * greaterThan("price", 100);
      * ```
      *
      * @param fieldName The name of the field to compare.
      * @param value The constant value to compare to.
-     * @return A new {@link BooleanExpr} representing the greater than comparison.
+     * @return A new {@link BooleanExpression} representing the greater than comparison.
      */
-    export function gt(fieldName: string, value: unknown): BooleanExpr;
+    export function greaterThan(
+      fieldName: string,
+      value: unknown
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if the first expression is greater than or equal to the
@@ -6042,14 +6215,17 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'quantity' field is greater than or equal to the field "threshold"
-     * gte(field("quantity"), field("threshold"));
+     * greaterThanOrEqual(field("quantity"), field("threshold"));
      * ```
      *
      * @param left The first expression to compare.
      * @param right The second expression to compare.
-     * @return A new `Expr` representing the greater than or equal to comparison.
+     * @return A new `Expression` representing the greater than or equal to comparison.
      */
-    export function gte(left: Expr, right: Expr): BooleanExpr;
+    export function greaterThanOrEqual(
+      left: Expression,
+      right: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if an expression is greater than or equal to a constant
@@ -6057,28 +6233,34 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'quantity' field is greater than or equal to 10
-     * gte(field("quantity"), 10);
+     * greaterThanOrEqual(field("quantity"), 10);
      * ```
      *
      * @param expression The expression to compare.
      * @param value The constant value to compare to.
-     * @return A new `Expr` representing the greater than or equal to comparison.
+     * @return A new `Expression` representing the greater than or equal to comparison.
      */
-    export function gte(expression: Expr, value: unknown): BooleanExpr;
+    export function greaterThanOrEqual(
+      expression: Expression,
+      value: unknown
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's value is greater than or equal to an expression.
      *
      * ```typescript
      * // Check if the value of field 'age' is greater than or equal to the value of field 'limit'
-     * gte("age", field("limit"));
+     * greaterThanOrEqual("age", field("limit"));
      * ```
      *
      * @param fieldName The field name to compare.
      * @param value The expression to compare to.
-     * @return A new `Expr` representing the greater than or equal to comparison.
+     * @return A new `Expression` representing the greater than or equal to comparison.
      */
-    export function gte(fieldName: string, value: Expr): BooleanExpr;
+    export function greaterThanOrEqual(
+      fieldName: string,
+      value: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's value is greater than or equal to a constant
@@ -6086,14 +6268,60 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'score' field is greater than or equal to 80
-     * gte("score", 80);
+     * greaterThanOrEqual("score", 80);
      * ```
      *
      * @param fieldName The field name to compare.
      * @param value The constant value to compare to.
-     * @return A new `Expr` representing the greater than or equal to comparison.
+     * @return A new `Expression` representing the greater than or equal to comparison.
      */
-    export function gte(fieldName: string, value: unknown): BooleanExpr;
+    export function greaterThanOrEqual(
+      fieldName: string,
+      value: unknown
+    ): BooleanExpression;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that concatenates an array expression with other arrays.
+     *
+     * ```typescript
+     * // Combine the 'items' array with two new item arrays
+     * arrayConcat(field("items"), [field("newItems"), field("otherItems")]);
+     * ```
+     *
+     * @param firstArray The first array expression to concatenate to.
+     * @param secondArray The second array expression or array literal to concatenate to.
+     * @param otherArrays Optional additional array expressions or array literals to concatenate.
+     * @return A new {@code Expr} representing the concatenated array.
+     */
+    export function arrayConcat(
+      firstArray: Expression,
+      secondArray: Expression | unknown[],
+      ...otherArrays: Array<Expression | unknown[]>
+    ): FunctionExpression;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that concatenates a field's array value with other arrays.
+     *
+     * ```typescript
+     * // Combine the 'items' array with two new item arrays
+     * arrayConcat("items", [field("newItems"), field("otherItems")]);
+     * ```
+     *
+     * @param firstArrayField The first array to concatenate to.
+     * @param secondArray The second array expression or array literal to concatenate to.
+     * @param otherArrays Optional additional array expressions or array literals to concatenate.
+     * @return A new {@code Expr} representing the concatenated array.
+     */
+    export function arrayConcat(
+      firstArrayField: string,
+      secondArray: Expression | unknown[],
+      ...otherArrays: Array<Expression | unknown[]>
+    ): FunctionExpression;
+
     /**
      * @beta
      * Creates an expression that checks if an array expression contains a specific element.
@@ -6105,9 +6333,12 @@ declare namespace FirebaseFirestore {
      *
      * @param array The array expression to check.
      * @param element The element to search for in the array.
-     * @return A new {@code Expr} representing the 'array_contains' comparison.
+     * @return A new {@code Expression} representing the 'array_contains' comparison.
      */
-    export function arrayContains(array: Expr, element: Expr): FunctionExpr;
+    export function arrayContains(
+      array: Expression,
+      element: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that checks if an array expression contains a specific element.
@@ -6119,9 +6350,12 @@ declare namespace FirebaseFirestore {
      *
      * @param array The array expression to check.
      * @param element The element to search for in the array.
-     * @return A new {@code Expr} representing the 'array_contains' comparison.
+     * @return A new {@code Expression} representing the 'array_contains' comparison.
      */
-    export function arrayContains(array: Expr, element: unknown): FunctionExpr;
+    export function arrayContains(
+      array: Expression,
+      element: unknown
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's array value contains a specific element.
@@ -6133,12 +6367,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The field name to check.
      * @param element The element to search for in the array.
-     * @return A new {@code Expr} representing the 'array_contains' comparison.
+     * @return A new {@code Expression} representing the 'array_contains' comparison.
      */
     export function arrayContains(
       fieldName: string,
-      element: Expr
-    ): FunctionExpr;
+      element: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's array value contains a specific value.
@@ -6150,12 +6384,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The field name to check.
      * @param element The element to search for in the array.
-     * @return A new {@code Expr} representing the 'array_contains' comparison.
+     * @return A new {@code Expression} representing the 'array_contains' comparison.
      */
     export function arrayContains(
       fieldName: string,
       element: unknown
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if an array expression contains any of the specified
@@ -6168,12 +6402,12 @@ declare namespace FirebaseFirestore {
      *
      * @param array The array expression to check.
      * @param values The elements to check for in the array.
-     * @return A new {@code Expr} representing the 'array_contains_any' comparison.
+     * @return A new {@code Expression} representing the 'array_contains_any' comparison.
      */
     export function arrayContainsAny(
-      array: Expr,
-      values: Array<Expr | unknown>
-    ): BooleanExpr;
+      array: Expression,
+      values: Array<Expression | unknown>
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's array value contains any of the specified
@@ -6187,12 +6421,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The field name to check.
      * @param values The elements to check for in the array.
-     * @return A new {@code Expr} representing the 'array_contains_any' comparison.
+     * @return A new {@code Expression} representing the 'array_contains_any' comparison.
      */
     export function arrayContainsAny(
       fieldName: string,
-      values: Array<Expr | unknown>
-    ): BooleanExpr;
+      values: Array<Expression | unknown>
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if an array expression contains any of the specified
@@ -6205,9 +6439,12 @@ declare namespace FirebaseFirestore {
      *
      * @param array The array expression to check.
      * @param values An expression that evaluates to an array, whose elements to check for in the array.
-     * @return A new {@code Expr} representing the 'array_contains_any' comparison.
+     * @return A new {@code Expression} representing the 'array_contains_any' comparison.
      */
-    export function arrayContainsAny(array: Expr, values: Expr): BooleanExpr;
+    export function arrayContainsAny(
+      array: Expression,
+      values: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's array value contains any of the specified
@@ -6221,12 +6458,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The field name to check.
      * @param values An expression that evaluates to an array, whose elements to check for in the array field.
-     * @return A new {@code Expr} representing the 'array_contains_any' comparison.
+     * @return A new {@code Expression} representing the 'array_contains_any' comparison.
      */
     export function arrayContainsAny(
       fieldName: string,
-      values: Expr
-    ): BooleanExpr;
+      values: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if an array expression contains all the specified elements.
@@ -6238,12 +6475,12 @@ declare namespace FirebaseFirestore {
      *
      * @param array The array expression to check.
      * @param values The elements to check for in the array.
-     * @return A new {@code Expr} representing the 'array_contains_all' comparison.
+     * @return A new {@code Expression} representing the 'array_contains_all' comparison.
      */
     export function arrayContainsAll(
-      array: Expr,
-      values: Array<Expr | unknown>
-    ): BooleanExpr;
+      array: Expression,
+      values: Array<Expression | unknown>
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's array value contains all the specified values or
@@ -6256,12 +6493,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The field name to check.
      * @param values The elements to check for in the array.
-     * @return A new {@code Expr} representing the 'array_contains_all' comparison.
+     * @return A new {@code Expression} representing the 'array_contains_all' comparison.
      */
     export function arrayContainsAll(
       fieldName: string,
-      values: Array<Expr | unknown>
-    ): BooleanExpr;
+      values: Array<Expression | unknown>
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if an array expression contains all the specified elements.
@@ -6280,12 +6517,12 @@ declare namespace FirebaseFirestore {
      *
      * @param array An expression evaluating to the array to check.
      * @param arrayExpression An expression evaluating to an array of elements to check for.
-     * @return A new {@code BooleanExpr} representing the 'array_contains_all' comparison.
+     * @return A new {@code BooleanExpression} representing the 'array_contains_all' comparison.
      */
     export function arrayContainsAll(
-      array: Expr,
-      arrayExpression: Expr
-    ): BooleanExpr;
+      array: Expression,
+      arrayExpression: Expression
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -6298,12 +6535,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The name of the array field to check.
      * @param arrayExpression An expression that evaluates to an array of values to check for.
-     * @return A new {@code BooleanExpr} representing the 'array_contains_all' comparison.
+     * @return A new {@code BooleanExpression} representing the 'array_contains_all' comparison.
      */
     export function arrayContainsAll(
       fieldName: string,
-      arrayExpression: Expr
-    ): BooleanExpr;
+      arrayExpression: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that calculates the length of an array in a specified field.
@@ -6314,9 +6551,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field containing an array to calculate the length of.
-     * @return A new {@code Expr} representing the length of the array.
+     * @return A new {@code Expression} representing the length of the array.
      */
-    export function arrayLength(fieldName: string): FunctionExpr;
+    export function arrayLength(fieldName: string): FunctionExpression;
     /**
      * @beta
      * Creates an expression that calculates the length of an array expression.
@@ -6327,9 +6564,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param array The array expression to calculate the length of.
-     * @return A new {@code Expr} representing the length of the array.
+     * @return A new {@code Expression} representing the length of the array.
      */
-    export function arrayLength(array: Expr): FunctionExpr;
+    export function arrayLength(array: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that checks if an expression, when evaluated, is equal to any of the provided values or
@@ -6337,31 +6574,34 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'category' field is either "Electronics" or value of field 'primaryType'
-     * eqAny(field("category"), [constant("Electronics"), field("primaryType")]);
+     * equalAny(field("category"), [constant("Electronics"), field("primaryType")]);
      * ```
      *
      * @param expression The expression whose results to compare.
      * @param values The values to check against.
-     * @return A new {@code Expr} representing the 'IN' comparison.
+     * @return A new {@code Expression} representing the 'IN' comparison.
      */
-    export function eqAny(
-      expression: Expr,
-      values: Array<Expr | unknown>
-    ): BooleanExpr;
+    export function equalAny(
+      expression: Expression,
+      values: Array<Expression | unknown>
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if an expression is equal to any of the provided values.
      *
      * ```typescript
      * // Check if the 'category' field is set to a value in the disabledCategories field
-     * eqAny(field("category"), field('disabledCategories'));
+     * equalAny(field("category"), field('disabledCategories'));
      * ```
      *
      * @param expression The expression whose results to compare.
      * @param arrayExpression An expression that evaluates to an array, whose elements to check for equality to the input.
-     * @return A new {@code Expr} representing the 'IN' comparison.
+     * @return A new {@code Expression} representing the 'IN' comparison.
      */
-    export function eqAny(expression: Expr, arrayExpression: Expr): BooleanExpr;
+    export function equalAny(
+      expression: Expression,
+      arrayExpression: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's value is equal to any of the provided values or
@@ -6369,17 +6609,17 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'category' field is either "Electronics" or value of field 'primaryType'
-     * eqAny("category", [constant("Electronics"), field("primaryType")]);
+     * equalAny("category", [constant("Electronics"), field("primaryType")]);
      * ```
      *
      * @param fieldName The field to compare.
      * @param values The values to check against.
-     * @return A new {@code Expr} representing the 'IN' comparison.
+     * @return A new {@code Expression} representing the 'IN' comparison.
      */
-    export function eqAny(
+    export function equalAny(
       fieldName: string,
-      values: Array<Expr | unknown>
-    ): BooleanExpr;
+      values: Array<Expression | unknown>
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -6390,17 +6630,17 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'category' field's value is present in the 'allowedCategories' array field.
-     * eqAny("category", field("allowedCategories"));
+     * equalAny("category", field("allowedCategories"));
      * ```
      *
      * @param fieldName The name of the field to compare.
      * @param arrayExpression An expression that evaluates to an array. The function checks if the value of `fieldName` is equal to any element within this array.
-     * @return A new {@code BooleanExpr} representing the 'IN' comparison.
+     * @return A new {@code BooleanExpression} representing the 'IN' comparison.
      */
-    export function eqAny(
+    export function equalAny(
       fieldName: string,
-      arrayExpression: Expr
-    ): BooleanExpr;
+      arrayExpression: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if an expression is not equal to any of the provided values
@@ -6408,17 +6648,17 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
-     * notEqAny(field("status"), ["pending", field("rejectedStatus")]);
+     * notEqualAny(field("status"), ["pending", field("rejectedStatus")]);
      * ```
      *
      * @param element The expression to compare.
      * @param values The values to check against.
-     * @return A new {@code Expr} representing the 'NOT IN' comparison.
+     * @return A new {@code Expression} representing the 'NOT IN' comparison.
      */
-    export function notEqAny(
-      element: Expr,
-      values: Array<Expr | unknown>
-    ): BooleanExpr;
+    export function notEqualAny(
+      element: Expression,
+      values: Array<Expression | unknown>
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's value is not equal to any of the provided values
@@ -6426,17 +6666,17 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'status' field is neither "pending" nor the value of 'rejectedStatus'
-     * notEqAny("status", [constant("pending"), field("rejectedStatus")]);
+     * notEqualAny("status", [constant("pending"), field("rejectedStatus")]);
      * ```
      *
      * @param fieldName The field name to compare.
      * @param values The values to check against.
-     * @return A new {@code Expr} representing the 'NOT IN' comparison.
+     * @return A new {@code Expression} representing the 'NOT IN' comparison.
      */
-    export function notEqAny(
+    export function notEqualAny(
       fieldName: string,
-      values: Array<Expr | unknown>
-    ): BooleanExpr;
+      values: Array<Expression | unknown>
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -6445,31 +6685,34 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Check if the 'status' field is not present in the array stored in the 'invalidStatuses' field.
-     * notEqAny(field("status"), field("invalidStatuses"));
+     * notEqualAny(field("status"), field("invalidStatuses"));
      * ```
      *
      * @param element The expression representing the value to check.
      * @param arrayExpression An expression that evaluates to an array of values to check against.
-     * @return A new {@code BooleanExpr} representing the 'NOT IN' comparison.
+     * @return A new {@code BooleanExpression} representing the 'NOT IN' comparison.
      */
-    export function notEqAny(element: Expr, arrayExpression: Expr): BooleanExpr;
+    export function notEqualAny(
+      element: Expression,
+      arrayExpression: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's value is not equal to any of the values in the evaluated expression.
      *
      * ```typescript
      * // Check if the 'status' field is not equal to any value in the field 'rejectedStatuses'
-     * notEqAny("status", field("rejectedStatuses"));
+     * notEqualAny("status", field("rejectedStatuses"));
      * ```
      *
      * @param fieldName The field name to compare.
      * @param arrayExpression The values to check against.
-     * @return A new {@code Expr} representing the 'NOT IN' comparison.
+     * @return A new {@code Expression} representing the 'NOT IN' comparison.
      */
-    export function notEqAny(
+    export function notEqualAny(
       fieldName: string,
-      arrayExpression: Expr
-    ): BooleanExpr;
+      arrayExpression: Expression
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -6480,22 +6723,22 @@ declare namespace FirebaseFirestore {
      * // Check if exactly one of the conditions is true: 'age' greater than 18, 'city' is "London",
      * // or 'status' is "active".
      * const condition = xor(
-     *     gt("age", 18),
-     *     eq("city", "London"),
-     *     eq("status", "active")
+     *     greaterThan("age", 18),
+     *     equal("city", "London"),
+     *     equal("status", "active")
      * );
      * ```
      *
      * @param first The first Boolean expression.
      * @param second The second Boolean expression.
      * @param additionalConditions Optional: Additional Boolean expressions to include in the XOR operation.
-     * @returns A new {@link BooleanExpr} representing the logical 'XOR' operation.
+     * @returns A new {@link BooleanExpression} representing the logical 'XOR' operation.
      */
     export function xor(
-      first: BooleanExpr,
-      second: BooleanExpr,
-      ...additionalConditions: BooleanExpr[]
-    ): BooleanExpr;
+      first: BooleanExpression,
+      second: BooleanExpression,
+      ...additionalConditions: BooleanExpression[]
+    ): BooleanExpression;
     /**
      * @beta
      * Creates a conditional expression that evaluates to a 'then' expression if a condition is true
@@ -6503,33 +6746,33 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // If 'age' is greater than 18, return "Adult"; otherwise, return "Minor".
-     * cond(
-     *     gt("age", 18), constant("Adult"), constant("Minor"));
+     * conditional(
+     *     greaterThan("age", 18), constant("Adult"), constant("Minor"));
      * ```
      *
      * @param condition The condition to evaluate.
      * @param thenExpr The expression to evaluate if the condition is true.
      * @param elseExpr The expression to evaluate if the condition is false.
-     * @return A new {@code Expr} representing the conditional expression.
+     * @return A new {@code Expression} representing the conditional expression.
      */
-    export function cond(
-      condition: BooleanExpr,
-      thenExpr: Expr,
-      elseExpr: Expr
-    ): FunctionExpr;
+    export function conditional(
+      condition: BooleanExpression,
+      thenExpr: Expression,
+      elseExpr: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that negates a filter condition.
      *
      * ```typescript
      * // Find documents where the 'completed' field is NOT true
-     * not(eq("completed", true));
+     * not(equal("completed", true));
      * ```
      *
      * @param booleanExpr The filter condition to negate.
-     * @return A new {@code Expr} representing the negated filter condition.
+     * @return A new {@code Expression} representing the negated filter condition.
      */
-    export function not(booleanExpr: BooleanExpr): BooleanExpr;
+    export function not(booleanExpr: BooleanExpression): BooleanExpression;
     /**
      * @beta
      * Creates an expression that returns the largest value between multiple input
@@ -6544,13 +6787,13 @@ declare namespace FirebaseFirestore {
      * @param first The first operand expression.
      * @param second The second expression or literal.
      * @param others Optional additional expressions or literals.
-     * @return A new {@code Expr} representing the logical max operation.
+     * @return A new {@code Expression} representing the logical max operation.
      */
     export function logicalMaximum(
-      first: Expr,
-      second: Expr | unknown,
-      ...others: Array<Expr | unknown>
-    ): FunctionExpr;
+      first: Expression,
+      second: Expression | unknown,
+      ...others: Array<Expression | unknown>
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that returns the largest value between multiple input
@@ -6565,13 +6808,13 @@ declare namespace FirebaseFirestore {
      * @param fieldName The first operand field name.
      * @param second The second expression or literal.
      * @param others Optional additional expressions or literals.
-     * @return A new {@code Expr} representing the logical max operation.
+     * @return A new {@code Expression} representing the logical max operation.
      */
     export function logicalMaximum(
       fieldName: string,
-      second: Expr | unknown,
-      ...others: Array<Expr | unknown>
-    ): FunctionExpr;
+      second: Expression | unknown,
+      ...others: Array<Expression | unknown>
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that returns the smallest value between multiple input
@@ -6586,13 +6829,13 @@ declare namespace FirebaseFirestore {
      * @param first The first operand expression.
      * @param second The second expression or literal.
      * @param others Optional additional expressions or literals.
-     * @return A new {@code Expr} representing the logical min operation.
+     * @return A new {@code Expression} representing the logical min operation.
      */
     export function logicalMinimum(
-      first: Expr,
-      second: Expr | unknown,
-      ...others: Array<Expr | unknown>
-    ): FunctionExpr;
+      first: Expression,
+      second: Expression | unknown,
+      ...others: Array<Expression | unknown>
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that returns the smallest value between a field's value
@@ -6608,13 +6851,13 @@ declare namespace FirebaseFirestore {
      * @param fieldName The first operand field name.
      * @param second The second expression or literal.
      * @param others Optional additional expressions or literals.
-     * @return A new {@code Expr} representing the logical min operation.
+     * @return A new {@code Expression} representing the logical min operation.
      */
     export function logicalMinimum(
       fieldName: string,
-      second: Expr | unknown,
-      ...others: Array<Expr | unknown>
-    ): FunctionExpr;
+      second: Expression | unknown,
+      ...others: Array<Expression | unknown>
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -6626,9 +6869,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param value An expression representing the field to check for existence.
-     * @return A new {@code BooleanExpr} representing the 'exists' check.
+     * @return A new {@code BooleanExpression} representing the 'exists' check.
      */
-    export function exists(value: Expr): BooleanExpr;
+    export function exists(value: Expression): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field exists.
@@ -6639,37 +6882,10 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The field name to check.
-     * @return A new {@code Expr} representing the 'exists' check.
+     * @return A new {@code Expression} representing the 'exists' check.
      */
-    export function exists(fieldName: string): BooleanExpr;
+    export function exists(fieldName: string): BooleanExpression;
 
-    /**
-     * @beta
-     * Creates an expression that checks if an expression evaluates to 'NaN' (Not a Number).
-     *
-     * ```typescript
-     * // Check if the result of a calculation is NaN
-     * isNan(field("value").divide(0));
-     * ```
-     *
-     * @param value The expression to check.
-     * @return A new {@code Expr} representing the 'isNaN' check.
-     */
-    export function isNan(value: Expr): BooleanExpr;
-
-    /**
-     * @beta
-     * Creates an expression that checks if a field's value evaluates to 'NaN' (Not a Number).
-     *
-     * ```typescript
-     * // Check if the result of a calculation is NaN
-     * isNan("value");
-     * ```
-     *
-     * @param fieldName The name of the field to check.
-     * @return A new {@code BooleanExpr} representing the 'isNan' check.
-     */
-    export function isNan(fieldName: string): BooleanExpr;
     /**
      * @beta
      * Creates an expression that reverses a string.
@@ -6680,9 +6896,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param stringExpression An expression evaluating to a string value, which will be reversed.
-     * @return A new {@code Expr} representing the reversed string.
+     * @return A new {@code Expression} representing the reversed string.
      */
-    export function reverse(stringExpression: Expr): FunctionExpr;
+    export function reverse(stringExpression: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that reverses a string value in the specified field.
@@ -6693,9 +6909,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param field The name of the field representing the string to reverse.
-     * @return A new {@code Expr} representing the reversed string.
+     * @return A new {@code Expression} representing the reversed string.
      */
-    export function reverse(field: string): FunctionExpr;
+    export function reverse(field: string): FunctionExpression;
     /**
      * @beta
      * Creates an expression that reverses an array.
@@ -6706,9 +6922,11 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param arrayExpression An expression evaluating to an array value, which will be reversed.
-     * @return A new {@code Expr} representing the reversed array.
+     * @return A new {@code Expression} representing the reversed array.
      */
-    export function arrayReverse(arrayExpression: Expr): FunctionExpr;
+    export function arrayReverse(
+      arrayExpression: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that reverses an array.
@@ -6719,9 +6937,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field to reverse.
-     * @return A new {@code Expr} representing the reversed array.
+     * @return A new {@code Expression} representing the reversed array.
      */
-    export function arrayReverse(fieldName: string): FunctionExpr;
+    export function arrayReverse(fieldName: string): FunctionExpression;
     /**
      * @beta
      * Creates an expression that computes the ceiling of a numeric value.
@@ -6732,9 +6950,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param expression An expression evaluating to a numeric value, which the ceiling will be computed for.
-     * @return A new {@code Expr} representing the ceiling of the numeric value.
+     * @return A new {@code Expression} representing the ceiling of the numeric value.
      */
-    export function ceil(expression: Expr): FunctionExpr;
+    export function ceil(expression: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that computes the ceiling of a numeric value.
@@ -6745,9 +6963,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field to compute the ceiling of.
-     * @return A new {@code Expr} representing the ceiling of the numeric value.
+     * @return A new {@code Expression} representing the ceiling of the numeric value.
      */
-    export function ceil(fieldName: string): FunctionExpr;
+    export function ceil(fieldName: string): FunctionExpression;
 
     /**
      * @beta
@@ -6761,9 +6979,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param expression An expression evaluating to a numeric value, which will be used as the exponent for `e`.
-     * @returns A new {@link FunctionExpr} representing `e` raised to the power of the input expression's result.
+     * @returns A new {@link FunctionExpression} representing `e` raised to the power of the input expression's result.
      */
-    export function exp(expression: Expr): FunctionExpr;
+    export function exp(expression: Expression): FunctionExpression;
 
     /**
      * @beta
@@ -6775,9 +6993,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field whose numeric value will be used as the exponent.
-     * @return A new {@code FunctionExpr} representing 'e' raised to the power of the numeric value.
+     * @return A new {@code FunctionExpression} representing 'e' raised to the power of the numeric value.
      */
-    export function exp(fieldName: string): FunctionExpr;
+    export function exp(fieldName: string): FunctionExpression;
     /**
      * @beta
      * Creates an aggregation that counts the number of distinct values of an evaluated expression.
@@ -6785,7 +7003,7 @@ declare namespace FirebaseFirestore {
      * @param expression The expression to count distinct values of.
      * @return A new `AggregateFunction` representing the 'count_distinct' aggregation.
      */
-    export function countDistinct(expression: Expr): AggregateFunction;
+    export function countDistinct(expression: Expression): AggregateFunction;
     /**
      * @beta
      * Creates an aggregation that counts the number of distinct values of a field.
@@ -6804,9 +7022,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param expr The expression representing the string.
-     * @return A new {@code Expr} representing the length of the string in bytes.
+     * @return A new {@code Expression} representing the length of the string in bytes.
      */
-    export function byteLength(expr: Expr): FunctionExpr;
+    export function byteLength(expr: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that calculates the length of a string represented by a field in UTF-8 bytes, or just the length of a Blob.
@@ -6817,9 +7035,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field containing the string.
-     * @return A new {@code Expr} representing the length of the string in bytes.
+     * @return A new {@code Expression} representing the length of the string in bytes.
      */
-    export function byteLength(fieldName: string): FunctionExpr;
+    export function byteLength(fieldName: string): FunctionExpression;
 
     /**
      * @beta
@@ -6831,9 +7049,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field containing the string.
-     * @return A new {@code Expr} representing the length of the string.
+     * @return A new {@code Expression} representing the length of the string.
      */
-    export function charLength(fieldName: string): FunctionExpr;
+    export function charLength(fieldName: string): FunctionExpression;
 
     /**
      * @beta
@@ -6845,9 +7063,11 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param stringExpression The expression representing the string to calculate the length of.
-     * @return A new {@code Expr} representing the length of the string.
+     * @return A new {@code Expression} representing the length of the string.
      */
-    export function charLength(stringExpression: Expr): FunctionExpr;
+    export function charLength(
+      stringExpression: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that performs a case-sensitive wildcard string comparison against a
@@ -6860,9 +7080,9 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The name of the field containing the string.
      * @param pattern The pattern to search for. You can use "%" as a wildcard character.
-     * @return A new {@code Expr} representing the 'like' comparison.
+     * @return A new {@code Expression} representing the 'like' comparison.
      */
-    export function like(fieldName: string, pattern: string): BooleanExpr;
+    export function like(fieldName: string, pattern: string): BooleanExpression;
     /**
      * @beta
      * Creates an expression that performs a case-sensitive wildcard string comparison against a
@@ -6875,9 +7095,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The name of the field containing the string.
      * @param pattern The pattern to search for. You can use "%" as a wildcard character.
-     * @return A new {@code Expr} representing the 'like' comparison.
+     * @return A new {@code Expression} representing the 'like' comparison.
      */
-    export function like(fieldName: string, pattern: Expr): BooleanExpr;
+    export function like(
+      fieldName: string,
+      pattern: Expression
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -6890,9 +7113,12 @@ declare namespace FirebaseFirestore {
      *
      * @param stringExpression The expression representing the string to perform the comparison on.
      * @param pattern The pattern to search for. You can use "%" as a wildcard character.
-     * @return A new {@code BooleanExpr} representing the 'like' comparison.
+     * @return A new {@code BooleanExpression} representing the 'like' comparison.
      */
-    export function like(stringExpression: Expr, pattern: string): BooleanExpr;
+    export function like(
+      stringExpression: Expression,
+      pattern: string
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that performs a case-sensitive wildcard string comparison.
@@ -6904,9 +7130,12 @@ declare namespace FirebaseFirestore {
      *
      * @param stringExpression The expression representing the string to perform the comparison on.
      * @param pattern The pattern to search for. You can use "%" as a wildcard character.
-     * @return A new {@code Expr} representing the 'like' comparison.
+     * @return A new {@code Expression} representing the 'like' comparison.
      */
-    export function like(stringExpression: Expr, pattern: Expr): BooleanExpr;
+    export function like(
+      stringExpression: Expression,
+      pattern: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a string field contains a specified regular expression as
@@ -6919,12 +7148,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The name of the field containing the string.
      * @param pattern The regular expression to use for the search.
-     * @return A new {@code Expr} representing the 'contains' comparison.
+     * @return A new {@code Expression} representing the 'contains' comparison.
      */
     export function regexContains(
       fieldName: string,
       pattern: string
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a string field contains a specified regular expression as
@@ -6937,12 +7166,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The name of the field containing the string.
      * @param pattern The regular expression to use for the search.
-     * @return A new {@code Expr} representing the 'contains' comparison.
+     * @return A new {@code Expression} representing the 'contains' comparison.
      */
     export function regexContains(
       fieldName: string,
-      pattern: Expr
-    ): BooleanExpr;
+      pattern: Expression
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -6956,12 +7185,12 @@ declare namespace FirebaseFirestore {
      *
      * @param stringExpression The expression representing the string to perform the regex comparison on.
      * @param pattern The regular expression string to search for within the `stringExpression`.
-     * @return A new {@code BooleanExpr} representing the result of the regex contains comparison.
+     * @return A new {@code BooleanExpression} representing the result of the regex contains comparison.
      */
     export function regexContains(
-      stringExpression: Expr,
+      stringExpression: Expression,
       pattern: string
-    ): BooleanExpr;
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -6978,12 +7207,12 @@ declare namespace FirebaseFirestore {
      *
      * @param stringExpression The expression representing the string to perform the comparison on.
      * @param pattern The regular expression to use for the search.
-     * @return A new {@code BooleanExpr} representing the 'contains' comparison.
+     * @return A new {@code BooleanExpression} representing the 'contains' comparison.
      */
     export function regexContains(
-      stringExpression: Expr,
-      pattern: Expr
-    ): BooleanExpr;
+      stringExpression: Expression,
+      pattern: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a string field matches a specified regular expression.
@@ -6995,15 +7224,18 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The name of the field containing the string.
      * @param pattern The regular expression to use for the match.
-     * @return A new {@code Expr} representing the regular expression match.
+     * @return A new {@code Expression} representing the regular expression match.
      */
-    export function regexMatch(fieldName: string, pattern: string): BooleanExpr;
+    export function regexMatch(
+      fieldName: string,
+      pattern: string
+    ): BooleanExpression;
 
     /**
      * @beta
      * Creates an expression that checks if a string field matches a specified regular expression.
      *
-     * The `pattern` parameter is an {@link Expr} that evaluates to the regular expression string.
+     * The `pattern` parameter is an {@link Expression} that evaluates to the regular expression string.
      * This allows for dynamic regex patterns, such as those stored in other fields.
      *
      * ```typescript
@@ -7012,10 +7244,13 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field containing the string value to be matched.
-     * @param pattern An {@link Expr} that evaluates to the regular expression string to use for the match.
-     * @return A new {@link BooleanExpr} representing the result of the regular expression match.
+     * @param pattern An {@link Expression} that evaluates to the regular expression string to use for the match.
+     * @return A new {@link BooleanExpression} representing the result of the regular expression match.
      */
-    export function regexMatch(fieldName: string, pattern: Expr): BooleanExpr;
+    export function regexMatch(
+      fieldName: string,
+      pattern: Expression
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -7029,12 +7264,12 @@ declare namespace FirebaseFirestore {
      *
      * @param stringExpression An expression that evaluates to the string to match against.
      * @param pattern The regular expression to use for the match.
-     * @return A new {@link BooleanExpr} representing the result of the regular expression match.
+     * @return A new {@link BooleanExpression} representing the result of the regular expression match.
      */
     export function regexMatch(
-      stringExpression: Expr,
+      stringExpression: Expression,
       pattern: string
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a string expression matches a specified regular
@@ -7047,80 +7282,80 @@ declare namespace FirebaseFirestore {
      *
      * @param stringExpression The expression representing the string to match against.
      * @param pattern The regular expression to use for the match.
-     * @return A new {@code Expr} representing the regular expression match.
+     * @return A new {@code Expression} representing the regular expression match.
      */
     export function regexMatch(
-      stringExpression: Expr,
-      pattern: Expr
-    ): BooleanExpr;
+      stringExpression: Expression,
+      pattern: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a string field contains a specified substring.
      *
      * ```typescript
      * // Check if the 'description' field contains "example".
-     * strContains("description", "example");
+     * stringContains("description", "example");
      * ```
      *
      * @param fieldName The name of the field containing the string.
      * @param substring The substring to search for.
-     * @return A new {@code Expr} representing the 'contains' comparison.
+     * @return A new {@code Expression} representing the 'contains' comparison.
      */
-    export function strContains(
+    export function stringContains(
       fieldName: string,
       substring: string
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a string field contains a substring specified by an expression.
      *
      * ```typescript
      * // Check if the 'description' field contains the value of the 'keyword' field.
-     * strContains("description", field("keyword"));
+     * stringContains("description", field("keyword"));
      * ```
      *
      * @param fieldName The name of the field containing the string.
      * @param substring The expression representing the substring to search for.
-     * @return A new {@code Expr} representing the 'contains' comparison.
+     * @return A new {@code Expression} representing the 'contains' comparison.
      */
-    export function strContains(
+    export function stringContains(
       fieldName: string,
-      substring: Expr
-    ): BooleanExpr;
+      substring: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a string expression contains a specified substring.
      *
      * ```typescript
      * // Check if the 'description' field contains "example".
-     * strContains(field("description"), "example");
+     * stringContains(field("description"), "example");
      * ```
      *
      * @param stringExpression The expression representing the string to perform the comparison on.
      * @param substring The substring to search for.
-     * @return A new {@code Expr} representing the 'contains' comparison.
+     * @return A new {@code Expression} representing the 'contains' comparison.
      */
-    export function strContains(
-      stringExpression: Expr,
+    export function stringContains(
+      stringExpression: Expression,
       substring: string
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a string expression contains a substring specified by another expression.
      *
      * ```typescript
      * // Check if the 'description' field contains the value of the 'keyword' field.
-     * strContains(field("description"), field("keyword"));
+     * stringContains(field("description"), field("keyword"));
      * ```
      *
      * @param stringExpression The expression representing the string to perform the comparison on.
      * @param substring The expression representing the substring to search for.
-     * @return A new {@code Expr} representing the 'contains' comparison.
+     * @return A new {@code Expression} representing the 'contains' comparison.
      */
-    export function strContains(
-      stringExpression: Expr,
-      substring: Expr
-    ): BooleanExpr;
+    export function stringContains(
+      stringExpression: Expression,
+      substring: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's value starts with a given prefix.
@@ -7132,9 +7367,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The field name to check.
      * @param prefix The prefix to check for.
-     * @return A new {@code Expr} representing the 'starts with' comparison.
+     * @return A new {@code Expression} representing the 'starts with' comparison.
      */
-    export function startsWith(fieldName: string, prefix: string): BooleanExpr;
+    export function startsWith(
+      fieldName: string,
+      prefix: string
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's value starts with a given prefix.
@@ -7146,9 +7384,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The field name to check.
      * @param prefix The expression representing the prefix.
-     * @return A new {@code Expr} representing the 'starts with' comparison.
+     * @return A new {@code Expression} representing the 'starts with' comparison.
      */
-    export function startsWith(fieldName: string, prefix: Expr): BooleanExpr;
+    export function startsWith(
+      fieldName: string,
+      prefix: Expression
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -7161,12 +7402,12 @@ declare namespace FirebaseFirestore {
      *
      * @param stringExpression An expression that evaluates to a string, which will be checked for the prefix.
      * @param prefix The string prefix to check for.
-     * @return A new {@code BooleanExpr} representing the 'starts with' comparison.
+     * @return A new {@code BooleanExpression} representing the 'starts with' comparison.
      */
     export function startsWith(
-      stringExpression: Expr,
+      stringExpression: Expression,
       prefix: string
-    ): BooleanExpr;
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -7179,12 +7420,12 @@ declare namespace FirebaseFirestore {
      *
      * @param stringExpression The string expression to check.
      * @param prefix The prefix expression to check for.
-     * @return A new {@code BooleanExpr} representing the 'starts with' comparison.
+     * @return A new {@code BooleanExpression} representing the 'starts with' comparison.
      */
     export function startsWith(
-      stringExpression: Expr,
-      prefix: Expr
-    ): BooleanExpr;
+      stringExpression: Expression,
+      prefix: Expression
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -7197,9 +7438,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The field name to check.
      * @param suffix The suffix to check for.
-     * @return A new {@link BooleanExpr} representing the 'ends with' comparison.
+     * @return A new {@link BooleanExpression} representing the 'ends with' comparison.
      */
-    export function endsWith(fieldName: string, suffix: string): BooleanExpr;
+    export function endsWith(
+      fieldName: string,
+      suffix: string
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's value ends with a given postfix.
@@ -7211,9 +7455,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The field name to check.
      * @param suffix The expression representing the postfix.
-     * @return A new {@code Expr} representing the 'ends with' comparison.
+     * @return A new {@code Expression} representing the 'ends with' comparison.
      */
-    export function endsWith(fieldName: string, suffix: Expr): BooleanExpr;
+    export function endsWith(
+      fieldName: string,
+      suffix: Expression
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a string expression ends with a given postfix.
@@ -7225,12 +7472,12 @@ declare namespace FirebaseFirestore {
      *
      * @param stringExpression The expression to check.
      * @param suffix The postfix to check for.
-     * @return A new {@code Expr} representing the 'ends with' comparison.
+     * @return A new {@code Expression} representing the 'ends with' comparison.
      */
     export function endsWith(
-      stringExpression: Expr,
+      stringExpression: Expression,
       suffix: string
-    ): BooleanExpr;
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a string expression ends with a given postfix.
@@ -7242,9 +7489,12 @@ declare namespace FirebaseFirestore {
      *
      * @param stringExpression The expression to check.
      * @param suffix The postfix to check for.
-     * @return A new {@code Expr} representing the 'ends with' comparison.
+     * @return A new {@code Expression} representing the 'ends with' comparison.
      */
-    export function endsWith(stringExpression: Expr, suffix: Expr): BooleanExpr;
+    export function endsWith(
+      stringExpression: Expression,
+      suffix: Expression
+    ): BooleanExpression;
 
     /**
      * @beta
@@ -7256,9 +7506,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field containing the string.
-     * @return A new {@code Expr} representing the lowercase string.
+     * @return A new {@code Expression} representing the lowercase string.
      */
-    export function toLower(fieldName: string): FunctionExpr;
+    export function toLower(fieldName: string): FunctionExpression;
 
     /**
      * @beta
@@ -7270,9 +7520,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param stringExpression The expression representing the string to convert to lowercase.
-     * @return A new {@code Expr} representing the lowercase string.
+     * @return A new {@code Expression} representing the lowercase string.
      */
-    export function toLower(stringExpression: Expr): FunctionExpr;
+    export function toLower(stringExpression: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that converts a string field to uppercase.
@@ -7283,9 +7533,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field containing the string.
-     * @return A new {@code Expr} representing the uppercase string.
+     * @return A new {@code Expression} representing the uppercase string.
      */
-    export function toUpper(fieldName: string): FunctionExpr;
+    export function toUpper(fieldName: string): FunctionExpression;
 
     /**
      * @beta
@@ -7297,9 +7547,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param stringExpression The expression representing the string to convert to uppercase.
-     * @return A new {@code FunctionExpr} representing the uppercase string.
+     * @return A new {@code FunctionExpression} representing the uppercase string.
      */
-    export function toUpper(stringExpression: Expr): FunctionExpr;
+    export function toUpper(stringExpression: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that removes leading and trailing whitespace from a string field.
@@ -7310,9 +7560,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field containing the string.
-     * @return A new {@code Expr} representing the trimmed string.
+     * @return A new {@code Expression} representing the trimmed string.
      */
-    export function trim(fieldName: string): FunctionExpr;
+    export function trim(fieldName: string): FunctionExpression;
     /**
      * @beta
      * Creates an expression that removes leading and trailing whitespace from a string expression.
@@ -7323,9 +7573,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param stringExpression The expression representing the string to trim.
-     * @return A new {@code Expr} representing the trimmed string.
+     * @return A new {@code Expression} representing the trimmed string.
      */
-    export function trim(stringExpression: Expr): FunctionExpr;
+    export function trim(stringExpression: Expression): FunctionExpression;
 
     /**
      * @beta
@@ -7333,38 +7583,38 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Combine the 'firstName' field, a space, and the 'lastName' field into a single string.
-     * strConcat("firstName", " ", field("lastName"));
+     * stringConcat("firstName", " ", field("lastName"));
      * ```
      *
      * @param fieldName The name of the field to use as the initial string value for concatenation.
      * @param secondString An expression or string literal to concatenate.
      * @param otherStrings Optional additional expressions or literals (typically strings) to concatenate.
-     * @return A new {@code FunctionExpr} representing the concatenated string.
+     * @return A new {@code FunctionExpression} representing the concatenated string.
      */
-    export function strConcat(
+    export function stringConcat(
       fieldName: string,
-      secondString: Expr | string,
-      ...otherStrings: Array<Expr | string>
-    ): FunctionExpr;
+      secondString: Expression | string,
+      ...otherStrings: Array<Expression | string>
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that concatenates string expressions together.
      *
      * ```typescript
      * // Combine the 'firstName', " ", and 'lastName' fields into a single string
-     * strConcat(field("firstName"), " ", field("lastName"));
+     * stringConcat(field("firstName"), " ", field("lastName"));
      * ```
      *
      * @param firstString The initial string expression to concatenate to.
      * @param secondString An expression or string literal to concatenate.
      * @param otherStrings Optional additional expressions or literals (typically strings) to concatenate.
-     * @return A new {@code Expr} representing the concatenated string.
+     * @return A new {@code Expression} representing the concatenated string.
      */
-    export function strConcat(
-      firstString: Expr,
-      secondString: Expr | string,
-      ...otherStrings: Array<Expr | string>
-    ): FunctionExpr;
+    export function stringConcat(
+      firstString: Expression,
+      secondString: Expression | string,
+      ...otherStrings: Array<Expression | string>
+    ): FunctionExpression;
     /**
      * @beta
      * Accesses a value from a map (object) field using the provided key.
@@ -7376,9 +7626,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The field name of the map field.
      * @param subField The key to access in the map.
-     * @return A new {@code Expr} representing the value associated with the given key in the map.
+     * @return A new {@code Expression} representing the value associated with the given key in the map.
      */
-    export function mapGet(fieldName: string, subField: string): FunctionExpr;
+    export function mapGet(
+      fieldName: string,
+      subField: string
+    ): FunctionExpression;
     /**
      * @beta
      * Accesses a value from a map (object) expression using the provided key.
@@ -7390,9 +7643,12 @@ declare namespace FirebaseFirestore {
      *
      * @param mapExpression The expression representing the map.
      * @param subField The key to access in the map.
-     * @return A new {@code Expr} representing the value associated with the given key in the map.
+     * @return A new {@code Expression} representing the value associated with the given key in the map.
      */
-    export function mapGet(mapExpression: Expr, subField: string): FunctionExpr;
+    export function mapGet(
+      mapExpression: Expression,
+      subField: string
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an aggregation that counts the total number of stage inputs.
@@ -7412,13 +7668,13 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Count the number of items where the price is greater than 10
-     * count(field("price").gt(10)).as("expensiveItemCount");
+     * count(field("price").greaterThan(10)).as("expensiveItemCount");
      * ```
      *
      * @param expression The expression to count.
      * @return A new {@code AggregateFunction} representing the 'count' aggregation.
      */
-    export function count(expression: Expr): AggregateFunction;
+    export function count(expression: Expression): AggregateFunction;
     /**
      * @beta
      * Creates an aggregation that counts the number of stage inputs where the input field exists.
@@ -7445,7 +7701,7 @@ declare namespace FirebaseFirestore {
      * @param expression The expression to sum up.
      * @return A new {@code AggregateFunction} representing the 'sum' aggregation.
      */
-    export function sum(expression: Expr): AggregateFunction;
+    export function sum(expression: Expression): AggregateFunction;
     /**
      * @beta
      * Creates an aggregation that calculates the sum of a field's values across multiple stage
@@ -7467,13 +7723,13 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Calculate the average age of users
-     * avg(field("age")).as("averageAge");
+     * average(field("age")).as("averageAge");
      * ```
      *
      * @param expression The expression representing the values to average.
-     * @return A new {@code AggregateFunction} representing the 'avg' aggregation.
+     * @return A new {@code AggregateFunction} representing the 'average' aggregation.
      */
-    export function avg(expression: Expr): AggregateFunction;
+    export function average(expression: Expression): AggregateFunction;
     /**
      * @beta
      * Creates an aggregation that calculates the average (mean) of a field's values across multiple
@@ -7481,13 +7737,13 @@ declare namespace FirebaseFirestore {
      *
      * ```typescript
      * // Calculate the average age of users
-     * avg("age").as("averageAge");
+     * average("age").as("averageAge");
      * ```
      *
      * @param fieldName The name of the field containing numeric values to average.
-     * @return A new {@code AggregateFunction} representing the 'avg' aggregation.
+     * @return A new {@code AggregateFunction} representing the 'average' aggregation.
      */
-    export function avg(fieldName: string): AggregateFunction;
+    export function average(fieldName: string): AggregateFunction;
     /**
      * @beta
      * Creates an aggregation that finds the minimum value of an expression across multiple stage
@@ -7501,7 +7757,7 @@ declare namespace FirebaseFirestore {
      * @param expression The expression to find the minimum value of.
      * @return A new {@code AggregateFunction} representing the 'min' aggregation.
      */
-    export function minimum(expression: Expr): AggregateFunction;
+    export function minimum(expression: Expression): AggregateFunction;
     /**
      * @beta
      * Creates an aggregation that finds the minimum value of a field across multiple stage inputs.
@@ -7528,7 +7784,7 @@ declare namespace FirebaseFirestore {
      * @param expression The expression to find the maximum value of.
      * @return A new {@code AggregateFunction} representing the 'max' aggregation.
      */
-    export function maximum(expression: Expr): AggregateFunction;
+    export function maximum(expression: Expression): AggregateFunction;
     /**
      * @beta
      * Creates an aggregation that finds the maximum value of a field across multiple stage inputs.
@@ -7553,12 +7809,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The name of the field containing the first vector.
      * @param vector The other vector (as an array of doubles) or {@link VectorValue} to compare against.
-     * @return A new {@code Expr} representing the Cosine distance between the two vectors.
+     * @return A new {@code Expression} representing the Cosine distance between the two vectors.
      */
     export function cosineDistance(
       fieldName: string,
       vector: number[] | VectorValue
-    ): FunctionExpr;
+    ): FunctionExpression;
     /**
      * @beta
      * Calculates the Cosine distance between a field's vector value and a vector expression.
@@ -7569,13 +7825,13 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field containing the first vector.
-     * @param vectorExpression The other vector (represented as an Expr) to compare against.
-     * @return A new {@code Expr} representing the cosine distance between the two vectors.
+     * @param vectorExpression The other vector (represented as an Expression) to compare against.
+     * @return A new {@code Expression} representing the cosine distance between the two vectors.
      */
     export function cosineDistance(
       fieldName: string,
-      vectorExpression: Expr
-    ): FunctionExpr;
+      vectorExpression: Expression
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -7593,14 +7849,14 @@ declare namespace FirebaseFirestore {
      * cosineDistance(field("vector1"), field("vector2"));
      * ```
      *
-     * @param vectorExpression The first vector, represented as an {@link Expr} (e.g., a field path).
-     * @param vector The second vector, which can be either a numeric array literal (`number[]`) or another {@link Expr}.
-     * @return A new {@link FunctionExpr} representing the cosine distance.
+     * @param vectorExpression The first vector, represented as an {@link Expression} (e.g., a field path).
+     * @param vector The second vector, which can be either a numeric array literal (`number[]`) or another {@link Expression}.
+     * @return A new {@link FunctionExpression} representing the cosine distance.
      */
     export function cosineDistance(
-      vectorExpression: Expr,
-      vector: number[] | Expr
-    ): FunctionExpr;
+      vectorExpression: Expression,
+      vector: number[] | Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Calculates the Cosine distance between two vector expressions.
@@ -7610,14 +7866,14 @@ declare namespace FirebaseFirestore {
      * cosineDistance(field("userVector"), field("itemVector"));
      * ```
      *
-     * @param vectorExpression The first vector (represented as an Expr) to compare against.
-     * @param otherVectorExpression The other vector (represented as an Expr) to compare against.
-     * @return A new {@code Expr} representing the cosine distance between the two vectors.
+     * @param vectorExpression The first vector (represented as an Expression) to compare against.
+     * @param otherVectorExpression The other vector (represented as an Expression) to compare against.
+     * @return A new {@code Expression} representing the cosine distance between the two vectors.
      */
     export function cosineDistance(
-      vectorExpression: Expr,
-      otherVectorExpression: Expr
-    ): FunctionExpr;
+      vectorExpression: Expression,
+      otherVectorExpression: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Calculates the dot product between a field's vector value and a double array.
@@ -7629,12 +7885,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The name of the field containing the first vector.
      * @param vector The other vector (as an array of doubles or VectorValue) to calculate with.
-     * @return A new {@code Expr} representing the dot product between the two vectors.
+     * @return A new {@code Expression} representing the dot product between the two vectors.
      */
     export function dotProduct(
       fieldName: string,
       vector: number[] | VectorValue
-    ): FunctionExpr;
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -7646,13 +7902,13 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field containing the first vector.
-     * @param vectorExpression The other vector (represented as an Expr) to calculate with.
-     * @return A new {@code Expr} representing the dot product between the two vectors.
+     * @param vectorExpression The other vector (represented as an Expression) to calculate with.
+     * @return A new {@code Expression} representing the dot product between the two vectors.
      */
     export function dotProduct(
       fieldName: string,
-      vectorExpression: Expr
-    ): FunctionExpr;
+      vectorExpression: Expression
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -7663,14 +7919,14 @@ declare namespace FirebaseFirestore {
      * dotProduct(field("features"), [0.5, 0.8, 0.2]);
      * ```
      *
-     * @param vectorExpression The first vector (represented as an Expr) to calculate with.
+     * @param vectorExpression The first vector (represented as an Expression) to calculate with.
      * @param vector The other vector (as an array of numbers or VectorValue) to calculate with.
-     * @return A new {@code Expr} representing the dot product between the two vectors.
+     * @return A new {@code Expression} representing the dot product between the two vectors.
      */
     export function dotProduct(
-      vectorExpression: Expr,
+      vectorExpression: Expression,
       vector: number[] | VectorValue
-    ): FunctionExpr;
+    ): FunctionExpression;
     /**
      * @beta
      * Calculates the dot product between two vector expressions.
@@ -7680,14 +7936,14 @@ declare namespace FirebaseFirestore {
      * dotProduct(field("docVector1"), field("docVector2"));
      * ```
      *
-     * @param vectorExpression The first vector (represented as an Expr) to calculate with.
-     * @param otherVectorExpression The other vector (represented as an Expr) to calculate with.
-     * @return A new {@code Expr} representing the dot product between the two vectors.
+     * @param vectorExpression The first vector (represented as an Expression) to calculate with.
+     * @param otherVectorExpression The other vector (represented as an Expression) to calculate with.
+     * @return A new {@code Expression} representing the dot product between the two vectors.
      */
     export function dotProduct(
-      vectorExpression: Expr,
-      otherVectorExpression: Expr
-    ): FunctionExpr;
+      vectorExpression: Expression,
+      otherVectorExpression: Expression
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -7701,12 +7957,12 @@ declare namespace FirebaseFirestore {
      *
      * @param fieldName The name of the field containing the first vector.
      * @param vector The other vector (as an array of doubles or VectorValue) to compare against.
-     * @return A new {@code Expr} representing the Euclidean distance between the two vectors.
+     * @return A new {@code Expression} representing the Euclidean distance between the two vectors.
      */
     export function euclideanDistance(
       fieldName: string,
       vector: number[] | VectorValue
-    ): FunctionExpr;
+    ): FunctionExpression;
     /**
      * @beta
      * Calculates the Euclidean distance between a field's vector value and a vector expression.
@@ -7717,13 +7973,13 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field containing the first vector.
-     * @param vectorExpression The other vector (represented as an Expr) to compare against.
-     * @return A new {@code Expr} representing the Euclidean distance between the two vectors.
+     * @param vectorExpression The other vector (represented as an Expression) to compare against.
+     * @return A new {@code Expression} representing the Euclidean distance between the two vectors.
      */
     export function euclideanDistance(
       fieldName: string,
-      vectorExpression: Expr
-    ): FunctionExpr;
+      vectorExpression: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Calculates the Euclidean distance between a vector expression and a double array.
@@ -7734,14 +7990,14 @@ declare namespace FirebaseFirestore {
      * euclideanDistance(field("location"), [37.7749, -122.4194]);
      * ```
      *
-     * @param vectorExpression The first vector (represented as an Expr) to compare against.
+     * @param vectorExpression The first vector (represented as an Expression) to compare against.
      * @param vector The other vector (as an array of doubles or VectorValue) to compare against.
-     * @return A new {@code Expr} representing the Euclidean distance between the two vectors.
+     * @return A new {@code Expression} representing the Euclidean distance between the two vectors.
      */
     export function euclideanDistance(
-      vectorExpression: Expr,
+      vectorExpression: Expression,
       vector: number[] | VectorValue
-    ): FunctionExpr;
+    ): FunctionExpression;
     /**
      * @beta
      * Calculates the Euclidean distance between two vector expressions.
@@ -7751,14 +8007,14 @@ declare namespace FirebaseFirestore {
      * euclideanDistance(field("pointA"), field("pointB"));
      * ```
      *
-     * @param vectorExpression The first vector (represented as an Expr) to compare against.
-     * @param otherVectorExpression The other vector (represented as an Expr) to compare against.
-     * @return A new {@code Expr} representing the Euclidean distance between the two vectors.
+     * @param vectorExpression The first vector (represented as an Expression) to compare against.
+     * @param otherVectorExpression The other vector (represented as an Expression) to compare against.
+     * @return A new {@code Expression} representing the Euclidean distance between the two vectors.
      */
     export function euclideanDistance(
-      vectorExpression: Expr,
-      otherVectorExpression: Expr
-    ): FunctionExpr;
+      vectorExpression: Expression,
+      otherVectorExpression: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that calculates the length of a Firestore Vector.
@@ -7769,9 +8025,11 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param vectorExpression The expression representing the Firestore Vector.
-     * @return A new {@code Expr} representing the length of the array.
+     * @return A new {@code Expression} representing the length of the array.
      */
-    export function vectorLength(vectorExpression: Expr): FunctionExpr;
+    export function vectorLength(
+      vectorExpression: Expression
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -7783,9 +8041,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field representing the Firestore Vector.
-     * @return A new {@code FunctionExpr} representing the length (dimension) of the vector.
+     * @return A new {@code FunctionExpression} representing the length (dimension) of the vector.
      */
-    export function vectorLength(fieldName: string): FunctionExpr;
+    export function vectorLength(fieldName: string): FunctionExpression;
     /**
      * @beta
      * Creates an expression that interprets an expression as the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
@@ -7797,9 +8055,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param expr The expression representing the number of microseconds since epoch.
-     * @return A new {@code Expr} representing the timestamp.
+     * @return A new {@code Expression} representing the timestamp.
      */
-    export function unixMicrosToTimestamp(expr: Expr): FunctionExpr;
+    export function unixMicrosToTimestamp(expr: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that interprets a field's value as the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
@@ -7811,9 +8069,11 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field representing the number of microseconds since epoch.
-     * @return A new {@code Expr} representing the timestamp.
+     * @return A new {@code Expression} representing the timestamp.
      */
-    export function unixMicrosToTimestamp(fieldName: string): FunctionExpr;
+    export function unixMicrosToTimestamp(
+      fieldName: string
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that converts a timestamp expression to the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
@@ -7824,9 +8084,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param expr The expression representing the timestamp.
-     * @return A new {@code Expr} representing the number of microseconds since epoch.
+     * @return A new {@code Expression} representing the number of microseconds since epoch.
      */
-    export function timestampToUnixMicros(expr: Expr): FunctionExpr;
+    export function timestampToUnixMicros(expr: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that converts a timestamp field to the number of microseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
@@ -7837,9 +8097,11 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field representing the timestamp.
-     * @return A new {@code Expr} representing the number of microseconds since epoch.
+     * @return A new {@code Expression} representing the number of microseconds since epoch.
      */
-    export function timestampToUnixMicros(fieldName: string): FunctionExpr;
+    export function timestampToUnixMicros(
+      fieldName: string
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that interprets an expression as the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
@@ -7851,9 +8113,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param expr The expression representing the number of milliseconds since epoch.
-     * @return A new {@code Expr} representing the timestamp.
+     * @return A new {@code Expression} representing the timestamp.
      */
-    export function unixMillisToTimestamp(expr: Expr): FunctionExpr;
+    export function unixMillisToTimestamp(expr: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that interprets a field's value as the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC)
@@ -7865,9 +8127,11 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field representing the number of milliseconds since epoch.
-     * @return A new {@code Expr} representing the timestamp.
+     * @return A new {@code Expression} representing the timestamp.
      */
-    export function unixMillisToTimestamp(fieldName: string): FunctionExpr;
+    export function unixMillisToTimestamp(
+      fieldName: string
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that converts a timestamp expression to the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
@@ -7878,9 +8142,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param expr The expression representing the timestamp.
-     * @return A new {@code Expr} representing the number of milliseconds since epoch.
+     * @return A new {@code Expression} representing the number of milliseconds since epoch.
      */
-    export function timestampToUnixMillis(expr: Expr): FunctionExpr;
+    export function timestampToUnixMillis(expr: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that converts a timestamp field to the number of milliseconds since the Unix epoch (1970-01-01 00:00:00 UTC).
@@ -7891,9 +8155,11 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field representing the timestamp.
-     * @return A new {@code Expr} representing the number of milliseconds since epoch.
+     * @return A new {@code Expression} representing the number of milliseconds since epoch.
      */
-    export function timestampToUnixMillis(fieldName: string): FunctionExpr;
+    export function timestampToUnixMillis(
+      fieldName: string
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that interprets an expression as the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC)
@@ -7905,9 +8171,11 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param expr The expression representing the number of seconds since epoch.
-     * @return A new {@code Expr} representing the timestamp.
+     * @return A new {@code Expression} representing the timestamp.
      */
-    export function unixSecondsToTimestamp(expr: Expr): FunctionExpr;
+    export function unixSecondsToTimestamp(
+      expr: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that interprets a field's value as the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC)
@@ -7919,9 +8187,11 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field representing the number of seconds since epoch.
-     * @return A new {@code Expr} representing the timestamp.
+     * @return A new {@code Expression} representing the timestamp.
      */
-    export function unixSecondsToTimestamp(fieldName: string): FunctionExpr;
+    export function unixSecondsToTimestamp(
+      fieldName: string
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that converts a timestamp expression to the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC).
@@ -7932,9 +8202,11 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param expr The expression representing the timestamp.
-     * @return A new {@code Expr} representing the number of seconds since epoch.
+     * @return A new {@code Expression} representing the number of seconds since epoch.
      */
-    export function timestampToUnixSeconds(expr: Expr): FunctionExpr;
+    export function timestampToUnixSeconds(
+      expr: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that converts a timestamp field to the number of seconds since the Unix epoch (1970-01-01 00:00:00 UTC).
@@ -7945,9 +8217,11 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field representing the timestamp.
-     * @return A new {@code Expr} representing the number of seconds since epoch.
+     * @return A new {@code Expression} representing the number of seconds since epoch.
      */
-    export function timestampToUnixSeconds(fieldName: string): FunctionExpr;
+    export function timestampToUnixSeconds(
+      fieldName: string
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that adds a specified amount of time to a timestamp.
@@ -7960,13 +8234,13 @@ declare namespace FirebaseFirestore {
      * @param timestamp The expression representing the timestamp.
      * @param unit The expression evaluates to unit of time, must be one of 'microsecond', 'millisecond', 'second', 'minute', 'hour', 'day'.
      * @param amount The expression evaluates to amount of the unit.
-     * @return A new {@code Expr} representing the resulting timestamp.
+     * @return A new {@code Expression} representing the resulting timestamp.
      */
     export function timestampAdd(
-      timestamp: Expr,
-      unit: Expr,
-      amount: Expr
-    ): FunctionExpr;
+      timestamp: Expression,
+      unit: Expression,
+      amount: Expression
+    ): FunctionExpression;
 
     /**
      * @beta
@@ -7980,10 +8254,10 @@ declare namespace FirebaseFirestore {
      * @param timestamp The expression representing the timestamp.
      * @param unit The unit of time to add: 'microsecond', 'millisecond', 'second', 'minute', 'hour', or 'day'.
      * @param amount The amount of time to add.
-     * @return A new {@code Expr} representing the resulting timestamp.
+     * @return A new {@code Expression} representing the resulting timestamp.
      */
     export function timestampAdd(
-      timestamp: Expr,
+      timestamp: Expression,
       unit:
         | 'microsecond'
         | 'millisecond'
@@ -7992,7 +8266,7 @@ declare namespace FirebaseFirestore {
         | 'hour'
         | 'day',
       amount: number
-    ): FunctionExpr;
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that adds a specified amount of time to a timestamp represented by a field.
@@ -8005,7 +8279,7 @@ declare namespace FirebaseFirestore {
      * @param fieldName The name of the field representing the timestamp.
      * @param unit The unit of time to add (e.g., "day", "hour").
      * @param amount The amount of time to add.
-     * @return A new {@code Expr} representing the resulting timestamp.
+     * @return A new {@code Expression} representing the resulting timestamp.
      */
     export function timestampAdd(
       fieldName: string,
@@ -8017,42 +8291,42 @@ declare namespace FirebaseFirestore {
         | 'hour'
         | 'day',
       amount: number
-    ): FunctionExpr;
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that subtracts a specified amount of time from a timestamp.
      *
      * ```typescript
      * // Subtract some duration determined by field 'unit' and 'amount' from the 'timestamp' field.
-     * timestampSub(field("timestamp"), field("unit"), field("amount"));
+     * timestampSubtract(field("timestamp"), field("unit"), field("amount"));
      * ```
      *
      * @param timestamp The expression representing the timestamp.
      * @param unit The expression evaluates to unit of time, must be one of 'microsecond', 'millisecond', 'second', 'minute', 'hour', 'day'.
      * @param amount The expression evaluates to amount of the unit.
-     * @return A new {@code Expr} representing the resulting timestamp.
+     * @return A new {@code Expression} representing the resulting timestamp.
      */
-    export function timestampSub(
-      timestamp: Expr,
-      unit: Expr,
-      amount: Expr
-    ): FunctionExpr;
+    export function timestampSubtract(
+      timestamp: Expression,
+      unit: Expression,
+      amount: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that subtracts a specified amount of time from a timestamp.
      *
      * ```typescript
      * // Subtract 1 day from the 'timestamp' field.
-     * timestampSub(field("timestamp"), "day", 1);
+     * timestampSubtract(field("timestamp"), "day", 1);
      * ```
      *
      * @param timestamp The expression representing the timestamp.
      * @param unit The unit of time to subtract (e.g., "day", "hour").
      * @param amount The amount of time to subtract.
-     * @return A new {@code Expr} representing the resulting timestamp.
+     * @return A new {@code Expression} representing the resulting timestamp.
      */
-    export function timestampSub(
-      timestamp: Expr,
+    export function timestampSubtract(
+      timestamp: Expression,
       unit:
         | 'microsecond'
         | 'millisecond'
@@ -8061,22 +8335,22 @@ declare namespace FirebaseFirestore {
         | 'hour'
         | 'day',
       amount: number
-    ): FunctionExpr;
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that subtracts a specified amount of time from a timestamp represented by a field.
      *
      * ```typescript
      * // Subtract 1 day from the 'timestamp' field.
-     * timestampSub("timestamp", "day", 1);
+     * timestampSubtract("timestamp", "day", 1);
      * ```
      *
      * @param fieldName The name of the field representing the timestamp.
      * @param unit The unit of time to subtract (e.g., "day", "hour").
      * @param amount The amount of time to subtract.
-     * @return A new {@code Expr} representing the resulting timestamp.
+     * @return A new {@code Expression} representing the resulting timestamp.
      */
-    export function timestampSub(
+    export function timestampSubtract(
       fieldName: string,
       unit:
         | 'microsecond'
@@ -8086,7 +8360,22 @@ declare namespace FirebaseFirestore {
         | 'hour'
         | 'day',
       amount: number
-    ): FunctionExpr;
+    ): FunctionExpression;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that evaluates to the current server timestamp.
+     *
+     * ```typescript
+     * // Get the current server timestamp
+     * currentTimestamp()
+     * ```
+     *
+     * @return A new Expression representing the current server timestamp.
+     */
+    export function currentTimestamp(): FunctionExpression;
+
     /**
      * @beta
      * Creates an expression that performs a logical 'AND' operation on multiple filter conditions.
@@ -8094,19 +8383,19 @@ declare namespace FirebaseFirestore {
      * ```typescript
      * // Check if the 'age' field is greater than 18 AND the 'city' field is "London" AND
      * // the 'status' field is "active"
-     * const condition = and(gt("age", 18), eq("city", "London"), eq("status", "active"));
+     * const condition = and(greaterThan("age", 18), equal("city", "London"), equal("status", "active"));
      * ```
      *
      * @param first The first filter condition.
      * @param second The second filter condition.
      * @param more Additional filter conditions to 'AND' together.
-     * @return A new {@code Expr} representing the logical 'AND' operation.
+     * @return A new {@code Expression} representing the logical 'AND' operation.
      */
     export function and(
-      first: BooleanExpr,
-      second: BooleanExpr,
-      ...more: BooleanExpr[]
-    ): BooleanExpr;
+      first: BooleanExpression,
+      second: BooleanExpression,
+      ...more: BooleanExpression[]
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that performs a logical 'OR' operation on multiple filter conditions.
@@ -8114,19 +8403,19 @@ declare namespace FirebaseFirestore {
      * ```typescript
      * // Check if the 'age' field is greater than 18 OR the 'city' field is "London" OR
      * // the 'status' field is "active"
-     * const condition = or(gt("age", 18), eq("city", "London"), eq("status", "active"));
+     * const condition = or(greaterThan("age", 18), equal("city", "London"), equal("status", "active"));
      * ```
      *
      * @param first The first filter condition.
      * @param second The second filter condition.
      * @param more Additional filter conditions to 'OR' together.
-     * @return A new {@code Expr} representing the logical 'OR' operation.
+     * @return A new {@code Expression} representing the logical 'OR' operation.
      */
     export function or(
-      first: BooleanExpr,
-      second: BooleanExpr,
-      ...more: BooleanExpr[]
-    ): BooleanExpr;
+      first: BooleanExpression,
+      second: BooleanExpression,
+      ...more: BooleanExpression[]
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that returns the value of the base expression raised to the power of the exponent expression.
@@ -8138,9 +8427,12 @@ declare namespace FirebaseFirestore {
      *
      * @param base The expression to raise to the power of the exponent.
      * @param exponent The expression to raise the base to the power of.
-     * @return A new `Expr` representing the power operation.
+     * @return A new `Expression` representing the power operation.
      */
-    export function pow(base: Expr, exponent: Expr): FunctionExpr;
+    export function pow(
+      base: Expression,
+      exponent: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that returns the value of the base expression raised to the power of the exponent.
@@ -8152,9 +8444,9 @@ declare namespace FirebaseFirestore {
      *
      * @param base The expression to raise to the power of the exponent.
      * @param exponent The constant value to raise the base to the power of.
-     * @return A new `Expr` representing the power operation.
+     * @return A new `Expression` representing the power operation.
      */
-    export function pow(base: Expr, exponent: number): FunctionExpr;
+    export function pow(base: Expression, exponent: number): FunctionExpression;
     /**
      * @beta
      * Creates an expression that returns the value of the base field raised to the power of the exponent expression.
@@ -8166,9 +8458,9 @@ declare namespace FirebaseFirestore {
      *
      * @param base The name of the field to raise to the power of the exponent.
      * @param exponent The expression to raise the base to the power of.
-     * @return A new `Expr` representing the power operation.
+     * @return A new `Expression` representing the power operation.
      */
-    export function pow(base: string, exponent: Expr): FunctionExpr;
+    export function pow(base: string, exponent: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that returns the value of the base field raised to the power of the exponent.
@@ -8180,9 +8472,9 @@ declare namespace FirebaseFirestore {
      *
      * @param base The name of the field to raise to the power of the exponent.
      * @param exponent The constant value to raise the base to the power of.
-     * @return A new `Expr` representing the power operation.
+     * @return A new `Expression` representing the power operation.
      */
-    export function pow(base: string, exponent: number): FunctionExpr;
+    export function pow(base: string, exponent: number): FunctionExpression;
     /**
      * @beta
      * Creates an expression that returns the collection ID from a path.
@@ -8193,9 +8485,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param expression An expression evaluating to a path, which the collection ID will be extracted from.
-     * @return A new {@code Expr} representing the collectionId operation.
+     * @return A new {@code Expression} representing the collectionId operation.
      */
-    export function collectionId(expression: Expr): FunctionExpr;
+    export function collectionId(expression: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that returns the collection ID from a path.
@@ -8206,9 +8498,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field to get the collection ID from.
-     * @return A new {@code Expr} representing the collectionId operation.
+     * @return A new {@code Expression} representing the collectionId operation.
      */
-    export function collectionId(fieldName: string): FunctionExpr;
+    export function collectionId(fieldName: string): FunctionExpression;
     /**
      * @beta
      * Creates an expression that calculates the length of a string, array, map, vector, or bytes.
@@ -8222,9 +8514,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param expression An expression evaluating to a string, array, map, vector, or bytes, which the length will be calculated for.
-     * @return A new `Expr` representing the length of the string, array, map, vector, or bytes.
+     * @return A new `Expression` representing the length of the string, array, map, vector, or bytes.
      */
-    export function length(expression: Expr): FunctionExpr;
+    export function length(expression: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that calculates the length of a string, array, map, vector, or bytes.
@@ -8238,36 +8530,234 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field to calculate the length of.
-     * @return A new `Expr` representing the length of the string, array, map, vector, or bytes.
+     * @return A new `Expression` representing the length of the string, array, map, vector, or bytes.
      */
-    export function length(fieldName: string): FunctionExpr;
+    export function length(fieldName: string): FunctionExpression;
     /**
      * @beta
      * Creates an expression that reverses a string.
      *
      * ```typescript
      * // Reverse the value of the 'myString' field.
-     * strReverse(field("myString"));
+     * stringReverse(field("myString"));
      * ```
      *
      * @param stringExpression An expression evaluating to a string value, which will be reversed.
-     * @return A new {@code Expr} representing the reversed string.
+     * @return A new {@code Expression} representing the reversed string.
      */
-    export function strReverse(stringExpression: Expr): FunctionExpr;
+    export function stringReverse(
+      stringExpression: Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that reverses a string value in the specified field.
      *
      * ```typescript
      * // Reverse the value of the 'myString' field.
-     * strReverse("myString");
+     * stringReverse("myString");
      * ```
      *
      * @param field The name of the field representing the string to reverse.
-     * @return A new {@code Expr} representing the reversed string.
+     * @return A new {@code Expression} representing the reversed string.
      */
-    export function strReverse(field: string): FunctionExpr;
-    // TODO(new-expression): Add new top-level expression function declarations above this line
+    export function stringReverse(field: string): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that concatenates strings, arrays, or blobs. Types cannot be mixed.
+     *
+     * ```typescript
+     * // Concatenate the 'firstName' and 'lastName' fields with a space in between.
+     * concat(field("firstName"), " ", field("lastName"))
+     * ```
+     *
+     * @param first The first expressions to concatenate.
+     * @param second The second literal or expression to concatenate.
+     * @param others Additional literals or expressions to concatenate.
+     * @return A new `Expression` representing the concatenation.
+     */
+    export function concat(
+      first: Expression,
+      second: Expression | unknown,
+      ...others: Array<Expression | unknown>
+    ): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that computes the absolute value of a numeric value.
+     *
+     * @param expr The expression to compute the absolute value of.
+     * @return A new {@code Expr} representing the absolute value of the numeric value.
+     */
+    export function abs(expr: Expression): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that returns the `elseExpr` argument if `ifExpr` is absent, else return
+     * the result of the `ifExpr` argument evaluation.
+     *
+     * ```typescript
+     * // Returns the value of the optional field 'optional_field', or returns 'default_value'
+     * // if the field is absent.
+     * ifAbsent(field("optional_field"), constant("default_value"))
+     * ```
+     *
+     * @param ifExpr The expression to check for absence.
+     * @param elseExpr The expression that will be evaluated and returned if [ifExpr] is absent.
+     * @return A new Expression representing the ifAbsent operation.
+     */
+    export function ifAbsent(
+      ifExpr: Expression,
+      elseExpr: Expression
+    ): Expression;
+
+    /**
+     * @beta
+     * Creates an expression that returns the `elseValue` argument if `ifExpr` is absent, else
+     * return the result of the `ifExpr` argument evaluation.
+     *
+     * ```typescript
+     * // Returns the value of the optional field 'optional_field', or returns 'default_value'
+     * // if the field is absent.
+     * ifAbsent(field("optional_field"), "default_value")
+     * ```
+     *
+     * @param ifExpr The expression to check for absence.
+     * @param elseValue The value that will be returned if `ifExpr` evaluates to an absent value.
+     * @return A new [Expression] representing the ifAbsent operation.
+     */
+    export function ifAbsent(
+      ifExpr: Expression,
+      elseValue: unknown
+    ): Expression;
+
+    /**
+     * @beta
+     * Creates an expression that returns the `elseExpr` argument if `ifFieldName` is absent, else
+     * return the value of the field.
+     *
+     * ```typescript
+     * // Returns the value of the optional field 'optional_field', or returns the value of
+     * // 'default_field' if 'optional_field' is absent.
+     * ifAbsent("optional_field", field("default_field"))
+     * ```
+     *
+     * @param ifFieldName The field to check for absence.
+     * @param elseExpr The expression that will be evaluated and returned if `ifFieldName` is
+     * absent.
+     * @return A new Expression representing the ifAbsent operation.
+     */
+    export function ifAbsent(
+      ifFieldName: string,
+      elseExpr: Expression
+    ): Expression;
+
+    /**
+     * @beta
+     * Creates an expression that joins the elements of an array into a string.
+     *
+     * ```typescript
+     * // Join the elements of the 'tags' field with a comma and space.
+     * join("tags", ", ")
+     * ```
+     *
+     * @param arrayFieldName The name of the field containing the array.
+     * @param delimiter The string to use as a delimiter.
+     * @return A new Expression representing the join operation.
+     */
+    export function join(arrayFieldName: string, delimiter: string): Expression;
+
+    /**
+     * @beta
+     * Creates an expression that joins the elements of an array into a string.
+     *
+     * ```typescript
+     * // Join an array of string using the delimiter from the 'separator' field.
+     * join(array(['foo', 'bar']), field("separator"))
+     * ```
+     *
+     * @param arrayExpression An expression that evaluates to an array.
+     * @param delimiterExpression The expression that evaluates to the delimiter string.
+     * @return A new Expression representing the join operation.
+     */
+    export function join(
+      arrayExpression: Expression,
+      delimiterExpression: Expression
+    ): Expression;
+
+    /**
+     * @beta
+     * Creates an expression that joins the elements of an array into a string.
+     *
+     * ```typescript
+     * // Join the elements of the 'tags' field with a comma and space.
+     * join(field("tags"), ", ")
+     * ```
+     *
+     * @param arrayExpression An expression that evaluates to an array.
+     * @param delimiter The string to use as a delimiter.
+     * @return A new Expression representing the join operation.
+     */
+    export function join(
+      arrayExpression: Expression,
+      delimiter: string
+    ): Expression;
+
+    /**
+     * @beta
+     * Creates an expression that computes the base-10 logarithm of a numeric value.
+     *
+     * ```typescript
+     * // Compute the base-10 logarithm of the 'value' field.
+     * log10("value");
+     * ```
+     *
+     * @param fieldName The name of the field to compute the base-10 logarithm of.
+     * @return A new `Expr` representing the base-10 logarithm of the numeric value.
+     */
+    export function log10(fieldName: string): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that computes the base-10 logarithm of a numeric value.
+     *
+     * ```typescript
+     * // Compute the base-10 logarithm of the 'value' field.
+     * log10(field("value"));
+     * ```
+     *
+     * @param expression An expression evaluating to a numeric value, which the base-10 logarithm will be computed for.
+     * @return A new `Expr` representing the base-10 logarithm of the numeric value.
+     */
+    export function log10(expression: Expression): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that computes the sum of the elements in an array.
+     *
+     * ```typescript
+     * // Compute the sum of the elements in the 'scores' field.
+     * arraySum("scores");
+     * ```
+     *
+     * @param fieldName The name of the field to compute the sum of.
+     * @return A new `Expr` representing the sum of the elements in the array.
+     */
+    export function arraySum(fieldName: string): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that computes the sum of the elements in an array.
+     *
+     * ```typescript
+     * // Compute the sum of the elements in the 'scores' field.
+     * arraySum(field("scores"));
+     * ```
+     *
+     * @param expression An expression evaluating to a numeric array, which the sum will be computed for.
+     * @return A new `Expr` representing the sum of the elements in the array.
+     */
+    export function arraySum(expression: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that computes the natural logarithm of a numeric value.
@@ -8278,9 +8768,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param expression An expression evaluating to a numeric value, which the natural logarithm will be computed for.
-     * @return A new {@code Expr} representing the natural logarithm of the numeric value.
+     * @return A new {@code Expression} representing the natural logarithm of the numeric value.
      */
-    export function ln(expression: Expr): FunctionExpr;
+    export function ln(expression: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that computes the natural logarithm of a numeric value.
@@ -8291,65 +8781,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field to compute the natural logarithm of.
-     * @return A new {@code Expr} representing the natural logarithm of the numeric value.
+     * @return A new {@code Expression} representing the natural logarithm of the numeric value.
      */
-    export function ln(fieldName: string): FunctionExpr;
-    /**
-     * @beta
-     * Creates an expression that computes the logarithm of an expression to a given base.
-     *
-     * ```typescript
-     * // Compute the logarithm of the 'value' field with base 10.
-     * log(field("value"), 10);
-     * ```
-     *
-     * @param expression An expression evaluating to a numeric value, which the logarithm will be computed for.
-     * @param base The base of the logarithm.
-     * @return A new {@code Expr} representing the logarithm of the numeric value.
-     */
-    export function log(expression: Expr, base: number): FunctionExpr;
-    /**
-     * @beta
-     * Creates an expression that computes the logarithm of an expression to a given base.
-     *
-     * ```typescript
-     * // Compute the logarithm of the 'value' field with the base in the 'base' field.
-     * log(field("value"), field("base"));
-     * ```
-     *
-     * @param expression An expression evaluating to a numeric value, which the logarithm will be computed for.
-     * @param base The base of the logarithm.
-     * @return A new {@code Expr} representing the logarithm of the numeric value.
-     */
-    export function log(expression: Expr, base: Expr): FunctionExpr;
-    /**
-     * @beta
-     * Creates an expression that computes the logarithm of a field to a given base.
-     *
-     * ```typescript
-     * // Compute the logarithm of the 'value' field with base 10.
-     * log("value", 10);
-     * ```
-     *
-     * @param fieldName The name of the field to compute the logarithm of.
-     * @param base The base of the logarithm.
-     * @return A new {@code Expr} representing the logarithm of the numeric value.
-     */
-    export function log(fieldName: string, base: number): FunctionExpr;
-    /**
-     * @beta
-     * Creates an expression that computes the logarithm of a field to a given base.
-     *
-     * ```typescript
-     * // Compute the logarithm of the 'value' field with the base in the 'base' field.
-     * log("value", field("base"));
-     * ```
-     *
-     * @param fieldName The name of the field to compute the logarithm of.
-     * @param base The base of the logarithm.
-     * @return A new {@code Expr} representing the logarithm of the numeric value.
-     */
-    export function log(fieldName: string, base: Expr): FunctionExpr;
+    export function ln(fieldName: string): FunctionExpression;
     /**
      * @beta
      * Creates an expression that rounds a numeric value to the nearest whole number.
@@ -8360,9 +8794,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param expression An expression evaluating to a numeric value, which will be rounded.
-     * @return A new `Expr` representing the rounded value.
+     * @return A new `Expression` representing the rounded value.
      */
-    export function round(expression: Expr): FunctionExpr;
+    export function round(expression: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that rounds a numeric value to the nearest whole number.
@@ -8373,9 +8807,44 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field to round.
+     * @return A new `Expression` representing the rounded value.
+     */
+    export function round(fieldName: string): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that rounds a numeric value to the specified number of decimal places.
+     *
+     * ```typescript
+     * // Round the value of the 'price' field to two decimal places.
+     * round("price", 2);
+     * ```
+     *
+     * @param fieldName The name of the field to round.
+     * @param decimalPlaces A constant or expression specifying the rounding precision in decimal places.
      * @return A new `Expr` representing the rounded value.
      */
-    export function round(fieldName: string): FunctionExpr;
+    export function round(
+      fieldName: string,
+      decimalPlaces: number | Expression
+    ): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that rounds a numeric value to the specified number of decimal places.
+     *
+     * ```typescript
+     * // Round the value of the 'price' field to two decimal places.
+     * round(field("price"), constant(2));
+     * ```
+     *
+     * @param expression An expression evaluating to a numeric value, which will be rounded.
+     * @param decimalPlaces A constant or expression specifying the rounding precision in decimal places.
+     * @return A new `Expr` representing the rounded value.
+     */
+    export function round(
+      expression: Expression,
+      decimalPlaces: number | Expression
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that computes the square root of a numeric value.
@@ -8386,9 +8855,9 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param expression An expression evaluating to a numeric value, which the square root will be computed for.
-     * @return A new {@code Expr} representing the square root of the numeric value.
+     * @return A new {@code Expression} representing the square root of the numeric value.
      */
-    export function sqrt(expression: Expr): FunctionExpr;
+    export function sqrt(expression: Expression): FunctionExpression;
     /**
      * @beta
      * Creates an expression that computes the square root of a numeric value.
@@ -8399,9 +8868,10 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param fieldName The name of the field to compute the square root of.
-     * @return A new {@code Expr} representing the square root of the numeric value.
+     * @return A new {@code Expression} representing the square root of the numeric value.
      */
-    export function sqrt(fieldName: string): FunctionExpr;
+    export function sqrt(fieldName: string): FunctionExpression;
+    // TODO(new-expression): Add new top-level expression function declarations above this line
     /**
      * @beta
      * Creates an {@link Ordering} that sorts documents in ascending order based on an expression.
@@ -8415,7 +8885,7 @@ declare namespace FirebaseFirestore {
      * @param expr The expression to create an ascending ordering for.
      * @return A new `Ordering` for ascending sorting.
      */
-    export function ascending(expr: Expr): Ordering;
+    export function ascending(expr: Expression): Ordering;
     /**
      * @beta
      * Creates an {@link Ordering} that sorts documents in ascending order based on a field.
@@ -8443,7 +8913,7 @@ declare namespace FirebaseFirestore {
      * @param expr The expression to create a descending ordering for.
      * @return A new `Ordering` for descending sorting.
      */
-    export function descending(expr: Expr): Ordering;
+    export function descending(expr: Expression): Ordering;
     /**
      * @beta
      * Creates an {@link Ordering} that sorts documents in descending order based on a field.
@@ -8465,7 +8935,7 @@ declare namespace FirebaseFirestore {
      * You create `Ordering` instances using the `ascending` and `descending` helper functions.
      */
     export class Ordering {
-      readonly expr: Expr;
+      readonly expr: Expression;
       readonly direction: 'ascending' | 'descending';
     }
 
@@ -8601,14 +9071,14 @@ declare namespace FirebaseFirestore {
      * // Example 2: Filter documents where 'genre' is "Science Fiction" and 'published' is after 1950
      * const results2 = await db.pipeline()
      *     .collection("books")
-     *     .where(and(Field.of("genre").eq("Science Fiction"), Field.of("published").gt(1950)))
+     *     .where(and(Field.of("genre").equal("Science Fiction"), Field.of("published").greaterThan(1950)))
      *     .execute();
      *
      * // Example 3: Calculate the average rating of books published after 1980
      * const results3 = await db.pipeline()
      *     .collection("books")
-     *     .where(Field.of("published").gt(1980))
-     *     .aggregate(avg(Field.of("rating")).as("averageRating"))
+     *     .where(Field.of("published").greaterThan(1980))
+     *     .aggregate(average(Field.of("rating")).as("averageRating"))
      *     .execute();
      * ```
      */
@@ -8624,8 +9094,8 @@ declare namespace FirebaseFirestore {
        * The added fields are defined using {@link Selectable}s, which can be:
        *
        * - {@link Field}: References an existing document field.
-       * - {@link Expr}: Either a literal value (see {@link Constant}) or a computed value
-       *   (see {@FunctionExpr}) with an assigned alias using {@link Expr#as}.
+       * - {@link Expression}: Either a literal value (see {@link Constant}) or a computed value
+       *   (see {@FunctionExpression}) with an assigned alias using {@link Expression#as}.
        *
        * Example:
        *
@@ -8653,8 +9123,8 @@ declare namespace FirebaseFirestore {
        * The added fields are defined using {@link Selectable}s, which can be:
        *
        * - {@link Field}: References an existing document field.
-       * - {@link Expr}: Either a literal value (see {@link Constant}) or a computed value
-       *   (see {@FunctionExpr}) with an assigned alias using {@link Expr#as}.
+       * - {@link Expression}: Either a literal value (see {@link Constant}) or a computed value
+       *   (see {@FunctionExpression}) with an assigned alias using {@link Expression#as}.
        *
        * Example:
        *
@@ -8716,7 +9186,7 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param options - An object containing the configuration for this stage.
-       *   @param options.fields - An array of field names (strings) or {@link Expr} objects
+       *   @param options.fields - An array of field names (strings) or {@link Expression} objects
        *     representing the fields to be removed from the output.
        * @returns A new {@link Pipeline} object with this stage appended to the stage list.
        */
@@ -8731,8 +9201,8 @@ declare namespace FirebaseFirestore {
        * <ul>
        *   <li>{@code string}: The name of an existing field.</li>
        *   <li>{@link Field}: A reference to an existing field.</li>
-       *   <li>{@link Expr}: An expression (e.g., a {@link FunctionExpr}) that represents the result of an expression.,
-       *       The Expr must be aliased using {@link Expr#as}.</li>
+       *   <li>{@link Expression}: An expression (e.g., a {@link FunctionExpression}) that represents the result of an expression.,
+       *       The Expression must be aliased using {@link Expression#as}.</li>
        * </ul>
        *
        * <p>Example:
@@ -8766,8 +9236,8 @@ declare namespace FirebaseFirestore {
        * <ul>
        *   <li>{@code string}: The name of an existing field.</li>
        *   <li>{@link Field}: A reference to an existing field.</li>
-       *   <li>{@link Expr}: An expression (e.g., a {@link FunctionExpr}) that represents the result of an expression.,
-       *       The Expr must be aliased using {@link Expr#as}.</li>
+       *   <li>{@link Expression}: An expression (e.g., a {@link FunctionExpression}) that represents the result of an expression.,
+       *       The Expression must be aliased using {@link Expression#as}.</li>
        * </ul>
        *
        * If no selections are provided within the `options` (i.e., the `fields` array is empty),
@@ -8795,15 +9265,15 @@ declare namespace FirebaseFirestore {
       /**
        * @beta
        * Filters the documents from previous stages to only include those matching the specified {@link
-       * BooleanExpr}.
+       * BooleanExpression}.
        *
        * <p>This stage allows you to apply conditions to the data, similar to a "WHERE" clause in SQL.
        * You can filter documents based on their field values, using implementations of {@link
-       * BooleanExpr}, typically including but not limited to:
+       * BooleanExpression}, typically including but not limited to:
        *
        * <ul>
-       *   <li>field comparators: {@link Function#eq}, {@link Function#lt} (less than), {@link
-       *       Function#gt} (greater than), etc.</li>
+       *   <li>field comparators: {@link Function#equal}, {@link Function#lessThan} (less than), {@link
+       *       Function#greaterThan} (greater than), etc.</li>
        *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
        *   <li>advanced functions: {@link Function#regexMatch}, {@link
        *       Function#arrayContains}, etc.</li>
@@ -8815,28 +9285,28 @@ declare namespace FirebaseFirestore {
        * firestore.pipeline().collection("books")
        *   .where(
        *     and(
-       *         gt(field("rating"), 4.0),   // Filter for ratings greater than 4.0
-       *         field("genre").eq("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
+       *         greaterThan(field("rating"), 4.0),   // Filter for ratings greater than 4.0
+       *         field("genre").equal("Science Fiction") // Equivalent to greaterThan("genre", "Science Fiction")
        *     )
        *   );
        * ```
        *
-       * @param condition The {@link BooleanExpr} to apply.
+       * @param condition The {@link BooleanExpression} to apply.
        * @return A new Pipeline object with this stage appended to the stage list.
        */
-      where(condition: BooleanExpr): Pipeline;
+      where(condition: BooleanExpression): Pipeline;
       /**
        * @beta
        * Filters the documents from previous stages to only include those matching the specified {@link
-       * BooleanExpr}.
+       * BooleanExpression}.
        *
        * <p>This stage allows you to apply conditions to the data, similar to a "WHERE" clause in SQL.
        * You can filter documents based on their field values, using implementations of {@link
-       * BooleanExpr}, typically including but not limited to:
+       * BooleanExpression}, typically including but not limited to:
        *
        * <ul>
-       *   <li>field comparators: {@link Function#eq}, {@link Function#lt} (less than), {@link
-       *       Function#gt} (greater than), etc.</li>
+       *   <li>field comparators: {@link Function#equal}, {@link Function#lessThan} (less than), {@link
+       *       Function#greaterThan} (greater than), etc.</li>
        *   <li>logical operators: {@link Function#and}, {@link Function#or}, {@link Function#not}, etc.</li>
        *   <li>advanced functions: {@link Function#regexMatch}, {@link
        *       Function#arrayContains}, etc.</li>
@@ -8848,13 +9318,13 @@ declare namespace FirebaseFirestore {
        * firestore.pipeline().collection("books")
        *   .where({
        *     filter: and(
-       *         gt(field("rating"), 4.0),   // Filter for ratings greater than 4.0
-       *         field("genre").eq("Science Fiction") // Equivalent to gt("genre", "Science Fiction")
+       *         greaterThan(field("rating"), 4.0),   // Filter for ratings greater than 4.0
+       *         field("genre").equal("Science Fiction") // Equivalent to greaterThan("genre", "Science Fiction")
        *     )
        *   });
        * ```
        *
-       * @param options An object that specifies the filtering criteria. It is expected to contain a `filter` property of type {@link BooleanExpr}.
+       * @param options An object that specifies the filtering criteria. It is expected to contain a `filter` property of type {@link BooleanExpression}.
        * @return A new Pipeline object with this stage appended to the stage list.
        */
       where(options: WhereStageOptions): Pipeline;
@@ -8963,14 +9433,14 @@ declare namespace FirebaseFirestore {
        * Returns a set of distinct values from the inputs to this stage.
        *
        * This stage runs through the results from previous stages to include only results with
-       * unique combinations of {@link Expr} values ({@link Field}, {@link Function}, etc).
+       * unique combinations of {@link Expression} values ({@link Field}, {@link Function}, etc).
        *
        * The parameters to this stage are defined using {@link Selectable} expressions or strings:
        *
        * - {@code string}: Name of an existing field
        * - {@link Field}: References an existing document field.
-       * - {@link AliasedExpr}: Represents the result of a function with an assigned alias name
-       *   using {@link Expr#as}.
+       * - {@link AliasedExpression}: Represents the result of a function with an assigned alias name
+       *   using {@link Expression#as}.
        *
        * Example:
        *
@@ -8996,14 +9466,14 @@ declare namespace FirebaseFirestore {
        * Returns a set of distinct values from the inputs to this stage.
        *
        * This stage runs through the results from previous stages to include only results with
-       * unique combinations of {@link Expr} values ({@link Field}, {@link Function}, etc).
+       * unique combinations of {@link Expression} values ({@link Field}, {@link Function}, etc).
        *
        * The parameters to this stage are defined using {@link Selectable} expressions or strings:
        *
        * - {@code string}: Name of an existing field
        * - {@link Field}: References an existing document field.
-       * - {@link AliasedExpr}: Represents the result of a function with an assigned alias name
-       *   using {@link Expr#as}.
+       * - {@link AliasedExpression}: Represents the result of a function with an assigned alias name
+       *   using {@link Expression#as}.
        *
        * Example:
        *
@@ -9024,7 +9494,7 @@ declare namespace FirebaseFirestore {
        *
        * <p>This stage allows you to calculate aggregate values over a set of documents. You define the
        * aggregations to perform using {@link AliasedAggregate} expressions which are typically results of
-       * calling {@link Expr#as} on {@link AggregateFunction} instances.
+       * calling {@link Expression#as} on {@link AggregateFunction} instances.
        *
        * <p>Example:
        *
@@ -9032,7 +9502,7 @@ declare namespace FirebaseFirestore {
        * // Calculate the average rating and the total number of books
        * firestore.pipeline().collection("books")
        *     .aggregate(
-       *         field("rating").avg().as("averageRating"),
+       *         field("rating").average().as("averageRating"),
        *         countAll().as("totalBooks")
        *     );
        * ```
@@ -9061,7 +9531,7 @@ declare namespace FirebaseFirestore {
        *       specifying groups is the same as putting the entire inputs into one group.</li>
        *   <li>**Accumulators:** One or more accumulation operations to perform within each group. These
        *       are defined using {@link AliasedAggregate} expressions, which are typically created by
-       *       calling {@link Expr#as} on {@link AggregateFunction} instances. Each aggregation
+       *       calling {@link Expression#as} on {@link AggregateFunction} instances. Each aggregation
        *       calculates a value (e.g., sum, average, count) based on the documents within its group.</li>
        * </ul>
        *
@@ -9071,7 +9541,7 @@ declare namespace FirebaseFirestore {
        * // Calculate the average rating for each genre.
        * firestore.pipeline().collection("books")
        *   .aggregate({
-       *       accumulators: [avg(field("rating")).as("avg_rating")]
+       *       accumulators: [average(field("rating")).as("avg_rating")]
        *       groups: ["genre"]
        *       });
        * ```
@@ -9148,7 +9618,7 @@ declare namespace FirebaseFirestore {
        * Fully replaces all fields in a document with the fields from a map expression.
        *
        * <p>This stage allows you to transform the current document into a new one
-       * by providing an {@link Expr} that evaluates to a map. Each key-value pair
+       * by providing an {@link Expression} that evaluates to a map. Each key-value pair
        * in the resulting map will become a field-value pair in the document.
        *
        * <p>Example:
@@ -9176,10 +9646,10 @@ declare namespace FirebaseFirestore {
        * // }
        * ```
        *
-       * @param expr An {@link Expr} that evaluates to a map. The key-value pairs of this map will replace the document's fields.
+       * @param expr An {@link Expression} that evaluates to a map. The key-value pairs of this map will replace the document's fields.
        * @return A new {@code Pipeline} object with this stage appended to the stage list.
        */
-      replaceWith(expr: Expr): Pipeline;
+      replaceWith(expr: Expression): Pipeline;
 
       /**
        * @beta
@@ -9442,7 +9912,7 @@ declare namespace FirebaseFirestore {
        * ```typescript
        * // Assume we don't have a built-in "where" stage
        * firestore.pipeline().collection("books")
-       *     .rawStage("where", [Field.of("published").lt(1900)]) // Custom "where" stage
+       *     .rawStage("where", [Field.of("published").lessThan(1900)]) // Custom "where" stage
        *     .select("title", "author");
        * ```
        *
@@ -9476,7 +9946,7 @@ declare namespace FirebaseFirestore {
        *
        * ```typescript
        * const futureResults = await firestore.pipeline().collection("books")
-       *     .where(gt(Field.of("rating"), 4.5))
+       *     .where(greaterThan(Field.of("rating"), 4.5))
        *     .select("title", "author", "rating")
        *     .execute();
        * ```
@@ -9497,7 +9967,7 @@ declare namespace FirebaseFirestore {
        * @example
        * ```typescript
        * firestore.pipeline().collection("books")
-       *     .where(gt(Field.of("rating"), 4.5))
+       *     .where(greaterThan(Field.of("rating"), 4.5))
        *     .select("title", "author", "rating")
        *     .stream()
        *     .on('data', (pipelineResult) => {
@@ -9537,7 +10007,7 @@ declare namespace FirebaseFirestore {
          * @beta
          * Specifies the output format of the query planner information.
          */
-        outputFormat?: 'text' | 'json';
+        outputFormat?: 'text';
       };
       /**
        * @beta
@@ -9719,9 +10189,9 @@ declare namespace FirebaseFirestore {
     export type WhereStageOptions = StageOptions & {
       /**
        * @beta
-       * The {@link BooleanExpr} to apply as a filter for each input document to this stage.
+       * The {@link BooleanExpression} to apply as a filter for each input document to this stage.
        */
-      condition: BooleanExpr;
+      condition: BooleanExpression;
     };
     /**
      * @beta
@@ -9822,10 +10292,10 @@ declare namespace FirebaseFirestore {
     export type ReplaceWithStageOptions = StageOptions & {
       /**
        * @beta
-       * The name of a field that contains a map or an {@link Expr} that
+       * The name of a field that contains a map or an {@link Expression} that
        * evaluates to a map.
        */
-      map: Expr | string;
+      map: Expression | string;
     };
     /**
      * @beta
@@ -9953,7 +10423,7 @@ declare namespace FirebaseFirestore {
      * const snapshot = await firestore
      *   .pipeline()
      *   .collection('myCollection')
-     *   .where(field('value').gt(10))
+     *   .where(field('value').greaterThan(10))
      *   .execute();
      *
      * snapshot.results.forEach(doc => {
@@ -9997,7 +10467,6 @@ declare namespace FirebaseFirestore {
      * value.
      */
     export class PipelineResult {
-      readonly executionTime: Timestamp;
       readonly createTime: Timestamp | undefined;
       readonly updateTime: Timestamp | undefined;
       /**

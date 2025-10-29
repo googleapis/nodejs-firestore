@@ -63,7 +63,7 @@ describe('StructuredPipeline', () => {
         indexMode: 'recommended',
         explainOptions: {
           mode: 'explain',
-          outputFormat: 'json',
+          outputFormat: 'text',
         },
       },
       {}
@@ -84,7 +84,7 @@ describe('StructuredPipeline', () => {
                 stringValue: 'explain',
               },
               output_format: {
-                stringValue: 'json',
+                stringValue: 'text',
               },
             },
           },
@@ -108,8 +108,6 @@ describe('StructuredPipeline', () => {
     );
 
     const proto = structuredPipeline._toProto(new Serializer(db!));
-
-    console.log(JSON.stringify(proto));
 
     expect(proto).to.deep.equal({
       pipeline: {},
