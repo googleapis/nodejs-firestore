@@ -426,6 +426,7 @@ export abstract class Expression
   }
 
   /**
+   * @beta
    * Creates an expression that concatenates an array expression with one or more other arrays.
    *
    * ```typescript
@@ -1805,6 +1806,7 @@ export abstract class Expression
    */
   round(): FunctionExpression;
   /**
+   * @beta
    * Creates an expression that rounds a numeric value to the specified number of decimal places.
    *
    * ```typescript
@@ -1818,6 +1820,7 @@ export abstract class Expression
    */
   round(decimalPlaces: number): FunctionExpression;
   /**
+   * @beta
    * Creates an expression that rounds a numeric value to the specified number of decimal places.
    *
    * ```typescript
@@ -6655,6 +6658,7 @@ export function round(fieldName: string): FunctionExpression;
  */
 export function round(expression: Expression): FunctionExpression;
 /**
+ * @beta
  * Creates an expression that rounds a numeric value to the specified number of decimal places.
  *
  * ```typescript
@@ -6672,6 +6676,7 @@ export function round(
 ): FunctionExpression;
 
 /**
+ * @beta
  * Creates an expression that rounds a numeric value to the specified number of decimal places.
  *
  * ```typescript

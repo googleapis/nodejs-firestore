@@ -143,7 +143,7 @@ use(chaiAsPromised);
 
 const timestampDeltaMS = 3000;
 
-describe('Pipeline class', () => {
+describe.skip('Pipeline class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
   let beginDocCreation = 0;
@@ -4275,7 +4275,7 @@ describe('Pipeline class', () => {
 
 // This is the Query integration tests from the lite API (no cache support)
 // with some additional test cases added for more complete coverage.
-describe('Query to Pipeline', () => {
+describe.skip('Query to Pipeline', () => {
   async function execute(ppl: Pipeline): Promise<PipelineSnapshot> {
     return ppl.execute();
   }

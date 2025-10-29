@@ -3437,6 +3437,7 @@ declare namespace FirebaseFirestore {
       greaterThanOrEqual(value: unknown): BooleanExpression;
 
       /**
+       * @beta
        * Creates an expression that concatenates an array expression with one or more other arrays.
        *
        * ```typescript
@@ -4512,6 +4513,7 @@ declare namespace FirebaseFirestore {
        */
       round(): FunctionExpression;
       /**
+       * @beta
        * Creates an expression that rounds a numeric value to the specified number of decimal places.
        *
        * ```typescript
@@ -4525,6 +4527,7 @@ declare namespace FirebaseFirestore {
        */
       round(decimalPlaces: number): FunctionExpression;
       /**
+       * @beta
        * Creates an expression that rounds a numeric value to the specified number of decimal places.
        *
        * ```typescript
@@ -8808,6 +8811,7 @@ declare namespace FirebaseFirestore {
      */
     export function round(fieldName: string): FunctionExpression;
     /**
+     * @beta
      * Creates an expression that rounds a numeric value to the specified number of decimal places.
      *
      * ```typescript
@@ -8825,6 +8829,7 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
 
     /**
+     * @beta
      * Creates an expression that rounds a numeric value to the specified number of decimal places.
      *
      * ```typescript
