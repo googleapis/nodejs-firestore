@@ -97,7 +97,7 @@ describe('isPlainObject()', () => {
       expect(tryGetPreferRestEnvironmentVariable()).to.be.undefined;
       expect(warnSpy.calledOnce).to.be.true;
       expect(warnSpy.getCall(0).args[0]).to.match(
-        /unsupported value.*FIRESTORE_PREFER_REST/
+        /unsupported value.*FIRESTORE_PREFER_REST/,
       );
     });
   });

@@ -124,7 +124,7 @@ export class Serializer {
       | Uint8Array
       | VectorValue
       | Map<string, unknown>
-      | Pipeline
+      | Pipeline,
   ): api.IValue;
   encodeValue(val: unknown): api.IValue | null;
   encodeValue(val: unknown): api.IValue | null {
@@ -277,7 +277,7 @@ export class Serializer {
   }
 
   encodeReference(
-    path: string | firestore.DocumentReference | firestore.CollectionReference
+    path: string | firestore.DocumentReference | firestore.CollectionReference,
   ): api.IValue {
     return {
       referenceValue: isString(path) ? path : path.path,
@@ -338,13 +338,13 @@ export class Serializer {
       }
       case 'referenceValue': {
         const resourcePath = QualifiedResourcePath.fromSlashSeparatedString(
-          proto.referenceValue!
+          proto.referenceValue!,
         );
         if (resourcePath.isDocument) {
           return this.createDocumentReference(resourcePath.relativeName);
         } else {
           throw new Error(
-            `The SDK does not currently support decoding referenceValues for collections or partitions. Actual path value: '${proto.referenceValue!}'`
+            `The SDK does not currently support decoding referenceValues for collections or partitions. Actual path value: '${proto.referenceValue!}'`,
           );
         }
       }
@@ -384,7 +384,7 @@ export class Serializer {
       }
       default: {
         throw new Error(
-          'Cannot decode type from Firestore Value: ' + JSON.stringify(proto)
+          'Cannot decode type from Firestore Value: ' + JSON.stringify(proto),
         );
       }
     }
@@ -421,7 +421,7 @@ export class Serializer {
       default: {
         throw new Error(
           'Cannot decode type from google.protobuf.Value: ' +
-            JSON.stringify(proto)
+            JSON.stringify(proto),
         );
       }
     }
@@ -436,7 +436,7 @@ export class Serializer {
    * @returns The converted JS type.
    */
   decodeGoogleProtobufList(
-    proto: proto.google.protobuf.IListValue | null | undefined
+    proto: proto.google.protobuf.IListValue | null | undefined,
   ): unknown[] {
     const result: unknown[] = [];
     if (proto && proto.values && Array.isArray(proto.values)) {
@@ -456,7 +456,7 @@ export class Serializer {
    * @returns The converted JS type.
    */
   decodeGoogleProtobufStruct(
-    proto: proto.google.protobuf.IStruct | null | undefined
+    proto: proto.google.protobuf.IStruct | null | undefined,
   ): Record<string, unknown> {
     const result: Record<string, unknown> = {};
     if (proto && proto.fields) {
@@ -490,14 +490,14 @@ export function validateUserInput(
   options: ValidationOptions,
   path?: FieldPath,
   level?: number,
-  inArray?: boolean
+  inArray?: boolean,
 ): void {
   if (path && path.size - 1 > MAX_DEPTH) {
     throw new Error(
       `${invalidArgumentMessage(
         arg,
-        desc
-      )} Input object is deeper than ${MAX_DEPTH} levels or contains a cycle.`
+        desc,
+      )} Input object is deeper than ${MAX_DEPTH} levels or contains a cycle.`,
     );
   }
 
@@ -515,7 +515,7 @@ export function validateUserInput(
         options,
         path ? path.append(String(i)) : new FieldPath(String(i)),
         level + 1,
-        /* inArray= */ true
+        /* inArray= */ true,
       );
     }
   } else if (isPlainObject(value)) {
@@ -527,7 +527,7 @@ export function validateUserInput(
         options,
         path ? path.append(new FieldPath(prop)) : new FieldPath(prop),
         level + 1,
-        inArray
+        inArray,
       );
     }
   } else if (value === undefined) {
@@ -535,16 +535,16 @@ export function validateUserInput(
       throw new Error(
         `${invalidArgumentMessage(
           arg,
-          desc
-        )} "undefined" values are only ignored inside of objects.`
+          desc,
+        )} "undefined" values are only ignored inside of objects.`,
       );
     } else if (!options.allowUndefined) {
       throw new Error(
         `${invalidArgumentMessage(
           arg,
-          desc
+          desc,
         )} Cannot use "undefined" as a Firestore value${fieldPathMessage}. ` +
-          'If you want to ignore undefined values, enable `ignoreUndefinedProperties`.'
+          'If you want to ignore undefined values, enable `ignoreUndefinedProperties`.',
       );
     }
   } else if (value instanceof VectorValue) {
@@ -554,14 +554,14 @@ export function validateUserInput(
       throw new Error(
         `${invalidArgumentMessage(arg, desc)} ${
           value.methodName
-        }() cannot be used inside of an array${fieldPathMessage}.`
+        }() cannot be used inside of an array${fieldPathMessage}.`,
       );
     } else if (options.allowDeletes === 'none') {
       throw new Error(
         `${invalidArgumentMessage(arg, desc)} ${
           value.methodName
         }() must appear at the top-level and can only be used in update() ` +
-          `or set() with {merge:true}${fieldPathMessage}.`
+          `or set() with {merge:true}${fieldPathMessage}.`,
       );
     } else if (options.allowDeletes === 'root') {
       if (level === 0) {
@@ -573,7 +573,7 @@ export function validateUserInput(
           `${invalidArgumentMessage(arg, desc)} ${
             value.methodName
           }() must appear at the top-level and can only be used in update() ` +
-            `or set() with {merge:true}${fieldPathMessage}.`
+            `or set() with {merge:true}${fieldPathMessage}.`,
         );
       }
     }
@@ -582,21 +582,21 @@ export function validateUserInput(
       throw new Error(
         `${invalidArgumentMessage(arg, desc)} ${
           value.methodName
-        }() cannot be used inside of an array${fieldPathMessage}.`
+        }() cannot be used inside of an array${fieldPathMessage}.`,
       );
     } else if (!options.allowTransforms) {
       throw new Error(
         `${invalidArgumentMessage(arg, desc)} ${
           value.methodName
-        }() can only be used in set(), create() or update()${fieldPathMessage}.`
+        }() can only be used in set(), create() or update()${fieldPathMessage}.`,
       );
     }
   } else if (value instanceof FieldPath) {
     throw new Error(
       `${invalidArgumentMessage(
         arg,
-        desc
-      )} Cannot use object of type "FieldPath" as a Firestore value${fieldPathMessage}.`
+        desc,
+      )} Cannot use object of type "FieldPath" as a Firestore value${fieldPathMessage}.`,
     );
   } else if (value instanceof DocumentReference) {
     // Ok.
@@ -633,7 +633,7 @@ function isMomentJsType(value: unknown): value is {toDate(): Date} {
 }
 
 export function isProtoValueSerializable(
-  value: unknown
+  value: unknown,
 ): value is ProtoValueSerializable {
   return (
     !!value &&
@@ -743,7 +743,7 @@ export class ObjectValue {
   private applyChanges(
     fieldsMap: Record<string, IValue>,
     inserts: {[key: string]: IValue},
-    deletes: string[]
+    deletes: string[],
   ): void {
     forEach(inserts, (key, val) => (fieldsMap[key] = val));
     for (const field of deletes) {
@@ -754,7 +754,7 @@ export class ObjectValue {
 
 /** Returns true if `value` is a MapValue. */
 export function isMapValue(
-  value?: IValue | null
+  value?: IValue | null,
 ): value is {mapValue: IMapValue} {
   return !!value && 'mapValue' in value;
 }

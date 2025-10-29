@@ -53,7 +53,7 @@ describe('execute(Pipeline|PipelineExecuteOptions)', () => {
     expect(pipelineSnapshot.results.length).to.equal(0);
 
     expect(pipelineSnapshot.executionTime.toProto()).to.deep.equal(
-      executeTime.toProto()
+      executeTime.toProto(),
     );
   });
 
@@ -85,7 +85,7 @@ describe('execute(Pipeline|PipelineExecuteOptions)', () => {
       },
     };
     expect(spy.args[FIRST_CALL][EXECUTE_PIPELINE_REQUEST]).to.deep.equal(
-      executePipelineRequest
+      executePipelineRequest,
     );
   });
 
@@ -138,7 +138,7 @@ describe('execute(Pipeline|PipelineExecuteOptions)', () => {
       },
     };
     expect(spy.args[FIRST_CALL][EXECUTE_PIPELINE_REQUEST]).to.deep.equal(
-      executePipelineRequest
+      executePipelineRequest,
     );
   });
 
@@ -181,7 +181,7 @@ describe('execute(Pipeline|PipelineExecuteOptions)', () => {
       },
     };
     expect(spy.args[FIRST_CALL][EXECUTE_PIPELINE_REQUEST]).to.deep.equal(
-      executePipelineRequest
+      executePipelineRequest,
     );
   });
 });
@@ -422,7 +422,7 @@ describe('stage option serialization', () => {
       expect(
         spy.args[FIRST_CALL][EXECUTE_PIPELINE_REQUEST]['structuredPipeline'][
           'pipeline'
-        ]['stages'][testDefinition.stageIndex ?? 0]['options']
+        ]['stages'][testDefinition.stageIndex ?? 0]['options'],
       ).to.deep.equal(expectedOptions);
     });
   });

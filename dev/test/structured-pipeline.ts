@@ -66,7 +66,7 @@ describe('StructuredPipeline', () => {
           outputFormat: 'text',
         },
       },
-      {}
+      {},
     );
 
     const proto = structuredPipeline._toProto(new Serializer(db!));
@@ -104,7 +104,7 @@ describe('StructuredPipeline', () => {
       {},
       {
         foo_bar: 'baz',
-      }
+      },
     );
 
     const proto = structuredPipeline._toProto(new Serializer(db!));
@@ -130,7 +130,7 @@ describe('StructuredPipeline', () => {
       {},
       {
         'foo.bar': 'baz',
-      }
+      },
     );
 
     const proto = structuredPipeline._toProto(new Serializer(db!));
@@ -162,7 +162,7 @@ describe('StructuredPipeline', () => {
       },
       {
         index_mode: 'baz',
-      }
+      },
     );
 
     const proto = structuredPipeline._toProto(new Serializer(db!));

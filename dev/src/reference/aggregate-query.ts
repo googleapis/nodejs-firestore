@@ -59,7 +59,7 @@ export class AggregateQuery<
   constructor(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private readonly _query: Query<AppModelType, DbModelType>,
-    private readonly _aggregates: AggregateSpecType
+    private readonly _aggregates: AggregateSpecType,
   ) {
     // Client-side aliases may be too long and exceed the 1500-byte string size limit.
     // Such long strings do not need to be transferred over the wire either.
@@ -92,7 +92,7 @@ export class AggregateQuery<
       async () => {
         const {result} = await this._get();
         return result;
-      }
+      },
     );
   }
 
@@ -106,7 +106,7 @@ export class AggregateQuery<
    *  transaction, or timestamp to use as read time.
    */
   async _get(
-    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
   ): Promise<
     QuerySnapshotResponse<
       AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
@@ -132,7 +132,7 @@ export class AggregateQuery<
    */
   _getResponse(
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    explainOptions?: firestore.ExplainOptions
+    explainOptions?: firestore.ExplainOptions,
   ): Promise<
     QueryResponse<
       AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
@@ -155,7 +155,7 @@ export class AggregateQuery<
         (
           data: QueryResponse<
             AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
-          >
+          >,
         ) => {
           if (data.transaction) {
             output.transaction = data.transaction;
@@ -166,7 +166,7 @@ export class AggregateQuery<
           if (data.result) {
             output.result = data.result;
           }
-        }
+        },
       );
       stream.on('end', () => {
         stream.destroy();
@@ -190,7 +190,7 @@ export class AggregateQuery<
    */
   _stream(
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    explainOptions?: firestore.ExplainOptions
+    explainOptions?: firestore.ExplainOptions,
   ): Readable {
     const tag = requestTag();
     const firestore = this._query.firestore;
@@ -210,7 +210,7 @@ export class AggregateQuery<
         if (proto.explainMetrics) {
           output.explainMetrics = ExplainMetrics._fromProto(
             proto.explainMetrics,
-            firestore._serializer!
+            firestore._serializer!,
           );
         }
 
@@ -236,7 +236,7 @@ export class AggregateQuery<
           'runAggregationQuery',
           /* bidirectional= */ false,
           request,
-          tag
+          tag,
         );
         stream.on('close', () => {
           backendStream.resume();
@@ -254,7 +254,7 @@ export class AggregateQuery<
             'AggregateQuery._stream',
             tag,
             'AggregateQuery failed with stream error:',
-            err
+            err,
           );
 
           this._query._firestore._traceUtil
@@ -278,7 +278,7 @@ export class AggregateQuery<
    * @private
    */
   private decodeResult(
-    proto: api.IAggregationResult
+    proto: api.IAggregationResult,
   ): firestore.AggregateSpecData<AggregateSpecType> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = {};
@@ -289,11 +289,11 @@ export class AggregateQuery<
         const alias = this.serverAliasToClientAliasMap[prop];
         assert(
           alias !== null && alias !== undefined,
-          `'${prop}' not present in server-client alias mapping.`
+          `'${prop}' not present in server-client alias mapping.`,
         );
         if (this._aggregates[alias] === undefined) {
           throw new Error(
-            `Unexpected alias [${prop}] in result aggregate result`
+            `Unexpected alias [${prop}] in result aggregate result`,
           );
         }
         data[alias] = serializer.decodeValue(fields[prop]);
@@ -312,7 +312,7 @@ export class AggregateQuery<
    */
   toProto(
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    explainOptions?: firestore.ExplainOptions
+    explainOptions?: firestore.ExplainOptions,
   ): api.IRunAggregationQueryRequest {
     const queryProto = this._query.toProto();
     const runQueryRequest: api.IRunAggregationQueryRequest = {
@@ -323,12 +323,12 @@ export class AggregateQuery<
           const serverAlias = this.clientAliasToServerAliasMap[clientAlias];
           assert(
             serverAlias !== null && serverAlias !== undefined,
-            `'${clientAlias}' not present in client-server alias mapping.`
+            `'${clientAlias}' not present in client-server alias mapping.`,
           );
           return new Aggregate(
             serverAlias,
             aggregate.aggregateType,
-            aggregate._field
+            aggregate._field,
           ).toProto();
         }),
       },
@@ -369,12 +369,12 @@ export class AggregateQuery<
         } else {
           throw new Error(`Unknown aggregate type ${aggregate.aggregateType}`);
         }
-      }
+      },
     );
 
     if (aggregates.length === 0) {
       throw new Error(
-        'Cannot convert an AggregateQuery with 0 aggregates to a Pipeline'
+        'Cannot convert an AggregateQuery with 0 aggregates to a Pipeline',
       );
     }
 
@@ -400,7 +400,7 @@ export class AggregateQuery<
       AggregateSpecType,
       AppModelType,
       DbModelType
-    >
+    >,
   ): boolean {
     if (this === other) {
       return true;
@@ -423,7 +423,7 @@ export class AggregateQuery<
    * statistics from the query execution (if any), and the query results (if any).
    */
   async explain(
-    options?: firestore.ExplainOptions
+    options?: firestore.ExplainOptions,
   ): Promise<
     ExplainResults<
       AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
@@ -431,7 +431,7 @@ export class AggregateQuery<
   > {
     const {result, explainMetrics} = await this._getResponse(
       undefined,
-      options || {}
+      options || {},
     );
     if (!explainMetrics) {
       throw new Error('No explain results');

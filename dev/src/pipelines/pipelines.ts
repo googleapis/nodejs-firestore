@@ -129,7 +129,7 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
     collectionOrOptions:
       | string
       | firestore.CollectionReference
-      | firestore.Pipelines.CollectionStageOptions
+      | firestore.Pipelines.CollectionStageOptions,
   ): Pipeline {
     const options =
       isString(collectionOrOptions) ||
@@ -173,15 +173,15 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
    * @param options - Options defining how this CollectionGroupStage is evaluated.
    */
   collectionGroup(
-    options: firestore.Pipelines.CollectionGroupStageOptions
+    options: firestore.Pipelines.CollectionGroupStageOptions,
   ): Pipeline;
   collectionGroup(
     collectionIdOrOptions:
       | string
-      | firestore.Pipelines.CollectionGroupStageOptions
+      | firestore.Pipelines.CollectionGroupStageOptions,
   ): Pipeline {
     const options: InternalCollectionGroupStageOptions = isString(
-      collectionIdOrOptions
+      collectionIdOrOptions,
     )
       ? {collectionId: collectionIdOrOptions}
       : {...collectionIdOrOptions};
@@ -226,7 +226,7 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
   documents(
     docsOrOptions:
       | Array<string | DocumentReference>
-      | firestore.Pipelines.DocumentsStageOptions
+      | firestore.Pipelines.DocumentsStageOptions,
   ): Pipeline {
     const options = Array.isArray(docsOrOptions) ? {} : docsOrOptions;
     const docs = Array.isArray(docsOrOptions)
@@ -237,11 +237,11 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
     docs
       .filter(v => v instanceof DocumentReference)
       .forEach(dr =>
-        this._validateReference(dr as firestore.DocumentReference)
+        this._validateReference(dr as firestore.DocumentReference),
       );
 
     const normalizedDocs: Array<DocumentReference> = docs.map(doc =>
-      isString(doc) ? this.db.doc(doc) : (doc as DocumentReference)
+      isString(doc) ? this.db.doc(doc) : (doc as DocumentReference),
     );
 
     const internalOptions: InternalDocumentsStageOptions = {
@@ -275,7 +275,7 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
   }
 
   _validateReference(
-    reference: firestore.CollectionReference | firestore.DocumentReference
+    reference: firestore.CollectionReference | firestore.DocumentReference,
   ): reference is CollectionReference | DocumentReference {
     if (
       !(
@@ -284,7 +284,7 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
       )
     ) {
       throw new Error(
-        'Invalid reference. The value may not be a CollectionReference or DocumentReference. Or, it may be an object from a different SDK build.'
+        'Invalid reference. The value may not be a CollectionReference or DocumentReference. Or, it may be an object from a different SDK build.',
       );
     }
 
@@ -297,7 +297,7 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
             : 'DocumentReference'
         }. ` +
           `The database name ("${refDbId}") of this reference does not match ` +
-          `the database name ("${this.db.formattedName}") of the target database of this Pipeline.`
+          `the database name ("${this.db.formattedName}") of the target database of this Pipeline.`,
       );
     }
 
@@ -349,7 +349,7 @@ export class PipelineSource implements firestore.Pipelines.PipelineSource {
 export class Pipeline implements firestore.Pipelines.Pipeline {
   constructor(
     private db: Firestore,
-    private stages: Stage[]
+    private stages: Stage[],
   ) {}
 
   private _addStage(stage: Stage): Pipeline {
@@ -426,7 +426,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   ): Pipeline {
     const options = isSelectable(fieldOrOptions) ? {} : fieldOrOptions;
     const fields: firestore.Pipelines.Selectable[] = isSelectable(
-      fieldOrOptions
+      fieldOrOptions,
     )
       ? [fieldOrOptions, ...additionalFields]
       : fieldOrOptions.fields;
@@ -500,7 +500,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
         ? [fieldValueOrOptions, ...additionalFields]
         : fieldValueOrOptions.fields;
     const convertedFields: Array<Field> = fields.map(f =>
-      isString(f) ? field(f) : (f as Field)
+      isString(f) ? field(f) : (f as Field),
     );
     this._validateUserData('removeFields', convertedFields);
 
@@ -679,12 +679,12 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   where(
     conditionOrOptions:
       | firestore.Pipelines.BooleanExpression
-      | firestore.Pipelines.WhereStageOptions
+      | firestore.Pipelines.WhereStageOptions,
   ): Pipeline {
     const options = isBooleanExpr(conditionOrOptions) ? {} : conditionOrOptions;
 
     const condition: firestore.Pipelines.BooleanExpression = isBooleanExpr(
-      conditionOrOptions
+      conditionOrOptions,
     )
       ? conditionOrOptions
       : conditionOrOptions.condition;
@@ -745,7 +745,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    */
   offset(options: firestore.Pipelines.OffsetStageOptions): Pipeline;
   offset(
-    offsetOrOptions: number | firestore.Pipelines.OffsetStageOptions
+    offsetOrOptions: number | firestore.Pipelines.OffsetStageOptions,
   ): Pipeline {
     const options = isNumber(offsetOrOptions) ? {} : offsetOrOptions;
 
@@ -815,7 +815,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    */
   limit(options: firestore.Pipelines.LimitStageOptions): Pipeline;
   limit(
-    limitOrOptions: number | firestore.Pipelines.LimitStageOptions
+    limitOrOptions: number | firestore.Pipelines.LimitStageOptions,
   ): Pipeline {
     const options = isNumber(limitOrOptions) ? {} : limitOrOptions;
 
@@ -995,7 +995,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     const convertedAccumulators: Map<string, AggregateFunction> =
       aliasedAggregateToMap(accumulators);
     const groups: Array<firestore.Pipelines.Selectable | string> =
-      isAliasedAggregate(targetOrOptions) ? [] : targetOrOptions.groups ?? [];
+      isAliasedAggregate(targetOrOptions) ? [] : (targetOrOptions.groups ?? []);
     const convertedGroups: Map<string, Expression> = selectablesToMap(groups);
     this._validateUserData('aggregate', convertedGroups);
 
@@ -1168,7 +1168,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     valueOrOptions:
       | firestore.Pipelines.Expression
       | string
-      | firestore.Pipelines.ReplaceWithStageOptions
+      | firestore.Pipelines.ReplaceWithStageOptions,
   ): Pipeline {
     const options =
       isString(valueOrOptions) || isExpr(valueOrOptions) ? {} : valueOrOptions;
@@ -1229,7 +1229,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    */
   sample(options: firestore.Pipelines.SampleStageOptions): Pipeline;
   sample(
-    documentsOrOptions: number | firestore.Pipelines.SampleStageOptions
+    documentsOrOptions: number | firestore.Pipelines.SampleStageOptions,
   ): Pipeline {
     const options = isNumber(documentsOrOptions) ? {} : documentsOrOptions;
 
@@ -1298,12 +1298,12 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   union(
     otherOrOptions:
       | firestore.Pipelines.Pipeline
-      | firestore.Pipelines.UnionStageOptions
+      | firestore.Pipelines.UnionStageOptions,
   ): Pipeline {
     const options = isPipeline(otherOrOptions) ? {} : otherOrOptions;
 
     const otherPipeline: firestore.Pipelines.Pipeline = isPipeline(
-      otherOrOptions
+      otherOrOptions,
     )
       ? otherOrOptions
       : otherOrOptions.other;
@@ -1351,7 +1351,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    */
   unnest(
     selectable: firestore.Pipelines.Selectable,
-    indexField?: string
+    indexField?: string,
   ): Pipeline;
   /**
    * @beta
@@ -1390,14 +1390,14 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     selectableOrOptions:
       | firestore.Pipelines.Selectable
       | firestore.Pipelines.UnnestStageOptions,
-    indexField?: string
+    indexField?: string,
   ): Pipeline {
     const options = isSelectable(selectableOrOptions)
       ? {}
       : selectableOrOptions;
 
     const selectable: firestore.Pipelines.Selectable = isSelectable(
-      selectableOrOptions
+      selectableOrOptions,
     )
       ? selectableOrOptions
       : selectableOrOptions.selectable;
@@ -1485,7 +1485,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
     const options = isOrdering(orderingOrOptions) ? {} : orderingOrOptions;
 
     const orderings: Array<firestore.Pipelines.Ordering> = isOrdering(
-      orderingOrOptions
+      orderingOrOptions,
     )
       ? [orderingOrOptions, ...additionalOrderings]
       : orderingOrOptions.orderings;
@@ -1525,7 +1525,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   rawStage(
     name: string,
     params: unknown[],
-    options?: {[key: string]: Expression | unknown}
+    options?: {[key: string]: Expression | unknown},
   ): Pipeline {
     // Convert input values to Expressions.
     // We treat objects as mapValues and arrays as arrayValues,
@@ -1585,7 +1585,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * @return A Promise representing the asynchronous pipeline execution.
    */
   execute(
-    pipelineExecuteOptions?: firestore.Pipelines.PipelineExecuteOptions
+    pipelineExecuteOptions?: firestore.Pipelines.PipelineExecuteOptions,
   ): Promise<PipelineSnapshot> {
     return this._execute(undefined, pipelineExecuteOptions).then(response => {
       const results = response.result || [];
@@ -1598,11 +1598,11 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
 
   _execute(
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    pipelineExecuteOptions?: firestore.Pipelines.PipelineExecuteOptions
+    pipelineExecuteOptions?: firestore.Pipelines.PipelineExecuteOptions,
   ): Promise<PipelineResponse> {
     const util = new ExecutionUtil(this.db, this.db._serializer!);
     const structuredPipeline = this._toStructuredPipeline(
-      pipelineExecuteOptions
+      pipelineExecuteOptions,
     );
     return util
       ._getResponse(structuredPipeline, transactionOrReadTime)
@@ -1610,14 +1610,14 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   }
 
   _toStructuredPipeline(
-    pipelineExecuteOptions?: firestore.Pipelines.PipelineExecuteOptions
+    pipelineExecuteOptions?: firestore.Pipelines.PipelineExecuteOptions,
   ): StructuredPipeline {
     const structuredPipelineOptions = pipelineExecuteOptions ?? {};
     const optionsOverride = pipelineExecuteOptions?.rawOptions ?? {};
     return new StructuredPipeline(
       this,
       structuredPipelineOptions,
-      optionsOverride
+      optionsOverride,
     );
   }
 
@@ -1647,7 +1647,7 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
 
   _toProto(): api.IPipeline {
     const stages: IStage[] = this.stages.map(stage =>
-      stage._toProto(this.db._serializer!)
+      stage._toProto(this.db._serializer!),
     );
     return {stages};
   }
@@ -1696,7 +1696,7 @@ export class ExplainStats implements firestore.Pipelines.ExplainStats {
       return;
     }
     this.protoRoot = await loadProtos(
-      '../protos/google/protobuf/wrappers.proto'
+      '../protos/google/protobuf/wrappers.proto',
     );
   }
 
@@ -1719,7 +1719,7 @@ export class ExplainStats implements firestore.Pipelines.ExplainStats {
   _decode(): unknown {
     if (!ExplainStats.protoRoot) {
       throw new Error(
-        'Ensure message types are loaded before attempting to decode ExplainStats'
+        'Ensure message types are loaded before attempting to decode ExplainStats',
       );
     }
 
@@ -1738,12 +1738,12 @@ export class ExplainStats implements firestore.Pipelines.ExplainStats {
     if (
       !typeUrl.startsWith(NAMESPACE) ||
       !(reflectionObject = ExplainStats.protoRoot.lookup(
-        typeUrl.slice(NAMESPACE.length)
+        typeUrl.slice(NAMESPACE.length),
       )) ||
       !(reflectionObject instanceof MessageType)
     ) {
       throw new Error(
-        `Unsupported explainStatsMessage type_url "${this.explainStatsData.type_url}". Use \`.rawMessage\` to get access to the encoded explainStats message and perform the protobuf parsing in your application.`
+        `Unsupported explainStatsMessage type_url "${this.explainStatsData.type_url}". Use \`.rawMessage\` to get access to the encoded explainStats message and perform the protobuf parsing in your application.`,
       );
     }
 
@@ -1768,7 +1768,7 @@ export class ExplainStats implements firestore.Pipelines.ExplainStats {
     }
 
     throw new Error(
-      "Explain stats is not in a string format, ensure you requested an `explainOptions.outputFormat` that returns a string value, such as 'text'."
+      "Explain stats is not in a string format, ensure you requested an `explainOptions.outputFormat` that returns a string value, such as 'text'.",
     );
   }
 
@@ -1787,7 +1787,24 @@ export class ExplainStats implements firestore.Pipelines.ExplainStats {
 
 /**
  * @beta
- * TODO(docs)
+ * Represents the results of a Firestore pipeline execution.
+ *
+ * A `PipelineSnapshot` contains zero or more {@link PipelineResult} objects
+ * representing the documents returned by a pipeline query. It provides methods
+ * to iterate over the documents and access metadata about the query results.
+ *
+ * @example
+ * ```typescript
+ * const snapshot: PipelineSnapshot = await firestore
+ *   .pipeline()
+ *   .collection('myCollection')
+ *   .where(field('value').greaterThan(10))
+ *   .execute();
+ *
+ * snapshot.results.forEach(doc => {
+ *   console.log(doc.id, '=>', doc.data());
+ * });
+ * ```
  */
 export class PipelineSnapshot implements firestore.Pipelines.PipelineSnapshot {
   private readonly _pipeline: Pipeline;
@@ -1799,7 +1816,7 @@ export class PipelineSnapshot implements firestore.Pipelines.PipelineSnapshot {
     pipeline: Pipeline,
     results: PipelineResult[],
     executionTime?: Timestamp,
-    explainStats?: ExplainStats
+    explainStats?: ExplainStats,
   ) {
     this._pipeline = pipeline;
     this._executionTime = executionTime;
@@ -1833,7 +1850,7 @@ export class PipelineSnapshot implements firestore.Pipelines.PipelineSnapshot {
   get executionTime(): Timestamp {
     if (this._executionTime === undefined) {
       throw new Error(
-        "'executionTime' is expected to exist, but it is undefined"
+        "'executionTime' is expected to exist, but it is undefined",
       );
     }
     return this._executionTime;
@@ -1890,7 +1907,7 @@ export class PipelineResult implements firestore.Pipelines.PipelineResult {
     ref?: DocumentReference,
     readTime?: Timestamp,
     createTime?: Timestamp,
-    updateTime?: Timestamp
+    updateTime?: Timestamp,
   ) {
     this._ref = ref;
     this._serializer = serializer;

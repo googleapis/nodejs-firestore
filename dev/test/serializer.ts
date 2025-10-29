@@ -169,7 +169,7 @@ describe('validateUserInput', () => {
         allowDeletes: 'none',
         allowTransforms: false,
         allowUndefined: false,
-      })
+      }),
     ).to.throw(/Input object is deeper than 20 levels/i);
   });
 
@@ -243,7 +243,7 @@ describe('validateUserInput', () => {
         allowDeletes: 'none',
         allowTransforms: false,
         allowUndefined: false,
-      })
+      }),
     ).to.throw(/Input object is deeper than 20 levels/i);
   });
 });
@@ -285,7 +285,7 @@ describe('serializer', () => {
           referenceValue: `${DATABASE_ROOT}/documents/foo`,
         }) as DocumentReference;
       }).to.throw(
-        'The SDK does not currently support decoding referenceValues for collections or partitions.'
+        'The SDK does not currently support decoding referenceValues for collections or partitions.',
       );
     });
 
@@ -295,7 +295,7 @@ describe('serializer', () => {
           referenceValue: `${DATABASE_ROOT}/documents`,
         }) as DocumentReference;
       }).to.throw(
-        'The SDK does not currently support decoding referenceValues for collections or partitions.'
+        'The SDK does not currently support decoding referenceValues for collections or partitions.',
       );
     });
   });

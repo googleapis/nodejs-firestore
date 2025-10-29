@@ -38,7 +38,9 @@ declare namespace FirebaseFirestore {
         ? T
         : T extends {}
           ? {
-              [K in keyof T]?: PartialWithFieldValue<T[K]> | FieldValue;
+              [K in keyof T]?: T[K] extends Function
+                ? T[K]
+                : PartialWithFieldValue<T[K]> | FieldValue;
             }
           : never);
   /**
@@ -51,7 +53,9 @@ declare namespace FirebaseFirestore {
         ? T
         : T extends {}
           ? {
-              [K in keyof T]: WithFieldValue<T[K]> | FieldValue;
+              [K in keyof T]: T[K] extends Function
+                ? T[K]
+                : WithFieldValue<T[K]> | FieldValue;
             }
           : never);
   /**
@@ -352,7 +356,7 @@ declare namespace FirebaseFirestore {
      * as `FieldValue.delete()` to be used as property values.
      */
     toFirestore(
-      modelObject: WithFieldValue<AppModelType>
+      modelObject: WithFieldValue<AppModelType>,
     ): WithFieldValue<DbModelType>;
     /**
      * Called by the Firestore SDK to convert a custom model object of type
@@ -369,7 +373,7 @@ declare namespace FirebaseFirestore {
      */
     toFirestore(
       modelObject: PartialWithFieldValue<AppModelType>,
-      options: SetOptions
+      options: SetOptions,
     ): PartialWithFieldValue<DbModelType>;
     /**
      * Called by the Firestore SDK to convert Firestore data into an object of
@@ -608,7 +612,7 @@ declare namespace FirebaseFirestore {
      */
     recursiveDelete(
       ref: CollectionReference<any, any> | DocumentReference<any, any>,
-      bulkWriter?: BulkWriter
+      bulkWriter?: BulkWriter,
     ): Promise<void>;
     /**
      * Terminates the Firestore client and closes all open streams.
@@ -665,7 +669,7 @@ declare namespace FirebaseFirestore {
       updateFunction: (transaction: Transaction) => Promise<T>,
       transactionOptions?:
         | ReadWriteTransactionOptions
-        | ReadOnlyTransactionOptions
+        | ReadOnlyTransactionOptions,
     ): Promise<T>;
     /**
      * Creates a write batch, used for performing multiple writes as a single
@@ -704,7 +708,16 @@ declare namespace FirebaseFirestore {
      */
     bundle(bundleId?: string): BundleBuilder;
     /**
-     * TODO(pipelines)
+     * Define a pipeline query. Every pipeline is defined as a series of stages
+     * starting with a source stage.
+     *
+     * @example
+     * ```
+     * let goodBooksPipeline: Pipeline =
+     *     myFirestore.pipeline()
+     *         .collection('books')
+     *         .where(field('rating').greaterThan(4));
+     * ```
      */
     pipeline(): Pipelines.PipelineSource;
   }
@@ -749,7 +762,7 @@ declare namespace FirebaseFirestore {
      * @return A QuerySnapshot for the retrieved data.
      */
     get<AppModelType, DbModelType extends DocumentData>(
-      query: Query<AppModelType, DbModelType>
+      query: Query<AppModelType, DbModelType>,
     ): Promise<QuerySnapshot<AppModelType, DbModelType>>;
     /**
      * Reads the document referenced by the provided `DocumentReference.`
@@ -759,7 +772,7 @@ declare namespace FirebaseFirestore {
      * @return A DocumentSnapshot for the read data.
      */
     get<AppModelType, DbModelType extends DocumentData>(
-      documentRef: DocumentReference<AppModelType, DbModelType>
+      documentRef: DocumentReference<AppModelType, DbModelType>,
     ): Promise<DocumentSnapshot<AppModelType, DbModelType>>;
     /**
      * Retrieves an aggregate query result. Holds a pessimistic lock on all
@@ -777,7 +790,7 @@ declare namespace FirebaseFirestore {
         AggregateSpecType,
         AppModelType,
         DbModelType
-      >
+      >,
     ): Promise<
       AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
     >;
@@ -812,7 +825,7 @@ declare namespace FirebaseFirestore {
      */
     create<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): Transaction;
     /**
      * Writes to the document referred to by the provided `DocumentReference`.
@@ -836,11 +849,11 @@ declare namespace FirebaseFirestore {
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: PartialWithFieldValue<AppModelType>,
-      options: SetOptions
+      options: SetOptions,
     ): Transaction;
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): Transaction;
     /**
      * Updates fields in the document referred to by the provided
@@ -860,7 +873,7 @@ declare namespace FirebaseFirestore {
     update<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: UpdateData<DbModelType>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): Transaction;
     /**
      * Updates fields in the document referred to by the provided
@@ -897,7 +910,7 @@ declare namespace FirebaseFirestore {
      */
     delete(
       documentRef: DocumentReference<any, any>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): Transaction;
     /**
      * Executes this pipeline and returns a Promise to represent the asynchronous operation.
@@ -955,7 +968,7 @@ declare namespace FirebaseFirestore {
      */
     create<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): Promise<WriteResult>;
     /**
      * Delete a document from the database.
@@ -975,7 +988,7 @@ declare namespace FirebaseFirestore {
      */
     delete(
       documentRef: DocumentReference<any, any>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): Promise<WriteResult>;
     /**
      * Write to the document referred to by the provided
@@ -1004,11 +1017,11 @@ declare namespace FirebaseFirestore {
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: PartialWithFieldValue<AppModelType>,
-      options: SetOptions
+      options: SetOptions,
     ): Promise<WriteResult>;
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): Promise<WriteResult>;
     /**
      * Update fields of the document referred to by the provided
@@ -1037,7 +1050,7 @@ declare namespace FirebaseFirestore {
     update<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: UpdateData<DbModelType>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): Promise<WriteResult>;
     /**
      * Update fields of the document referred to by the provided
@@ -1081,8 +1094,8 @@ declare namespace FirebaseFirestore {
     onWriteResult(
       callback: (
         documentRef: DocumentReference<any, any>,
-        result: WriteResult
-      ) => void
+        result: WriteResult,
+      ) => void,
     ): void;
     /**
      * Attaches an error handler listener that is run every time a BulkWriter
@@ -1097,7 +1110,7 @@ declare namespace FirebaseFirestore {
      * `false` will stop the retry loop.
      */
     onWriteError(
-      shouldRetryCallback: (error: BulkWriterError) => boolean
+      shouldRetryCallback: (error: BulkWriterError) => boolean,
     ): void;
     /**
      * Commits all writes that have been enqueued up to this point in parallel.
@@ -1200,7 +1213,7 @@ declare namespace FirebaseFirestore {
      */
     create<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): WriteBatch;
     /**
      * Write to the document referred to by the provided `DocumentReference`.
@@ -1224,11 +1237,11 @@ declare namespace FirebaseFirestore {
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: PartialWithFieldValue<AppModelType>,
-      options: SetOptions
+      options: SetOptions,
     ): WriteBatch;
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): WriteBatch;
     /**
      * Update fields of the document referred to by the provided
@@ -1248,7 +1261,7 @@ declare namespace FirebaseFirestore {
     update<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: UpdateData<DbModelType>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): WriteBatch;
     /**
      * Updates fields in the document referred to by the provided
@@ -1285,7 +1298,7 @@ declare namespace FirebaseFirestore {
      */
     delete(
       documentRef: DocumentReference<any, any>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): WriteBatch;
     /**
      * Commits all of the writes in this write batch as a single atomic unit.
@@ -1438,7 +1451,7 @@ declare namespace FirebaseFirestore {
      */
     set(
       data: PartialWithFieldValue<AppModelType>,
-      options: SetOptions
+      options: SetOptions,
     ): Promise<WriteResult>;
     set(data: WithFieldValue<AppModelType>): Promise<WriteResult>;
     /**
@@ -1456,7 +1469,7 @@ declare namespace FirebaseFirestore {
      */
     update(
       data: UpdateData<DbModelType>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): Promise<WriteResult>;
     /**
      * Updates fields in the document referred to by this `DocumentReference`.
@@ -1507,7 +1520,7 @@ declare namespace FirebaseFirestore {
      */
     onSnapshot(
       onNext: (snapshot: DocumentSnapshot<AppModelType, DbModelType>) => void,
-      onError?: (error: Error) => void
+      onError?: (error: Error) => void,
     ): () => void;
     /**
      * Returns true if this `DocumentReference` is equal to the provided one.
@@ -1531,7 +1544,7 @@ declare namespace FirebaseFirestore {
       NewAppModelType,
       NewDbModelType extends DocumentData = DocumentData,
     >(
-      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType> | null
+      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType> | null,
     ): DocumentReference<NewAppModelType, NewDbModelType>;
   }
   /**
@@ -1678,7 +1691,7 @@ declare namespace FirebaseFirestore {
     where(
       fieldPath: string | FieldPath,
       opStr: WhereFilterOp,
-      value: any
+      value: any,
     ): Query<AppModelType, DbModelType>;
     /**
      * Creates and returns a new [Query]{@link Query} with the additional filter
@@ -1706,7 +1719,7 @@ declare namespace FirebaseFirestore {
      */
     orderBy(
       fieldPath: string | FieldPath,
-      directionStr?: OrderByDirection
+      directionStr?: OrderByDirection,
     ): Query<AppModelType, DbModelType>;
     /**
      * Creates and returns a new Query that only returns the first matching
@@ -1769,7 +1782,7 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     startAt(
-      snapshot: DocumentSnapshot<any, any>
+      snapshot: DocumentSnapshot<any, any>,
     ): Query<AppModelType, DbModelType>;
     /**
      * Creates and returns a new Query that starts at the provided fields
@@ -1791,7 +1804,7 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     startAfter(
-      snapshot: DocumentSnapshot<any, any>
+      snapshot: DocumentSnapshot<any, any>,
     ): Query<AppModelType, DbModelType>;
     /**
      * Creates and returns a new Query that starts after the provided fields
@@ -1813,7 +1826,7 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     endBefore(
-      snapshot: DocumentSnapshot<any, any>
+      snapshot: DocumentSnapshot<any, any>,
     ): Query<AppModelType, DbModelType>;
     /**
      * Creates and returns a new Query that ends before the provided fields
@@ -1835,7 +1848,7 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     endAt(
-      snapshot: DocumentSnapshot<any, any>
+      snapshot: DocumentSnapshot<any, any>,
     ): Query<AppModelType, DbModelType>;
     /**
      * Creates and returns a new Query that ends at the provided fields
@@ -1862,7 +1875,7 @@ declare namespace FirebaseFirestore {
      *  from the query execution (if any), and the query results (if any).
      */
     explain(
-      options?: ExplainOptions
+      options?: ExplainOptions,
     ): Promise<ExplainResults<QuerySnapshot<AppModelType, DbModelType>>>;
     /**
      * Executes the query and returns the results as Node Stream.
@@ -1913,7 +1926,7 @@ declare namespace FirebaseFirestore {
      */
     onSnapshot(
       onNext: (snapshot: QuerySnapshot<AppModelType, DbModelType>) => void,
-      onError?: (error: Error) => void
+      onError?: (error: Error) => void,
     ): () => void;
     /**
      * Returns a query that counts the documents in the result set of this
@@ -1970,7 +1983,7 @@ declare namespace FirebaseFirestore {
      * ```
      */
     aggregate<T extends AggregateSpec>(
-      aggregateSpec: T
+      aggregateSpec: T,
     ): AggregateQuery<T, AppModelType, DbModelType>;
     /**
      * Returns a query that can perform vector distance (similarity) search with given parameters.
@@ -2006,7 +2019,7 @@ declare namespace FirebaseFirestore {
       options: {
         limit: number;
         distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
-      }
+      },
     ): VectorQuery<AppModelType, DbModelType>;
     /**
      * Returns a query that can perform vector distance (similarity) search with given parameters.
@@ -2037,7 +2050,7 @@ declare namespace FirebaseFirestore {
      * See {@link VectorQueryOptions}.
      */
     findNearest(
-      options: VectorQueryOptions
+      options: VectorQueryOptions,
     ): VectorQuery<AppModelType, DbModelType>;
     /**
      * Returns a query that can perform vector distance (similarity) search with given parameters.
@@ -2068,7 +2081,7 @@ declare namespace FirebaseFirestore {
      * See {@link VectorQueryOptions}.
      */
     findNearest(
-      options: VectorQueryOptions
+      options: VectorQueryOptions,
     ): VectorQuery<AppModelType, DbModelType>;
     /**
      * Returns true if this `Query` is equal to the provided one.
@@ -2091,7 +2104,7 @@ declare namespace FirebaseFirestore {
       NewAppModelType,
       NewDbModelType extends DocumentData = DocumentData,
     >(
-      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType> | null
+      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType> | null,
     ): Query<NewAppModelType, NewDbModelType>;
   }
   /**
@@ -2134,9 +2147,9 @@ declare namespace FirebaseFirestore {
      */
     forEach(
       callback: (
-        result: QueryDocumentSnapshot<AppModelType, DbModelType>
+        result: QueryDocumentSnapshot<AppModelType, DbModelType>,
       ) => void,
-      thisArg?: any
+      thisArg?: any,
     ): void;
     /**
      * Returns true if the document data in this `QuerySnapshot` is equal to the
@@ -2187,9 +2200,9 @@ declare namespace FirebaseFirestore {
      */
     forEach(
       callback: (
-        result: QueryDocumentSnapshot<AppModelType, DbModelType>
+        result: QueryDocumentSnapshot<AppModelType, DbModelType>,
       ) => void,
-      thisArg?: any
+      thisArg?: any,
     ): void;
     /**
      * Returns true if the document data in this `VectorQuerySnapshot` is equal to the
@@ -2301,7 +2314,7 @@ declare namespace FirebaseFirestore {
      * newly created document after it has been written to the backend.
      */
     add(
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): Promise<DocumentReference<AppModelType, DbModelType>>;
     /**
      * Returns true if this `CollectionReference` is equal to the provided one.
@@ -2325,7 +2338,7 @@ declare namespace FirebaseFirestore {
       NewAppModelType,
       NewDbModelType extends DocumentData = DocumentData,
     >(
-      converter: FirestoreDataConverter<NewAppModelType> | null
+      converter: FirestoreDataConverter<NewAppModelType> | null,
     ): CollectionReference<NewAppModelType, NewDbModelType>;
   }
   /**
@@ -2348,7 +2361,7 @@ declare namespace FirebaseFirestore {
      * @return An AsyncIterable of `QueryPartition`s.
      */
     getPartitions(
-      desiredPartitionCount: number
+      desiredPartitionCount: number,
     ): AsyncIterable<QueryPartition<AppModelType, DbModelType>>;
     /**
      * Applies a custom data converter to this `CollectionGroup`, allowing you
@@ -2400,7 +2413,7 @@ declare namespace FirebaseFirestore {
       NewAppModelType,
       NewDbModelType extends DocumentData = DocumentData,
     >(
-      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType> | null
+      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType> | null,
     ): CollectionGroup<NewAppModelType, NewDbModelType>;
   }
   /**
@@ -2534,7 +2547,7 @@ declare namespace FirebaseFirestore {
      *  from the query execution (if any), and the query results (if any).
      */
     explain(
-      options?: ExplainOptions
+      options?: ExplainOptions,
     ): Promise<
       ExplainResults<
         AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
@@ -2553,7 +2566,7 @@ declare namespace FirebaseFirestore {
      * defined above, or `false` otherwise.
      */
     isEqual(
-      other: AggregateQuery<AggregateSpecType, AppModelType, DbModelType>
+      other: AggregateQuery<AggregateSpecType, AppModelType, DbModelType>,
     ): boolean;
   }
   /**
@@ -2601,7 +2614,7 @@ declare namespace FirebaseFirestore {
         AggregateSpecType,
         AppModelType,
         DbModelType
-      >
+      >,
     ): boolean;
   }
   /**
@@ -2847,7 +2860,7 @@ declare namespace FirebaseFirestore {
      * @returns This instance.
      */
     add<AppModelType, DbModelType extends DocumentData>(
-      documentSnapshot: DocumentSnapshot<AppModelType, DbModelType>
+      documentSnapshot: DocumentSnapshot<AppModelType, DbModelType>,
     ): BundleBuilder;
     /**
      * Adds a Firestore `QuerySnapshot` to the bundle. Both the documents in the query results and
@@ -2859,7 +2872,7 @@ declare namespace FirebaseFirestore {
      */
     add<AppModelType, DbModelType extends DocumentData>(
       queryName: string,
-      querySnapshot: QuerySnapshot<AppModelType, DbModelType>
+      querySnapshot: QuerySnapshot<AppModelType, DbModelType>,
     ): BundleBuilder;
     /**
      * Builds the bundle and returns the result as a `Buffer` instance.
@@ -2942,7 +2955,7 @@ declare namespace FirebaseFirestore {
     static where(
       fieldPath: string | FieldPath,
       opStr: WhereFilterOp,
-      value: unknown
+      value: unknown,
     ): Filter;
     /**
      * Creates and returns a new [Filter]{@link Filter} that is a
@@ -4249,7 +4262,7 @@ declare namespace FirebaseFirestore {
           | 'minute'
           | 'hour'
           | 'day',
-        amount: number
+        amount: number,
       ): FunctionExpression;
       /**
        * @beta
@@ -4266,7 +4279,7 @@ declare namespace FirebaseFirestore {
        */
       timestampSubtract(
         unit: Expression,
-        amount: Expression
+        amount: Expression,
       ): FunctionExpression;
 
       /**
@@ -4290,7 +4303,7 @@ declare namespace FirebaseFirestore {
           | 'minute'
           | 'hour'
           | 'day',
-        amount: number
+        amount: number,
       ): FunctionExpression;
       /**
        * @beta
@@ -5145,7 +5158,7 @@ declare namespace FirebaseFirestore {
      */
     export function arrayGet(
       arrayField: string,
-      index: number
+      index: number,
     ): FunctionExpression;
     /**
      * @beta
@@ -5165,7 +5178,7 @@ declare namespace FirebaseFirestore {
      */
     export function arrayGet(
       arrayField: string,
-      indexExpr: Expression
+      indexExpr: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -5184,7 +5197,7 @@ declare namespace FirebaseFirestore {
      */
     export function arrayGet(
       arrayExpression: Expression,
-      index: number
+      index: number,
     ): FunctionExpression;
     /**
      * @beta
@@ -5204,7 +5217,7 @@ declare namespace FirebaseFirestore {
      */
     export function arrayGet(
       arrayExpression: Expression,
-      indexExpr: Expression
+      indexExpr: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -5240,7 +5253,7 @@ declare namespace FirebaseFirestore {
      */
     export function ifError(
       tryExpr: BooleanExpression,
-      catchExpr: BooleanExpression
+      catchExpr: BooleanExpression,
     ): BooleanExpression;
     /**
      * @beta
@@ -5260,7 +5273,7 @@ declare namespace FirebaseFirestore {
      */
     export function ifError(
       tryExpr: Expression,
-      catchExpr: Expression
+      catchExpr: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -5280,7 +5293,7 @@ declare namespace FirebaseFirestore {
      */
     export function ifError(
       tryExpr: Expression,
-      catchValue: unknown
+      catchValue: unknown,
     ): FunctionExpression;
     /**
      * @beta
@@ -5325,7 +5338,7 @@ declare namespace FirebaseFirestore {
      */
     export function mapRemove(
       mapField: string,
-      key: string
+      key: string,
     ): FunctionExpression;
 
     /**
@@ -5343,7 +5356,7 @@ declare namespace FirebaseFirestore {
      */
     export function mapRemove(
       mapExpr: Expression,
-      key: string
+      key: string,
     ): FunctionExpression;
 
     /**
@@ -5361,7 +5374,7 @@ declare namespace FirebaseFirestore {
      */
     export function mapRemove(
       mapField: string,
-      keyExpr: Expression
+      keyExpr: Expression,
     ): FunctionExpression;
 
     /**
@@ -5383,7 +5396,7 @@ declare namespace FirebaseFirestore {
      */
     export function mapRemove(
       mapExpr: Expression,
-      keyExpr: Expression
+      keyExpr: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -5441,7 +5454,7 @@ declare namespace FirebaseFirestore {
      * @return A new {@code FunctionExpression} representing the document ID as a string.
      */
     export function documentId(
-      documentPathExpr: Expression
+      documentPathExpr: Expression,
     ): FunctionExpression;
 
     /**
@@ -5457,7 +5470,7 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expr} representing the documentId operation.
      */
     export function documentId(
-      documentPath: string | DocumentReference
+      documentPath: string | DocumentReference,
     ): FunctionExpression;
 
     /**
@@ -5472,7 +5485,7 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expression} representing the documentId operation.
      */
     export function documentId(
-      documentPathExpr: Expression
+      documentPathExpr: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -5485,7 +5498,7 @@ declare namespace FirebaseFirestore {
     export function substring(
       field: string,
       position: number,
-      length?: number
+      length?: number,
     ): FunctionExpression;
     /**
      * @beta
@@ -5498,7 +5511,7 @@ declare namespace FirebaseFirestore {
     export function substring(
       input: Expression,
       position: number,
-      length?: number
+      length?: number,
     ): FunctionExpression;
     /**
      * @beta
@@ -5511,7 +5524,7 @@ declare namespace FirebaseFirestore {
     export function substring(
       field: string,
       position: Expression,
-      length?: Expression
+      length?: Expression,
     ): FunctionExpression;
 
     /**
@@ -5531,7 +5544,7 @@ declare namespace FirebaseFirestore {
     export function substring(
       input: Expression,
       position: Expression,
-      length?: Expression
+      length?: Expression,
     ): FunctionExpression;
 
     /**
@@ -5599,7 +5612,7 @@ declare namespace FirebaseFirestore {
      */
     export function subtract(
       minuend: Expression,
-      subtrahend: Expression
+      subtrahend: Expression,
     ): FunctionExpression;
 
     /**
@@ -5617,7 +5630,7 @@ declare namespace FirebaseFirestore {
      */
     export function subtract(
       minuend: Expression,
-      subtrahend: unknown
+      subtrahend: unknown,
     ): FunctionExpression;
     /**
      * @beta
@@ -5634,7 +5647,7 @@ declare namespace FirebaseFirestore {
      */
     export function subtract(
       minuendFieldName: string,
-      subtrahend: Expression
+      subtrahend: Expression,
     ): FunctionExpression;
 
     /**
@@ -5653,7 +5666,7 @@ declare namespace FirebaseFirestore {
      */
     export function subtract(
       minuendFieldName: string,
-      subtrahend: unknown
+      subtrahend: unknown,
     ): FunctionExpression;
 
     /**
@@ -5713,7 +5726,7 @@ declare namespace FirebaseFirestore {
      */
     export function divide(
       dividend: Expression,
-      divisor: Expression
+      divisor: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -5730,7 +5743,7 @@ declare namespace FirebaseFirestore {
      */
     export function divide(
       dividend: Expression,
-      divisor: unknown
+      divisor: unknown,
     ): FunctionExpression;
     /**
      * @beta
@@ -5747,7 +5760,7 @@ declare namespace FirebaseFirestore {
      */
     export function divide(
       dividend: string,
-      divisor: Expression
+      divisor: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -5764,7 +5777,7 @@ declare namespace FirebaseFirestore {
      */
     export function divide(
       dividend: string,
-      divisor: unknown
+      divisor: unknown,
     ): FunctionExpression;
     /**
      * @beta
@@ -5781,7 +5794,7 @@ declare namespace FirebaseFirestore {
      */
     export function mod(
       left: Expression,
-      right: Expression
+      right: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -5798,7 +5811,7 @@ declare namespace FirebaseFirestore {
      */
     export function mod(
       expression: Expression,
-      value: unknown
+      value: unknown,
     ): FunctionExpression;
     /**
      * @beta
@@ -5815,7 +5828,7 @@ declare namespace FirebaseFirestore {
      */
     export function mod(
       fieldName: string,
-      expression: Expression
+      expression: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -5878,7 +5891,7 @@ declare namespace FirebaseFirestore {
      */
     export function equal(
       left: Expression,
-      right: Expression
+      right: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -5895,7 +5908,7 @@ declare namespace FirebaseFirestore {
      */
     export function equal(
       expression: Expression,
-      value: unknown
+      value: unknown,
     ): BooleanExpression;
 
     /**
@@ -5913,7 +5926,7 @@ declare namespace FirebaseFirestore {
      */
     export function equal(
       fieldName: string,
-      expression: Expression
+      expression: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -5944,7 +5957,7 @@ declare namespace FirebaseFirestore {
      */
     export function notEqual(
       left: Expression,
-      right: Expression
+      right: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -5961,7 +5974,7 @@ declare namespace FirebaseFirestore {
      */
     export function notEqual(
       expression: Expression,
-      value: unknown
+      value: unknown,
     ): BooleanExpression;
 
     /**
@@ -5979,7 +5992,7 @@ declare namespace FirebaseFirestore {
      */
     export function notEqual(
       fieldName: string,
-      expression: Expression
+      expression: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -5996,7 +6009,7 @@ declare namespace FirebaseFirestore {
      */
     export function notEqual(
       fieldName: string,
-      value: unknown
+      value: unknown,
     ): BooleanExpression;
     /**
      * @beta
@@ -6013,7 +6026,7 @@ declare namespace FirebaseFirestore {
      */
     export function lessThan(
       left: Expression,
-      right: Expression
+      right: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -6030,7 +6043,7 @@ declare namespace FirebaseFirestore {
      */
     export function lessThan(
       expression: Expression,
-      value: unknown
+      value: unknown,
     ): BooleanExpression;
 
     /**
@@ -6048,7 +6061,7 @@ declare namespace FirebaseFirestore {
      */
     export function lessThan(
       fieldName: string,
-      expression: Expression
+      expression: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -6065,7 +6078,7 @@ declare namespace FirebaseFirestore {
      */
     export function lessThan(
       fieldName: string,
-      value: unknown
+      value: unknown,
     ): BooleanExpression;
     /**
      * @beta
@@ -6083,7 +6096,7 @@ declare namespace FirebaseFirestore {
      */
     export function lessThanOrEqual(
       left: Expression,
-      right: Expression
+      right: Expression,
     ): BooleanExpression;
 
     /**
@@ -6101,7 +6114,7 @@ declare namespace FirebaseFirestore {
      */
     export function lessThanOrEqual(
       expression: Expression,
-      value: unknown
+      value: unknown,
     ): BooleanExpression;
 
     /**
@@ -6119,7 +6132,7 @@ declare namespace FirebaseFirestore {
      */
     export function lessThanOrEqual(
       fieldName: string,
-      expression: Expression
+      expression: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -6136,7 +6149,7 @@ declare namespace FirebaseFirestore {
      */
     export function lessThanOrEqual(
       fieldName: string,
-      value: unknown
+      value: unknown,
     ): BooleanExpression;
     /**
      * @beta
@@ -6154,7 +6167,7 @@ declare namespace FirebaseFirestore {
      */
     export function greaterThan(
       left: Expression,
-      right: Expression
+      right: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -6171,7 +6184,7 @@ declare namespace FirebaseFirestore {
      */
     export function greaterThan(
       expression: Expression,
-      value: unknown
+      value: unknown,
     ): BooleanExpression;
 
     /**
@@ -6189,7 +6202,7 @@ declare namespace FirebaseFirestore {
      */
     export function greaterThan(
       fieldName: string,
-      expression: Expression
+      expression: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -6206,7 +6219,7 @@ declare namespace FirebaseFirestore {
      */
     export function greaterThan(
       fieldName: string,
-      value: unknown
+      value: unknown,
     ): BooleanExpression;
     /**
      * @beta
@@ -6224,7 +6237,7 @@ declare namespace FirebaseFirestore {
      */
     export function greaterThanOrEqual(
       left: Expression,
-      right: Expression
+      right: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -6242,7 +6255,7 @@ declare namespace FirebaseFirestore {
      */
     export function greaterThanOrEqual(
       expression: Expression,
-      value: unknown
+      value: unknown,
     ): BooleanExpression;
     /**
      * @beta
@@ -6259,7 +6272,7 @@ declare namespace FirebaseFirestore {
      */
     export function greaterThanOrEqual(
       fieldName: string,
-      value: Expression
+      value: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -6277,7 +6290,7 @@ declare namespace FirebaseFirestore {
      */
     export function greaterThanOrEqual(
       fieldName: string,
-      value: unknown
+      value: unknown,
     ): BooleanExpression;
 
     /**
@@ -6337,7 +6350,7 @@ declare namespace FirebaseFirestore {
      */
     export function arrayContains(
       array: Expression,
-      element: Expression
+      element: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -6354,7 +6367,7 @@ declare namespace FirebaseFirestore {
      */
     export function arrayContains(
       array: Expression,
-      element: unknown
+      element: unknown,
     ): FunctionExpression;
     /**
      * @beta
@@ -6371,7 +6384,7 @@ declare namespace FirebaseFirestore {
      */
     export function arrayContains(
       fieldName: string,
-      element: Expression
+      element: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -6388,7 +6401,7 @@ declare namespace FirebaseFirestore {
      */
     export function arrayContains(
       fieldName: string,
-      element: unknown
+      element: unknown,
     ): BooleanExpression;
     /**
      * @beta
@@ -6406,7 +6419,7 @@ declare namespace FirebaseFirestore {
      */
     export function arrayContainsAny(
       array: Expression,
-      values: Array<Expression | unknown>
+      values: Array<Expression | unknown>,
     ): BooleanExpression;
     /**
      * @beta
@@ -6425,7 +6438,7 @@ declare namespace FirebaseFirestore {
      */
     export function arrayContainsAny(
       fieldName: string,
-      values: Array<Expression | unknown>
+      values: Array<Expression | unknown>,
     ): BooleanExpression;
     /**
      * @beta
@@ -6443,7 +6456,7 @@ declare namespace FirebaseFirestore {
      */
     export function arrayContainsAny(
       array: Expression,
-      values: Expression
+      values: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -6462,7 +6475,7 @@ declare namespace FirebaseFirestore {
      */
     export function arrayContainsAny(
       fieldName: string,
-      values: Expression
+      values: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -6479,7 +6492,7 @@ declare namespace FirebaseFirestore {
      */
     export function arrayContainsAll(
       array: Expression,
-      values: Array<Expression | unknown>
+      values: Array<Expression | unknown>,
     ): BooleanExpression;
     /**
      * @beta
@@ -6497,7 +6510,7 @@ declare namespace FirebaseFirestore {
      */
     export function arrayContainsAll(
       fieldName: string,
-      values: Array<Expression | unknown>
+      values: Array<Expression | unknown>,
     ): BooleanExpression;
     /**
      * @beta
@@ -6521,7 +6534,7 @@ declare namespace FirebaseFirestore {
      */
     export function arrayContainsAll(
       array: Expression,
-      arrayExpression: Expression
+      arrayExpression: Expression,
     ): BooleanExpression;
 
     /**
@@ -6539,7 +6552,7 @@ declare namespace FirebaseFirestore {
      */
     export function arrayContainsAll(
       fieldName: string,
-      arrayExpression: Expression
+      arrayExpression: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -6583,7 +6596,7 @@ declare namespace FirebaseFirestore {
      */
     export function equalAny(
       expression: Expression,
-      values: Array<Expression | unknown>
+      values: Array<Expression | unknown>,
     ): BooleanExpression;
     /**
      * @beta
@@ -6600,7 +6613,7 @@ declare namespace FirebaseFirestore {
      */
     export function equalAny(
       expression: Expression,
-      arrayExpression: Expression
+      arrayExpression: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -6618,7 +6631,7 @@ declare namespace FirebaseFirestore {
      */
     export function equalAny(
       fieldName: string,
-      values: Array<Expression | unknown>
+      values: Array<Expression | unknown>,
     ): BooleanExpression;
 
     /**
@@ -6639,7 +6652,7 @@ declare namespace FirebaseFirestore {
      */
     export function equalAny(
       fieldName: string,
-      arrayExpression: Expression
+      arrayExpression: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -6657,7 +6670,7 @@ declare namespace FirebaseFirestore {
      */
     export function notEqualAny(
       element: Expression,
-      values: Array<Expression | unknown>
+      values: Array<Expression | unknown>,
     ): BooleanExpression;
     /**
      * @beta
@@ -6675,7 +6688,7 @@ declare namespace FirebaseFirestore {
      */
     export function notEqualAny(
       fieldName: string,
-      values: Array<Expression | unknown>
+      values: Array<Expression | unknown>,
     ): BooleanExpression;
 
     /**
@@ -6694,7 +6707,7 @@ declare namespace FirebaseFirestore {
      */
     export function notEqualAny(
       element: Expression,
-      arrayExpression: Expression
+      arrayExpression: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -6711,7 +6724,7 @@ declare namespace FirebaseFirestore {
      */
     export function notEqualAny(
       fieldName: string,
-      arrayExpression: Expression
+      arrayExpression: Expression,
     ): BooleanExpression;
 
     /**
@@ -6758,7 +6771,7 @@ declare namespace FirebaseFirestore {
     export function conditional(
       condition: BooleanExpression,
       thenExpr: Expression,
-      elseExpr: Expression
+      elseExpr: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -6925,7 +6938,7 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expression} representing the reversed array.
      */
     export function arrayReverse(
-      arrayExpression: Expression
+      arrayExpression: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -7066,7 +7079,7 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expression} representing the length of the string.
      */
     export function charLength(
-      stringExpression: Expression
+      stringExpression: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -7099,7 +7112,7 @@ declare namespace FirebaseFirestore {
      */
     export function like(
       fieldName: string,
-      pattern: Expression
+      pattern: Expression,
     ): BooleanExpression;
 
     /**
@@ -7117,7 +7130,7 @@ declare namespace FirebaseFirestore {
      */
     export function like(
       stringExpression: Expression,
-      pattern: string
+      pattern: string,
     ): BooleanExpression;
     /**
      * @beta
@@ -7134,7 +7147,7 @@ declare namespace FirebaseFirestore {
      */
     export function like(
       stringExpression: Expression,
-      pattern: Expression
+      pattern: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -7152,7 +7165,7 @@ declare namespace FirebaseFirestore {
      */
     export function regexContains(
       fieldName: string,
-      pattern: string
+      pattern: string,
     ): BooleanExpression;
     /**
      * @beta
@@ -7170,7 +7183,7 @@ declare namespace FirebaseFirestore {
      */
     export function regexContains(
       fieldName: string,
-      pattern: Expression
+      pattern: Expression,
     ): BooleanExpression;
 
     /**
@@ -7189,7 +7202,7 @@ declare namespace FirebaseFirestore {
      */
     export function regexContains(
       stringExpression: Expression,
-      pattern: string
+      pattern: string,
     ): BooleanExpression;
 
     /**
@@ -7211,7 +7224,7 @@ declare namespace FirebaseFirestore {
      */
     export function regexContains(
       stringExpression: Expression,
-      pattern: Expression
+      pattern: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -7228,7 +7241,7 @@ declare namespace FirebaseFirestore {
      */
     export function regexMatch(
       fieldName: string,
-      pattern: string
+      pattern: string,
     ): BooleanExpression;
 
     /**
@@ -7249,7 +7262,7 @@ declare namespace FirebaseFirestore {
      */
     export function regexMatch(
       fieldName: string,
-      pattern: Expression
+      pattern: Expression,
     ): BooleanExpression;
 
     /**
@@ -7268,7 +7281,7 @@ declare namespace FirebaseFirestore {
      */
     export function regexMatch(
       stringExpression: Expression,
-      pattern: string
+      pattern: string,
     ): BooleanExpression;
     /**
      * @beta
@@ -7286,7 +7299,7 @@ declare namespace FirebaseFirestore {
      */
     export function regexMatch(
       stringExpression: Expression,
-      pattern: Expression
+      pattern: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -7303,7 +7316,7 @@ declare namespace FirebaseFirestore {
      */
     export function stringContains(
       fieldName: string,
-      substring: string
+      substring: string,
     ): BooleanExpression;
     /**
      * @beta
@@ -7320,7 +7333,7 @@ declare namespace FirebaseFirestore {
      */
     export function stringContains(
       fieldName: string,
-      substring: Expression
+      substring: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -7337,7 +7350,7 @@ declare namespace FirebaseFirestore {
      */
     export function stringContains(
       stringExpression: Expression,
-      substring: string
+      substring: string,
     ): BooleanExpression;
     /**
      * @beta
@@ -7354,7 +7367,7 @@ declare namespace FirebaseFirestore {
      */
     export function stringContains(
       stringExpression: Expression,
-      substring: Expression
+      substring: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -7371,7 +7384,7 @@ declare namespace FirebaseFirestore {
      */
     export function startsWith(
       fieldName: string,
-      prefix: string
+      prefix: string,
     ): BooleanExpression;
     /**
      * @beta
@@ -7388,7 +7401,7 @@ declare namespace FirebaseFirestore {
      */
     export function startsWith(
       fieldName: string,
-      prefix: Expression
+      prefix: Expression,
     ): BooleanExpression;
 
     /**
@@ -7406,7 +7419,7 @@ declare namespace FirebaseFirestore {
      */
     export function startsWith(
       stringExpression: Expression,
-      prefix: string
+      prefix: string,
     ): BooleanExpression;
 
     /**
@@ -7424,7 +7437,7 @@ declare namespace FirebaseFirestore {
      */
     export function startsWith(
       stringExpression: Expression,
-      prefix: Expression
+      prefix: Expression,
     ): BooleanExpression;
 
     /**
@@ -7442,7 +7455,7 @@ declare namespace FirebaseFirestore {
      */
     export function endsWith(
       fieldName: string,
-      suffix: string
+      suffix: string,
     ): BooleanExpression;
     /**
      * @beta
@@ -7459,7 +7472,7 @@ declare namespace FirebaseFirestore {
      */
     export function endsWith(
       fieldName: string,
-      suffix: Expression
+      suffix: Expression,
     ): BooleanExpression;
     /**
      * @beta
@@ -7476,7 +7489,7 @@ declare namespace FirebaseFirestore {
      */
     export function endsWith(
       stringExpression: Expression,
-      suffix: string
+      suffix: string,
     ): BooleanExpression;
     /**
      * @beta
@@ -7493,7 +7506,7 @@ declare namespace FirebaseFirestore {
      */
     export function endsWith(
       stringExpression: Expression,
-      suffix: Expression
+      suffix: Expression,
     ): BooleanExpression;
 
     /**
@@ -7630,7 +7643,7 @@ declare namespace FirebaseFirestore {
      */
     export function mapGet(
       fieldName: string,
-      subField: string
+      subField: string,
     ): FunctionExpression;
     /**
      * @beta
@@ -7647,7 +7660,7 @@ declare namespace FirebaseFirestore {
      */
     export function mapGet(
       mapExpression: Expression,
-      subField: string
+      subField: string,
     ): FunctionExpression;
     /**
      * @beta
@@ -7813,7 +7826,7 @@ declare namespace FirebaseFirestore {
      */
     export function cosineDistance(
       fieldName: string,
-      vector: number[] | VectorValue
+      vector: number[] | VectorValue,
     ): FunctionExpression;
     /**
      * @beta
@@ -7830,7 +7843,7 @@ declare namespace FirebaseFirestore {
      */
     export function cosineDistance(
       fieldName: string,
-      vectorExpression: Expression
+      vectorExpression: Expression,
     ): FunctionExpression;
 
     /**
@@ -7855,7 +7868,7 @@ declare namespace FirebaseFirestore {
      */
     export function cosineDistance(
       vectorExpression: Expression,
-      vector: number[] | Expression
+      vector: number[] | Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -7872,7 +7885,7 @@ declare namespace FirebaseFirestore {
      */
     export function cosineDistance(
       vectorExpression: Expression,
-      otherVectorExpression: Expression
+      otherVectorExpression: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -7889,7 +7902,7 @@ declare namespace FirebaseFirestore {
      */
     export function dotProduct(
       fieldName: string,
-      vector: number[] | VectorValue
+      vector: number[] | VectorValue,
     ): FunctionExpression;
 
     /**
@@ -7907,7 +7920,7 @@ declare namespace FirebaseFirestore {
      */
     export function dotProduct(
       fieldName: string,
-      vectorExpression: Expression
+      vectorExpression: Expression,
     ): FunctionExpression;
 
     /**
@@ -7925,7 +7938,7 @@ declare namespace FirebaseFirestore {
      */
     export function dotProduct(
       vectorExpression: Expression,
-      vector: number[] | VectorValue
+      vector: number[] | VectorValue,
     ): FunctionExpression;
     /**
      * @beta
@@ -7942,7 +7955,7 @@ declare namespace FirebaseFirestore {
      */
     export function dotProduct(
       vectorExpression: Expression,
-      otherVectorExpression: Expression
+      otherVectorExpression: Expression,
     ): FunctionExpression;
 
     /**
@@ -7961,7 +7974,7 @@ declare namespace FirebaseFirestore {
      */
     export function euclideanDistance(
       fieldName: string,
-      vector: number[] | VectorValue
+      vector: number[] | VectorValue,
     ): FunctionExpression;
     /**
      * @beta
@@ -7978,7 +7991,7 @@ declare namespace FirebaseFirestore {
      */
     export function euclideanDistance(
       fieldName: string,
-      vectorExpression: Expression
+      vectorExpression: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -7996,7 +8009,7 @@ declare namespace FirebaseFirestore {
      */
     export function euclideanDistance(
       vectorExpression: Expression,
-      vector: number[] | VectorValue
+      vector: number[] | VectorValue,
     ): FunctionExpression;
     /**
      * @beta
@@ -8013,7 +8026,7 @@ declare namespace FirebaseFirestore {
      */
     export function euclideanDistance(
       vectorExpression: Expression,
-      otherVectorExpression: Expression
+      otherVectorExpression: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -8028,7 +8041,7 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expression} representing the length of the array.
      */
     export function vectorLength(
-      vectorExpression: Expression
+      vectorExpression: Expression,
     ): FunctionExpression;
 
     /**
@@ -8072,7 +8085,7 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expression} representing the timestamp.
      */
     export function unixMicrosToTimestamp(
-      fieldName: string
+      fieldName: string,
     ): FunctionExpression;
     /**
      * @beta
@@ -8100,7 +8113,7 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expression} representing the number of microseconds since epoch.
      */
     export function timestampToUnixMicros(
-      fieldName: string
+      fieldName: string,
     ): FunctionExpression;
     /**
      * @beta
@@ -8130,7 +8143,7 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expression} representing the timestamp.
      */
     export function unixMillisToTimestamp(
-      fieldName: string
+      fieldName: string,
     ): FunctionExpression;
     /**
      * @beta
@@ -8158,7 +8171,7 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expression} representing the number of milliseconds since epoch.
      */
     export function timestampToUnixMillis(
-      fieldName: string
+      fieldName: string,
     ): FunctionExpression;
     /**
      * @beta
@@ -8174,7 +8187,7 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expression} representing the timestamp.
      */
     export function unixSecondsToTimestamp(
-      expr: Expression
+      expr: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -8190,7 +8203,7 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expression} representing the timestamp.
      */
     export function unixSecondsToTimestamp(
-      fieldName: string
+      fieldName: string,
     ): FunctionExpression;
     /**
      * @beta
@@ -8205,7 +8218,7 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expression} representing the number of seconds since epoch.
      */
     export function timestampToUnixSeconds(
-      expr: Expression
+      expr: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -8220,7 +8233,7 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expression} representing the number of seconds since epoch.
      */
     export function timestampToUnixSeconds(
-      fieldName: string
+      fieldName: string,
     ): FunctionExpression;
     /**
      * @beta
@@ -8239,7 +8252,7 @@ declare namespace FirebaseFirestore {
     export function timestampAdd(
       timestamp: Expression,
       unit: Expression,
-      amount: Expression
+      amount: Expression,
     ): FunctionExpression;
 
     /**
@@ -8265,7 +8278,7 @@ declare namespace FirebaseFirestore {
         | 'minute'
         | 'hour'
         | 'day',
-      amount: number
+      amount: number,
     ): FunctionExpression;
     /**
      * @beta
@@ -8290,7 +8303,7 @@ declare namespace FirebaseFirestore {
         | 'minute'
         | 'hour'
         | 'day',
-      amount: number
+      amount: number,
     ): FunctionExpression;
     /**
      * @beta
@@ -8309,7 +8322,7 @@ declare namespace FirebaseFirestore {
     export function timestampSubtract(
       timestamp: Expression,
       unit: Expression,
-      amount: Expression
+      amount: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -8334,7 +8347,7 @@ declare namespace FirebaseFirestore {
         | 'minute'
         | 'hour'
         | 'day',
-      amount: number
+      amount: number,
     ): FunctionExpression;
     /**
      * @beta
@@ -8359,7 +8372,7 @@ declare namespace FirebaseFirestore {
         | 'minute'
         | 'hour'
         | 'day',
-      amount: number
+      amount: number,
     ): FunctionExpression;
 
     /**
@@ -8431,7 +8444,7 @@ declare namespace FirebaseFirestore {
      */
     export function pow(
       base: Expression,
-      exponent: Expression
+      exponent: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -8546,7 +8559,7 @@ declare namespace FirebaseFirestore {
      * @return A new {@code Expression} representing the reversed string.
      */
     export function stringReverse(
-      stringExpression: Expression
+      stringExpression: Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -8608,7 +8621,7 @@ declare namespace FirebaseFirestore {
      */
     export function ifAbsent(
       ifExpr: Expression,
-      elseExpr: Expression
+      elseExpr: Expression,
     ): Expression;
 
     /**
@@ -8628,7 +8641,7 @@ declare namespace FirebaseFirestore {
      */
     export function ifAbsent(
       ifExpr: Expression,
-      elseValue: unknown
+      elseValue: unknown,
     ): Expression;
 
     /**
@@ -8649,7 +8662,7 @@ declare namespace FirebaseFirestore {
      */
     export function ifAbsent(
       ifFieldName: string,
-      elseExpr: Expression
+      elseExpr: Expression,
     ): Expression;
 
     /**
@@ -8682,7 +8695,7 @@ declare namespace FirebaseFirestore {
      */
     export function join(
       arrayExpression: Expression,
-      delimiterExpression: Expression
+      delimiterExpression: Expression,
     ): Expression;
 
     /**
@@ -8700,7 +8713,7 @@ declare namespace FirebaseFirestore {
      */
     export function join(
       arrayExpression: Expression,
-      delimiter: string
+      delimiter: string,
     ): Expression;
 
     /**
@@ -8825,7 +8838,7 @@ declare namespace FirebaseFirestore {
      */
     export function round(
       fieldName: string,
-      decimalPlaces: number | Expression
+      decimalPlaces: number | Expression,
     ): FunctionExpression;
 
     /**
@@ -8843,7 +8856,7 @@ declare namespace FirebaseFirestore {
      */
     export function round(
       expression: Expression,
-      decimalPlaces: number | Expression
+      decimalPlaces: number | Expression,
     ): FunctionExpression;
     /**
      * @beta
@@ -9955,7 +9968,7 @@ declare namespace FirebaseFirestore {
        * @return A Promise representing the asynchronous pipeline execution.
        */
       execute(
-        pipelineExecuteOptions?: PipelineExecuteOptions
+        pipelineExecuteOptions?: PipelineExecuteOptions,
       ): Promise<PipelineSnapshot>;
 
       /**

@@ -124,7 +124,7 @@ export class FirestoreClient {
    */
   constructor(
     opts?: ClientOptions,
-    gaxInstance?: typeof gax | typeof gax.fallback
+    gaxInstance?: typeof gax | typeof gax.fallback,
   ) {
     // Ensure that options include all the required fields.
     const staticMembers = this.constructor as typeof FirestoreClient;
@@ -134,7 +134,7 @@ export class FirestoreClient {
       opts?.universe_domain !== opts?.universeDomain
     ) {
       throw new Error(
-        'Please set either universe_domain or universeDomain, but not both.'
+        'Please set either universe_domain or universeDomain, but not both.',
       );
     }
     const universeDomainEnvVar =
@@ -220,17 +220,17 @@ export class FirestoreClient {
       listDocuments: new this._gaxModule.PageDescriptor(
         'pageToken',
         'nextPageToken',
-        'documents'
+        'documents',
       ),
       partitionQuery: new this._gaxModule.PageDescriptor(
         'pageToken',
         'nextPageToken',
-        'partitions'
+        'partitions',
       ),
       listCollectionIds: new this._gaxModule.PageDescriptor(
         'pageToken',
         'nextPageToken',
-        'collectionIds'
+        'collectionIds',
       ),
     };
 
@@ -240,22 +240,22 @@ export class FirestoreClient {
       batchGetDocuments: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.SERVER_STREAMING,
         !!opts.fallback,
-        !!opts.gaxServerStreamingRetries
+        !!opts.gaxServerStreamingRetries,
       ),
       runQuery: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.SERVER_STREAMING,
         !!opts.fallback,
-        !!opts.gaxServerStreamingRetries
+        !!opts.gaxServerStreamingRetries,
       ),
       write: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.BIDI_STREAMING,
         !!opts.fallback,
-        !!opts.gaxServerStreamingRetries
+        !!opts.gaxServerStreamingRetries,
       ),
       listen: new this._gaxModule.StreamDescriptor(
         this._gaxModule.StreamType.BIDI_STREAMING,
         !!opts.fallback,
-        !!opts.gaxServerStreamingRetries
+        !!opts.gaxServerStreamingRetries,
       ),
     };
 
@@ -264,7 +264,7 @@ export class FirestoreClient {
       'google.firestore.v1beta1.Firestore',
       gapicConfig as gax.ClientConfig,
       opts.clientConfig || {},
-      {'x-goog-api-client': clientHeader.join(' ')}
+      {'x-goog-api-client': clientHeader.join(' ')},
     );
 
     // Set up a dictionary of "inner API calls"; the core implementation
@@ -298,12 +298,12 @@ export class FirestoreClient {
     this.firestoreStub = this._gaxGrpc.createStub(
       this._opts.fallback
         ? (this._protos as protobuf.Root).lookupService(
-            'google.firestore.v1beta1.Firestore'
+            'google.firestore.v1beta1.Firestore',
           )
         : // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (this._protos as any).google.firestore.v1beta1.Firestore,
       this._opts,
-      this._providedCustomServicePath
+      this._providedCustomServicePath,
     ) as Promise<{[method: string]: Function}>;
 
     // Iterate over each of the methods that the service provides
@@ -336,8 +336,8 @@ export class FirestoreClient {
                   stream.emit(
                     'error',
                     new this._gaxModule.GoogleError(
-                      'The client has already been closed.'
-                    )
+                      'The client has already been closed.',
+                    ),
                   );
                 });
                 return stream;
@@ -349,7 +349,7 @@ export class FirestoreClient {
           },
         (err: Error | null | undefined) => () => {
           throw err;
-        }
+        },
       );
 
       const descriptor =
@@ -360,7 +360,7 @@ export class FirestoreClient {
         callPromise,
         this._defaults[methodName],
         descriptor,
-        this._opts.fallback
+        this._opts.fallback,
       );
 
       this.innerApiCalls[methodName] = apiCall;
@@ -381,7 +381,7 @@ export class FirestoreClient {
     ) {
       process.emitWarning(
         'Static servicePath is deprecated, please use the instance method instead.',
-        'DeprecationWarning'
+        'DeprecationWarning',
       );
     }
     return 'firestore.googleapis.com';
@@ -399,7 +399,7 @@ export class FirestoreClient {
     ) {
       process.emitWarning(
         'Static apiEndpoint is deprecated, please use the instance method instead.',
-        'DeprecationWarning'
+        'DeprecationWarning',
       );
     }
     return 'firestore.googleapis.com';
@@ -444,7 +444,7 @@ export class FirestoreClient {
    * @returns {Promise} A promise that resolves to string containing the project ID.
    */
   getProjectId(
-    callback?: Callback<string, undefined, undefined>
+    callback?: Callback<string, undefined, undefined>,
   ): Promise<string> | void {
     if (callback) {
       this.auth.getProjectId(callback);
@@ -485,7 +485,7 @@ export class FirestoreClient {
    */
   getDocument(
     request?: protos.google.firestore.v1beta1.IGetDocumentRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.v1beta1.IDocument,
@@ -500,7 +500,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.IDocument,
       protos.google.firestore.v1beta1.IGetDocumentRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   getDocument(
     request: protos.google.firestore.v1beta1.IGetDocumentRequest,
@@ -508,7 +508,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.IDocument,
       protos.google.firestore.v1beta1.IGetDocumentRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   getDocument(
     request?: protos.google.firestore.v1beta1.IGetDocumentRequest,
@@ -525,7 +525,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.IDocument,
       protos.google.firestore.v1beta1.IGetDocumentRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): Promise<
     [
       protos.google.firestore.v1beta1.IDocument,
@@ -548,7 +548,7 @@ export class FirestoreClient {
       this._gaxModule.routingHeader.fromParams({
         name: request.name ?? '',
       });
-    this.initialize();
+    void this.initialize();
     return this.innerApiCalls.getDocument(request, options, callback);
   }
   /**
@@ -586,7 +586,7 @@ export class FirestoreClient {
    */
   updateDocument(
     request?: protos.google.firestore.v1beta1.IUpdateDocumentRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.v1beta1.IDocument,
@@ -601,7 +601,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.IDocument,
       protos.google.firestore.v1beta1.IUpdateDocumentRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   updateDocument(
     request: protos.google.firestore.v1beta1.IUpdateDocumentRequest,
@@ -609,7 +609,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.IDocument,
       protos.google.firestore.v1beta1.IUpdateDocumentRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   updateDocument(
     request?: protos.google.firestore.v1beta1.IUpdateDocumentRequest,
@@ -626,7 +626,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.IDocument,
       protos.google.firestore.v1beta1.IUpdateDocumentRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): Promise<
     [
       protos.google.firestore.v1beta1.IDocument,
@@ -649,7 +649,7 @@ export class FirestoreClient {
       this._gaxModule.routingHeader.fromParams({
         'document.name': request.document!.name ?? '',
       });
-    this.initialize();
+    void this.initialize();
     return this.innerApiCalls.updateDocument(request, options, callback);
   }
   /**
@@ -674,7 +674,7 @@ export class FirestoreClient {
    */
   deleteDocument(
     request?: protos.google.firestore.v1beta1.IDeleteDocumentRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.protobuf.IEmpty,
@@ -689,7 +689,7 @@ export class FirestoreClient {
       protos.google.protobuf.IEmpty,
       protos.google.firestore.v1beta1.IDeleteDocumentRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   deleteDocument(
     request: protos.google.firestore.v1beta1.IDeleteDocumentRequest,
@@ -697,7 +697,7 @@ export class FirestoreClient {
       protos.google.protobuf.IEmpty,
       protos.google.firestore.v1beta1.IDeleteDocumentRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   deleteDocument(
     request?: protos.google.firestore.v1beta1.IDeleteDocumentRequest,
@@ -714,7 +714,7 @@ export class FirestoreClient {
       protos.google.protobuf.IEmpty,
       protos.google.firestore.v1beta1.IDeleteDocumentRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): Promise<
     [
       protos.google.protobuf.IEmpty,
@@ -737,7 +737,7 @@ export class FirestoreClient {
       this._gaxModule.routingHeader.fromParams({
         name: request.name ?? '',
       });
-    this.initialize();
+    void this.initialize();
     return this.innerApiCalls.deleteDocument(request, options, callback);
   }
   /**
@@ -762,7 +762,7 @@ export class FirestoreClient {
    */
   beginTransaction(
     request?: protos.google.firestore.v1beta1.IBeginTransactionRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.v1beta1.IBeginTransactionResponse,
@@ -779,7 +779,7 @@ export class FirestoreClient {
       | null
       | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   beginTransaction(
     request: protos.google.firestore.v1beta1.IBeginTransactionRequest,
@@ -789,7 +789,7 @@ export class FirestoreClient {
       | null
       | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   beginTransaction(
     request?: protos.google.firestore.v1beta1.IBeginTransactionRequest,
@@ -808,7 +808,7 @@ export class FirestoreClient {
       | null
       | undefined,
       {} | null | undefined
-    >
+    >,
   ): Promise<
     [
       protos.google.firestore.v1beta1.IBeginTransactionResponse,
@@ -831,7 +831,7 @@ export class FirestoreClient {
       this._gaxModule.routingHeader.fromParams({
         database: request.database ?? '',
       });
-    this.initialize();
+    void this.initialize();
     return this.innerApiCalls.beginTransaction(request, options, callback);
   }
   /**
@@ -859,7 +859,7 @@ export class FirestoreClient {
    */
   commit(
     request?: protos.google.firestore.v1beta1.ICommitRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.v1beta1.ICommitResponse,
@@ -874,7 +874,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.ICommitResponse,
       protos.google.firestore.v1beta1.ICommitRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   commit(
     request: protos.google.firestore.v1beta1.ICommitRequest,
@@ -882,7 +882,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.ICommitResponse,
       protos.google.firestore.v1beta1.ICommitRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   commit(
     request?: protos.google.firestore.v1beta1.ICommitRequest,
@@ -897,7 +897,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.ICommitResponse,
       protos.google.firestore.v1beta1.ICommitRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): Promise<
     [
       protos.google.firestore.v1beta1.ICommitResponse,
@@ -920,7 +920,7 @@ export class FirestoreClient {
       this._gaxModule.routingHeader.fromParams({
         database: request.database ?? '',
       });
-    this.initialize();
+    void this.initialize();
     return this.innerApiCalls.commit(request, options, callback);
   }
   /**
@@ -944,7 +944,7 @@ export class FirestoreClient {
    */
   rollback(
     request?: protos.google.firestore.v1beta1.IRollbackRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.protobuf.IEmpty,
@@ -959,7 +959,7 @@ export class FirestoreClient {
       protos.google.protobuf.IEmpty,
       protos.google.firestore.v1beta1.IRollbackRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   rollback(
     request: protos.google.firestore.v1beta1.IRollbackRequest,
@@ -967,7 +967,7 @@ export class FirestoreClient {
       protos.google.protobuf.IEmpty,
       protos.google.firestore.v1beta1.IRollbackRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   rollback(
     request?: protos.google.firestore.v1beta1.IRollbackRequest,
@@ -982,7 +982,7 @@ export class FirestoreClient {
       protos.google.protobuf.IEmpty,
       protos.google.firestore.v1beta1.IRollbackRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): Promise<
     [
       protos.google.protobuf.IEmpty,
@@ -1005,7 +1005,7 @@ export class FirestoreClient {
       this._gaxModule.routingHeader.fromParams({
         database: request.database ?? '',
       });
-    this.initialize();
+    void this.initialize();
     return this.innerApiCalls.rollback(request, options, callback);
   }
   /**
@@ -1043,7 +1043,7 @@ export class FirestoreClient {
    */
   batchWrite(
     request?: protos.google.firestore.v1beta1.IBatchWriteRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.v1beta1.IBatchWriteResponse,
@@ -1058,7 +1058,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.IBatchWriteResponse,
       protos.google.firestore.v1beta1.IBatchWriteRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   batchWrite(
     request: protos.google.firestore.v1beta1.IBatchWriteRequest,
@@ -1066,7 +1066,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.IBatchWriteResponse,
       protos.google.firestore.v1beta1.IBatchWriteRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   batchWrite(
     request?: protos.google.firestore.v1beta1.IBatchWriteRequest,
@@ -1081,7 +1081,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.IBatchWriteResponse,
       protos.google.firestore.v1beta1.IBatchWriteRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): Promise<
     [
       protos.google.firestore.v1beta1.IBatchWriteResponse,
@@ -1104,7 +1104,7 @@ export class FirestoreClient {
       this._gaxModule.routingHeader.fromParams({
         database: request.database ?? '',
       });
-    this.initialize();
+    void this.initialize();
     return this.innerApiCalls.batchWrite(request, options, callback);
   }
   /**
@@ -1140,7 +1140,7 @@ export class FirestoreClient {
    */
   createDocument(
     request?: protos.google.firestore.v1beta1.ICreateDocumentRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.v1beta1.IDocument,
@@ -1155,7 +1155,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.IDocument,
       protos.google.firestore.v1beta1.ICreateDocumentRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   createDocument(
     request: protos.google.firestore.v1beta1.ICreateDocumentRequest,
@@ -1163,7 +1163,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.IDocument,
       protos.google.firestore.v1beta1.ICreateDocumentRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): void;
   createDocument(
     request?: protos.google.firestore.v1beta1.ICreateDocumentRequest,
@@ -1180,7 +1180,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.IDocument,
       protos.google.firestore.v1beta1.ICreateDocumentRequest | null | undefined,
       {} | null | undefined
-    >
+    >,
   ): Promise<
     [
       protos.google.firestore.v1beta1.IDocument,
@@ -1204,7 +1204,7 @@ export class FirestoreClient {
         parent: request.parent ?? '',
         collection_id: request.collectionId ?? '',
       });
-    this.initialize();
+    void this.initialize();
     return this.innerApiCalls.createDocument(request, options, callback);
   }
 
@@ -1250,7 +1250,7 @@ export class FirestoreClient {
    */
   batchGetDocuments(
     request?: protos.google.firestore.v1beta1.IBatchGetDocumentsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): gax.CancellableStream {
     request = request || {};
     options = options || {};
@@ -1260,7 +1260,7 @@ export class FirestoreClient {
       this._gaxModule.routingHeader.fromParams({
         database: request.database ?? '',
       });
-    this.initialize();
+    void this.initialize();
     return this.innerApiCalls.batchGetDocuments(request, options);
   }
 
@@ -1299,7 +1299,7 @@ export class FirestoreClient {
    */
   runQuery(
     request?: protos.google.firestore.v1beta1.IRunQueryRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): gax.CancellableStream {
     request = request || {};
     options = options || {};
@@ -1309,7 +1309,7 @@ export class FirestoreClient {
       this._gaxModule.routingHeader.fromParams({
         parent: request.parent ?? '',
       });
-    this.initialize();
+    void this.initialize();
     return this.innerApiCalls.runQuery(request, options);
   }
 
@@ -1328,7 +1328,7 @@ export class FirestoreClient {
    * region_tag:firestore_v1beta1_generated_Firestore_Write_async
    */
   write(options?: CallOptions): gax.CancellableStream {
-    this.initialize();
+    void this.initialize();
     return this.innerApiCalls.write(null, options);
   }
 
@@ -1347,7 +1347,7 @@ export class FirestoreClient {
    * region_tag:firestore_v1beta1_generated_Firestore_Listen_async
    */
   listen(options?: CallOptions): gax.CancellableStream {
-    this.initialize();
+    void this.initialize();
     return this.innerApiCalls.listen(null, options);
   }
 
@@ -1404,7 +1404,7 @@ export class FirestoreClient {
    */
   listDocuments(
     request?: protos.google.firestore.v1beta1.IListDocumentsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.v1beta1.IDocument[],
@@ -1419,7 +1419,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.IListDocumentsRequest,
       protos.google.firestore.v1beta1.IListDocumentsResponse | null | undefined,
       protos.google.firestore.v1beta1.IDocument
-    >
+    >,
   ): void;
   listDocuments(
     request: protos.google.firestore.v1beta1.IListDocumentsRequest,
@@ -1427,7 +1427,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.IListDocumentsRequest,
       protos.google.firestore.v1beta1.IListDocumentsResponse | null | undefined,
       protos.google.firestore.v1beta1.IDocument
-    >
+    >,
   ): void;
   listDocuments(
     request?: protos.google.firestore.v1beta1.IListDocumentsRequest,
@@ -1444,7 +1444,7 @@ export class FirestoreClient {
       protos.google.firestore.v1beta1.IListDocumentsRequest,
       protos.google.firestore.v1beta1.IListDocumentsResponse | null | undefined,
       protos.google.firestore.v1beta1.IDocument
-    >
+    >,
   ): Promise<
     [
       protos.google.firestore.v1beta1.IDocument[],
@@ -1468,7 +1468,7 @@ export class FirestoreClient {
         parent: request.parent ?? '',
         collection_id: request.collectionId ?? '',
       });
-    this.initialize();
+    void this.initialize();
     return this.innerApiCalls.listDocuments(request, options, callback);
   }
 
@@ -1523,7 +1523,7 @@ export class FirestoreClient {
    */
   listDocumentsStream(
     request?: protos.google.firestore.v1beta1.IListDocumentsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Transform {
     request = request || {};
     options = options || {};
@@ -1536,11 +1536,11 @@ export class FirestoreClient {
       });
     const defaultCallSettings = this._defaults['listDocuments'];
     const callSettings = defaultCallSettings.merge(options);
-    this.initialize();
+    void this.initialize();
     return this.descriptors.page.listDocuments.createStream(
       this.innerApiCalls.listDocuments as GaxCall,
       request,
-      callSettings
+      callSettings,
     );
   }
 
@@ -1598,7 +1598,7 @@ export class FirestoreClient {
    */
   listDocumentsAsync(
     request?: protos.google.firestore.v1beta1.IListDocumentsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): AsyncIterable<protos.google.firestore.v1beta1.IDocument> {
     request = request || {};
     options = options || {};
@@ -1611,11 +1611,11 @@ export class FirestoreClient {
       });
     const defaultCallSettings = this._defaults['listDocuments'];
     const callSettings = defaultCallSettings.merge(options);
-    this.initialize();
+    void this.initialize();
     return this.descriptors.page.listDocuments.asyncIterate(
       this.innerApiCalls['listDocuments'] as GaxCall,
       request as {},
-      callSettings
+      callSettings,
     ) as AsyncIterable<protos.google.firestore.v1beta1.IDocument>;
   }
   /**
@@ -1680,7 +1680,7 @@ export class FirestoreClient {
    */
   partitionQuery(
     request?: protos.google.firestore.v1beta1.IPartitionQueryRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       protos.google.firestore.v1beta1.ICursor[],
@@ -1697,7 +1697,7 @@ export class FirestoreClient {
       | null
       | undefined,
       protos.google.firestore.v1beta1.ICursor
-    >
+    >,
   ): void;
   partitionQuery(
     request: protos.google.firestore.v1beta1.IPartitionQueryRequest,
@@ -1707,7 +1707,7 @@ export class FirestoreClient {
       | null
       | undefined,
       protos.google.firestore.v1beta1.ICursor
-    >
+    >,
   ): void;
   partitionQuery(
     request?: protos.google.firestore.v1beta1.IPartitionQueryRequest,
@@ -1726,7 +1726,7 @@ export class FirestoreClient {
       | null
       | undefined,
       protos.google.firestore.v1beta1.ICursor
-    >
+    >,
   ): Promise<
     [
       protos.google.firestore.v1beta1.ICursor[],
@@ -1749,7 +1749,7 @@ export class FirestoreClient {
       this._gaxModule.routingHeader.fromParams({
         parent: request.parent ?? '',
       });
-    this.initialize();
+    void this.initialize();
     return this.innerApiCalls.partitionQuery(request, options, callback);
   }
 
@@ -1811,7 +1811,7 @@ export class FirestoreClient {
    */
   partitionQueryStream(
     request?: protos.google.firestore.v1beta1.IPartitionQueryRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Transform {
     request = request || {};
     options = options || {};
@@ -1823,11 +1823,11 @@ export class FirestoreClient {
       });
     const defaultCallSettings = this._defaults['partitionQuery'];
     const callSettings = defaultCallSettings.merge(options);
-    this.initialize();
+    void this.initialize();
     return this.descriptors.page.partitionQuery.createStream(
       this.innerApiCalls.partitionQuery as GaxCall,
       request,
-      callSettings
+      callSettings,
     );
   }
 
@@ -1892,7 +1892,7 @@ export class FirestoreClient {
    */
   partitionQueryAsync(
     request?: protos.google.firestore.v1beta1.IPartitionQueryRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): AsyncIterable<protos.google.firestore.v1beta1.ICursor> {
     request = request || {};
     options = options || {};
@@ -1904,11 +1904,11 @@ export class FirestoreClient {
       });
     const defaultCallSettings = this._defaults['partitionQuery'];
     const callSettings = defaultCallSettings.merge(options);
-    this.initialize();
+    void this.initialize();
     return this.descriptors.page.partitionQuery.asyncIterate(
       this.innerApiCalls['partitionQuery'] as GaxCall,
       request as {},
-      callSettings
+      callSettings,
     ) as AsyncIterable<protos.google.firestore.v1beta1.ICursor>;
   }
   /**
@@ -1940,7 +1940,7 @@ export class FirestoreClient {
    */
   listCollectionIds(
     request?: protos.google.firestore.v1beta1.IListCollectionIdsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Promise<
     [
       string[],
@@ -1957,7 +1957,7 @@ export class FirestoreClient {
       | null
       | undefined,
       string
-    >
+    >,
   ): void;
   listCollectionIds(
     request: protos.google.firestore.v1beta1.IListCollectionIdsRequest,
@@ -1967,7 +1967,7 @@ export class FirestoreClient {
       | null
       | undefined,
       string
-    >
+    >,
   ): void;
   listCollectionIds(
     request?: protos.google.firestore.v1beta1.IListCollectionIdsRequest,
@@ -1986,7 +1986,7 @@ export class FirestoreClient {
       | null
       | undefined,
       string
-    >
+    >,
   ): Promise<
     [
       string[],
@@ -2009,7 +2009,7 @@ export class FirestoreClient {
       this._gaxModule.routingHeader.fromParams({
         parent: request.parent ?? '',
       });
-    this.initialize();
+    void this.initialize();
     return this.innerApiCalls.listCollectionIds(request, options, callback);
   }
 
@@ -2040,7 +2040,7 @@ export class FirestoreClient {
    */
   listCollectionIdsStream(
     request?: protos.google.firestore.v1beta1.IListCollectionIdsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): Transform {
     request = request || {};
     options = options || {};
@@ -2052,11 +2052,11 @@ export class FirestoreClient {
       });
     const defaultCallSettings = this._defaults['listCollectionIds'];
     const callSettings = defaultCallSettings.merge(options);
-    this.initialize();
+    void this.initialize();
     return this.descriptors.page.listCollectionIds.createStream(
       this.innerApiCalls.listCollectionIds as GaxCall,
       request,
-      callSettings
+      callSettings,
     );
   }
 
@@ -2090,7 +2090,7 @@ export class FirestoreClient {
    */
   listCollectionIdsAsync(
     request?: protos.google.firestore.v1beta1.IListCollectionIdsRequest,
-    options?: CallOptions
+    options?: CallOptions,
   ): AsyncIterable<string> {
     request = request || {};
     options = options || {};
@@ -2102,11 +2102,11 @@ export class FirestoreClient {
       });
     const defaultCallSettings = this._defaults['listCollectionIds'];
     const callSettings = defaultCallSettings.merge(options);
-    this.initialize();
+    void this.initialize();
     return this.descriptors.page.listCollectionIds.asyncIterate(
       this.innerApiCalls['listCollectionIds'] as GaxCall,
       request as {},
-      callSettings
+      callSettings,
     ) as AsyncIterable<string>;
   }
 

@@ -52,7 +52,7 @@ export class StructuredPipeline
   constructor(
     private pipeline: ProtoSerializable<IPipeline>,
     private options: StructuredPipelineOptions,
-    private optionsOverride: Record<string, unknown>
+    private optionsOverride: Record<string, unknown>,
   ) {}
 
   _toProto(serializer: Serializer): IStructuredPipeline {
@@ -61,7 +61,7 @@ export class StructuredPipeline
       options: this.optionsUtil.getOptionsProto(
         serializer,
         this.options,
-        this.optionsOverride
+        this.optionsOverride,
       ),
     };
   }

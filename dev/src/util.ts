@@ -36,11 +36,11 @@ export class Deferred<R> {
     this.promise = new Promise<R>(
       (
         resolve: (value: R | Promise<R>) => void,
-        reject: (reason: Error) => void
+        reject: (reason: Error) => void,
       ) => {
         this.resolve = resolve;
         this.reject = reject;
-      }
+      },
     );
   }
 }
@@ -143,7 +143,7 @@ export function isFunction(value: unknown): boolean {
  */
 export function isPermanentRpcError(
   err: GoogleError,
-  methodName: string
+  methodName: string,
 ): boolean {
   if (err.code !== undefined) {
     const retryCodes = getRetryCodes(methodName);
@@ -166,7 +166,7 @@ function getServiceConfig(methodName: string): CallSettings | undefined {
       'google.firestore.v1.Firestore',
       gapicConfig as ClientConfig,
       {},
-      require('google-gax').Status
+      require('google-gax').Status,
     ) as {[k: string]: CallSettings};
   }
   return serviceConfig[methodName];
@@ -222,7 +222,7 @@ export function getRetryParams(methodName: string): BackoffSettings {
 export function silencePromise(promise: Promise<unknown>): Promise<void> {
   return promise.then(
     () => {},
-    () => {}
+    () => {},
   );
 }
 
@@ -264,7 +264,7 @@ export function tryGetPreferRestEnvironmentVariable(): boolean | undefined {
   } else {
     // eslint-disable-next-line no-console
     console.warn(
-      `An unsupported value was specified for the environment variable FIRESTORE_PREFER_REST. Value ${rawValue} is unsupported.`
+      `An unsupported value was specified for the environment variable FIRESTORE_PREFER_REST. Value ${rawValue} is unsupported.`,
     );
     return undefined;
   }
@@ -279,7 +279,7 @@ export function tryGetPreferRestEnvironmentVariable(): boolean | undefined {
  */
 export function mapToArray<V, R>(
   obj: Dict<V>,
-  fn: (element: V, key: string, obj: Dict<V>) => R
+  fn: (element: V, key: string, obj: Dict<V>) => R,
 ): R[] {
   const result: R[] = [];
   for (const key in obj) {
@@ -301,7 +301,7 @@ export function mapToArray<V, R>(
  */
 export function isArrayEqual<T extends {isEqual: (t: T) => boolean}>(
   left: T[],
-  right: T[]
+  right: T[],
 ): boolean {
   if (left.length !== right.length) {
     return false;
@@ -327,7 +327,7 @@ export function isArrayEqual<T extends {isEqual: (t: T) => boolean}>(
  */
 export function isOptionalEqual<T extends {isEqual: (t: T) => boolean}>(
   left: T | undefined,
-  right: T | undefined
+  right: T | undefined,
 ): boolean {
   if (left === undefined && right === undefined) {
     return true;
@@ -351,7 +351,7 @@ export function isOptionalEqual<T extends {isEqual: (t: T) => boolean}>(
  */
 export function isPrimitiveArrayEqual<T extends number | string>(
   left: T[],
-  right: T[]
+  right: T[],
 ): boolean {
   if (left.length !== right.length) {
     return false;
@@ -368,7 +368,7 @@ export function isPrimitiveArrayEqual<T extends number | string>(
 
 export function cast<T>(
   val: unknown,
-  constructor?: {new (...args: unknown[]): T}
+  constructor?: {new (...args: unknown[]): T},
 ): T {
   if (!constructor) {
     return val as T;
@@ -381,7 +381,7 @@ export function cast<T>(
 
 export function forEach<V>(
   obj: Record<string, V> | undefined,
-  fn: (key: string, val: V) => void
+  fn: (key: string, val: V) => void,
 ): void {
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {

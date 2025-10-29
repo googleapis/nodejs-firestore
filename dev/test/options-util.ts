@@ -56,7 +56,7 @@ describe('OptionsUtil', () => {
     const proto = optionsUtil.getOptionsProto(
       new Serializer(db!),
       {},
-      {baz: 'foo'}
+      {baz: 'foo'},
     );
 
     expect(proto).to.deep.equal({
@@ -71,7 +71,7 @@ describe('OptionsUtil', () => {
     const proto = optionsUtil.getOptionsProto(
       new Serializer(db!),
       {},
-      {'foo.bar': 'baz'}
+      {'foo.bar': 'baz'},
     );
 
     expect(proto).to.deep.equal({
@@ -98,7 +98,7 @@ describe('OptionsUtil', () => {
       },
       {
         index_mode: 'baz',
-      }
+      },
     );
 
     expect(proto).to.deep.equal({
@@ -130,7 +130,7 @@ describe('OptionsUtil', () => {
       {
         'foo.bar': 123,
         'foo.baz': true,
-      }
+      },
     );
 
     expect(proto).to.deep.equal({
@@ -175,7 +175,7 @@ describe('OptionsUtil', () => {
         foo: {
           bar: 123,
         },
-      }
+      },
     );
 
     expect(proto).to.deep.equal({
@@ -206,7 +206,7 @@ describe('OptionsUtil', () => {
       {
         'foo.bar': '123',
         'foo.waldo': true,
-      }
+      },
     );
 
     expect(proto).to.deep.equal({

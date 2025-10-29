@@ -24,7 +24,7 @@ const DATABASE_ROOT = `projects/${PROJECT_ID}/databases/(default)`;
 describe('ResourcePath', () => {
   it('has id property', () => {
     expect(
-      new QualifiedResourcePath(PROJECT_ID, '(default)', 'foo').id
+      new QualifiedResourcePath(PROJECT_ID, '(default)', 'foo').id,
     ).to.equal('foo');
     expect(new QualifiedResourcePath(PROJECT_ID, '(default)').id).to.be.null;
   });
@@ -53,7 +53,7 @@ describe('ResourcePath', () => {
 
     // parse reference to db root with `/documents`
     path = QualifiedResourcePath.fromSlashSeparatedString(
-      `${DATABASE_ROOT}/documents`
+      `${DATABASE_ROOT}/documents`,
     );
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents`);
     expect(path.isCollection).to.equal(false);
@@ -61,7 +61,7 @@ describe('ResourcePath', () => {
 
     // parse reference to collection
     path = QualifiedResourcePath.fromSlashSeparatedString(
-      `${DATABASE_ROOT}/documents/foo`
+      `${DATABASE_ROOT}/documents/foo`,
     );
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo`);
     expect(path.isCollection).to.equal(true);
@@ -69,7 +69,7 @@ describe('ResourcePath', () => {
 
     // parse reference to document
     path = QualifiedResourcePath.fromSlashSeparatedString(
-      `${DATABASE_ROOT}/documents/foo/bar`
+      `${DATABASE_ROOT}/documents/foo/bar`,
     );
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo/bar`);
     expect(path.isCollection).to.equal(false);
@@ -77,17 +77,17 @@ describe('ResourcePath', () => {
 
     // parse reference to nested collection
     path = QualifiedResourcePath.fromSlashSeparatedString(
-      `${DATABASE_ROOT}/documents/foo/bar/baz`
+      `${DATABASE_ROOT}/documents/foo/bar/baz`,
     );
     expect(path.formattedName).to.equal(
-      `${DATABASE_ROOT}/documents/foo/bar/baz`
+      `${DATABASE_ROOT}/documents/foo/bar/baz`,
     );
     expect(path.isCollection).to.equal(true);
     expect(path.isDocument).to.equal(false);
 
     expect(() => {
       path = QualifiedResourcePath.fromSlashSeparatedString(
-        'projects/project/databases'
+        'projects/project/databases',
       );
     }).to.throw("Resource name 'projects/project/databases' is not valid");
   });
@@ -114,7 +114,7 @@ describe('ResourcePath', () => {
 
   it('accepts newlines', () => {
     const path = QualifiedResourcePath.fromSlashSeparatedString(
-      `${DATABASE_ROOT}/documents/foo\nbar`
+      `${DATABASE_ROOT}/documents/foo\nbar`,
     );
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo\nbar`);
   });

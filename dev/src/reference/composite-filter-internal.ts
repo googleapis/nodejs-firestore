@@ -23,7 +23,7 @@ import {FieldFilterInternal} from './field-filter-internal';
 export class CompositeFilterInternal extends FilterInternal {
   constructor(
     private filters: FilterInternal[],
-    private operator: api.StructuredQuery.CompositeFilter.Operator
+    private operator: api.StructuredQuery.CompositeFilter.Operator,
   ) {
     super();
   }
@@ -56,7 +56,7 @@ export class CompositeFilterInternal extends FilterInternal {
     this.memoizedFlattenedFilters = this.filters.reduce(
       (allFilters: FieldFilterInternal[], subfilter: FilterInternal) =>
         allFilters.concat(subfilter.getFlattenedFilters()),
-      []
+      [],
     );
 
     return this.memoizedFlattenedFilters;
@@ -84,7 +84,7 @@ export class CompositeFilterInternal extends FilterInternal {
         this.operator === other.operator &&
         this.getFilters().length === other.getFilters().length &&
         this.getFilters().every((filter, index) =>
-          filter.isEqual(otherFilters[index])
+          filter.isEqual(otherFilters[index]),
         )
       );
     } else {

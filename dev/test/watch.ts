@@ -59,7 +59,7 @@ if (!PROJECT_ID) {
  */
 function docsEqual(
   actual: QueryDocumentSnapshot[],
-  expected: QueryDocumentSnapshot[]
+  expected: QueryDocumentSnapshot[],
 ): void {
   expect(actual.length).to.equal(expected.length);
   for (let i = 0; i < actual.length; i++) {
@@ -91,7 +91,7 @@ function snapshotsEqual(
   lastSnapshot: TestSnapshot,
   version: number,
   actual: Error | QuerySnapshot | undefined,
-  expected: TestSnapshot
+  expected: TestSnapshot,
 ): TestSnapshot {
   const localDocs = ([] as QueryDocumentSnapshot[]).concat(lastSnapshot.docs);
 
@@ -104,15 +104,15 @@ function snapshotsEqual(
   for (let i = 0; i < expected.docChanges.length; i++) {
     expect(actualDocChanges[i].type).to.equal(expected.docChanges[i].type);
     expect(actualDocChanges[i].doc.ref.id).to.equal(
-      expected.docChanges[i].doc.ref.id
+      expected.docChanges[i].doc.ref.id,
     );
     expect(actualDocChanges[i].doc.data()).to.deep.eq(
-      expected.docChanges[i].doc.data()
+      expected.docChanges[i].doc.data(),
     );
     const readVersion =
       actualDocChanges[i].type === 'removed' ? version - 1 : version;
     expect(
-      actualDocChanges[i].doc.readTime.isEqual(new Timestamp(0, readVersion))
+      actualDocChanges[i].doc.readTime.isEqual(new Timestamp(0, readVersion)),
     ).to.be.true;
 
     if (actualDocChanges[i].oldIndex !== -1) {
@@ -123,7 +123,7 @@ function snapshotsEqual(
       localDocs.splice(
         actualDocChanges[i].newIndex,
         0,
-        actualDocChanges[i].doc
+        actualDocChanges[i].doc,
       );
     }
   }
@@ -141,7 +141,7 @@ function snapshotsEqual(
  */
 function snapshot(
   ref: DocumentReference,
-  data: DocumentData
+  data: DocumentData,
 ): QueryDocumentSnapshot {
   const snapshot = new DocumentSnapshotBuilder(ref);
   snapshot.fieldsProto = ref.firestore._serializer!.encodeFields(data);
@@ -157,7 +157,7 @@ function snapshot(
 function docChange(
   type: DocumentChangeType,
   ref: DocumentReference,
-  data: DocumentData
+  data: DocumentData,
 ): {type: DocumentChangeType; doc: QueryDocumentSnapshot} {
   return {type, doc: snapshot(ref, data)};
 }
@@ -199,7 +199,7 @@ class DeferredListener<T> {
       expect(type).to.equal(
         listener.type,
         `Expected message of type '${listener.type}' but got '${type}' ` +
-          `with '${JSON.stringify(data)}'.`
+          `with '${JSON.stringify(data)}'.`,
       );
       listener.resolve(data);
     } else {
@@ -222,7 +222,7 @@ class DeferredListener<T> {
       expect(data.type).to.equal(
         expectedType,
         `Expected message of type '${expectedType}' but got '${data.type}' ` +
-          `with '${JSON.stringify(data.data)}'.`
+          `with '${JSON.stringify(data.data)}'.`,
       );
       return Promise.resolve(data.data);
     }
@@ -231,7 +231,7 @@ class DeferredListener<T> {
       this.pendingListeners.push({
         type: expectedType,
         resolve,
-      })
+      }),
     );
   }
 }
@@ -260,10 +260,10 @@ class StreamHelper {
       this.writeStream = through2.obj();
 
       this.readStream!.once('data', result =>
-        this.deferredListener.on('data', result)
+        this.deferredListener.on('data', result),
       );
       this.readStream!.on('error', error =>
-        this.deferredListener.on('error', error)
+        this.deferredListener.on('error', error),
       );
       this.readStream!.on('end', () => this.deferredListener.on('end'));
       this.readStream!.on('close', () => this.deferredListener.on('close'));
@@ -349,7 +349,7 @@ class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
   constructor(
     streamHelper: StreamHelper,
     private reference: DocumentReference | Query,
-    private targetId: number
+    private targetId: number,
   ) {
     this.serializer = new Serializer(reference.firestore);
     this.streamHelper = streamHelper;
@@ -379,7 +379,7 @@ class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
       },
       (error: Error) => {
         this.deferredListener.on('error', error);
-      }
+      },
     );
     return this.unsubscribe!;
   }
@@ -527,7 +527,7 @@ class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
    */
   runTest(
     expectedRequest: api.IListenRequest,
-    func: () => Promise<unknown>
+    func: () => Promise<unknown>,
   ): Promise<void> {
     this.startWatch();
 
@@ -546,7 +546,7 @@ class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
   runFailedTest(
     expectedRequest: api.IListenRequest,
     func: () => void | Promise<unknown>,
-    expectedError: string
+    expectedError: string,
   ): Promise<void> {
     this.startWatch();
 
@@ -637,7 +637,7 @@ describe('Query watch', () => {
 
   // The proto JSON that should be sent for a resumed query.
   const resumeTokenQuery: (resumeToken: Buffer) => api.IListenRequest = (
-    resumeToken: Buffer
+    resumeToken: Buffer,
   ) => {
     return {
       database: `projects/${PROJECT_ID}/databases/(default)`,
@@ -678,7 +678,7 @@ describe('Query watch', () => {
   /** The GAPIC callback that executes the listen. */
   let listenCallback: () => Duplex;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // We are intentionally skipping the delays to ensure fast test execution.
     // The retry semantics are unaffected by this, as we maintain their
     // asynchronous behavior.
@@ -693,26 +693,21 @@ describe('Query watch', () => {
     streamHelper = new StreamHelper();
     listenCallback = streamHelper.getListenCallback();
 
-    return createInstance({listen: () => listenCallback()}).then(
-      firestoreClient => {
-        firestore = firestoreClient;
-
-        watchHelper = new WatchHelper(
-          streamHelper,
-          firestore.collection('col'),
-          targetId
-        );
-
-        colRef = firestore.collection('col');
-
-        doc1 = firestore.doc('col/doc1');
-        doc2 = firestore.doc('col/doc2');
-        doc3 = firestore.doc('col/doc3');
-        doc4 = firestore.doc('col/doc4');
-
-        lastSnapshot = EMPTY;
-      }
+    firestore = await createInstance({listen: () => listenCallback()});
+    watchHelper = new WatchHelper(
+      streamHelper,
+      firestore.collection('col'),
+      targetId,
     );
+
+    colRef = firestore.collection('col');
+
+    doc1 = firestore.doc('col/doc1');
+    doc2 = firestore.doc('col/doc2');
+    doc3 = firestore.doc('col/doc3');
+    doc4 = firestore.doc('col/doc4');
+
+    lastSnapshot = EMPTY;
   });
 
   afterEach(() => {
@@ -722,11 +717,11 @@ describe('Query watch', () => {
 
   it('with invalid callbacks', () => {
     expect(() => colRef.onSnapshot('foo' as InvalidApiUsage)).to.throw(
-      'Value for argument "onNext" is not a valid function.'
+      'Value for argument "onNext" is not a valid function.',
     );
 
     expect(() =>
-      colRef.onSnapshot(() => {}, 'foo' as InvalidApiUsage)
+      colRef.onSnapshot(() => {}, 'foo' as InvalidApiUsage),
     ).to.throw('Value for argument "onError" is not a valid function.');
   });
 
@@ -736,7 +731,7 @@ describe('Query watch', () => {
       done();
     });
 
-    streamHelper.awaitOpen().then(() => {
+    void streamHelper.awaitOpen().then(() => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
@@ -750,7 +745,7 @@ describe('Query watch', () => {
         // Mock the server responding to the query with an invalid proto.
         streamHelper.write({invalid: true});
       },
-      'Unknown listen response type: {"invalid":true}'
+      'Unknown listen response type: {"invalid":true}',
     );
   });
 
@@ -767,7 +762,7 @@ describe('Query watch', () => {
         });
       },
       'Unknown target change type: {"targetChangeType":"INVALID",' +
-        '"targetIds":[65261]}'
+        '"targetIds":[65261]}',
     );
   });
 
@@ -777,7 +772,7 @@ describe('Query watch', () => {
       () => {
         watchHelper.sendRemoveTarget();
       },
-      'Error 13: internal error'
+      'Error 13: internal error',
     );
   });
 
@@ -787,7 +782,7 @@ describe('Query watch', () => {
       () => {
         watchHelper.sendRemoveTarget(7);
       },
-      'Error 7: test remove'
+      'Error 7: test remove',
     );
   });
 
@@ -797,7 +792,7 @@ describe('Query watch', () => {
       () => {
         watchHelper.sendAddTarget(2);
       },
-      'Unexpected target ID sent by server'
+      'Unexpected target ID sent by server',
     );
   });
 
@@ -836,7 +831,7 @@ describe('Query watch', () => {
         await streamHelper.await('error');
         await streamHelper.await('close');
       },
-      'Exceeded maximum number of retries allowed.'
+      'Exceeded maximum number of retries allowed.',
     );
   });
 
@@ -888,7 +883,7 @@ describe('Query watch', () => {
       err.code = statusCode;
 
       if (expectRetry) {
-        await watchHelper.runTest(collQueryJSON(), () => {
+        return watchHelper.runTest(collQueryJSON(), () => {
           watchHelper.sendAddTarget();
           watchHelper.sendCurrent();
           watchHelper.sendSnapshot(1, Buffer.from([0xabcd]));
@@ -916,7 +911,7 @@ describe('Query watch', () => {
                 return streamHelper.await('close');
               });
           },
-          'GRPC Error'
+          'GRPC Error',
         );
       }
     }
@@ -1164,7 +1159,7 @@ describe('Query watch', () => {
                 ++streamHelper.streamCount;
                 return through2.obj((chunk, enc, callback) => {
                   callback(
-                    new Error(`Stream Error (${streamHelper.streamCount})`)
+                    new Error(`Stream Error (${streamHelper.streamCount})`),
                   );
                 });
               };
@@ -1179,12 +1174,12 @@ describe('Query watch', () => {
               streamHelper.writeStream!.destroy();
             });
         },
-        'Stream Error (6)'
+        'Stream Error (6)',
       )
       .then(() => {
         expect(streamHelper.streamCount).to.equal(
           6,
-          'Expected stream to be opened once and retried five times'
+          'Expected stream to be opened once and retried five times',
         );
       });
   });
@@ -1980,7 +1975,7 @@ describe('Query watch', () => {
     });
 
     function initialSnapshot(
-      watchTest: (initialSnapshot: QuerySnapshot) => Promise<void> | void
+      watchTest: (initialSnapshot: QuerySnapshot) => Promise<void> | void,
     ) {
       return watchHelper.runTest(collQueryJSON(), () => {
         watchHelper.sendAddTarget();
@@ -1994,9 +1989,9 @@ describe('Query watch', () => {
 
     function nextSnapshot(
       baseSnapshot: QuerySnapshot,
-      watchStep: (currentSnapshot: QuerySnapshot) => Promise<void> | void
+      watchStep: (currentSnapshot: QuerySnapshot) => Promise<void> | void,
     ): Promise<QuerySnapshot> {
-      watchStep(baseSnapshot);
+      void watchStep(baseSnapshot);
       watchHelper.sendSnapshot(++snapshotVersion);
       return watchHelper.await('snapshot') as Promise<QuerySnapshot>;
     }
@@ -2021,7 +2016,7 @@ describe('Query watch', () => {
               watchHelper.sendDocDelete(doc1);
               watchHelper.sendDoc(doc2, {foo: 'bar'});
               watchHelper.sendDoc(doc4, {foo: 'd'});
-            })
+            }),
           )
           .then(snapshot => {
             thirdSnapshot = snapshot;
@@ -2041,12 +2036,12 @@ describe('Query watch', () => {
                 watchHelper.sendDocDelete(doc1);
                 watchHelper.sendDoc(doc2, {foo: 'bar'});
                 watchHelper.sendDoc(doc4, {foo: 'd'});
-              })
+              }),
             )
             .then(snapshot => {
               expect(snapshot.isEqual(thirdSnapshot)).to.be.true;
             });
-        })
+        }),
       );
     });
 
@@ -2072,7 +2067,7 @@ describe('Query watch', () => {
             expect(materializedDocs.length).to.equal(3);
             expect(snapshot.isEqual(firstSnapshot)).to.be.true;
           });
-        })
+        }),
       );
     });
 
@@ -2093,7 +2088,7 @@ describe('Query watch', () => {
           }).then(snapshot => {
             expect(snapshot.isEqual(firstSnapshot)).to.be.false;
           });
-        })
+        }),
       );
     });
 
@@ -2106,7 +2101,7 @@ describe('Query watch', () => {
         }).then(snapshot => {
           firstSnapshot = snapshot;
           expect(
-            snapshot.docChanges()[0].isEqual(firstSnapshot.docChanges()[0])
+            snapshot.docChanges()[0].isEqual(firstSnapshot.docChanges()[0]),
           ).to.be.true;
         });
       }).then(() =>
@@ -2116,10 +2111,10 @@ describe('Query watch', () => {
           }).then(snapshot => {
             expect(snapshot.isEqual(firstSnapshot)).to.be.false;
             expect(
-              snapshot.docChanges()[0].isEqual(firstSnapshot.docChanges()[0])
+              snapshot.docChanges()[0].isEqual(firstSnapshot.docChanges()[0]),
             ).to.be.false;
           });
-        })
+        }),
       );
     });
 
@@ -2128,10 +2123,10 @@ describe('Query watch', () => {
 
       return initialSnapshot(snapshot => {
         return nextSnapshot(snapshot, () =>
-          watchHelper.sendDoc(doc1, {foo: 'a'})
+          watchHelper.sendDoc(doc1, {foo: 'a'}),
         )
           .then(snapshot =>
-            nextSnapshot(snapshot, () => watchHelper.sendDoc(doc2, {foo: 'b'}))
+            nextSnapshot(snapshot, () => watchHelper.sendDoc(doc2, {foo: 'b'})),
           )
           .then(snapshot => {
             firstSnapshot = snapshot;
@@ -2139,19 +2134,19 @@ describe('Query watch', () => {
       }).then(() =>
         initialSnapshot(snapshot => {
           return nextSnapshot(snapshot, () =>
-            watchHelper.sendDoc(doc1, {foo: 'a'})
+            watchHelper.sendDoc(doc1, {foo: 'a'}),
           )
             .then(snapshot =>
               nextSnapshot(snapshot, () => {
                 watchHelper.sendDocDelete(doc1);
                 watchHelper.sendDoc(doc2, {foo: 'b'});
                 watchHelper.sendDoc(doc3, {foo: 'c'});
-              })
+              }),
             )
             .then(snapshot => {
               expect(snapshot.isEqual(firstSnapshot)).to.be.false;
             });
-        })
+        }),
       );
     });
 
@@ -2160,18 +2155,18 @@ describe('Query watch', () => {
 
       return initialSnapshot(snapshot => {
         return nextSnapshot(snapshot, () =>
-          watchHelper.sendDoc(doc1, {foo: '1'})
+          watchHelper.sendDoc(doc1, {foo: '1'}),
         ).then(snapshot => {
           originalSnapshot = snapshot;
         });
       }).then(() =>
         initialSnapshot(snapshot => {
           return nextSnapshot(snapshot, () =>
-            watchHelper.sendDoc(doc1, {foo: 1})
+            watchHelper.sendDoc(doc1, {foo: 1}),
           ).then(snapshot => {
             expect(snapshot.isEqual(originalSnapshot)).to.be.false;
           });
-        })
+        }),
       );
     });
 
@@ -2280,7 +2275,7 @@ describe('DocumentReference watch', () => {
     };
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // We are intentionally skipping the delays to ensure fast test execution.
     // The retry semantics are unaffected by this, as we maintain their
     // asynchronous behavior.
@@ -2294,11 +2289,9 @@ describe('DocumentReference watch', () => {
     streamHelper = new StreamHelper();
 
     const overrides = {listen: streamHelper.getListenCallback()};
-    return createInstance(overrides).then(firestoreClient => {
-      firestore = firestoreClient;
-      doc = firestore.doc('col/doc');
-      watchHelper = new WatchHelper(streamHelper, doc, targetId);
-    });
+    firestore = await createInstance(overrides);
+    doc = firestore.doc('col/doc');
+    watchHelper = new WatchHelper(streamHelper, doc, targetId);
   });
 
   afterEach(() => {
@@ -2308,11 +2301,11 @@ describe('DocumentReference watch', () => {
 
   it('with invalid callbacks', () => {
     expect(() => doc.onSnapshot('foo' as InvalidApiUsage)).to.throw(
-      'Value for argument "onNext" is not a valid function.'
+      'Value for argument "onNext" is not a valid function.',
     );
 
     expect(() => doc.onSnapshot(() => {}, 'foo' as InvalidApiUsage)).to.throw(
-      'Value for argument "onError" is not a valid function.'
+      'Value for argument "onError" is not a valid function.',
     );
   });
 
@@ -2322,7 +2315,7 @@ describe('DocumentReference watch', () => {
       done();
     });
 
-    streamHelper.awaitOpen().then(() => {
+    void streamHelper.awaitOpen().then(() => {
       watchHelper.sendAddTarget();
       watchHelper.sendCurrent();
       watchHelper.sendSnapshot(1);
@@ -2336,7 +2329,7 @@ describe('DocumentReference watch', () => {
         // Mock the server responding to the watch with an invalid proto.
         streamHelper.write({invalid: true});
       },
-      'Unknown listen response type: {"invalid":true}'
+      'Unknown listen response type: {"invalid":true}',
     );
   });
 
@@ -2353,7 +2346,7 @@ describe('DocumentReference watch', () => {
         });
       },
       'Unknown target change type: {"targetChangeType":"INVALID",' +
-        '"targetIds":[65261]}'
+        '"targetIds":[65261]}',
     );
   });
 
@@ -2363,7 +2356,7 @@ describe('DocumentReference watch', () => {
       () => {
         watchHelper.sendRemoveTarget();
       },
-      'Error 13: internal error'
+      'Error 13: internal error',
     );
   });
 
@@ -2373,7 +2366,7 @@ describe('DocumentReference watch', () => {
       () => {
         watchHelper.sendRemoveTarget(7);
       },
-      'Error 7: test remove'
+      'Error 7: test remove',
     );
   });
 
@@ -2635,17 +2628,15 @@ describe('Query comparator', () => {
   let doc3: DocumentReference;
   let doc4: DocumentReference;
 
-  beforeEach(() => {
-    return createInstance().then(firestoreClient => {
-      firestore = firestoreClient;
+  beforeEach(async () => {
+    firestore = await createInstance();
 
-      colRef = firestore.collection('col');
+    colRef = firestore.collection('col');
 
-      doc1 = firestore.doc('col/doc1');
-      doc2 = firestore.doc('col/doc2');
-      doc3 = firestore.doc('col/doc3');
-      doc4 = firestore.doc('col/doc4');
-    });
+    doc1 = firestore.doc('col/doc1');
+    doc2 = firestore.doc('col/doc2');
+    doc3 = firestore.doc('col/doc3');
+    doc4 = firestore.doc('col/doc4');
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -2653,7 +2644,7 @@ describe('Query comparator', () => {
   function testSort(
     query: Query,
     input: QueryDocumentSnapshot[],
-    expected: QueryDocumentSnapshot[]
+    expected: QueryDocumentSnapshot[],
   ) {
     const comparator = query.comparator();
     input.sort(comparator);
@@ -2725,7 +2716,7 @@ describe('Query comparator', () => {
 
     const comparator = query.comparator();
     expect(() => input.sort(comparator)).to.throw(
-      "Trying to compare documents on fields that don't exist"
+      "Trying to compare documents on fields that don't exist",
     );
   });
 });

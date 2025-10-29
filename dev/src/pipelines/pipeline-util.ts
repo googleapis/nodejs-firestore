@@ -82,12 +82,12 @@ export class ExecutionUtil {
     /** @private */
     readonly _firestore: Firestore,
     /** @private */
-    readonly _serializer: Serializer
+    readonly _serializer: Serializer,
   ) {}
 
   _getResponse(
     structuredPipeline: StructuredPipeline,
-    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
   ): Promise<PipelineResponse> {
     // Capture the error stack to preserve stack tracing across async calls.
     const stack = Error().stack!;
@@ -98,7 +98,7 @@ export class ExecutionUtil {
 
       const stream: NodeJS.EventEmitter = this._stream(
         structuredPipeline,
-        transactionOrReadTime
+        transactionOrReadTime,
       );
       stream.on('error', err => {
         reject(wrapError(err, stack));
@@ -142,11 +142,11 @@ export class ExecutionUtil {
 
   stream(
     structuredPipeline: StructuredPipeline,
-    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
   ): NodeJS.ReadableStream {
     const responseStream = this._stream(
       structuredPipeline,
-      transactionOrReadTime
+      transactionOrReadTime,
     );
     const transform = new Transform({
       objectMode: true,
@@ -167,7 +167,7 @@ export class ExecutionUtil {
 
   _stream(
     structuredPipeline: StructuredPipeline,
-    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions
+    transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
   ): NodeJS.ReadableStream {
     const tag = requestTag();
 
@@ -177,7 +177,7 @@ export class ExecutionUtil {
       transform: (
         proto: api.ExecutePipelineResponse | typeof NOOP_MESSAGE,
         enc,
-        callback
+        callback,
       ) => {
         if (proto === NOOP_MESSAGE) {
           callback(undefined);
@@ -206,7 +206,7 @@ export class ExecutionUtil {
             const ref = result.name
               ? new DocumentReference(
                   this._firestore,
-                  QualifiedResourcePath.fromSlashSeparatedString(result.name)
+                  QualifiedResourcePath.fromSlashSeparatedString(result.name),
                 )
               : undefined;
 
@@ -214,7 +214,7 @@ export class ExecutionUtil {
               logger(
                 '_stream',
                 null,
-                'Unexpected state: `result.fields` was falsey. Using an empty map.'
+                'Unexpected state: `result.fields` was falsey. Using an empty map.',
               );
             }
 
@@ -228,7 +228,7 @@ export class ExecutionUtil {
                 : undefined,
               result.updateTime
                 ? Timestamp.fromProto(result.updateTime!)
-                : undefined
+                : undefined,
             );
             return output;
           });
@@ -276,7 +276,7 @@ export class ExecutionUtil {
             methodName,
             /* bidirectional= */ false,
             request,
-            tag
+            tag,
           );
           backendStream.on('error', err => {
             backendStream.unpipe(stream);
@@ -285,7 +285,7 @@ export class ExecutionUtil {
               'PipelineUtil._stream',
               tag,
               'Pipeline failed with stream error:',
-              err
+              err,
             );
             stream.destroy(err);
             streamActive.resolve(/* active= */ false);
@@ -302,7 +302,7 @@ export class ExecutionUtil {
           'PipelineUtil._stream',
           tag,
           'Pipeline failed with stream error:',
-          e
+          e,
         );
         stream.destroy(e);
       });
@@ -439,7 +439,7 @@ export function isFirestoreValue(obj: unknown): obj is api.IValue {
 export function whereConditionsFromCursor(
   cursor: QueryCursor,
   orderings: Ordering[],
-  position: 'before' | 'after'
+  position: 'before' | 'after',
 ): BooleanExpression {
   // The filterFunc is either greater than or less than
   const filterFunc = position === 'before' ? lessThan : greaterThan;
@@ -459,7 +459,7 @@ export function whereConditionsFromCursor(
     // can be equal to the value, otherwise it's not equal
     condition = or(
       condition,
-      field.equal(value) as unknown as BooleanExpression
+      field.equal(value) as unknown as BooleanExpression,
     );
   }
 
@@ -474,7 +474,7 @@ export function whereConditionsFromCursor(
     // b) or equal the cursor value and lessThan|greaterThan the cursor values for other fields
     condition = or(
       filterFunc(field, value),
-      and(field.equal(value) as unknown as BooleanExpression, condition)
+      and(field.equal(value) as unknown as BooleanExpression, condition),
     );
   }
 
@@ -486,14 +486,14 @@ export function reverseOrderings(orderings: Ordering[]): Ordering[] {
     o =>
       new Ordering(
         o.expr,
-        o.direction === 'ascending' ? 'descending' : 'ascending'
-      )
+        o.direction === 'ascending' ? 'descending' : 'ascending',
+      ),
   );
 }
 
 export function toPipelineBooleanExpr(
   f: FilterInternal,
-  serializer: Serializer
+  serializer: Serializer,
 ): BooleanExpression {
   if (f instanceof FieldFilterInternal) {
     const field = createField(f.field);
@@ -548,7 +548,7 @@ export function toPipelineBooleanExpr(
   }
 
   throw new Error(
-    `Failed to convert filter to pipeline conditions: ${f.toProto()}`
+    `Failed to convert filter to pipeline conditions: ${f.toProto()}`,
   );
 }
 
@@ -561,7 +561,7 @@ export function isNumber(val: unknown): val is number {
 }
 
 export function isSelectable(
-  val: unknown
+  val: unknown,
 ): val is firestore.Pipelines.Selectable {
   const candidate = val as firestore.Pipelines.Selectable;
   return (
@@ -581,7 +581,7 @@ export function isOrdering(val: unknown): val is firestore.Pipelines.Ordering {
 }
 
 export function isAliasedAggregate(
-  val: unknown
+  val: unknown,
 ): val is firestore.Pipelines.AliasedAggregate {
   const candidate = val as firestore.Pipelines.AliasedAggregate;
   return (
@@ -595,7 +595,7 @@ export function isExpr(val: unknown): val is firestore.Pipelines.Expression {
 }
 
 export function isBooleanExpr(
-  val: unknown
+  val: unknown,
 ): val is firestore.Pipelines.BooleanExpression {
   return val instanceof BooleanExpression;
 }
@@ -609,7 +609,7 @@ export function isPipeline(val: unknown): val is firestore.Pipelines.Pipeline {
 }
 
 export function isCollectionReference(
-  val: unknown
+  val: unknown,
 ): val is firestore.CollectionReference {
   return val instanceof CollectionReference;
 }
@@ -651,7 +651,7 @@ export function valueToDefaultExpr(value: unknown): Expression {
  * @param value
  */
 export function vectorToExpr(
-  value: firestore.VectorValue | number[] | Expression
+  value: firestore.VectorValue | number[] | Expression,
 ): Expression {
   if (value instanceof Expression) {
     return value;
@@ -719,7 +719,7 @@ export function fieldOrSelectable(value: string | Selectable): Selectable {
 }
 
 export function selectablesToMap(
-  selectables: (firestore.Pipelines.Selectable | string)[]
+  selectables: (firestore.Pipelines.Selectable | string)[],
 ): Map<string, Expression> {
   const result = new Map<string, Expression>();
   for (const selectable of selectables) {
@@ -743,12 +743,12 @@ export function selectablesToMap(
 }
 
 export function aliasedAggregateToMap(
-  aliasedAggregatees: firestore.Pipelines.AliasedAggregate[]
+  aliasedAggregatees: firestore.Pipelines.AliasedAggregate[],
 ): Map<string, AggregateFunction> {
   return aliasedAggregatees.reduce(
     (
       map: Map<string, AggregateFunction>,
-      selectable: firestore.Pipelines.AliasedAggregate
+      selectable: firestore.Pipelines.AliasedAggregate,
     ) => {
       if (map.get(selectable._alias) !== undefined) {
         throw new Error(`Duplicate alias or field '${selectable._alias}'`);
@@ -757,6 +757,6 @@ export function aliasedAggregateToMap(
       map.set(selectable._alias, selectable._aggregate as AggregateFunction);
       return map;
     },
-    new Map() as Map<string, AggregateFunction>
+    new Map() as Map<string, AggregateFunction>,
   );
 }

@@ -29,7 +29,7 @@ export class OptionsUtil {
 
   private _getKnownOptions(
     options: Record<string, unknown>,
-    serializer: Serializer
+    serializer: Serializer,
   ): ObjectValue {
     const knownOptions: ObjectValue = ObjectValue.empty();
 
@@ -56,7 +56,7 @@ export class OptionsUtil {
         if (protoValue) {
           knownOptions.set(
             new ObjectValueFieldPath(optionDefinition.serverName),
-            protoValue
+            protoValue,
           );
         }
       }
@@ -68,7 +68,7 @@ export class OptionsUtil {
   getOptionsProto(
     serializer: Serializer,
     knownOptions: Record<string, unknown>,
-    optionsOverride?: Record<string, unknown>
+    optionsOverride?: Record<string, unknown>,
   ): ApiMapValue | undefined {
     const result: ObjectValue = this._getKnownOptions(knownOptions, serializer);
 
@@ -78,7 +78,7 @@ export class OptionsUtil {
         mapToArray(optionsOverride, (value, key) => [
           ObjectValueFieldPath.fromDotNotation(key),
           value !== undefined ? serializer.encodeValue(value) : null,
-        ])
+        ]),
       );
       result.setAll(optionsMap);
     }
