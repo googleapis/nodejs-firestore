@@ -85,6 +85,15 @@ import {
   RECURSIVE_DELETE_MIN_PENDING_OPS,
   RecursiveDelete,
 } from './recursive-delete';
+import {
+  ATTRIBUTE_KEY_DOC_COUNT,
+  ATTRIBUTE_KEY_IS_TRANSACTIONAL,
+  ATTRIBUTE_KEY_NUM_RESPONSES,
+  SPAN_NAME_BATCH_GET_DOCUMENTS,
+  TraceUtil,
+} from './telemetry/trace-util';
+import {DisabledTraceUtil} from './telemetry/disabled-trace-util';
+import {EnabledTraceUtil} from './telemetry/enabled-trace-util';
 
 export {CollectionReference} from './reference/collection-reference';
 export {DocumentReference} from './reference/document-reference';
@@ -94,6 +103,7 @@ export type {AggregateQuery} from './reference/aggregate-query';
 export type {AggregateQuerySnapshot} from './reference/aggregate-query-snapshot';
 export type {VectorQuery} from './reference/vector-query';
 export type {VectorQuerySnapshot} from './reference/vector-query-snapshot';
+export type {VectorQueryOptions} from './reference/vector-query-options';
 export {BulkWriter} from './bulk-writer';
 export type {BulkWriterError} from './bulk-writer';
 export type {BundleBuilder} from './bundle';
@@ -169,7 +179,7 @@ export const DEFAULT_MAX_TRANSACTION_ATTEMPTS = 5;
 /*!
  * The default number of idle GRPC channel to keep.
  */
-const DEFAULT_MAX_IDLE_CHANNELS = 1;
+export const DEFAULT_MAX_IDLE_CHANNELS = 1;
 
 /*!
  * The maximum number of concurrent requests supported by a single GRPC channel,
@@ -456,6 +466,13 @@ export class Firestore implements firestore.Firestore {
   _serializer: Serializer | null = null;
 
   /**
+   * The OpenTelemetry tracing utility object.
+   * @private
+   * @internal
+   */
+  _traceUtil: TraceUtil;
+
+  /**
    * The project ID for this client.
    *
    * The project ID is auto-detected during the first request unless a project
@@ -571,7 +588,13 @@ export class Firestore implements firestore.Firestore {
       libraryHeader.libVersion += ' fire/' + settings.firebaseVersion;
     }
 
+    if (settings && settings.firebaseAdminVersion) {
+      libraryHeader.libVersion +=
+        ' fire-admin/' + settings.firebaseAdminVersion;
+    }
+
     this.validateAndApplySettings({...settings, ...libraryHeader});
+    this._traceUtil = this.newTraceUtilInstance(this._settings);
 
     const retryConfig = serviceConfig.retry_params.default;
     this._backoffSettings = {
@@ -597,7 +620,7 @@ export class Firestore implements firestore.Firestore {
         let gax: typeof googleGax | typeof googleGaxFallback;
         if (useFallback) {
           if (!this._gaxFallback) {
-            gax = this._gaxFallback = require('google-gax/build/src/fallback');
+            gax = this._gaxFallback = require('google-gax/fallback');
           } else {
             gax = this._gaxFallback;
           }
@@ -633,7 +656,7 @@ export class Firestore implements firestore.Firestore {
               fallback: useFallback,
               minifyJson: true,
             },
-            gax
+            gax,
           );
         }
 
@@ -641,11 +664,11 @@ export class Firestore implements firestore.Firestore {
           'clientFactory',
           null,
           'Initialized Firestore GAPIC Client (useFallback: %s)',
-          useFallback
+          useFallback,
         );
         return client;
       },
-      /* clientDestructor= */ client => client.close()
+      /* clientDestructor= */ client => client.close(),
     );
 
     logger('Firestore', null, 'Initialized Firestore');
@@ -672,12 +695,13 @@ export class Firestore implements firestore.Firestore {
       throw new Error(
         'Firestore has already been initialized. You can only call ' +
           'settings() once, and only before calling any other methods on a ' +
-          'Firestore object.'
+          'Firestore object.',
       );
     }
 
     const mergedSettings = {...this._settings, ...settings};
     this.validateAndApplySettings(mergedSettings);
+    this._traceUtil = this.newTraceUtilInstance(this._settings);
     this._settingsFrozen = true;
   }
 
@@ -709,7 +733,7 @@ export class Firestore implements firestore.Firestore {
     if (process.env.FIRESTORE_EMULATOR_HOST) {
       validateHost(
         'FIRESTORE_EMULATOR_HOST',
-        process.env.FIRESTORE_EMULATOR_HOST
+        process.env.FIRESTORE_EMULATOR_HOST,
       );
 
       settings = {
@@ -736,7 +760,7 @@ export class Firestore implements firestore.Firestore {
           `The provided host (${url.hostname}) in "settings" does not ` +
             `match the existing host (${
               settings.servicePath ?? settings.apiEndpoint
-            }). Using the provided host.`
+            }). Using the provided host.`,
         );
       }
 
@@ -773,6 +797,28 @@ export class Firestore implements firestore.Firestore {
     this._serializer = new Serializer(this);
   }
 
+  private newTraceUtilInstance(settings: firestore.Settings): TraceUtil {
+    let createEnabledInstance = true;
+
+    // The environment variable can override options to enable/disable telemetry collection.
+    if ('FIRESTORE_ENABLE_TRACING' in process.env) {
+      const enableTracingEnvVar =
+        process.env.FIRESTORE_ENABLE_TRACING!.toLowerCase();
+      if (enableTracingEnvVar === 'on' || enableTracingEnvVar === 'true') {
+        createEnabledInstance = true;
+      }
+      if (enableTracingEnvVar === 'off' || enableTracingEnvVar === 'false') {
+        createEnabledInstance = false;
+      }
+    }
+
+    if (createEnabledInstance) {
+      return new EnabledTraceUtil(settings);
+    } else {
+      return new DisabledTraceUtil();
+    }
+  }
+
   /**
    * Returns the Project ID for this Firestore instance. Validates that
    * `initializeIfNeeded()` was called before.
@@ -783,7 +829,7 @@ export class Firestore implements firestore.Firestore {
   get projectId(): string {
     if (this._projectId === undefined) {
       throw new Error(
-        'INTERNAL ERROR: Client is not yet ready to issue requests.'
+        'INTERNAL ERROR: Client is not yet ready to issue requests.',
       );
     }
     return this._projectId;
@@ -827,7 +873,7 @@ export class Firestore implements firestore.Firestore {
     const path = ResourcePath.EMPTY.append(documentPath);
     if (!path.isDocument) {
       throw new Error(
-        `Value for argument "documentPath" must point to a document, but was "${documentPath}". Your path does not contain an even number of components.`
+        `Value for argument "documentPath" must point to a document, but was "${documentPath}". Your path does not contain an even number of components.`,
       );
     }
 
@@ -858,7 +904,7 @@ export class Firestore implements firestore.Firestore {
     const path = ResourcePath.EMPTY.append(collectionPath);
     if (!path.isCollection) {
       throw new Error(
-        `Value for argument "collectionPath" must point to a collection, but was "${collectionPath}". Your path does not contain an odd number of components.`
+        `Value for argument "collectionPath" must point to a collection, but was "${collectionPath}". Your path does not contain an odd number of components.`,
       );
     }
 
@@ -892,7 +938,7 @@ export class Firestore implements firestore.Firestore {
   collectionGroup(collectionId: string): CollectionGroup {
     if (collectionId.indexOf('/') !== -1) {
       throw new Error(
-        `Invalid collectionId '${collectionId}'. Collection IDs must not contain '/'.`
+        `Invalid collectionId '${collectionId}'. Collection IDs must not contain '/'.`,
       );
     }
 
@@ -985,37 +1031,37 @@ export class Firestore implements firestore.Firestore {
   snapshot_(
     documentName: string,
     readTime?: google.protobuf.ITimestamp,
-    encoding?: 'protobufJS'
+    encoding?: 'protobufJS',
   ): DocumentSnapshot;
   /** @private */
   snapshot_(
     documentName: string,
     readTime: string,
-    encoding: 'json'
+    encoding: 'json',
   ): DocumentSnapshot;
   /** @private */
   snapshot_(
     document: api.IDocument,
     readTime: google.protobuf.ITimestamp,
-    encoding?: 'protobufJS'
+    encoding?: 'protobufJS',
   ): QueryDocumentSnapshot;
   /** @private */
   snapshot_(
     document: {[k: string]: unknown},
     readTime: string,
-    encoding: 'json'
+    encoding: 'json',
   ): QueryDocumentSnapshot;
   /** @private */
   snapshot_(
     documentOrName: api.IDocument | {[k: string]: unknown} | string,
     readTime?: google.protobuf.ITimestamp | string,
-    encoding?: 'json' | 'protobufJS'
+    encoding?: 'json' | 'protobufJS',
   ): DocumentSnapshot {
     // TODO: Assert that Firestore Project ID is valid.
 
     let convertTimestamp: (
       timestampValue?: string | google.protobuf.ITimestamp,
-      argumentName?: string
+      argumentName?: string,
     ) => google.protobuf.ITimestamp | undefined;
     let convertFields: (data: ApiMapValue) => ApiMapValue;
 
@@ -1030,7 +1076,7 @@ export class Firestore implements firestore.Firestore {
     } else {
       throw new Error(
         'Unsupported encoding format. Expected "json" or "protobufJS", ' +
-          `but was "${encoding}".`
+          `but was "${encoding}".`,
       );
     }
 
@@ -1039,15 +1085,15 @@ export class Firestore implements firestore.Firestore {
     if (typeof documentOrName === 'string') {
       ref = new DocumentReference(
         this,
-        QualifiedResourcePath.fromSlashSeparatedString(documentOrName)
+        QualifiedResourcePath.fromSlashSeparatedString(documentOrName),
       );
       document = new DocumentSnapshotBuilder(ref);
     } else {
       ref = new DocumentReference(
         this,
         QualifiedResourcePath.fromSlashSeparatedString(
-          documentOrName.name as string
-        )
+          documentOrName.name as string,
+        ),
       );
       document = new DocumentSnapshotBuilder(ref);
       document.fieldsProto = documentOrName.fields
@@ -1056,20 +1102,20 @@ export class Firestore implements firestore.Firestore {
       document.createTime = Timestamp.fromProto(
         convertTimestamp(
           documentOrName.createTime as string | google.protobuf.ITimestamp,
-          'documentOrName.createTime'
-        )!
+          'documentOrName.createTime',
+        )!,
       );
       document.updateTime = Timestamp.fromProto(
         convertTimestamp(
           documentOrName.updateTime as string | google.protobuf.ITimestamp,
-          'documentOrName.updateTime'
-        )!
+          'documentOrName.updateTime',
+        )!,
       );
     }
 
     if (readTime) {
       document.readTime = Timestamp.fromProto(
-        convertTimestamp(readTime, 'readTime')!
+        convertTimestamp(readTime, 'readTime')!,
       );
     }
 
@@ -1192,7 +1238,7 @@ export class Firestore implements firestore.Firestore {
     updateFunction: (transaction: Transaction) => Promise<T>,
     transactionOptions?:
       | firestore.ReadWriteTransactionOptions
-      | firestore.ReadOnlyTransactionOptions
+      | firestore.ReadOnlyTransactionOptions,
   ): Promise<T> {
     validateFunction('updateFunction', updateFunction);
 
@@ -1203,27 +1249,27 @@ export class Firestore implements firestore.Firestore {
       validateBoolean(
         'transactionOptions.readOnly',
         transactionOptions.readOnly,
-        {optional: true}
+        {optional: true},
       );
 
       if (transactionOptions.readOnly) {
         validateTimestamp(
           'transactionOptions.readTime',
           transactionOptions.readTime,
-          {optional: true}
+          {optional: true},
         );
       } else {
         validateInteger(
           'transactionOptions.maxAttempts',
           transactionOptions.maxAttempts,
-          {optional: true, minValue: 1}
+          {optional: true, minValue: 1},
         );
       }
     }
 
     const transaction = new Transaction(this, tag, transactionOptions);
     return this.initializeIfNeeded(tag).then(() =>
-      transaction.runTransaction(updateFunction)
+      transaction.runTransaction(updateFunction),
     );
   }
 
@@ -1277,28 +1323,39 @@ export class Firestore implements firestore.Firestore {
       | firestore.ReadOptions
     >
   ): Promise<Array<DocumentSnapshot<AppModelType, DbModelType>>> {
-    validateMinNumberOfArguments(
-      'Firestore.getAll',
-      documentRefsOrReadOptions,
-      1
+    return this._traceUtil.startActiveSpan(
+      SPAN_NAME_BATCH_GET_DOCUMENTS,
+      () => {
+        validateMinNumberOfArguments(
+          'Firestore.getAll',
+          documentRefsOrReadOptions,
+          1,
+        );
+
+        const {documents, fieldMask} = parseGetAllArguments(
+          documentRefsOrReadOptions,
+        );
+
+        this._traceUtil.currentSpan().setAttributes({
+          [ATTRIBUTE_KEY_IS_TRANSACTIONAL]: false,
+          [ATTRIBUTE_KEY_DOC_COUNT]: documents.length,
+        });
+
+        const tag = requestTag();
+
+        // Capture the error stack to preserve stack tracing across async calls.
+        const stack = Error().stack!;
+
+        return this.initializeIfNeeded(tag)
+          .then(() => {
+            const reader = new DocumentReader(this, documents, fieldMask);
+            return reader.get(tag);
+          })
+          .catch(err => {
+            throw wrapError(err, stack);
+          });
+      },
     );
-
-    const {documents, fieldMask} = parseGetAllArguments(
-      documentRefsOrReadOptions
-    );
-    const tag = requestTag();
-
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
-
-    return this.initializeIfNeeded(tag)
-      .then(() => {
-        const reader = new DocumentReader(this, documents, fieldMask);
-        return reader.get(tag);
-      })
-      .catch(err => {
-        throw wrapError(err, stack);
-      });
   }
 
   /**
@@ -1389,13 +1446,13 @@ export class Firestore implements firestore.Firestore {
     | firestore.CollectionReference<any, any>
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       | firestore.DocumentReference<any, any>,
-    bulkWriter?: BulkWriter
+    bulkWriter?: BulkWriter,
   ): Promise<void> {
     return this._recursiveDelete(
       ref,
       RECURSIVE_DELETE_MAX_PENDING_OPS,
       RECURSIVE_DELETE_MIN_PENDING_OPS,
-      bulkWriter
+      bulkWriter,
     );
   }
 
@@ -1413,7 +1470,7 @@ export class Firestore implements firestore.Firestore {
       | firestore.DocumentReference<unknown>,
     maxPendingOps: number,
     minPendingOps: number,
-    bulkWriter?: BulkWriter
+    bulkWriter?: BulkWriter,
   ): Promise<void> {
     const writer = bulkWriter ?? this.getBulkWriter();
     const deleter = new RecursiveDelete(
@@ -1421,7 +1478,7 @@ export class Firestore implements firestore.Firestore {
       writer,
       ref,
       maxPendingOps,
-      minPendingOps
+      minPendingOps,
     );
     return deleter.run();
   }
@@ -1431,13 +1488,17 @@ export class Firestore implements firestore.Firestore {
    *
    * @return A Promise that resolves when the client is terminated.
    */
-  terminate(): Promise<void> {
+  async terminate(): Promise<void> {
+    if (this._bulkWriter) {
+      await this._bulkWriter.close();
+      this._bulkWriter = undefined;
+    }
     if (this.registeredListenersCount > 0 || this.bulkWritersCount > 0) {
       return Promise.reject(
         'All onSnapshot() listeners must be unsubscribed, and all BulkWriter ' +
           'instances must be closed before terminating the client. ' +
           `There are ${this.registeredListenersCount} active listeners and ` +
-          `${this.bulkWritersCount} open BulkWriter instances.`
+          `${this.bulkWritersCount} open BulkWriter instances.`,
       );
     }
     return this._clientPool.terminate();
@@ -1485,20 +1546,24 @@ export class Firestore implements firestore.Firestore {
         this._projectId = await this._clientPool.run(
           requestTag,
           /* requiresGrpc= */ false,
-          gapicClient => gapicClient.getProjectId()
+          gapicClient => gapicClient.getProjectId(),
         );
         logger(
           'Firestore.initializeIfNeeded',
           null,
           'Detected project ID: %s',
-          this._projectId
+          this._projectId,
         );
+
+        // If the project ID was undefined when the TraceUtil was set up, we
+        // need to record it.
+        this._traceUtil.recordProjectId(this.projectId);
       } catch (err) {
         logger(
           'Firestore.initializeIfNeeded',
           null,
           'Failed to detect project ID: %s',
-          err
+          err,
         );
         return Promise.reject(err);
       }
@@ -1512,7 +1577,7 @@ export class Firestore implements firestore.Firestore {
    */
   private createCallOptions(
     methodName: string,
-    retryCodes?: number[]
+    retryCodes?: number[],
   ): CallOptions {
     const callOptions: CallOptions = {
       otherArgs: {
@@ -1526,11 +1591,10 @@ export class Firestore implements firestore.Firestore {
 
     if (retryCodes) {
       const retryParams = getRetryParams(methodName);
-      callOptions.retry =
-        new (require('google-gax/build/src/fallback').RetryOptions)(
-          retryCodes,
-          retryParams
-        );
+      callOptions.retry = new (require('google-gax/fallback').RetryOptions)(
+        retryCodes,
+        retryParams,
+      );
     }
 
     return callOptions;
@@ -1564,7 +1628,7 @@ export class Firestore implements firestore.Firestore {
   private async _retry<T>(
     methodName: string,
     requestTag: string,
-    func: () => Promise<T>
+    func: () => Promise<T>,
   ): Promise<T> {
     const backoff = new ExponentialBackoff();
 
@@ -1576,7 +1640,7 @@ export class Firestore implements firestore.Firestore {
           'Firestore._retry',
           requestTag,
           'Retrying request that failed with error:',
-          lastError
+          lastError,
         );
       }
 
@@ -1596,7 +1660,7 @@ export class Firestore implements firestore.Firestore {
       'Firestore._retry',
       requestTag,
       'Request failed with error:',
-      lastError
+      lastError,
     );
     return Promise.reject(lastError);
   }
@@ -1621,7 +1685,7 @@ export class Firestore implements firestore.Firestore {
     backendStream: Duplex,
     lifetime: Deferred<void>,
     requestTag: string,
-    request?: {}
+    request?: {},
   ): Promise<Duplex> {
     const resultStream = new PassThrough({objectMode: true});
     resultStream.pause();
@@ -1645,7 +1709,7 @@ export class Firestore implements firestore.Firestore {
         logger(
           'Firestore._initializeStream',
           requestTag,
-          'Received stream end'
+          'Received stream end',
         );
         resultStream.unpipe(backendStream);
         resolve(resultStream);
@@ -1660,7 +1724,7 @@ export class Firestore implements firestore.Firestore {
             'Firestore._initializeStream',
             requestTag,
             'Received initial error:',
-            err
+            err,
           );
           reject(err);
         } else {
@@ -1668,7 +1732,7 @@ export class Firestore implements firestore.Firestore {
             'Firestore._initializeStream',
             requestTag,
             'Received stream error:',
-            err
+            err,
           );
           // We execute the forwarding of the 'error' event via setImmediate() as
           // V8 guarantees that the Promise chain returned from this method
@@ -1693,7 +1757,7 @@ export class Firestore implements firestore.Firestore {
           'Firestore._initializeStream',
           requestTag,
           'Sending request: %j',
-          request
+          request,
         );
         backendStream.write(request, 'utf-8', err => {
           if (err) {
@@ -1702,7 +1766,7 @@ export class Firestore implements firestore.Firestore {
             logger(
               'Firestore._initializeStream',
               requestTag,
-              'Marking stream as healthy'
+              'Marking stream as healthy',
             );
             streamReady();
           }
@@ -1729,7 +1793,7 @@ export class Firestore implements firestore.Firestore {
     methodName: FirestoreUnaryMethod,
     request: Req,
     requestTag: string,
-    retryCodes?: number[]
+    retryCodes?: number[],
   ): Promise<Resp> {
     const callOptions = this.createCallOptions(methodName, retryCodes);
 
@@ -1742,7 +1806,7 @@ export class Firestore implements firestore.Firestore {
             'Firestore.request',
             requestTag,
             'Sending request: %j',
-            request
+            request,
           );
           const [result] = await (
             gapicClient[methodName] as UnaryMethod<Req, Resp>
@@ -1751,14 +1815,14 @@ export class Firestore implements firestore.Firestore {
             'Firestore.request',
             requestTag,
             'Received response: %j',
-            result
+            result,
           );
           return result;
         } catch (err) {
           logger('Firestore.request', requestTag, 'Received error:', err);
           return Promise.reject(err);
         }
-      }
+      },
     );
   }
 
@@ -1783,22 +1847,29 @@ export class Firestore implements firestore.Firestore {
     methodName: FirestoreStreamingMethod,
     bidrectional: boolean,
     request: {},
-    requestTag: string
+    requestTag: string,
   ): Promise<Duplex> {
     const callOptions = this.createCallOptions(methodName);
 
     const bidirectional = methodName === 'listen';
+    let numResponses = 0;
+    const NUM_RESPONSES_PER_TRACE_EVENT = 100;
 
     return this._retry(methodName, requestTag, () => {
       const result = new Deferred<Duplex>();
 
-      this._clientPool.run(requestTag, bidrectional, async gapicClient => {
+      void this._clientPool.run(requestTag, bidrectional, async gapicClient => {
         logger(
           'Firestore.requestStream',
           requestTag,
           'Sending request: %j',
-          request
+          request,
         );
+
+        this._traceUtil
+          .currentSpan()
+          .addEvent(`Firestore.${methodName}: Start`);
+
         try {
           const stream = bidirectional
             ? gapicClient[methodName](callOptions)
@@ -1810,8 +1881,20 @@ export class Firestore implements firestore.Firestore {
                 'Firestore.requestStream',
                 requestTag,
                 'Received response: %j',
-                chunk
+                chunk,
               );
+              numResponses++;
+              if (numResponses === 1) {
+                this._traceUtil
+                  .currentSpan()
+                  .addEvent(`Firestore.${methodName}: First response received`);
+              } else if (numResponses % NUM_RESPONSES_PER_TRACE_EVENT === 0) {
+                this._traceUtil
+                  .currentSpan()
+                  .addEvent(
+                    `Firestore.${methodName}: Received ${numResponses} responses`,
+                  );
+              }
               callback();
             },
           });
@@ -1822,9 +1905,16 @@ export class Firestore implements firestore.Firestore {
             stream,
             lifetime,
             requestTag,
-            bidirectional ? request : undefined
+            bidirectional ? request : undefined,
           );
-          resultStream.on('end', () => stream.end());
+          resultStream.on('end', () => {
+            stream.end();
+            this._traceUtil
+              .currentSpan()
+              .addEvent(`Firestore.${methodName}: Completed`, {
+                [ATTRIBUTE_KEY_NUM_RESPONSES]: numResponses,
+              });
+          });
           result.resolve(resultStream);
 
           // While we return the stream to the callee early, we don't want to

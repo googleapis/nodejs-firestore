@@ -4,6 +4,85 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [7.11.6](https://github.com/googleapis/nodejs-firestore/compare/v7.11.5...v7.11.6) (2025-09-26)
+
+
+### Bug Fixes
+
+* Pool.ts: add even more logging ([c508d1b](https://github.com/googleapis/nodejs-firestore/commit/c508d1bd653f5d2b9bbe78236fac15e999c27e69))
+
+## [7.11.5](https://github.com/googleapis/nodejs-firestore/compare/v7.11.4...v7.11.5) (2025-09-22)
+
+
+### Bug Fixes
+
+* Pool.ts: add more detailed logging for client garbage collection ([#2420](https://github.com/googleapis/nodejs-firestore/issues/2420)) ([1bbca46](https://github.com/googleapis/nodejs-firestore/commit/1bbca46ff2a6ea98b52a83ff7dae6092e69b044d))
+
+## [7.11.4](https://github.com/googleapis/nodejs-firestore/compare/v7.11.3...v7.11.4) (2025-09-16)
+
+
+### Bug Fixes
+
+* Improve debug logging for the internal client pool. Added client IDs to debug log statements for client management. ([99918f1](https://github.com/googleapis/nodejs-firestore/commit/99918f1794adee706c4f2685cd3f8aea6dff895e))
+
+## [7.11.3](https://github.com/googleapis/nodejs-firestore/compare/v7.11.2...v7.11.3) (2025-07-09)
+
+
+### Bug Fixes
+
+* Improve performance of the UTF-8 string comparison logic ([#2380](https://github.com/googleapis/nodejs-firestore/issues/2380)) ([bc6a03e](https://github.com/googleapis/nodejs-firestore/commit/bc6a03e2b44e740b32676d7d0bec07feaa509b5b))
+
+## [7.11.2](https://github.com/googleapis/nodejs-firestore/compare/v7.11.1...v7.11.2) (2025-06-19)
+
+
+### Bug Fixes
+
+* Firestore Client caching stub in bad state issue ([#2365](https://github.com/googleapis/nodejs-firestore/issues/2365)) ([04ad0a4](https://github.com/googleapis/nodejs-firestore/commit/04ad0a4c0fb370db8aeae87dc6ab8bd06eafedd4))
+
+## [7.11.1](https://github.com/googleapis/nodejs-firestore/compare/v7.11.0...v7.11.1) (2025-05-02)
+
+
+### Bug Fixes
+
+* Aggregate query readtime bug ([#2331](https://github.com/googleapis/nodejs-firestore/issues/2331)) ([9ac0394](https://github.com/googleapis/nodejs-firestore/commit/9ac0394df78619bf1d6b7907a364342796a4f0fb))
+* Bump default deadline on CreateDatabase and RestoreDatabase to 2 minutes ([#2274](https://github.com/googleapis/nodejs-firestore/issues/2274)) ([d559080](https://github.com/googleapis/nodejs-firestore/commit/d559080a0f436927108ec69c2910af4e8246a8b0))
+* Close default BulkWriter upon terminate. ([#2276](https://github.com/googleapis/nodejs-firestore/issues/2276)) ([1e714a8](https://github.com/googleapis/nodejs-firestore/commit/1e714a8b7952b65872e65533cfe74d303dfabe20))
+* Correctly escape field paths with multiple backslashes or backticks ([#2259](https://github.com/googleapis/nodejs-firestore/issues/2259)) ([#2261](https://github.com/googleapis/nodejs-firestore/issues/2261)) ([7056ba7](https://github.com/googleapis/nodejs-firestore/commit/7056ba76040b9369d86c57838ef938c9d9ef73d8))
+* Do not send page size with auto-paginate. Fixes warnings in listCollections and listDocuments. ([#2336](https://github.com/googleapis/nodejs-firestore/issues/2336)) ([844b4ca](https://github.com/googleapis/nodejs-firestore/commit/844b4ca9c209e649565d122940858409d808baa6))
+* Finalize fixing typings for headers in generator ([#2287](https://github.com/googleapis/nodejs-firestore/issues/2287)) ([c6c85b6](https://github.com/googleapis/nodejs-firestore/commit/c6c85b66a25b56bd23c19285302a740b0ca85d25))
+* Prevent crashes if an inactive stream receives an error. ([#2283](https://github.com/googleapis/nodejs-firestore/issues/2283)) ([f58fe79](https://github.com/googleapis/nodejs-firestore/commit/f58fe791c7afc59087e2555f7208cdb611470d80))
+* Remove unused "long" dependency from firestore proto ([#2324](https://github.com/googleapis/nodejs-firestore/issues/2324)) ([5937b93](https://github.com/googleapis/nodejs-firestore/commit/5937b93aa1aacd2f63bf1678ec569c504cf0b186))
+* Sort document reference by long type id  ([#2257](https://github.com/googleapis/nodejs-firestore/issues/2257)) ([3fd0de9](https://github.com/googleapis/nodejs-firestore/commit/3fd0de93076adfe17aaae9e0a9b732bcae52d594))
+* Sort strings in UTF-8 encoded byte order ([#2275](https://github.com/googleapis/nodejs-firestore/issues/2275)) ([a2950e0](https://github.com/googleapis/nodejs-firestore/commit/a2950e0b6464012f0e6c5703d0d28c2175cd35a2))
+* Use lazy encoding for utf-8 encoded string comparison ([#2299](https://github.com/googleapis/nodejs-firestore/issues/2299)) ([e8777e1](https://github.com/googleapis/nodejs-firestore/commit/e8777e12db41096c3945afd3be7905c1c029493c))
+
+## [7.11.0](https://github.com/googleapis/nodejs-firestore/compare/v7.10.0...v7.11.0) (2024-12-05)
+
+
+### Features
+
+* [proto] add Database.CmekConfig and Database.cmek_config (information about CMEK enablement) ([2779896](https://github.com/googleapis/nodejs-firestore/commit/27798966c5d72616fc0cee109e1d28f693c9f5f1))
+* [proto] add Database.delete_time (the time a database was deleted, if it ever was) ([2779896](https://github.com/googleapis/nodejs-firestore/commit/27798966c5d72616fc0cee109e1d28f693c9f5f1))
+* [proto] add Database.previous_id (if a database was deleted, what ID it was using beforehand) ([2779896](https://github.com/googleapis/nodejs-firestore/commit/27798966c5d72616fc0cee109e1d28f693c9f5f1))
+* [proto] add Database.SourceInfo and Database.source_info (information about database provenance, specifically for restored databases) ([2779896](https://github.com/googleapis/nodejs-firestore/commit/27798966c5d72616fc0cee109e1d28f693c9f5f1))
+* [proto] allow specifying an encryption_config when restoring a database ([2779896](https://github.com/googleapis/nodejs-firestore/commit/27798966c5d72616fc0cee109e1d28f693c9f5f1))
+* Enable tracing via OpenTelemetry. ([#2218](https://github.com/googleapis/nodejs-firestore/issues/2218)) ([1ddb62e](https://github.com/googleapis/nodejs-firestore/commit/1ddb62ed67e93ca2c265556bb5e504d207a639a8))
+* Support `fire-admin` tag for Admin Node SDK ([#2238](https://github.com/googleapis/nodejs-firestore/issues/2238)) ([#2252](https://github.com/googleapis/nodejs-firestore/issues/2252)) ([1339dc2](https://github.com/googleapis/nodejs-firestore/commit/1339dc20e3ffc065f5f79a82baaa67deda76fb36))
+
+
+### Bug Fixes
+
+* Use correct limit when retrying a limit query stream with a cursor ([#2203](https://github.com/googleapis/nodejs-firestore/issues/2203)) ([ab94092](https://github.com/googleapis/nodejs-firestore/commit/ab94092c2375501dd2998a458fc8a449793c9e69))
+
+## [7.10.0](https://github.com/googleapis/nodejs-firestore/compare/v7.9.0...v7.10.0) (2024-09-05)
+
+
+### Features
+
+* Expose proto changes for the bulk delete api ([23ce891](https://github.com/googleapis/nodejs-firestore/commit/23ce89175ce315648ce9af3994cba0decc48ba47))
+* Expose the proto changes to support FindNearest.distance_result_field parameter and the FindNearest.distance_threshold parameter ([23ce891](https://github.com/googleapis/nodejs-firestore/commit/23ce89175ce315648ce9af3994cba0decc48ba47))
+* Return computed distance and set distance thresholds on VectorQueries ([#2090](https://github.com/googleapis/nodejs-firestore/issues/2090)) ([b5ca84f](https://github.com/googleapis/nodejs-firestore/commit/b5ca84f076ca0668e90ca3fc7dd878f732ccd956))
+
 ## [7.9.0](https://github.com/googleapis/nodejs-firestore/compare/v7.8.0...v7.9.0) (2024-06-25)
 
 

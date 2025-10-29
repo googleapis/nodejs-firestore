@@ -25,6 +25,7 @@ import {
 import {
   DocumentSnapshot,
   FieldValue,
+  FieldPath,
   Firestore,
   Query,
   Timestamp,
@@ -40,7 +41,7 @@ export function findNearestQuery(
   fieldPath: string,
   queryVector: Array<number>,
   limit: number,
-  measure: api.StructuredQuery.FindNearest.DistanceMeasure
+  measure: api.StructuredQuery.FindNearest.DistanceMeasure,
 ): api.IStructuredQuery {
   return {
     findNearest: {
@@ -86,30 +87,300 @@ describe('Vector(findNearest) query interface', () => {
 
     expect(
       queryA
-        .findNearest('embedding', [40, 41, 42], {
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [40, 41, 42],
           limit: 10,
           distanceMeasure: 'COSINE',
         })
         .isEqual(
-          queryA.findNearest('embedding', [40, 41, 42], {
+          queryA.findNearest({
+            vectorField: 'embedding',
+            queryVector: [40, 41, 42],
             distanceMeasure: 'COSINE',
             limit: 10,
-          })
-        )
+          }),
+        ),
     ).to.be.true;
     expect(
       queryA
-        .findNearest('embedding', [40, 41, 42], {
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [40, 41, 42],
+          distanceMeasure: 'EUCLIDEAN',
+          limit: 10,
+        })
+        .isEqual(
+          queryB.findNearest({
+            vectorField: 'embedding',
+            queryVector: [40, 41, 42],
+            distanceMeasure: 'EUCLIDEAN',
+            limit: 10,
+          }),
+        ),
+    ).to.be.true;
+    expect(
+      queryA
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [40, 41, 42],
+          distanceMeasure: 'EUCLIDEAN',
+          limit: 10,
+          distanceThreshold: 0.125,
+        })
+        .isEqual(
+          queryB.findNearest({
+            vectorField: 'embedding',
+            queryVector: [40, 41, 42],
+            distanceMeasure: 'EUCLIDEAN',
+            limit: 10,
+            distanceThreshold: 0.125,
+          }),
+        ),
+    ).to.be.true;
+    expect(
+      queryA
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [40, 41, 42],
+          distanceMeasure: 'EUCLIDEAN',
+          limit: 10,
+          distanceThreshold: 0.125,
+          distanceResultField: new FieldPath('foo'),
+        })
+        .isEqual(
+          queryB.findNearest({
+            vectorField: 'embedding',
+            queryVector: [40, 41, 42],
+            distanceMeasure: 'EUCLIDEAN',
+            limit: 10,
+            distanceThreshold: 0.125,
+            distanceResultField: new FieldPath('foo'),
+          }),
+        ),
+    ).to.be.true;
+    expect(
+      queryA
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [40, 41, 42],
+          distanceMeasure: 'EUCLIDEAN',
+          limit: 10,
+          distanceResultField: 'distance',
+        })
+        .isEqual(
+          queryB.findNearest({
+            vectorField: 'embedding',
+            queryVector: [40, 41, 42],
+            distanceMeasure: 'EUCLIDEAN',
+            limit: 10,
+            distanceResultField: new FieldPath('distance'),
+          }),
+        ),
+    ).to.be.true;
+
+    expect(
+      queryA
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [40, 41, 42],
           limit: 10,
           distanceMeasure: 'COSINE',
         })
         .isEqual(
-          queryB.findNearest('embedding', [40, 41, 42], {
+          firestore.collection('collectionId').findNearest({
+            vectorField: 'embedding',
+            queryVector: [40, 41, 42],
             distanceMeasure: 'COSINE',
             limit: 10,
-          })
-        )
-    ).to.be.true;
+          }),
+        ),
+    ).to.be.false;
+    expect(
+      queryA
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [40, 41, 42],
+          limit: 10,
+          distanceMeasure: 'COSINE',
+        })
+        .isEqual(
+          queryB.findNearest({
+            vectorField: 'embedding',
+            queryVector: [40, 42],
+            distanceMeasure: 'COSINE',
+            limit: 10,
+          }),
+        ),
+    ).to.be.false;
+    expect(
+      queryA
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [40, 41, 42],
+          limit: 10,
+          distanceMeasure: 'COSINE',
+        })
+        .isEqual(
+          queryB.findNearest({
+            vectorField: 'embedding',
+            queryVector: [40, 41, 42],
+            distanceMeasure: 'COSINE',
+            limit: 1000,
+          }),
+        ),
+    ).to.be.false;
+    expect(
+      queryA
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [40, 41, 42],
+          limit: 10,
+          distanceMeasure: 'COSINE',
+        })
+        .isEqual(
+          queryB.findNearest({
+            vectorField: 'embedding',
+            queryVector: [40, 42],
+            distanceMeasure: 'EUCLIDEAN',
+            limit: 10,
+          }),
+        ),
+    ).to.be.false;
+    expect(
+      queryA
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [40, 41, 42],
+          distanceMeasure: 'EUCLIDEAN',
+          limit: 10,
+          distanceThreshold: 1.125,
+        })
+        .isEqual(
+          queryB.findNearest({
+            vectorField: 'embedding',
+            queryVector: [40, 41, 42],
+            distanceMeasure: 'EUCLIDEAN',
+            limit: 10,
+            distanceThreshold: 0.125,
+          }),
+        ),
+    ).to.be.false;
+    expect(
+      queryA
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [40, 41, 42],
+          distanceMeasure: 'EUCLIDEAN',
+          limit: 10,
+        })
+        .isEqual(
+          queryB.findNearest({
+            vectorField: 'embedding',
+            queryVector: [40, 41, 42],
+            distanceMeasure: 'EUCLIDEAN',
+            limit: 10,
+            distanceThreshold: 1,
+          }),
+        ),
+    ).to.be.false;
+    expect(
+      queryA
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [40, 41, 42],
+          distanceMeasure: 'EUCLIDEAN',
+          limit: 10,
+          distanceThreshold: 1,
+        })
+        .isEqual(
+          queryB.findNearest({
+            vectorField: 'embedding',
+            queryVector: [40, 41, 42],
+            distanceMeasure: 'EUCLIDEAN',
+            limit: 10,
+          }),
+        ),
+    ).to.be.false;
+    expect(
+      queryA
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [40, 41, 42],
+          distanceMeasure: 'EUCLIDEAN',
+          limit: 10,
+          distanceResultField: 'distance',
+        })
+        .isEqual(
+          queryB.findNearest({
+            vectorField: 'embedding',
+            queryVector: [40, 41, 42],
+            distanceMeasure: 'EUCLIDEAN',
+            limit: 10,
+            distanceResultField: 'result',
+          }),
+        ),
+    ).to.be.false;
+    expect(
+      queryA
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [40, 41, 42],
+          distanceMeasure: 'EUCLIDEAN',
+          limit: 10,
+          distanceResultField: new FieldPath('bar'),
+        })
+        .isEqual(
+          queryB.findNearest({
+            vectorField: 'embedding',
+            queryVector: [40, 41, 42],
+            distanceMeasure: 'EUCLIDEAN',
+            limit: 10,
+            distanceResultField: new FieldPath('foo'),
+          }),
+        ),
+    ).to.be.false;
+    expect(
+      queryA
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [40, 41, 42],
+          distanceMeasure: 'EUCLIDEAN',
+          limit: 10,
+        })
+        .isEqual(
+          queryB.findNearest({
+            vectorField: 'embedding',
+            queryVector: [40, 41, 42],
+            distanceMeasure: 'EUCLIDEAN',
+            limit: 10,
+            distanceResultField: new FieldPath('foo'),
+          }),
+        ),
+    ).to.be.false;
+    expect(
+      queryA
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [40, 41, 42],
+          distanceMeasure: 'EUCLIDEAN',
+          limit: 10,
+          distanceResultField: 'result',
+        })
+        .isEqual(
+          queryB.findNearest({
+            vectorField: 'embedding',
+            queryVector: [40, 41, 42],
+            distanceMeasure: 'EUCLIDEAN',
+            limit: 10,
+          }),
+        ),
+    ).to.be.false;
+  });
+
+  it('generates equal vector queries with deprecated API', () => {
+    const queryA = firestore.collection('collectionId').where('foo', '==', 42);
+    const queryB = firestore.collection('collectionId').where('foo', '==', 42);
 
     expect(
       queryA
@@ -118,53 +389,29 @@ describe('Vector(findNearest) query interface', () => {
           distanceMeasure: 'COSINE',
         })
         .isEqual(
-          firestore
-            .collection('collectionId')
-            .findNearest('embedding', [40, 41, 42], {
-              distanceMeasure: 'COSINE',
-              limit: 10,
-            })
-        )
-    ).to.be.false;
-    expect(
-      queryA
-        .findNearest('embedding', [40, 41, 42], {
-          limit: 10,
-          distanceMeasure: 'COSINE',
-        })
-        .isEqual(
-          queryB.findNearest('embedding', [40, 42], {
+          queryB.findNearest({
+            vectorField: 'embedding',
+            queryVector: [40, 41, 42],
             distanceMeasure: 'COSINE',
             limit: 10,
-          })
-        )
-    ).to.be.false;
+          }),
+        ),
+    ).to.be.true;
     expect(
       queryA
-        .findNearest('embedding', [40, 41, 42], {
-          limit: 10,
-          distanceMeasure: 'COSINE',
+        .findNearest('foo', [40, 41, 42, 43], {
+          limit: 1,
+          distanceMeasure: 'DOT_PRODUCT',
         })
         .isEqual(
-          queryB.findNearest('embedding', [40, 42], {
-            distanceMeasure: 'COSINE',
-            limit: 1000,
-          })
-        )
-    ).to.be.false;
-    expect(
-      queryA
-        .findNearest('embedding', [40, 41, 42], {
-          limit: 10,
-          distanceMeasure: 'COSINE',
-        })
-        .isEqual(
-          queryB.findNearest('embedding', [40, 42], {
-            distanceMeasure: 'EUCLIDEAN',
-            limit: 1000,
-          })
-        )
-    ).to.be.false;
+          queryB.findNearest({
+            vectorField: 'foo',
+            queryVector: [40, 41, 42, 43],
+            distanceMeasure: 'DOT_PRODUCT',
+            limit: 1,
+          }),
+        ),
+    ).to.be.true;
   });
 
   it('generates proto', async () => {
@@ -173,7 +420,7 @@ describe('Vector(findNearest) query interface', () => {
         queryEquals(
           request,
           fieldFiltersQuery('foo', 'EQUAL', 'bar'),
-          findNearestQuery('embedding', [3, 4, 5], 100, 'COSINE')
+          findNearestQuery('embedding', [3, 4, 5], 100, 'COSINE'),
         );
         return emptyQueryStream();
       },
@@ -193,6 +440,26 @@ describe('Vector(findNearest) query interface', () => {
   });
 
   it('validates inputs', async () => {
+    const query: Query = firestore.collection('collectionId');
+    expect(() => {
+      query.findNearest({
+        vectorField: 'embedding',
+        queryVector: [],
+        limit: 10,
+        distanceMeasure: 'EUCLIDEAN',
+      });
+    }).to.throw('not a valid vector size');
+    expect(() => {
+      query.findNearest({
+        vectorField: 'embedding',
+        queryVector: [10, 1000],
+        limit: 0,
+        distanceMeasure: 'EUCLIDEAN',
+      });
+    }).to.throw('not a valid positive limit number');
+  });
+
+  it('validates inputs - preview (deprecated) API', async () => {
     const query: Query = firestore.collection('collectionId');
     expect(() => {
       query.findNearest('embedding', [], {
@@ -219,7 +486,7 @@ describe('Vector(findNearest) query interface', () => {
         runQuery: request => {
           queryEquals(
             request,
-            findNearestQuery('embedding', [1], 2, distanceMeasure)
+            findNearestQuery('embedding', [1], 2, distanceMeasure),
           );
           return stream(result('first'), result('second'));
         },
@@ -227,12 +494,12 @@ describe('Vector(findNearest) query interface', () => {
 
       return createInstance(overrides).then(firestoreInstance => {
         firestore = firestoreInstance;
-        const query = firestore
-          .collection('collectionId')
-          .findNearest('embedding', [1], {
-            limit: 2,
-            distanceMeasure: distanceMeasure,
-          });
+        const query = firestore.collection('collectionId').findNearest({
+          vectorField: 'embedding',
+          queryVector: [1],
+          limit: 2,
+          distanceMeasure: distanceMeasure,
+        });
         return query.get().then(results => {
           expect(results.size).to.equal(2);
           expect(results.empty).to.be.false;
@@ -268,9 +535,12 @@ describe('Vector(findNearest) query interface', () => {
     let counter = 0;
     return createInstance(overrides).then(firestoreInstance => {
       firestore = firestoreInstance;
-      const query = firestore
-        .collection('collectionId')
-        .findNearest('vector', [1], {limit: 10, distanceMeasure: 'COSINE'});
+      const query = firestore.collection('collectionId').findNearest({
+        vectorField: 'vector',
+        queryVector: [1],
+        limit: 10,
+        distanceMeasure: 'COSINE',
+      });
       return query.get().then(results => {
         expect(++counter).to.equal(1);
         expect(results.size).to.equal(2);
@@ -285,12 +555,12 @@ describe('Vector(findNearest) query interface', () => {
 
   it('handles stream exception at initialization', async () => {
     let attempts = 0;
-    const query = firestore
-      .collection('collectionId')
-      .findNearest('embedding', [1], {
-        limit: 100,
-        distanceMeasure: 'EUCLIDEAN',
-      });
+    const query = firestore.collection('collectionId').findNearest({
+      vectorField: 'embedding',
+      queryVector: [1],
+      limit: 100,
+      distanceMeasure: 'EUCLIDEAN',
+    });
 
     query._queryUtil._stream = () => {
       ++attempts;
@@ -322,7 +592,12 @@ describe('Vector(findNearest) query interface', () => {
       firestore = firestoreInstance;
       return firestore
         .collection('collectionId')
-        .findNearest('embedding', [1], {limit: 10, distanceMeasure: 'COSINE'})
+        .findNearest({
+          vectorField: 'embedding',
+          queryVector: [1],
+          limit: 10,
+          distanceMeasure: 'COSINE',
+        })
         .get()
         .then(() => {
           throw new Error('Unexpected success in Promise');

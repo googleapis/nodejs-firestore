@@ -56,9 +56,7 @@ export class VectorQuery<
    */
   constructor(
     private readonly _query: Query<AppModelType, DbModelType>,
-    private readonly vectorField: string | firestore.FieldPath,
-    private readonly queryVector: firestore.VectorValue | Array<number>,
-    private readonly options: VectorQueryOptions
+    private readonly _options: VectorQueryOptions,
   ) {
     this._queryUtil = new QueryUtil<
       AppModelType,
@@ -79,9 +77,21 @@ export class VectorQuery<
    * @internal
    */
   private get _rawVectorField(): string {
-    return typeof this.vectorField === 'string'
-      ? this.vectorField
-      : this.vectorField.toString();
+    return typeof this._options.vectorField === 'string'
+      ? this._options.vectorField
+      : this._options.vectorField.toString();
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  private get _rawDistanceResultField(): string | undefined {
+    if (typeof this._options.distanceResultField === 'undefined') return;
+
+    return typeof this._options.distanceResultField === 'string'
+      ? this._options.distanceResultField
+      : this._options.distanceResultField.toString();
   }
 
   /**
@@ -89,9 +99,9 @@ export class VectorQuery<
    * @internal
    */
   private get _rawQueryVector(): Array<number> {
-    return Array.isArray(this.queryVector)
-      ? this.queryVector
-      : this.queryVector.toArray();
+    return Array.isArray(this._options.queryVector)
+      ? this._options.queryVector
+      : this._options.queryVector.toArray();
   }
 
   /**
@@ -103,7 +113,7 @@ export class VectorQuery<
    *  from the query execution (if any), and the query results (if any).
    */
   async explain(
-    options?: firestore.ExplainOptions
+    options?: firestore.ExplainOptions,
   ): Promise<ExplainResults<VectorQuerySnapshot<AppModelType, DbModelType>>> {
     if (options === undefined) {
       options = {};
@@ -129,14 +139,14 @@ export class VectorQuery<
   }
 
   _getResponse(
-    explainOptions?: firestore.ExplainOptions
+    explainOptions?: firestore.ExplainOptions,
   ): Promise<QueryResponse<VectorQuerySnapshot<AppModelType, DbModelType>>> {
     return this._queryUtil._getResponse(
       this,
       /*transactionOrReadTime*/ undefined,
       // VectorQuery cannot be retried with cursors as they do not support cursors yet.
       /*retryWithCursor*/ false,
-      explainOptions
+      explainOptions,
     );
   }
 
@@ -152,12 +162,12 @@ export class VectorQuery<
     return this._queryUtil._stream(
       this,
       transactionId,
-      /*retryWithCursor*/ false
+      /*retryWithCursor*/ false,
     );
   }
 
   /**
-   * Internal method for serializing a query to its RunAggregationQuery proto
+   * Internal method for serializing a query to its proto
    * representation with an optional transaction id.
    *
    * @private
@@ -166,21 +176,29 @@ export class VectorQuery<
    */
   toProto(
     transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions,
-    explainOptions?: firestore.ExplainOptions
+    explainOptions?: firestore.ExplainOptions,
   ): api.IRunQueryRequest {
     const queryProto = this._query.toProto(transactionOrReadTime);
 
-    const queryVector = Array.isArray(this.queryVector)
-      ? new VectorValue(this.queryVector)
-      : (this.queryVector as VectorValue);
+    const queryVector = Array.isArray(this._options.queryVector)
+      ? new VectorValue(this._options.queryVector)
+      : (this._options.queryVector as VectorValue);
 
     queryProto.structuredQuery!.findNearest = {
-      limit: {value: this.options.limit},
-      distanceMeasure: this.options.distanceMeasure,
+      limit: {value: this._options.limit},
+      distanceMeasure: this._options.distanceMeasure,
       vectorField: {
-        fieldPath: FieldPath.fromArgument(this.vectorField).formattedName,
+        fieldPath: FieldPath.fromArgument(this._options.vectorField)
+          .formattedName,
       },
       queryVector: queryVector._toProto(this._query._serializer),
+      distanceResultField: this._options?.distanceResultField
+        ? FieldPath.fromArgument(this._options.distanceResultField!)
+            .formattedName
+        : undefined,
+      distanceThreshold: this._options?.distanceThreshold
+        ? {value: this._options?.distanceThreshold}
+        : undefined,
     };
 
     if (explainOptions) {
@@ -200,14 +218,14 @@ export class VectorQuery<
     readTime: Timestamp,
     size: number,
     docs: () => Array<QueryDocumentSnapshot<AppModelType, DbModelType>>,
-    changes: () => Array<DocumentChange<AppModelType, DbModelType>>
+    changes: () => Array<DocumentChange<AppModelType, DbModelType>>,
   ): VectorQuerySnapshot<AppModelType, DbModelType> {
     return new VectorQuerySnapshot<AppModelType, DbModelType>(
       this,
       readTime,
       size,
       docs,
-      changes
+      changes,
     );
   }
 
@@ -224,7 +242,7 @@ export class VectorQuery<
     ...fieldValuesOrDocumentSnapshot: Array<unknown>
   ): VectorQuery<AppModelType, DbModelType> {
     throw new Error(
-      'Unimplemented: Vector query does not support cursors yet.'
+      'Unimplemented: Vector query does not support cursors yet.',
     );
   }
 
@@ -253,7 +271,10 @@ export class VectorQuery<
     return (
       this._rawVectorField === other._rawVectorField &&
       isPrimitiveArrayEqual(this._rawQueryVector, other._rawQueryVector) &&
-      this.options.isEqual(other.options)
+      this._options.limit === other._options.limit &&
+      this._options.distanceMeasure === other._options.distanceMeasure &&
+      this._options.distanceThreshold === other._options.distanceThreshold &&
+      this._rawDistanceResultField === other._rawDistanceResultField
     );
   }
 }

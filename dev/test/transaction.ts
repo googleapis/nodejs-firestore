@@ -79,7 +79,7 @@ interface TransactionStep {
 function commit(
   transaction: Uint8Array | string | undefined,
   writes?: api.IWrite[],
-  error?: Error
+  error?: Error,
 ): TransactionStep {
   const proto: api.ICommitRequest = {
     database: DATABASE_ROOT,
@@ -117,7 +117,7 @@ function commit(
 
 function rollback(
   transaction: Uint8Array | string,
-  error?: Error
+  error?: Error,
 ): TransactionStep {
   const proto = {
     database: DATABASE_ROOT,
@@ -143,7 +143,7 @@ function getAll(
     };
     readTime?: Timestamp;
     error?: Error;
-  }
+  },
 ): TransactionStep {
   const request: api.IBatchGetDocumentsRequest = {
     database: DATABASE_ROOT,
@@ -156,7 +156,7 @@ function getAll(
       readWrite: options.newTransaction.readWrite.prevTransactionId
         ? {
             retryTransaction: transactionId(
-              options.newTransaction.readWrite.prevTransactionId
+              options.newTransaction.readWrite.prevTransactionId,
             ),
           }
         : {},
@@ -189,7 +189,7 @@ function getAll(
       ? options.newTransaction.readWrite.prevTransactionId.slice(0, -1) +
         String(
           Number(options.newTransaction.readWrite.prevTransactionId.slice(-1)) +
-            1
+            1,
         )
       : 'foo1';
     setImmediate(() => {
@@ -290,7 +290,7 @@ function query(options?: {
       readWrite: options.newTransaction.readWrite.prevTransactionId
         ? {
             retryTransaction: transactionId(
-              options.newTransaction.readWrite.prevTransactionId
+              options.newTransaction.readWrite.prevTransactionId,
             ),
           }
         : {},
@@ -310,7 +310,7 @@ function query(options?: {
       ? options.newTransaction.readWrite.prevTransactionId.slice(0, -1) +
         String(
           Number(options.newTransaction.readWrite.prevTransactionId.slice(-1)) +
-            1
+            1,
         )
       : 'foo1';
     setImmediate(() => {
@@ -360,7 +360,7 @@ function runTransaction<T>(
   transactionOptions: ReadWriteTransactionOptions | ReadOnlyTransactionOptions,
   transactionCallback: (
     transaction: Transaction,
-    docRef: DocumentReference
+    docRef: DocumentReference,
   ) => Promise<T>,
   ...expectedRequests: TransactionStep[]
 ) {
@@ -432,7 +432,7 @@ function runTransaction<T>(
       setTimeoutHandler(setTimeout);
       expect(expectedRequests.length).to.equal(
         0,
-        'Missing requests: ' + expectedRequests.map(r => r.type).join(', ')
+        'Missing requests: ' + expectedRequests.map(r => r.type).join(', '),
       );
     }
   });
@@ -478,7 +478,7 @@ describe('failed transactions', () => {
     // a no-op and will not retry
     const transactionFunction = async (
       trans: Transaction,
-      ref: DocumentReference
+      ref: DocumentReference,
     ) => {
       await trans.get(ref);
     };
@@ -498,7 +498,7 @@ describe('failed transactions', () => {
           getDocument({
             newTransaction: {readWrite: {prevTransactionId: 'foo1'}},
           }),
-          commit('foo2')
+          commit('foo2'),
         );
       } else {
         await expect(
@@ -507,8 +507,8 @@ describe('failed transactions', () => {
             transactionFunction,
             getDocument({newTransaction: {readWrite: {}}}),
             commit('foo1', undefined, serverError),
-            rollback('foo1')
-          )
+            rollback('foo1'),
+          ),
         ).to.eventually.be.rejected;
       }
     }
@@ -519,13 +519,13 @@ describe('failed transactions', () => {
     // a no-op and will not retry
     const transactionFunction = async (
       trans: Transaction,
-      ref: DocumentReference
+      ref: DocumentReference,
     ) => {
       await trans.get(ref);
     };
 
     const serverError = new GoogleError(
-      'The referenced transaction has expired or is no longer valid.'
+      'The referenced transaction has expired or is no longer valid.',
     );
     serverError.code = Status.INVALID_ARGUMENT;
 
@@ -537,14 +537,14 @@ describe('failed transactions', () => {
       rollback('foo1'),
       backoff(),
       getDocument({newTransaction: {readWrite: {prevTransactionId: 'foo1'}}}),
-      commit('foo2')
+      commit('foo2'),
     );
   });
 
   it('retries runQuery based on error code', async () => {
     const transactionFunction = (
       transaction: Transaction,
-      docRef: DocumentReference
+      docRef: DocumentReference,
     ) => {
       const query = docRef.parent.where('foo', '==', 'bar');
       return transaction.get(query);
@@ -562,16 +562,16 @@ describe('failed transactions', () => {
           // No rollback because the lazy-start operation failed
           backoff(),
           query({newTransaction: {readWrite: {}}}),
-          commit('foo1')
+          commit('foo1'),
         );
       } else {
         await expect(
           runTransaction(
             /* transactionOptions= */ {},
             transactionFunction,
-            query({newTransaction: {readWrite: {}}, error: serverError})
+            query({newTransaction: {readWrite: {}}, error: serverError}),
             // No rollback because the lazy-start operation failed
-          )
+          ),
         ).to.eventually.be.rejected;
       }
     }
@@ -580,7 +580,7 @@ describe('failed transactions', () => {
   it('retries batchGetDocuments based on error code', async () => {
     const transactionFunction = (
       transaction: Transaction,
-      docRef: DocumentReference
+      docRef: DocumentReference,
     ) => {
       return transaction.get(docRef);
     };
@@ -597,16 +597,16 @@ describe('failed transactions', () => {
           // No rollback because the lazy-start operation failed
           backoff(),
           getDocument({newTransaction: {readWrite: {}}}),
-          commit('foo1')
+          commit('foo1'),
         );
       } else {
         await expect(
           runTransaction(
             /* transactionOptions= */ {},
             transactionFunction,
-            getDocument({newTransaction: {readWrite: {}}, error: serverError})
+            getDocument({newTransaction: {readWrite: {}}, error: serverError}),
             // No rollback because the lazy-start operation failed
-          )
+          ),
         ).to.eventually.be.rejected;
       }
     }
@@ -615,7 +615,7 @@ describe('failed transactions', () => {
   it('retries rollback based on error code', async () => {
     const transactionFunction = async (
       trans: Transaction,
-      doc: DocumentReference
+      doc: DocumentReference,
     ) => {
       await trans.get(doc);
     };
@@ -635,7 +635,7 @@ describe('failed transactions', () => {
           getDocument({
             newTransaction: {readWrite: {prevTransactionId: 'foo1'}},
           }),
-          commit('foo2')
+          commit('foo2'),
         );
       } else {
         await expect(
@@ -644,8 +644,8 @@ describe('failed transactions', () => {
             transactionFunction,
             getDocument({newTransaction: {readWrite: {}}}),
             commit('foo1', /* writes=*/ undefined, serverError),
-            rollback('foo1', serverError)
-          )
+            rollback('foo1', serverError),
+          ),
         ).to.eventually.be.rejected;
       }
     }
@@ -658,7 +658,7 @@ describe('failed transactions', () => {
 
     return createInstance(overrides).then(firestore => {
       expect(() => (firestore as InvalidApiUsage).runTransaction()).to.throw(
-        'Value for argument "updateFunction" is not a valid function.'
+        'Value for argument "updateFunction" is not a valid function.',
       );
     });
   });
@@ -672,15 +672,15 @@ describe('failed transactions', () => {
       expect(() =>
         firestore.runTransaction(() => Promise.resolve(), {
           maxAttempts: 'foo' as InvalidApiUsage,
-        })
+        }),
       ).to.throw(
-        'Value for argument "transactionOptions.maxAttempts" is not a valid integer.'
+        'Value for argument "transactionOptions.maxAttempts" is not a valid integer.',
       );
 
       expect(() =>
-        firestore.runTransaction(() => Promise.resolve(), {maxAttempts: 0})
+        firestore.runTransaction(() => Promise.resolve(), {maxAttempts: 0}),
       ).to.throw(
-        'Value for argument "transactionOptions.maxAttempts" must be within [1, Infinity] inclusive, but was: 0'
+        'Value for argument "transactionOptions.maxAttempts" must be within [1, Infinity] inclusive, but was: 0',
       );
     });
   });
@@ -689,10 +689,10 @@ describe('failed transactions', () => {
     return expect(
       runTransaction(
         /* transactionOptions= */ {},
-        (() => {}) as InvalidApiUsage
-      )
+        (() => {}) as InvalidApiUsage,
+      ),
     ).to.eventually.be.rejectedWith(
-      'You must return a Promise in your transaction()-callback.'
+      'You must return a Promise in your transaction()-callback.',
     );
   });
 
@@ -707,7 +707,7 @@ describe('failed transactions', () => {
           // Need to perform a read or write otherwise transaction is a no-op
           // with zero requests
           await trans.get(firestore.doc('collectionId/documentId'));
-        })
+        }),
       ).to.eventually.be.rejectedWith('Expected exception');
     });
   });
@@ -716,7 +716,7 @@ describe('failed transactions', () => {
     return expect(
       runTransaction(/* transactionOptions= */ {}, () => {
         return Promise.reject('request exception');
-      })
+      }),
     ).to.eventually.be.rejectedWith('request exception');
   });
 
@@ -746,8 +746,8 @@ describe('failed transactions', () => {
         backoff(),
         getDocument({newTransaction: {readWrite: {prevTransactionId: 'foo4'}}}),
         commit('foo5', [], new Error('Final exception')),
-        rollback('foo5')
-      )
+        rollback('foo5'),
+      ),
     ).to.eventually.be.rejectedWith('Final exception');
   });
 
@@ -763,7 +763,7 @@ describe('failed transactions', () => {
       rollback('foo1'),
       backoff(/* maxDelay= */ true),
       getDocument({newTransaction: {readWrite: {prevTransactionId: 'foo1'}}}),
-      commit('foo2')
+      commit('foo2'),
     );
   });
 });
@@ -778,7 +778,7 @@ describe('transaction operations', () => {
         });
       },
       getDocument({newTransaction: {readWrite: {}}}),
-      commit('foo1')
+      commit('foo1'),
     );
   });
 
@@ -787,15 +787,15 @@ describe('transaction operations', () => {
       /* transactionOptions= */ {},
       (transaction: InvalidApiUsage) => {
         expect(() => transaction.get()).to.throw(
-          'Value for argument "refOrQuery" must be a DocumentReference, Query, or AggregateQuery.'
+          'Value for argument "refOrQuery" must be a DocumentReference, Query, or AggregateQuery.',
         );
 
         expect(() => transaction.get('foo')).to.throw(
-          'Value for argument "refOrQuery" must be a DocumentReference, Query, or AggregateQuery.'
+          'Value for argument "refOrQuery" must be a DocumentReference, Query, or AggregateQuery.',
         );
 
         return Promise.resolve();
-      }
+      },
     );
   });
 
@@ -804,9 +804,9 @@ describe('transaction operations', () => {
       runTransaction(/* transactionOptions= */ {}, (transaction, docRef) => {
         transaction.set(docRef, {foo: 'bar'});
         return transaction.get(docRef);
-      })
+      }),
     ).to.eventually.be.rejectedWith(
-      'Firestore transactions require all reads to be executed before all writes.'
+      'Firestore transactions require all reads to be executed before all writes.',
     );
   });
 
@@ -816,10 +816,10 @@ describe('transaction operations', () => {
         /* transactionOptions= */ {readOnly: true},
         async (transaction, docRef) => {
           transaction.set(docRef, {foo: 'bar'});
-        }
-      )
+        },
+      ),
     ).to.eventually.be.rejectedWith(
-      'Firestore read-only transactions cannot execute writes.'
+      'Firestore read-only transactions cannot execute writes.',
     );
   });
 
@@ -832,10 +832,10 @@ describe('transaction operations', () => {
         },
         async (transaction, docRef) => {
           transaction.set(docRef, {foo: 'bar'});
-        }
-      )
+        },
+      ),
     ).to.eventually.be.rejectedWith(
-      'Firestore read-only transactions cannot execute writes.'
+      'Firestore read-only transactions cannot execute writes.',
     );
   });
 
@@ -849,7 +849,7 @@ describe('transaction operations', () => {
         });
       },
       query({newTransaction: {readWrite: {}}}),
-      commit('foo1')
+      commit('foo1'),
     );
   });
 
@@ -857,7 +857,7 @@ describe('transaction operations', () => {
     return runTransaction(
       {readOnly: true},
       (transaction, docRef) => transaction.get(docRef),
-      getDocument({newTransaction: {readOnly: {}}})
+      getDocument({newTransaction: {readOnly: {}}}),
     );
   });
 
@@ -868,7 +868,7 @@ describe('transaction operations', () => {
         readTime: Timestamp.fromMillis(1),
       },
       (transaction, docRef) => transaction.get(docRef),
-      getDocument({readTime: Timestamp.fromMillis(1)})
+      getDocument({readTime: Timestamp.fromMillis(1)}),
     );
   });
 
@@ -884,7 +884,7 @@ describe('transaction operations', () => {
           expect(results.docs[0].id).to.equal('documentId');
         });
       },
-      query({readTime: Timestamp.fromMillis(2)})
+      query({readTime: Timestamp.fromMillis(2)}),
     );
   });
 
@@ -904,7 +904,7 @@ describe('transaction operations', () => {
       getAll(['firstDocument', 'secondDocument'], {
         newTransaction: {readWrite: {}},
       }),
-      commit('foo1')
+      commit('foo1'),
     );
   });
 
@@ -922,7 +922,7 @@ describe('transaction operations', () => {
         newTransaction: {readWrite: {}},
         fieldMask: ['a.b', '`a.b`'],
       }),
-      commit('foo1')
+      commit('foo1'),
     );
   });
 
@@ -931,9 +931,9 @@ describe('transaction operations', () => {
       runTransaction(/* transactionOptions= */ {}, (transaction, docRef) => {
         transaction.set(docRef, {foo: 'bar'});
         return transaction.getAll(docRef);
-      })
+      }),
     ).to.eventually.be.rejectedWith(
-      'Firestore transactions require all reads to be executed before all writes.'
+      'Firestore transactions require all reads to be executed before all writes.',
     );
   });
 
@@ -972,7 +972,7 @@ describe('transaction operations', () => {
       query({transactionId: 'foo1'}),
       getDocument({transactionId: 'foo1', document: 'thirdDocument'}),
       query({transactionId: 'foo1'}),
-      commit('foo1')
+      commit('foo1'),
     );
   });
 
@@ -1010,7 +1010,7 @@ describe('transaction operations', () => {
       getDocument({transactionId: 'foo1', document: 'secondDocument'}),
       query({transactionId: 'foo1'}),
       getDocument({transactionId: 'foo1', document: 'thirdDocument'}),
-      query({transactionId: 'foo1'})
+      query({transactionId: 'foo1'}),
     );
   });
 
@@ -1031,7 +1031,7 @@ describe('transaction operations', () => {
         transaction.create(docRef, {});
         return Promise.resolve();
       },
-      commit(undefined, [create])
+      commit(undefined, [create]),
     );
   });
 
@@ -1067,7 +1067,7 @@ describe('transaction operations', () => {
         transaction.update(docRef, new Firestore.FieldPath('a', 'b'), 'c');
         return Promise.resolve();
       },
-      commit(undefined, [update, update, update])
+      commit(undefined, [update, update, update]),
     );
   });
 
@@ -1089,7 +1089,7 @@ describe('transaction operations', () => {
         transaction.set(docRef, {'a.b': 'c'});
         return Promise.resolve();
       },
-      commit(undefined, [set])
+      commit(undefined, [set]),
     );
   });
 
@@ -1114,7 +1114,7 @@ describe('transaction operations', () => {
         transaction.set(docRef, {'a.b': 'c'}, {merge: true});
         return Promise.resolve();
       },
-      commit(undefined, [set])
+      commit(undefined, [set]),
     );
   });
 
@@ -1142,7 +1142,7 @@ describe('transaction operations', () => {
         });
         return Promise.resolve();
       },
-      commit(undefined, [set])
+      commit(undefined, [set]),
     );
   });
 
@@ -1170,11 +1170,11 @@ describe('transaction operations', () => {
           {title: 'story', author: 'person'} as Partial<Post>,
           {
             mergeFields: ['title'],
-          }
+          },
         );
         return Promise.resolve();
       },
-      commit(undefined, [set])
+      commit(undefined, [set]),
     );
   });
 
@@ -1189,7 +1189,7 @@ describe('transaction operations', () => {
         transaction.delete(docRef);
         return Promise.resolve();
       },
-      commit(undefined, [remove])
+      commit(undefined, [remove]),
     );
   });
 
@@ -1211,7 +1211,7 @@ describe('transaction operations', () => {
         transaction.delete(docRef).set(docRef, {});
         return Promise.resolve();
       },
-      commit(undefined, [remove, set])
+      commit(undefined, [remove, set]),
     );
   });
 });

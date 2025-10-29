@@ -49,7 +49,7 @@ export class FieldFilterInternal extends FilterInternal {
     private readonly serializer: Serializer,
     readonly field: FieldPath,
     private readonly op: api.StructuredQuery.FieldFilter.Operator,
-    private readonly value: unknown
+    private readonly value: unknown,
   ) {
     super();
   }

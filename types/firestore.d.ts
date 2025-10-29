@@ -20,6 +20,7 @@
 
 // Declare a global (ambient) namespace
 // (used when not using import statement, but just script include).
+
 declare namespace FirebaseFirestore {
   /** Alias for `any` but used where a Firestore field value would be provided. */
   export type DocumentFieldValue = any;
@@ -343,7 +344,7 @@ declare namespace FirebaseFirestore {
      * as `FieldValue.delete()` to be used as property values.
      */
     toFirestore(
-      modelObject: WithFieldValue<AppModelType>
+      modelObject: WithFieldValue<AppModelType>,
     ): WithFieldValue<DbModelType>;
 
     /**
@@ -361,7 +362,7 @@ declare namespace FirebaseFirestore {
      */
     toFirestore(
       modelObject: PartialWithFieldValue<AppModelType>,
-      options: SetOptions
+      options: SetOptions,
     ): PartialWithFieldValue<DbModelType>;
 
     /**
@@ -460,7 +461,30 @@ declare namespace FirebaseFirestore {
      */
     preferRest?: boolean;
 
+    /**
+     * Settings related to telemetry collection by this client.
+     * @beta
+     */
+    openTelemetry?: FirestoreOpenTelemetryOptions;
+
     [key: string]: any; // Accept other properties, such as GRPC settings.
+  }
+
+  /**
+   * Options to configure telemetry collection.
+   * This is a 'beta' interface and may change in backwards incompatible ways.
+   * @beta
+   */
+  export interface FirestoreOpenTelemetryOptions {
+    /**
+     * The OpenTelemetry TracerProvider instance that the SDK should use to
+     * create trace spans. If not provided, the SDK will use the Global TracerProvider.
+     *
+     * Even if a Global TracerProvider has been registered, users can still
+     * disable this client's span creation by passing in a "no-op" tracer provider
+     * here, or by setting the `FIRESTORE_ENABLE_TRACING` environment variable to `OFF` or `FALSE`.
+     */
+    tracerProvider?: any;
   }
 
   /** Options to configure a read-only transaction. */
@@ -599,7 +623,7 @@ declare namespace FirebaseFirestore {
      */
     recursiveDelete(
       ref: CollectionReference<any, any> | DocumentReference<any, any>,
-      bulkWriter?: BulkWriter
+      bulkWriter?: BulkWriter,
     ): Promise<void>;
 
     /**
@@ -659,7 +683,7 @@ declare namespace FirebaseFirestore {
       updateFunction: (transaction: Transaction) => Promise<T>,
       transactionOptions?:
         | ReadWriteTransactionOptions
-        | ReadOnlyTransactionOptions
+        | ReadOnlyTransactionOptions,
     ): Promise<T>;
 
     /**
@@ -747,7 +771,7 @@ declare namespace FirebaseFirestore {
      * @return A QuerySnapshot for the retrieved data.
      */
     get<AppModelType, DbModelType extends DocumentData>(
-      query: Query<AppModelType, DbModelType>
+      query: Query<AppModelType, DbModelType>,
     ): Promise<QuerySnapshot<AppModelType, DbModelType>>;
 
     /**
@@ -758,7 +782,7 @@ declare namespace FirebaseFirestore {
      * @return A DocumentSnapshot for the read data.
      */
     get<AppModelType, DbModelType extends DocumentData>(
-      documentRef: DocumentReference<AppModelType, DbModelType>
+      documentRef: DocumentReference<AppModelType, DbModelType>,
     ): Promise<DocumentSnapshot<AppModelType, DbModelType>>;
 
     /**
@@ -777,7 +801,7 @@ declare namespace FirebaseFirestore {
         AggregateSpecType,
         AppModelType,
         DbModelType
-      >
+      >,
     ): Promise<
       AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
     >;
@@ -814,7 +838,7 @@ declare namespace FirebaseFirestore {
      */
     create<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): Transaction;
 
     /**
@@ -839,11 +863,11 @@ declare namespace FirebaseFirestore {
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: PartialWithFieldValue<AppModelType>,
-      options: SetOptions
+      options: SetOptions,
     ): Transaction;
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): Transaction;
 
     /**
@@ -864,7 +888,7 @@ declare namespace FirebaseFirestore {
     update<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: UpdateData<DbModelType>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): Transaction;
 
     /**
@@ -903,7 +927,7 @@ declare namespace FirebaseFirestore {
      */
     delete(
       documentRef: DocumentReference<any, any>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): Transaction;
   }
 
@@ -930,7 +954,7 @@ declare namespace FirebaseFirestore {
      */
     create<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): Promise<WriteResult>;
 
     /**
@@ -951,7 +975,7 @@ declare namespace FirebaseFirestore {
      */
     delete(
       documentRef: DocumentReference<any, any>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): Promise<WriteResult>;
 
     /**
@@ -981,11 +1005,11 @@ declare namespace FirebaseFirestore {
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: PartialWithFieldValue<AppModelType>,
-      options: SetOptions
+      options: SetOptions,
     ): Promise<WriteResult>;
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): Promise<WriteResult>;
 
     /**
@@ -1015,7 +1039,7 @@ declare namespace FirebaseFirestore {
     update<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: UpdateData<DbModelType>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): Promise<WriteResult>;
 
     /**
@@ -1061,8 +1085,8 @@ declare namespace FirebaseFirestore {
     onWriteResult(
       callback: (
         documentRef: DocumentReference<any, any>,
-        result: WriteResult
-      ) => void
+        result: WriteResult,
+      ) => void,
     ): void;
 
     /**
@@ -1078,7 +1102,7 @@ declare namespace FirebaseFirestore {
      * `false` will stop the retry loop.
      */
     onWriteError(
-      shouldRetryCallback: (error: BulkWriterError) => boolean
+      shouldRetryCallback: (error: BulkWriterError) => boolean,
     ): void;
 
     /**
@@ -1188,7 +1212,7 @@ declare namespace FirebaseFirestore {
      */
     create<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): WriteBatch;
 
     /**
@@ -1213,11 +1237,11 @@ declare namespace FirebaseFirestore {
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: PartialWithFieldValue<AppModelType>,
-      options: SetOptions
+      options: SetOptions,
     ): WriteBatch;
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): WriteBatch;
 
     /**
@@ -1238,7 +1262,7 @@ declare namespace FirebaseFirestore {
     update<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: UpdateData<DbModelType>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): WriteBatch;
 
     /**
@@ -1277,7 +1301,7 @@ declare namespace FirebaseFirestore {
      */
     delete(
       documentRef: DocumentReference<any, any>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): WriteBatch;
 
     /**
@@ -1447,7 +1471,7 @@ declare namespace FirebaseFirestore {
      */
     set(
       data: PartialWithFieldValue<AppModelType>,
-      options: SetOptions
+      options: SetOptions,
     ): Promise<WriteResult>;
     set(data: WithFieldValue<AppModelType>): Promise<WriteResult>;
 
@@ -1466,7 +1490,7 @@ declare namespace FirebaseFirestore {
      */
     update(
       data: UpdateData<DbModelType>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): Promise<WriteResult>;
 
     /**
@@ -1521,7 +1545,7 @@ declare namespace FirebaseFirestore {
      */
     onSnapshot(
       onNext: (snapshot: DocumentSnapshot<AppModelType, DbModelType>) => void,
-      onError?: (error: Error) => void
+      onError?: (error: Error) => void,
     ): () => void;
 
     /**
@@ -1547,7 +1571,7 @@ declare namespace FirebaseFirestore {
       NewAppModelType,
       NewDbModelType extends DocumentData = DocumentData,
     >(
-      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>
+      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>,
     ): DocumentReference<NewAppModelType, NewDbModelType>;
     withConverter(converter: null): DocumentReference;
   }
@@ -1714,7 +1738,7 @@ declare namespace FirebaseFirestore {
     where(
       fieldPath: string | FieldPath,
       opStr: WhereFilterOp,
-      value: any
+      value: any,
     ): Query<AppModelType, DbModelType>;
 
     /**
@@ -1744,7 +1768,7 @@ declare namespace FirebaseFirestore {
      */
     orderBy(
       fieldPath: string | FieldPath,
-      directionStr?: OrderByDirection
+      directionStr?: OrderByDirection,
     ): Query<AppModelType, DbModelType>;
 
     /**
@@ -1812,7 +1836,7 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     startAt(
-      snapshot: DocumentSnapshot<any, any>
+      snapshot: DocumentSnapshot<any, any>,
     ): Query<AppModelType, DbModelType>;
 
     /**
@@ -1836,7 +1860,7 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     startAfter(
-      snapshot: DocumentSnapshot<any, any>
+      snapshot: DocumentSnapshot<any, any>,
     ): Query<AppModelType, DbModelType>;
 
     /**
@@ -1860,7 +1884,7 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     endBefore(
-      snapshot: DocumentSnapshot<any, any>
+      snapshot: DocumentSnapshot<any, any>,
     ): Query<AppModelType, DbModelType>;
 
     /**
@@ -1884,7 +1908,7 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     endAt(
-      snapshot: DocumentSnapshot<any, any>
+      snapshot: DocumentSnapshot<any, any>,
     ): Query<AppModelType, DbModelType>;
 
     /**
@@ -1914,7 +1938,7 @@ declare namespace FirebaseFirestore {
      *  from the query execution (if any), and the query results (if any).
      */
     explain(
-      options?: ExplainOptions
+      options?: ExplainOptions,
     ): Promise<ExplainResults<QuerySnapshot<AppModelType, DbModelType>>>;
 
     /**
@@ -1968,7 +1992,7 @@ declare namespace FirebaseFirestore {
      */
     onSnapshot(
       onNext: (snapshot: QuerySnapshot<AppModelType, DbModelType>) => void,
-      onError?: (error: Error) => void
+      onError?: (error: Error) => void,
     ): () => void;
 
     /**
@@ -2025,7 +2049,7 @@ declare namespace FirebaseFirestore {
      * ```
      */
     aggregate<T extends AggregateSpec>(
-      aggregateSpec: T
+      aggregateSpec: T,
     ): AggregateQuery<T, AppModelType, DbModelType>;
 
     /**
@@ -2035,11 +2059,11 @@ declare namespace FirebaseFirestore {
      * `vectorField` against the given `queryVector` and returns the top documents that are closest
      * to the `queryVector`.
      *
-     * Only documents whose `vectorField` field is a `VectorValue` of the same dimension as `queryVector`
+     * Only documents whose `vectorField` field is a {@link VectorValue} of the same dimension as `queryVector`
      * participate in the query, all other documents are ignored.
      *
      * @example
-     * ```typescript
+     * ```
      * // Returns the closest 10 documents whose Euclidean distance from their 'embedding' fields are closed to [41, 42].
      * const vectorQuery = col.findNearest('embedding', [41, 42], {limit: 10, distanceMeasure: 'EUCLIDEAN'});
      *
@@ -2047,11 +2071,14 @@ declare namespace FirebaseFirestore {
      * querySnapshot.forEach(...);
      * ```
      *
-     * @param vectorField The field path this vector query executes on.
-     * @param queryVector The vector value used to measure the distance from `vectorField` values in the documents.
-     * @param options Options control the vector query. `limit` specifies the upper bound of documents to return, must
-     * be a positive integer with a maximum value of 1000. `distanceMeasure` specifies what type of distance is
-     * calculated when performing the query.
+     * @param vectorField - A string or {@link FieldPath} specifying the vector field to search on.
+     * @param queryVector - The {@link VectorValue} used to measure the distance from `vectorField` values in the documents.
+     * @param options - Options control the vector query. `limit` specifies the upper bound of documents to return, must
+     * be a positive integer with a maximum value of 1000. `distanceMeasure` specifies what type of distance is calculated
+     * when performing the query.
+     *
+     * @deprecated Use the new {@link findNearest} implementation
+     * accepting a single `options` param.
      */
     findNearest(
       vectorField: string | FieldPath,
@@ -2059,7 +2086,39 @@ declare namespace FirebaseFirestore {
       options: {
         limit: number;
         distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
-      }
+      },
+    ): VectorQuery<AppModelType, DbModelType>;
+
+    /**
+     * Returns a query that can perform vector distance (similarity) search with given parameters.
+     *
+     * The returned query, when executed, performs a distance (similarity) search on the specified
+     * `vectorField` against the given `queryVector` and returns the top documents that are closest
+     * to the `queryVector`.
+     *
+     * Only documents whose `vectorField` field is a {@link VectorValue} of the same dimension as `queryVector`
+     * participate in the query, all other documents are ignored.
+     *
+     * @example
+     * ```
+     * // Returns the closest 10 documents whose Euclidean distance from their 'embedding' fields are closed to [41, 42].
+     * const vectorQuery = col.findNearest({
+     *     vectorField: 'embedding',
+     *     queryVector: [41, 42],
+     *     limit: 10,
+     *     distanceMeasure: 'EUCLIDEAN',
+     *     distanceResultField: 'distance',
+     *     distanceThreshold: 0.125
+     * });
+     *
+     * const querySnapshot = await aggregateQuery.get();
+     * querySnapshot.forEach(...);
+     * ```
+     * @param options - An argument specifying the behavior of the {@link VectorQuery} returned by this function.
+     * See {@link VectorQueryOptions}.
+     */
+    findNearest(
+      options: VectorQueryOptions,
     ): VectorQuery<AppModelType, DbModelType>;
 
     /**
@@ -2084,7 +2143,7 @@ declare namespace FirebaseFirestore {
       NewAppModelType,
       NewDbModelType extends DocumentData = DocumentData,
     >(
-      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>
+      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>,
     ): Query<NewAppModelType, NewDbModelType>;
     withConverter(converter: null): Query;
   }
@@ -2136,9 +2195,9 @@ declare namespace FirebaseFirestore {
      */
     forEach(
       callback: (
-        result: QueryDocumentSnapshot<AppModelType, DbModelType>
+        result: QueryDocumentSnapshot<AppModelType, DbModelType>,
       ) => void,
-      thisArg?: any
+      thisArg?: any,
     ): void;
 
     /**
@@ -2198,9 +2257,9 @@ declare namespace FirebaseFirestore {
      */
     forEach(
       callback: (
-        result: QueryDocumentSnapshot<AppModelType, DbModelType>
+        result: QueryDocumentSnapshot<AppModelType, DbModelType>,
       ) => void,
-      thisArg?: any
+      thisArg?: any,
     ): void;
 
     /**
@@ -2327,7 +2386,7 @@ declare namespace FirebaseFirestore {
      * newly created document after it has been written to the backend.
      */
     add(
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): Promise<DocumentReference<AppModelType, DbModelType>>;
 
     /**
@@ -2353,7 +2412,7 @@ declare namespace FirebaseFirestore {
       NewAppModelType,
       NewDbModelType extends DocumentData = DocumentData,
     >(
-      converter: FirestoreDataConverter<NewAppModelType>
+      converter: FirestoreDataConverter<NewAppModelType>,
     ): CollectionReference<NewAppModelType, NewDbModelType>;
     withConverter(converter: null): CollectionReference;
   }
@@ -2379,7 +2438,7 @@ declare namespace FirebaseFirestore {
      * @return An AsyncIterable of `QueryPartition`s.
      */
     getPartitions(
-      desiredPartitionCount: number
+      desiredPartitionCount: number,
     ): AsyncIterable<QueryPartition<AppModelType, DbModelType>>;
 
     /**
@@ -2432,7 +2491,7 @@ declare namespace FirebaseFirestore {
       NewAppModelType,
       NewDbModelType extends DocumentData = DocumentData,
     >(
-      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>
+      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>,
     ): CollectionGroup<NewAppModelType, NewDbModelType>;
     withConverter(converter: null): CollectionGroup;
   }
@@ -2586,7 +2645,7 @@ declare namespace FirebaseFirestore {
      *  from the query execution (if any), and the query results (if any).
      */
     explain(
-      options?: ExplainOptions
+      options?: ExplainOptions,
     ): Promise<
       ExplainResults<
         AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
@@ -2606,7 +2665,7 @@ declare namespace FirebaseFirestore {
      * defined above, or `false` otherwise.
      */
     isEqual(
-      other: AggregateQuery<AggregateSpecType, AppModelType, DbModelType>
+      other: AggregateQuery<AggregateSpecType, AppModelType, DbModelType>,
     ): boolean;
   }
 
@@ -2659,7 +2718,7 @@ declare namespace FirebaseFirestore {
         AggregateSpecType,
         AppModelType,
         DbModelType
-      >
+      >,
     ): boolean;
   }
 
@@ -2935,7 +2994,7 @@ declare namespace FirebaseFirestore {
      * @returns This instance.
      */
     add<AppModelType, DbModelType extends DocumentData>(
-      documentSnapshot: DocumentSnapshot<AppModelType, DbModelType>
+      documentSnapshot: DocumentSnapshot<AppModelType, DbModelType>,
     ): BundleBuilder;
 
     /**
@@ -2948,7 +3007,7 @@ declare namespace FirebaseFirestore {
      */
     add<AppModelType, DbModelType extends DocumentData>(
       queryName: string,
-      querySnapshot: QuerySnapshot<AppModelType, DbModelType>
+      querySnapshot: QuerySnapshot<AppModelType, DbModelType>,
     ): BundleBuilder;
 
     /**
@@ -3036,7 +3095,7 @@ declare namespace FirebaseFirestore {
     static where(
       fieldPath: string | FieldPath,
       opStr: WhereFilterOp,
-      value: unknown
+      value: unknown,
     ): Filter;
 
     /**
@@ -3191,6 +3250,50 @@ declare namespace FirebaseFirestore {
      * if the query was not executed.
      */
     readonly snapshot: T | null;
+  }
+
+  /**
+   * Specifies the behavior of the {@link VectorQuery} generated by a call to {@link Query.findNearest}.
+   */
+  export interface VectorQueryOptions {
+    /**
+     * A string or {@link FieldPath} specifying the vector field to search on.
+     */
+    vectorField: string | FieldPath;
+
+    /**
+     * The {@link VectorValue} used to measure the distance from `vectorField` values in the documents.
+     */
+    queryVector: VectorValue | Array<number>;
+
+    /**
+     * Specifies the upper bound of documents to return, must be a positive integer with a maximum value of 1000.
+     */
+    limit: number;
+
+    /**
+     * Specifies what type of distance is calculated when performing the query.
+     */
+    distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
+
+    /**
+     * Optionally specifies the name of a field that will be set on each returned DocumentSnapshot,
+     * which will contain the computed distance for the document.
+     */
+    distanceResultField?: string | FieldPath;
+
+    /**
+     * Specifies a threshold for which no less similar documents will be returned. The behavior
+     * of the specified `distanceMeasure` will affect the meaning of the distance threshold.
+     *
+     *  - For `distanceMeasure: "EUCLIDEAN"`, the meaning of `distanceThreshold` is:
+     *     SELECT docs WHERE euclidean_distance <= distanceThreshold
+     *  - For `distanceMeasure: "COSINE"`, the meaning of `distanceThreshold` is:
+     *     SELECT docs WHERE cosine_distance <= distanceThreshold
+     *  - For `distanceMeasure: "DOT_PRODUCT"`, the meaning of `distanceThreshold` is:
+     *     SELECT docs WHERE dot_product_distance >= distanceThreshold
+     */
+    distanceThreshold?: number;
   }
 }
 

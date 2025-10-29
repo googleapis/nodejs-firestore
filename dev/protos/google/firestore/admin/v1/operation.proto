@@ -146,13 +146,13 @@ message ExportDocumentsMetadata {
   // The progress, in bytes, of this operation.
   Progress progress_bytes = 5;
 
-  // Which collection ids are being exported.
+  // Which collection IDs are being exported.
   repeated string collection_ids = 6;
 
   // Where the documents are being exported to.
   string output_uri_prefix = 7;
 
-  // Which namespace ids are being exported.
+  // Which namespace IDs are being exported.
   repeated string namespace_ids = 8;
 
   // The timestamp that corresponds to the version of the database that is being
@@ -181,14 +181,47 @@ message ImportDocumentsMetadata {
   // The progress, in bytes, of this operation.
   Progress progress_bytes = 5;
 
-  // Which collection ids are being imported.
+  // Which collection IDs are being imported.
   repeated string collection_ids = 6;
 
   // The location of the documents being imported.
   string input_uri_prefix = 7;
 
-  // Which namespace ids are being imported.
+  // Which namespace IDs are being imported.
   repeated string namespace_ids = 8;
+}
+
+// Metadata for [google.longrunning.Operation][google.longrunning.Operation]
+// results from
+// [FirestoreAdmin.BulkDeleteDocuments][google.firestore.admin.v1.FirestoreAdmin.BulkDeleteDocuments].
+message BulkDeleteDocumentsMetadata {
+  // The time this operation started.
+  google.protobuf.Timestamp start_time = 1;
+
+  // The time this operation completed. Will be unset if operation still in
+  // progress.
+  google.protobuf.Timestamp end_time = 2;
+
+  // The state of the operation.
+  OperationState operation_state = 3;
+
+  // The progress, in documents, of this operation.
+  Progress progress_documents = 4;
+
+  // The progress, in bytes, of this operation.
+  Progress progress_bytes = 5;
+
+  // The IDs of the collection groups that are being deleted.
+  repeated string collection_ids = 6;
+
+  // Which namespace IDs are being deleted.
+  repeated string namespace_ids = 7;
+
+  // The timestamp that corresponds to the version of the database that is being
+  // read to get the list of documents to delete. This time can also be used as
+  // the timestamp of PITR in case of disaster recovery (subject to PITR window
+  // limit).
+  google.protobuf.Timestamp snapshot_time = 8;
 }
 
 // Returned in the [google.longrunning.Operation][google.longrunning.Operation]

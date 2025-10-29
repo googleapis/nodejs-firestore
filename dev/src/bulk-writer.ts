@@ -49,6 +49,10 @@ import {StatusCode} from './status-code';
 // eslint-disable-next-line no-undef
 import GrpcStatus = FirebaseFirestore.GrpcStatus;
 import api = google.firestore.v1;
+import {
+  ATTRIBUTE_KEY_DOC_COUNT,
+  SPAN_NAME_BULK_WRITER_COMMIT,
+} from './telemetry/trace-util';
 
 /*!
  * The maximum number of writes that can be in a single batch.
@@ -130,8 +134,8 @@ class BulkWriterOperation {
     private readonly errorFn: (error: BulkWriterError) => boolean,
     private readonly successFn: (
       ref: firestore.DocumentReference<unknown>,
-      result: WriteResult
-    ) => void
+      result: WriteResult,
+    ) => void,
   ) {}
 
   get promise(): Promise<WriteResult> {
@@ -159,7 +163,7 @@ class BulkWriterOperation {
         error.message,
         this.ref,
         this.type,
-        this.failedAttempts
+        this.failedAttempts,
       );
       const shouldRetry = this.errorFn(bulkWriterError);
       logger(
@@ -170,7 +174,7 @@ class BulkWriterOperation {
         ', shouldRetry:',
         shouldRetry,
         ' for document:',
-        this.ref.path
+        this.ref.path,
       );
 
       if (shouldRetry) {
@@ -233,7 +237,7 @@ class BulkCommitBatch extends WriteBatch {
   setMaxBatchSize(size: number): void {
     assert(
       this.pendingOps.length <= size,
-      'New batch size cannot be less than the number of enqueued writes'
+      'New batch size cannot be less than the number of enqueued writes',
     );
     this._maxBatchSize = size;
   }
@@ -243,55 +247,62 @@ class BulkCommitBatch extends WriteBatch {
   }
 
   async bulkCommit(options: {requestTag?: string} = {}): Promise<void> {
-    const tag = options?.requestTag ?? requestTag();
+    return this._firestore._traceUtil.startActiveSpan(
+      SPAN_NAME_BULK_WRITER_COMMIT,
+      async () => {
+        const tag = options?.requestTag ?? requestTag();
 
-    // Capture the error stack to preserve stack tracing across async calls.
-    const stack = Error().stack!;
+        // Capture the error stack to preserve stack tracing across async calls.
+        const stack = Error().stack!;
 
-    let response: api.IBatchWriteResponse;
-    try {
-      logger(
-        'BulkCommitBatch.bulkCommit',
-        tag,
-        `Sending next batch with ${this._opCount} writes`
-      );
-      const retryCodes = getRetryCodes('batchWrite');
-      response = await this._commit<
-        api.BatchWriteRequest,
-        api.BatchWriteResponse
-      >({retryCodes, methodName: 'batchWrite', requestTag: tag});
-    } catch (err) {
-      // Map the failure to each individual write's result.
-      const ops = Array.from({length: this.pendingOps.length});
-      response = {
-        writeResults: ops.map(() => {
-          return {};
-        }),
-        status: ops.map(() => err),
-      };
-    }
-
-    for (let i = 0; i < (response.writeResults || []).length; ++i) {
-      // Since delete operations currently do not have write times, use a
-      // sentinel Timestamp value.
-      // TODO(b/158502664): Use actual delete timestamp.
-      const DELETE_TIMESTAMP_SENTINEL = Timestamp.fromMillis(0);
-
-      const status = (response.status || [])[i];
-      if (status.code === StatusCode.OK) {
-        const updateTime = Timestamp.fromProto(
-          response.writeResults![i].updateTime || DELETE_TIMESTAMP_SENTINEL
-        );
-        this.pendingOps[i].onSuccess(new WriteResult(updateTime));
-      } else {
-        const error =
-          new (require('google-gax/build/src/fallback').GoogleError)(
-            status.message || undefined
+        let response: api.IBatchWriteResponse;
+        try {
+          logger(
+            'BulkCommitBatch.bulkCommit',
+            tag,
+            `Sending next batch with ${this._opCount} writes`,
           );
-        error.code = status.code as number;
-        this.pendingOps[i].onError(wrapError(error, stack));
-      }
-    }
+          const retryCodes = getRetryCodes('batchWrite');
+          response = await this._commit<
+            api.BatchWriteRequest,
+            api.BatchWriteResponse
+          >({retryCodes, methodName: 'batchWrite', requestTag: tag});
+        } catch (err) {
+          // Map the failure to each individual write's result.
+          const ops = Array.from({length: this.pendingOps.length});
+          response = {
+            writeResults: ops.map(() => {
+              return {};
+            }),
+            status: ops.map(() => err),
+          };
+        }
+
+        for (let i = 0; i < (response.writeResults || []).length; ++i) {
+          // Since delete operations currently do not have write times, use a
+          // sentinel Timestamp value.
+          // TODO(b/158502664): Use actual delete timestamp.
+          const DELETE_TIMESTAMP_SENTINEL = Timestamp.fromMillis(0);
+
+          const status = (response.status || [])[i];
+          if (status.code === StatusCode.OK) {
+            const updateTime = Timestamp.fromProto(
+              response.writeResults![i].updateTime || DELETE_TIMESTAMP_SENTINEL,
+            );
+            this.pendingOps[i].onSuccess(new WriteResult(updateTime));
+          } else {
+            const error = new (require('google-gax/fallback').GoogleError)(
+              status.message || undefined,
+            );
+            error.code = status.code as number;
+            this.pendingOps[i].onError(wrapError(error, stack));
+          }
+        }
+      },
+      {
+        [ATTRIBUTE_KEY_DOC_COUNT]: this._opCount,
+      },
+    );
   }
 
   /**
@@ -301,7 +312,7 @@ class BulkCommitBatch extends WriteBatch {
   processLastOperation(op: BulkWriterOperation): void {
     assert(
       !this.docPaths.has(op.ref.path),
-      'Batch should not contain writes to the same document'
+      'Batch should not contain writes to the same document',
     );
     this.docPaths.add(op.ref.path);
     this.pendingOps.push(op);
@@ -317,7 +328,7 @@ class BulkCommitBatch extends WriteBatch {
 class BufferedOperation {
   constructor(
     readonly operation: BulkWriterOperation,
-    readonly sendFn: () => void
+    readonly sendFn: () => void,
   ) {}
 }
 
@@ -346,7 +357,7 @@ export class BulkWriterError extends Error {
     readonly operationType: 'create' | 'set' | 'update' | 'delete',
 
     /** How many times this operation has been attempted unsuccessfully. */
-    readonly failedAttempts: number
+    readonly failedAttempts: number,
   ) {
     super(message);
   }
@@ -373,10 +384,7 @@ export class BulkWriter {
    * @private
    * @internal
    */
-  private _bulkCommitBatch = new BulkCommitBatch(
-    this.firestore,
-    this._maxBatchSize
-  );
+  private _bulkCommitBatch: BulkCommitBatch;
 
   /**
    * A pointer to the tail of all active BulkWriter operations. This pointer
@@ -387,13 +395,13 @@ export class BulkWriter {
   private _lastOp: Promise<void> = Promise.resolve();
 
   /**
-   * Whether this BulkWriter instance has started to close. Afterwards, no
-   * new operations can be enqueued, except for retry operations scheduled by
-   * the error handler.
+   * When this BulkWriter instance has started to close, a flush promise is
+   * saved. Afterwards, no new operations can be enqueued, except for retry
+   * operations scheduled by the error handler.
    * @private
    * @internal
    */
-  private _closing = false;
+  private _closePromise: Promise<void> | undefined;
 
   /**
    * Rate limiter used to throttle requests as per the 500/50/5 rule.
@@ -447,7 +455,7 @@ export class BulkWriter {
   _setMaxBatchSize(size: number): void {
     assert(
       this._bulkCommitBatch.pendingOps.length === 0,
-      'BulkCommitBatch should be empty'
+      'BulkCommitBatch should be empty',
     );
     this._maxBatchSize = size;
     this._bulkCommitBatch = new BulkCommitBatch(this.firestore, size);
@@ -479,7 +487,7 @@ export class BulkWriter {
    */
   private _successFn: (
     document: firestore.DocumentReference<unknown>,
-    result: WriteResult
+    result: WriteResult,
   ) => void = () => {};
 
   /**
@@ -502,8 +510,13 @@ export class BulkWriter {
   /** @private */
   constructor(
     private readonly firestore: Firestore,
-    options?: firestore.BulkWriterOptions
+    options?: firestore.BulkWriterOptions,
   ) {
+    this._bulkCommitBatch = new BulkCommitBatch(
+      this.firestore,
+      this._maxBatchSize,
+    );
+
     this.firestore._incrementBulkWritersCount();
     validateBulkWriterOptions(options);
 
@@ -512,7 +525,7 @@ export class BulkWriter {
         Number.POSITIVE_INFINITY,
         Number.POSITIVE_INFINITY,
         Number.POSITIVE_INFINITY,
-        Number.POSITIVE_INFINITY
+        Number.POSITIVE_INFINITY,
       );
     } else {
       let startingRate = DEFAULT_INITIAL_OPS_PER_SECOND_LIMIT;
@@ -546,7 +559,7 @@ export class BulkWriter {
         startingRate,
         RATE_LIMITER_MULTIPLIER,
         RATE_LIMITER_MULTIPLIER_MILLIS,
-        maxRate
+        maxRate,
       );
     }
   }
@@ -581,11 +594,11 @@ export class BulkWriter {
    */
   create<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
-    data: firestore.WithFieldValue<AppModelType>
+    data: firestore.WithFieldValue<AppModelType>,
   ): Promise<WriteResult> {
     this._verifyNotClosed();
     return this._enqueue(documentRef, 'create', bulkCommitBatch =>
-      bulkCommitBatch.create(documentRef, data)
+      bulkCommitBatch.create(documentRef, data),
     );
   }
 
@@ -621,22 +634,22 @@ export class BulkWriter {
    */
   delete<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
-    precondition?: firestore.Precondition
+    precondition?: firestore.Precondition,
   ): Promise<WriteResult> {
     this._verifyNotClosed();
     return this._enqueue(documentRef, 'delete', bulkCommitBatch =>
-      bulkCommitBatch.delete(documentRef, precondition)
+      bulkCommitBatch.delete(documentRef, precondition),
     );
   }
 
   set<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     data: Partial<AppModelType>,
-    options: firestore.SetOptions
+    options: firestore.SetOptions,
   ): Promise<WriteResult>;
   set<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
-    data: AppModelType
+    data: AppModelType,
   ): Promise<WriteResult>;
   /**
    * Write to the document referred to by the provided
@@ -681,7 +694,7 @@ export class BulkWriter {
   set<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
     data: firestore.PartialWithFieldValue<AppModelType>,
-    options?: firestore.SetOptions
+    options?: firestore.SetOptions,
   ): Promise<WriteResult> {
     this._verifyNotClosed();
     return this._enqueue(documentRef, 'set', bulkCommitBatch => {
@@ -690,7 +703,7 @@ export class BulkWriter {
       } else {
         return bulkCommitBatch.set(
           documentRef,
-          data as firestore.WithFieldValue<AppModelType>
+          data as firestore.WithFieldValue<AppModelType>,
         );
       }
     });
@@ -749,7 +762,7 @@ export class BulkWriter {
   ): Promise<WriteResult> {
     this._verifyNotClosed();
     return this._enqueue(documentRef, 'update', bulkCommitBatch =>
-      bulkCommitBatch.update(documentRef, dataOrField, ...preconditionOrValues)
+      bulkCommitBatch.update(documentRef, dataOrField, ...preconditionOrValues),
     );
   }
 
@@ -788,8 +801,8 @@ export class BulkWriter {
     successCallback: (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       documentRef: firestore.DocumentReference<any, any>,
-      result: WriteResult
-    ) => void
+      result: WriteResult,
+    ) => void,
   ): void {
     this._successFn = successCallback;
   }
@@ -909,11 +922,11 @@ export class BulkWriter {
    * ```
    */
   close(): Promise<void> {
-    this._verifyNotClosed();
-    this.firestore._decrementBulkWritersCount();
-    const flushPromise = this.flush();
-    this._closing = true;
-    return flushPromise;
+    if (!this._closePromise) {
+      this._closePromise = this.flush();
+      this.firestore._decrementBulkWritersCount();
+    }
+    return this._closePromise;
   }
 
   /**
@@ -922,7 +935,7 @@ export class BulkWriter {
    * @internal
    */
   _verifyNotClosed(): void {
-    if (this._closing) {
+    if (this._closePromise) {
       throw new Error('BulkWriter has already been closed.');
     }
   }
@@ -942,12 +955,12 @@ export class BulkWriter {
     const pendingBatch = this._bulkCommitBatch;
     this._bulkCommitBatch = new BulkCommitBatch(
       this.firestore,
-      this._maxBatchSize
+      this._maxBatchSize,
     );
 
     // Use the write with the longest backoff duration when determining backoff.
     const highestBackoffDuration = pendingBatch.pendingOps.reduce(
-      (prev, cur) => (prev.backoffDuration > cur.backoffDuration ? prev : cur)
+      (prev, cur) => (prev.backoffDuration > cur.backoffDuration ? prev : cur),
     ).backoffDuration;
     const backoffMsWithJitter = BulkWriter._applyJitter(highestBackoffDuration);
     const delayedExecution = new Deferred<void>();
@@ -958,7 +971,9 @@ export class BulkWriter {
       delayedExecution.resolve();
     }
 
-    delayedExecution.promise.then(() => this._sendBatch(pendingBatch, flush));
+    void delayedExecution.promise.then(() =>
+      this._sendBatch(pendingBatch, flush),
+    );
   }
 
   /**
@@ -968,7 +983,7 @@ export class BulkWriter {
    */
   private async _sendBatch(
     batch: BulkCommitBatch,
-    flush = false
+    flush = false,
   ): Promise<void> {
     const tag = requestTag();
 
@@ -983,7 +998,7 @@ export class BulkWriter {
       logger(
         'BulkWriter._sendBatch',
         tag,
-        `Backing off for ${delayMs} seconds`
+        `Backing off for ${delayMs} seconds`,
       );
       delayExecution(() => this._sendBatch(batch, flush), delayMs);
     }
@@ -1001,7 +1016,7 @@ export class BulkWriter {
     const jitter = DEFAULT_JITTER_FACTOR * (Math.random() * 2 - 1);
     return Math.min(
       DEFAULT_BACKOFF_MAX_DELAY_MS,
-      backoffMs + jitter * backoffMs
+      backoffMs + jitter * backoffMs,
     );
   }
 
@@ -1013,14 +1028,14 @@ export class BulkWriter {
   private _enqueue(
     ref: firestore.DocumentReference<unknown>,
     type: 'create' | 'set' | 'update' | 'delete',
-    enqueueOnBatchCallback: (bulkCommitBatch: BulkCommitBatch) => void
+    enqueueOnBatchCallback: (bulkCommitBatch: BulkCommitBatch) => void,
   ): Promise<WriteResult> {
     const bulkWriterOp = new BulkWriterOperation(
       ref,
       type,
       this._sendFn.bind(this, enqueueOnBatchCallback),
       this._errorFn.bind(this),
-      this._successFn.bind(this)
+      this._successFn.bind(this),
     );
 
     // Swallow the error if the developer has set an error listener. This
@@ -1052,7 +1067,7 @@ export class BulkWriter {
         new BufferedOperation(bulkWriterOp, () => {
           this._pendingOpsCount++;
           this._sendFn(enqueueOnBatchCallback, bulkWriterOp);
-        })
+        }),
       );
     }
 
@@ -1097,7 +1112,7 @@ export class BulkWriter {
    */
   _sendFn(
     enqueueOnBatchCallback: (bulkCommitBatch: BulkCommitBatch) => void,
-    op: BulkWriterOperation
+    op: BulkWriterOperation,
   ): void {
     // A backoff duration greater than 0 implies that this batch is a retry.
     // Retried writes are sent with a batch size of 10 in order to guarantee
@@ -1146,8 +1161,8 @@ function validateBulkWriterOptions(value: unknown): void {
     throw new Error(
       `${invalidArgumentMessage(
         argName,
-        'bulkWriter() options argument'
-      )} Input is not an object.`
+        'bulkWriter() options argument',
+      )} Input is not an object.`,
     );
   }
 
@@ -1166,7 +1181,7 @@ function validateBulkWriterOptions(value: unknown): void {
       options.throttling.initialOpsPerSecond,
       {
         minValue: 1,
-      }
+      },
     );
   }
 
@@ -1183,8 +1198,8 @@ function validateBulkWriterOptions(value: unknown): void {
       throw new Error(
         `${invalidArgumentMessage(
           argName,
-          'bulkWriter() options argument'
-        )} "maxOpsPerSecond" cannot be less than "initialOpsPerSecond".`
+          'bulkWriter() options argument',
+        )} "maxOpsPerSecond" cannot be less than "initialOpsPerSecond".`,
       );
     }
   }

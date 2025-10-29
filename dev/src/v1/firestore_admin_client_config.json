@@ -70,7 +70,13 @@
           "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"
         },
+        "BulkDeleteDocuments": {
+          "timeout_millis": 60000,
+          "retry_codes_name": "non_idempotent",
+          "retry_params_name": "default"
+        },
         "CreateDatabase": {
+          "timeout_millis": 120000,
           "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"
         },
@@ -103,6 +109,7 @@
           "retry_params_name": "default"
         },
         "RestoreDatabase": {
+          "timeout_millis": 120000,
           "retry_codes_name": "non_idempotent",
           "retry_params_name": "default"
         },
