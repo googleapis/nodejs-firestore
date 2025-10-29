@@ -105,7 +105,6 @@ import {
   Type as MessageType,
   ReflectionObject,
 } from 'protobufjs';
-import {logger} from '../logger';
 
 /**
  * @beta
@@ -1752,30 +1751,6 @@ export class ExplainStats implements firestore.Pipelines.ExplainStats {
 
     return messageType.toObject(messageType.decode(this.explainStatsData.value))
       .value;
-  }
-
-  /**
-   * @beta
-   * When explain stats were requested with `outputFormat = 'json'`, this returns
-   * the explain stats object parsed from the JSON string returned from the Firestore
-   * backend.
-   *
-   * If explain stats were not requested with `outputFormat = 'json'`, the behavior
-   * of this method is not guaranteed and is expected to throw.
-   */
-  get json(): {[key: string]: firestore.Pipelines.ExplainStatsFieldValue} {
-    const value = this._decode();
-    if (isString(value)) {
-      try {
-        return JSON.parse(value);
-      } catch (error: unknown) {
-        logger('json', null, 'Error parsing explain stats to JSON.', error);
-      }
-    }
-
-    throw new Error(
-      "Unable to convert explain stats to an object, ensure you requested `explainOptions.outputFormat = 'json'`"
-    );
   }
 
   /**

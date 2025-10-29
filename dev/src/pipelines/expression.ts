@@ -980,14 +980,14 @@ export abstract class Expression
 
   /**
    * @beta
-   * Creates an expression that reverses this string expression.
+   * Creates an expression that reverses this string or bytes expression.
    *
    * ```typescript
    * // Reverse the value of the 'myString' field.
    * field("myString").reverse();
    * ```
    *
-   * @return A new {@code Expression} representing the reversed string.
+   * @return A new {@code Expression} representing the reversed string or bytes.
    */
   reverse(): FunctionExpression {
     return new FunctionExpression('reverse', [this]);

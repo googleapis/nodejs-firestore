@@ -3846,14 +3846,14 @@ declare namespace FirebaseFirestore {
       ): FunctionExpression;
       /**
        * @beta
-       * Creates an expression that reverses this string expression.
+       * Creates an expression that reverses this string or bytes expression.
        *
        * ```typescript
        * // Reverse the value of the 'myString' field.
        * field("myString").reverse();
        * ```
        *
-       * @return A new {@code Expression} representing the reversed string.
+       * @return A new {@code Expression} representing the reversed string or bytes.
        */
       reverse(): FunctionExpression;
       /**
@@ -10002,7 +10002,7 @@ declare namespace FirebaseFirestore {
          * @beta
          * Specifies the output format of the query planner information.
          */
-        outputFormat?: 'text' | 'mongo';
+        outputFormat?: 'text';
       };
       /**
        * @beta
@@ -10384,18 +10384,6 @@ declare namespace FirebaseFirestore {
      * options enabled, providing insights into the query's performance and execution plan.
      */
     export class ExplainStats {
-      /**
-       * @beta
-       * When explain stats were requested with `outputFormat = 'mongo'`, this returns
-       * the explain stats object parsed from the JSON string returned from the Firestore
-       * backend.
-       *
-       * If explain stats were not requested with `outputFormat = 'mongo'`, the behavior
-       * of this method is not guaranteed and is expected to throw.
-       */
-      get json(): {
-        [key: string]: ExplainStatsFieldValue;
-      };
       /**
        * @beta
        * When explain stats were requested with `outputFormat = 'text'`, this returns

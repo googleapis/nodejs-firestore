@@ -139,13 +139,11 @@ import {getTestDb, getTestRoot} from './firestore';
 import {Firestore as InternalFirestore} from '../src';
 import {ServiceError} from 'google-gax';
 
-import * as google from '../protos/firestore_v1_proto_api';
-
 use(chaiAsPromised);
 
 const timestampDeltaMS = 3000;
 
-describe.only('Pipeline class', () => {
+describe('Pipeline class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
   let beginDocCreation = 0;
@@ -516,48 +514,6 @@ describe.only('Pipeline class', () => {
       );
       expect(snapshot.explainStats!.rawData.value).to.not.be.null;
       expect(snapshot.explainStats!.rawData.value).to.not.be.undefined;
-
-      expect(snapshot.results.length).to.equal(10);
-      expect(snapshot.pipeline).to.equal(ppl);
-      expectResults(
-        snapshot,
-        'book1',
-        'book10',
-        'book2',
-        'book3',
-        'book4',
-        'book5',
-        'book6',
-        'book7',
-        'book8',
-        'book9'
-      );
-    });
-
-    it('mode: analyze, format: mongo', async () => {
-      const ppl = firestore
-        .pipeline()
-        .collection(randomCol.path)
-        .sort(ascending('__name__'));
-      const snapshot = await ppl.execute({
-        explainOptions: {
-          mode: 'analyze',
-          outputFormat: 'mongo',
-        },
-      });
-      expect(snapshot.explainStats).not.to.be.undefined;
-      expect(snapshot.explainStats!.text.length).to.be.greaterThan(0);
-      expect(snapshot.explainStats!.text.charAt(0)).to.equal('{');
-
-      expect(snapshot.explainStats!.rawData.type_url).to.equal(
-        'type.googleapis.com/google.protobuf.StringValue'
-      );
-      expect(snapshot.explainStats!.rawData.value).to.not.be.null;
-      expect(snapshot.explainStats!.rawData.value).to.not.be.undefined;
-
-      expect(snapshot.explainStats!.json).not.to.be.null;
-      expect(typeof snapshot.explainStats!.json).to.be.equal('object');
-      console.log(snapshot.explainStats!.json);
 
       expect(snapshot.results.length).to.equal(10);
       expect(snapshot.pipeline).to.equal(ppl);
@@ -1723,12 +1679,17 @@ describe.only('Pipeline class', () => {
 
           expect('statusDetails' in err).to.be.true;
           expect(Array.isArray(err['statusDetails'])).to.be.true;
-          const explainStatsAny = (
-            err['statusDetails'] as Array<unknown>
-          )[0] as google.google.protobuf.IAny;
-          expect(explainStatsAny['type_url']).to.equal(
-            'type.googleapis.com/google.firestore.v1.ExplainStats'
-          );
+
+          const statusDetails = err['statusDetails'] as Array<object>;
+
+          const foundExplainStats = statusDetails.find(x => {
+            return (
+              'type_url' in x &&
+              x['type_url'] ===
+                'type.googleapis.com/google.firestore.v1.ExplainStats'
+            );
+          });
+          expect(foundExplainStats).to.not.be.undefined;
         }
       });
     });
@@ -3376,9 +3337,10 @@ describe.only('Pipeline class', () => {
         .limit(1)
         .select(field('rating').exp().as('expRating'))
         .execute();
-      expectResults(snapshot, {
-        expRating: 109.94717245212352,
-      });
+      expect(snapshot.results[0].get('expRating')).to.be.approximately(
+        109.94717245212352,
+        0.00001
+      );
     });
 
     it('can compute e to the power of a numeric value with the top-level function', async () => {
