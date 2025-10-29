@@ -48,7 +48,7 @@ import {RESERVED_MAP_KEY, RESERVED_MAP_KEY_VECTOR_VALUE} from './map-type';
  */
 export function timestampFromJson(
   timestampValue?: string | google.protobuf.ITimestamp,
-  argumentName?: string
+  argumentName?: string,
 ): google.protobuf.ITimestamp | undefined {
   let timestampProto: google.protobuf.ITimestamp = {};
 
@@ -60,7 +60,7 @@ export function timestampFromJson(
     if (timestampValue.length > 20) {
       const nanoString = timestampValue.substring(
         20,
-        timestampValue.length - 1
+        timestampValue.length - 1,
       );
       const trailingZeroes = 9 - nanoString.length;
       nanos = Number(nanoString) * Math.pow(10, trailingZeroes);
@@ -69,7 +69,7 @@ export function timestampFromJson(
     if (isNaN(seconds) || isNaN(nanos)) {
       argumentName = argumentName || 'timestampValue';
       throw new Error(
-        `Specify a valid ISO 8601 timestamp for "${argumentName}".`
+        `Specify a valid ISO 8601 timestamp for "${argumentName}".`,
       );
     }
 
@@ -156,7 +156,7 @@ export function detectValueType(proto: ProtobufJsValue): string {
 
     if (detectedValues.length !== 1) {
       throw new Error(
-        `Unable to infer type value from '${JSON.stringify(proto)}'.`
+        `Unable to infer type value from '${JSON.stringify(proto)}'.`,
       );
     }
 
@@ -190,7 +190,7 @@ export function detectValueType(proto: ProtobufJsValue): string {
  * @return The string value for 'valueType'.
  */
 export function detectGoogleProtobufValueType(
-  proto: google.protobuf.IValue
+  proto: google.protobuf.IValue,
 ): string {
   const detectedValues: string[] = [];
 
@@ -215,7 +215,7 @@ export function detectGoogleProtobufValueType(
 
   if (detectedValues.length !== 1) {
     throw new Error(
-      `Unable to infer type value from '${JSON.stringify(proto)}'.`
+      `Unable to infer type value from '${JSON.stringify(proto)}'.`,
     );
   }
 

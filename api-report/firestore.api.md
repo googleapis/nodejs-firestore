@@ -4,11 +4,13 @@
 
 ```ts
 
-import * as $protobuf from 'protobufjs';
 import { DocumentData } from '@google-cloud/firestore';
 import { Duplex } from 'stream';
 import * as firestore from '@google-cloud/firestore';
+import { google } from '../protos/firestore_v1_proto_api';
 import { GoogleError } from 'google-gax';
+import * as proto from '../protos/firestore_v1_proto_api';
+import * as protos from '../../protos/firestore_v1_proto_api';
 import { Readable } from 'stream';
 import { Span as Span_2 } from '@opentelemetry/api';
 
@@ -21,8 +23,6 @@ export class Aggregate {
     readonly alias: string;
     // (undocumented)
     readonly fieldPath?: (string | FieldPath) | undefined;
-    // Warning: (ae-forgotten-export) The symbol "google" needs to be exported by the entry point index.d.ts
-    //
     // @internal
     toProto(): IAggregation;
 }
@@ -60,7 +60,6 @@ export class AggregateQuery<AggregateSpecType extends AggregateSpec, AppModelTyp
     get(): Promise<AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>>;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-    // Warning: (ae-forgotten-export) The symbol "google" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "QuerySnapshotResponse" needs to be exported by the entry point index.d.ts
     //
     // @internal
@@ -307,6 +306,9 @@ export class CollectionReference<AppModelType = firestore.DocumentData, DbModelT
     // (undocumented)
     withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData = firestore.DocumentData>(converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>): CollectionReference<NewAppModelType, NewDbModelType>;
 }
+
+// @public (undocumented)
+export const DEFAULT_MAX_IDLE_CHANNELS = 1;
 
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 //
@@ -589,7 +591,6 @@ export class ExecutionStats implements firestore.ExecutionStats {
     // (undocumented)
     readonly executionDuration: firestore.Duration;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-    // Warning: (ae-forgotten-export) The symbol "google" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "Serializer" needs to be exported by the entry point index.d.ts
     //
     // @internal (undocumented)
@@ -611,7 +612,6 @@ export class ExplainMetrics implements firestore.ExplainMetrics {
     // (undocumented)
     readonly executionStats: ExecutionStats | null;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-    // Warning: (ae-forgotten-export) The symbol "google" needs to be exported by the entry point index.d.ts
     //
     // @internal (undocumented)
     static _fromProto(metrics: IExplainMetrics, serializer: Serializer): ExplainMetrics;
@@ -898,7 +898,6 @@ class Firestore implements firestore.Firestore {
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-    // Warning: (ae-forgotten-export) The symbol "google" needs to be exported by the entry point index.d.ts
     snapshot_(documentName: string, readTime?: google.protobuf.ITimestamp, encoding?: 'protobufJS'): DocumentSnapshot;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     //
@@ -980,7 +979,6 @@ export class PlanSummary implements firestore.PlanSummary {
     // @internal
     constructor(indexesUsed: Record<string, unknown>[]);
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-    // Warning: (ae-forgotten-export) The symbol "google" needs to be exported by the entry point index.d.ts
     //
     // @internal (undocumented)
     static _fromProto(plan: IPlanSummary | null | undefined, serializer: Serializer): PlanSummary;
@@ -1166,7 +1164,6 @@ export class Query<AppModelType = firestore.DocumentData, DbModelType extends fi
     // @internal
     _stream(transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions, explainOptions?: firestore.ExplainOptions): NodeJS.ReadableStream;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-    // Warning: (ae-forgotten-export) The symbol "protos" needs to be exported by the entry point index.d.ts
     //
     // @internal
     _toBundledQuery(): protos.firestore.IBundledQuery;
@@ -1632,82 +1629,83 @@ export class WriteResult implements firestore.WriteResult {
 
 // Warnings were encountered during analysis:
 //
-// build/src/aggregate.d.ts:48:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/aggregate.d.ts:49:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/bulk-writer.d.ts:49:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/bulk-writer.d.ts:83:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/bulk-writer.d.ts:146:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/bulk-writer.d.ts:153:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/bulk-writer.d.ts:160:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/bulk-writer.d.ts:168:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/bulk-writer.d.ts:183:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/bulk-writer.d.ts:190:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/bulk-writer.d.ts:199:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/bulk-writer.d.ts:217:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/bulk-writer.d.ts:229:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/bulk-writer.d.ts:236:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/bulk-writer.d.ts:487:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/bulk-writer.d.ts:490:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/bulk-writer.d.ts:496:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/bulk-writer.d.ts:503:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/bulk-writer.d.ts:509:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/bulk-writer.d.ts:516:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/bundle.d.ts:19:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/filter.d.ts:120:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/filter.d.ts:155:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/index.d.ts:292:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/index.d.ts:312:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/index.d.ts:319:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/index.d.ts:340:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/index.d.ts:347:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/index.d.ts:356:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/index.d.ts:364:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/index.d.ts:371:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/index.d.ts:380:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/index.d.ts:864:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/index.d.ts:883:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/index.d.ts:885:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/index.d.ts:887:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/index.d.ts:888:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/index.d.ts:898:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/index.d.ts:900:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/index.d.ts:901:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/index.d.ts:903:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/index.d.ts:904:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/path.d.ts:29:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/path.d.ts:31:4 - (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
-// build/src/path.d.ts:119:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/path.d.ts:311:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/rate-limiter.d.ts:13:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/reference/aggregate-query.d.ts:85:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/reference/field-filter-internal.d.ts:24:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/reference/field-filter-internal.d.ts:26:4 - (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
-// build/src/reference/field-order.d.ts:22:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/reference/field-order.d.ts:24:4 - (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
-// build/src/reference/query-options.d.ts:27:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/reference/query.d.ts:425:8 - (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
-// build/src/reference/query.d.ts:431:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/reference/query.d.ts:433:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/reference/query.d.ts:441:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/reference/query.d.ts:443:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/reference/query.d.ts:443:15 - (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
-// build/src/reference/query.d.ts:445:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/reference/query.d.ts:445:15 - (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
-// build/src/reference/query.d.ts:447:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/reference/query.d.ts:449:24 - (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// build/src/reference/query.d.ts:449:17 - (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-// build/src/reference/query.d.ts:458:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/reference/query.d.ts:460:8 - (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
-// build/src/reference/query.d.ts:462:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/reference/query.d.ts:648:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/src/reference/query.d.ts:649:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/reference/vector-query.d.ts:50:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/reference/vector-query.d.ts:55:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/reference/vector-query.d.ts:60:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/serializer.d.ts:25:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/serializer.d.ts:35:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/write-batch.d.ts:85:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/src/write-batch.d.ts:108:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/aggregate.d.ts:48:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/aggregate.d.ts:49:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/bulk-writer.d.ts:49:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/bulk-writer.d.ts:83:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/bulk-writer.d.ts:146:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/bulk-writer.d.ts:153:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/bulk-writer.d.ts:160:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/bulk-writer.d.ts:168:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/bulk-writer.d.ts:183:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/bulk-writer.d.ts:190:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/bulk-writer.d.ts:199:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/bulk-writer.d.ts:217:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/bulk-writer.d.ts:229:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/bulk-writer.d.ts:236:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/bulk-writer.d.ts:487:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/bulk-writer.d.ts:490:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/bulk-writer.d.ts:496:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/bulk-writer.d.ts:503:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/bulk-writer.d.ts:509:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/bulk-writer.d.ts:516:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/bundle.d.ts:19:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/filter.d.ts:120:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/filter.d.ts:155:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:296:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:316:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:323:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:344:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:351:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:360:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:368:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:375:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:384:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:868:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:887:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:889:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/index.d.ts:891:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/index.d.ts:892:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/index.d.ts:902:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:904:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/index.d.ts:905:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/index.d.ts:907:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/index.d.ts:908:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/path.d.ts:29:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/path.d.ts:31:4 - (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
+// build/types/src/path.d.ts:127:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/path.d.ts:319:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/rate-limiter.d.ts:13:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/aggregate-query.d.ts:85:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/field-filter-internal.d.ts:24:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/field-filter-internal.d.ts:26:4 - (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
+// build/types/src/reference/field-order.d.ts:22:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/field-order.d.ts:24:4 - (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
+// build/types/src/reference/query-options.d.ts:27:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/query.d.ts:425:8 - (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// build/types/src/reference/query.d.ts:431:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/query.d.ts:433:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/reference/query.d.ts:441:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/query.d.ts:443:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/reference/query.d.ts:443:15 - (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
+// build/types/src/reference/query.d.ts:445:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/reference/query.d.ts:445:15 - (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
+// build/types/src/reference/query.d.ts:447:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/reference/query.d.ts:449:24 - (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+// build/types/src/reference/query.d.ts:449:17 - (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+// build/types/src/reference/query.d.ts:458:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/reference/query.d.ts:460:8 - (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// build/types/src/reference/query.d.ts:462:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/query.d.ts:648:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/reference/query.d.ts:649:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/vector-query.d.ts:50:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/vector-query.d.ts:55:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/vector-query.d.ts:60:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/serializer.d.ts:25:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/serializer.d.ts:35:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/telemetry/trace-util.d.ts:66:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/write-batch.d.ts:85:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/write-batch.d.ts:108:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 
 // (No @packageDocumentation comment for this package)
 

@@ -53,7 +53,7 @@ export abstract class Filter {
   public static where(
     fieldPath: string | firestore.FieldPath,
     opStr: firestore.WhereFilterOp,
-    value: unknown
+    value: unknown,
   ): Filter {
     return new UnaryFilter(fieldPath, opStr, value);
   }
@@ -143,7 +143,7 @@ export class UnaryFilter extends Filter {
   public constructor(
     private field: string | firestore.FieldPath,
     private operator: firestore.WhereFilterOp,
-    private value: unknown
+    private value: unknown,
   ) {
     super();
   }
@@ -190,7 +190,7 @@ export class CompositeFilter extends Filter {
    */
   public constructor(
     private filters: Filter[],
-    private operator: CompositeOperator
+    private operator: CompositeOperator,
   ) {
     super();
   }

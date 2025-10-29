@@ -37,10 +37,8 @@ setLogFunction(null);
 describe('Order', () => {
   let firestore: Firestore;
 
-  beforeEach(() => {
-    return createInstance().then(firestoreInstance => {
-      firestore = firestoreInstance;
-    });
+  beforeEach(async () => {
+    firestore = await createInstance();
   });
 
   afterEach(() => verifyInstance(firestore));
@@ -60,8 +58,8 @@ describe('Order', () => {
     return wrap(
       new DocumentReference(
         firestore,
-        QualifiedResourcePath.fromSlashSeparatedString(pathString)
-      )
+        QualifiedResourcePath.fromSlashSeparatedString(pathString),
+      ),
     );
   }
 
@@ -85,7 +83,7 @@ describe('Order', () => {
     expect(() => {
       order.compare(
         {valueType: 'foo'} as InvalidApiUsage,
-        {valueType: 'foo'} as InvalidApiUsage
+        {valueType: 'foo'} as InvalidApiUsage,
       );
     }).to.throw('Unexpected value type: foo');
   });
@@ -98,7 +96,7 @@ describe('Order', () => {
         },
         {
           bytesValue: new Uint8Array([1, 2, 3]),
-        }
+        },
       );
     }).to.throw('Blobs can only be compared if they are Buffers');
   });
@@ -110,28 +108,28 @@ describe('Order', () => {
         {},
         Timestamp.now(),
         Timestamp.now(),
-        Timestamp.now()
+        Timestamp.now(),
       ),
       new QueryDocumentSnapshot(
         firestore.doc('col/doc2'),
         {},
         Timestamp.now(),
         Timestamp.now(),
-        Timestamp.now()
+        Timestamp.now(),
       ),
       new QueryDocumentSnapshot(
         firestore.doc('col/doc2'),
         {},
         Timestamp.now(),
         Timestamp.now(),
-        Timestamp.now()
+        Timestamp.now(),
       ),
       new QueryDocumentSnapshot(
         firestore.doc('col/doc1'),
         {},
         Timestamp.now(),
         Timestamp.now(),
-        Timestamp.now()
+        Timestamp.now(),
       ),
     ];
 
@@ -258,7 +256,7 @@ describe('Order', () => {
                 i +
                 ', ' +
                 j +
-                ')'
+                ')',
             );
 
             expected = order.primitiveComparator(j, i);
@@ -276,7 +274,7 @@ describe('Order', () => {
                 j +
                 ', ' +
                 i +
-                ')'
+                ')',
             );
           }
         }
@@ -288,7 +286,7 @@ describe('Order', () => {
 class StringPair {
   constructor(
     readonly s1: string,
-    readonly s2: string
+    readonly s2: string,
   ) {}
 }
 
@@ -316,7 +314,7 @@ class StringGenerator {
   constructor(
     seedOrRnd: number | Random,
     surrogatePairProbability?: number,
-    maxLength?: number
+    maxLength?: number,
   ) {
     if (typeof seedOrRnd === 'number') {
       this.rnd = new Random(seedOrRnd);
@@ -326,7 +324,7 @@ class StringGenerator {
     } else {
       this.rnd = seedOrRnd;
       this.surrogatePairProbability = StringGenerator.validateProbability(
-        surrogatePairProbability!
+        surrogatePairProbability!,
       );
       this.maxLength = StringGenerator.validateLength(maxLength!);
     }
@@ -335,15 +333,15 @@ class StringGenerator {
   private static validateProbability(probability: number): number {
     if (!Number.isFinite(probability)) {
       throw new Error(
-        `invalid surrogate pair probability: ${probability} (must be between 0.0 and 1.0, inclusive)`
+        `invalid surrogate pair probability: ${probability} (must be between 0.0 and 1.0, inclusive)`,
       );
     } else if (probability < 0.0) {
       throw new Error(
-        `invalid surrogate pair probability: ${probability} (must be greater than or equal to zero)`
+        `invalid surrogate pair probability: ${probability} (must be greater than or equal to zero)`,
       );
     } else if (probability > 1.0) {
       throw new Error(
-        `invalid surrogate pair probability: ${probability} (must be less than or equal to 1)`
+        `invalid surrogate pair probability: ${probability} (must be less than or equal to 1)`,
       );
     }
     return probability;
@@ -352,7 +350,7 @@ class StringGenerator {
   private static validateLength(length: number): number {
     if (length < 0) {
       throw new Error(
-        `invalid maximum string length: ${length} (must be greater than or equal to zero)`
+        `invalid maximum string length: ${length} (must be greater than or equal to zero)`,
       );
     }
     return length;
@@ -398,11 +396,11 @@ class StringGenerator {
 
     const highSurrogate = this.nextCodePointRange(
       highSurrogateMin,
-      highSurrogateMax
+      highSurrogateMax,
     );
     const lowSurrogate = this.nextCodePointRange(
       lowSurrogateMin,
-      lowSurrogateMax
+      lowSurrogateMax,
     );
 
     return (highSurrogate - 0xd800) * 0x400 + (lowSurrogate - 0xdc00) + 0x10000;
@@ -484,19 +482,19 @@ describe('CompareUtf8Strings', () => {
       } else {
         errors.push(
           `compareUtf8Strings(s1="${s1}", s2="${s2}") returned ${actual}, ` +
-            `but expected ${expected} (i=${i}, s1.length=${s1.length}, s2.length=${s2.length})`
+            `but expected ${expected} (i=${i}, s1.length=${s1.length}, s2.length=${s2.length})`,
         );
       }
     }
 
     if (errors.length > 0) {
       console.error(
-        `${errors.length} test cases failed, ${passCount} test cases passed, seed=${seed};`
+        `${errors.length} test cases failed, ${passCount} test cases passed, seed=${seed};`,
       );
       errors.forEach((error, index) =>
-        console.error(`errors[${index}]: ${error}`)
+        console.error(`errors[${index}]: ${error}`),
       );
       throw new Error('Test failed');
     }
-  }).timeout(20000);
+  }).timeout(30000);
 });

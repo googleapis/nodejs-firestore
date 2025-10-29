@@ -65,7 +65,7 @@ export class EnabledTraceUtil implements TraceUtil {
       this.tracer = this.tracerProvider.getTracer(libName, libVersion);
     } catch (e) {
       throw new Error(
-        "The object provided for 'tracerProvider' does not conform to the TracerProvider interface."
+        "The object provided for 'tracerProvider' does not conform to the TracerProvider interface.",
       );
     }
 
@@ -104,28 +104,28 @@ export class EnabledTraceUtil implements TraceUtil {
       `${ATTRIBUTE_SETTINGS_PREFIX}.initial_retry_delay`
     ] = this.millisToSecondString(
       customRetrySettings?.initial_retry_delay_millis ??
-        defaultRetrySettings.initial_retry_delay_millis
+        defaultRetrySettings.initial_retry_delay_millis,
     );
     this.settingsAttributes[
       `${ATTRIBUTE_SETTINGS_PREFIX}.initial_rpc_timeout`
     ] = this.millisToSecondString(
       customRetrySettings?.initial_rpc_timeout_millis ??
-        defaultRetrySettings.initial_rpc_timeout_millis
+        defaultRetrySettings.initial_rpc_timeout_millis,
     );
     this.settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.total_timeout`] =
       this.millisToSecondString(
         customRetrySettings?.total_timeout_millis ??
-          defaultRetrySettings.total_timeout_millis
+          defaultRetrySettings.total_timeout_millis,
       );
     this.settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.max_retry_delay`] =
       this.millisToSecondString(
         customRetrySettings?.max_retry_delay_millis ??
-          defaultRetrySettings.max_retry_delay_millis
+          defaultRetrySettings.max_retry_delay_millis,
       );
     this.settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.max_rpc_timeout`] =
       this.millisToSecondString(
         customRetrySettings?.max_rpc_timeout_millis ??
-          defaultRetrySettings.max_rpc_timeout_millis
+          defaultRetrySettings.max_rpc_timeout_millis,
       );
     this.settingsAttributes[
       `${ATTRIBUTE_SETTINGS_PREFIX}.retry_delay_multiplier`
@@ -161,7 +161,7 @@ export class EnabledTraceUtil implements TraceUtil {
   startActiveSpan<F extends (span: Span) => unknown>(
     name: string,
     fn: F,
-    attributes?: Attributes
+    attributes?: Attributes,
   ): ReturnType<F> {
     return this.tracer.startActiveSpan(
       name,
@@ -196,7 +196,7 @@ export class EnabledTraceUtil implements TraceUtil {
           // Re-throw the exception to maintain normal error handling.
           throw error;
         }
-      }
+      },
     );
   }
 

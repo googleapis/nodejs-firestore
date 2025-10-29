@@ -38,6 +38,7 @@ import {
   InMemorySpanExporter,
   NodeTracerProvider,
   ReadableSpan,
+  SpanProcessor,
   TimedEvent,
 } from '@opentelemetry/sdk-trace-node';
 import {setLogFunction, Firestore} from '../src';
@@ -128,16 +129,16 @@ class SpanData {
     public traceId: string,
     public name: string | null | undefined,
     public attributes: Attributes,
-    public events: TimedEvent[]
+    public events: TimedEvent[],
   ) {}
   static fromInMemorySpan(span: ReadableSpan): SpanData {
     return new SpanData(
       span.spanContext().spanId,
-      span.parentSpanId,
+      span.parentSpanContext?.spanId,
       span.spanContext().traceId,
       span.name,
       span.attributes,
-      span.events
+      span.events,
     );
   }
 
@@ -148,7 +149,7 @@ class SpanData {
       traceId,
       span.name,
       {},
-      []
+      [],
     );
   }
 }
@@ -182,7 +183,7 @@ describe('Tracing Tests', () => {
   }
 
   function getOpenTelemetryOptions(
-    tracerProvider: TracerProvider
+    tracerProvider: TracerProvider,
   ): FirestoreOpenTelemetryOptions {
     const options: FirestoreOpenTelemetryOptions = {
       tracerProvider: undefined,
@@ -242,28 +243,27 @@ describe('Tracing Tests', () => {
     contextManager.enable();
     context.setGlobalContextManager(contextManager);
 
-    // Create a new tracer and span processor for each test to make sure there
-    // are no overlaps when reading the results.
-    tracerProvider = new NodeTracerProvider({
-      sampler: new AlwaysOnSampler(),
-    });
-
     inMemorySpanExporter = new InMemorySpanExporter();
     consoleSpanExporter = new ConsoleSpanExporter();
     gcpTraceExporter = new TraceExporter();
 
-    // Always add the console exporter for local debugging.
-    tracerProvider.addSpanProcessor(
-      new BatchSpanProcessor(consoleSpanExporter)
-    );
+    const spanProcessors: SpanProcessor[] = [
+      // Always add the console exporter for local debugging.
+      new BatchSpanProcessor(consoleSpanExporter),
+    ];
 
     if (testConfig.e2e) {
-      tracerProvider.addSpanProcessor(new BatchSpanProcessor(gcpTraceExporter));
+      spanProcessors.push(new BatchSpanProcessor(gcpTraceExporter));
     } else {
-      tracerProvider.addSpanProcessor(
-        new BatchSpanProcessor(inMemorySpanExporter)
-      );
+      spanProcessors.push(new BatchSpanProcessor(inMemorySpanExporter));
     }
+
+    // Create a new tracer and span processor for each test to make sure there
+    // are no overlaps when reading the results.
+    tracerProvider = new NodeTracerProvider({
+      sampler: new AlwaysOnSampler(),
+      spanProcessors,
+    });
 
     if (testConfig.useGlobalOpenTelemetry) {
       trace.setGlobalTracerProvider(tracerProvider);
@@ -339,7 +339,7 @@ describe('Tracing Tests', () => {
   // encapsulate all the SDK-generated spans inside a test root span. It also makes
   // it easy to query a trace storage backend for a known trace ID and span Id.
   function runFirestoreOperationInRootSpan<F extends () => void>(
-    fn: F
+    fn: F,
   ): Promise<void> {
     return tracer.startActiveSpan(
       SPAN_NAME_TEST_ROOT,
@@ -348,7 +348,7 @@ describe('Tracing Tests', () => {
       async span => {
         await fn();
         span.end();
-      }
+      },
     );
   }
 
@@ -362,7 +362,7 @@ describe('Tracing Tests', () => {
 
   // Returns true on success, and false otherwise.
   async function waitForCompletedCloudTraceSpans(
-    numExpectedSpans: number
+    numExpectedSpans: number,
   ): Promise<boolean> {
     const auth = new gAuth.GoogleAuth({
       projectId: firestore.projectId,
@@ -370,13 +370,13 @@ describe('Tracing Tests', () => {
     });
     const client = new cloudtrace_v1.Cloudtrace({auth});
     const projectTraces = new cloudtrace_v1.Resource$Projects$Traces(
-      client.context
+      client.context,
     );
 
     // Querying the trace from Cloud Trace immediately is almost always going
     // to fail. So we have an initial delay before making our first attempt.
     await new Promise(resolve =>
-      setTimeout(resolve, GET_TRACE_INITIAL_WAIT_MILLIS)
+      setTimeout(resolve, GET_TRACE_INITIAL_WAIT_MILLIS),
     );
 
     let remainingAttempts = GET_TRACE_MAX_RETRY_COUNT;
@@ -394,14 +394,14 @@ describe('Tracing Tests', () => {
         logger(
           'waitForCompletedCloudTraceSpans',
           null,
-          `fetched a trace with ${cloudTraceInfo.spans?.length} spans`
+          `fetched a trace with ${cloudTraceInfo.spans?.length} spans`,
         );
       } catch (error) {
         logger(
           'waitForCompletedCloudTraceSpans',
           null,
           'failed with error:',
-          error
+          error,
         );
       }
 
@@ -410,10 +410,10 @@ describe('Tracing Tests', () => {
         logger(
           'waitForCompletedCloudTraceSpans',
           null,
-          `Could not fetch a full trace from the server. Retrying in ${GET_TRACE_RETRY_BACKOFF_MILLIS}ms.`
+          `Could not fetch a full trace from the server. Retrying in ${GET_TRACE_RETRY_BACKOFF_MILLIS}ms.`,
         );
         await new Promise(resolve =>
-          setTimeout(resolve, GET_TRACE_RETRY_BACKOFF_MILLIS)
+          setTimeout(resolve, GET_TRACE_RETRY_BACKOFF_MILLIS),
         );
       }
     } while (!receivedFullTrace && --remainingAttempts > 0);
@@ -421,7 +421,7 @@ describe('Tracing Tests', () => {
   }
 
   async function waitForCompletedSpans(
-    numExpectedSpans: number
+    numExpectedSpans: number,
   ): Promise<void> {
     let success = false;
     if (testConfig.e2e) {
@@ -440,7 +440,7 @@ describe('Tracing Tests', () => {
     // the in-memory trace will have more spans than `numExpectedSpans`.
     expect(spanIdToSpanData.size).to.greaterThanOrEqual(
       numExpectedSpans,
-      `Could not find expected number of spans (${numExpectedSpans})`
+      `Could not find expected number of spans (${numExpectedSpans})`,
     );
   }
 
@@ -448,7 +448,7 @@ describe('Tracing Tests', () => {
     const spans = inMemorySpanExporter.getFinishedSpans();
     spans.forEach(span => {
       const id = span?.spanContext().spanId;
-      const parentId = span?.parentSpanId;
+      const parentId = span?.parentSpanContext?.spanId;
       if (!parentId || span.name === SPAN_NAME_TEST_ROOT) {
         rootSpanIds.push(id);
       } else {
@@ -482,7 +482,7 @@ describe('Tracing Tests', () => {
       }
       spanIdToSpanData.set(
         id!,
-        SpanData.fromCloudTraceSpan(span, customSpanContext.traceId)
+        SpanData.fromCloudTraceSpan(span, customSpanContext.traceId),
       );
     });
   }
@@ -499,7 +499,7 @@ describe('Tracing Tests', () => {
       'Built the following spans:',
       rootSpanIds,
       spanIdToSpanData,
-      spanIdToChildrenSpanIds
+      spanIdToChildrenSpanIds,
     );
   }
 
@@ -523,7 +523,7 @@ describe('Tracing Tests', () => {
   // the given root.
   function dfsSpanHierarchy(
     rootSpanId: string,
-    spanNamesHierarchy: string[]
+    spanNamesHierarchy: string[],
   ): SpanData[] {
     // This function returns an empty list if it cannot find a full match.
     const notAMatch: SpanData[] = [];
@@ -559,7 +559,7 @@ describe('Tracing Tests', () => {
           const newRootSpanId = children[childIndex];
           const subtreeMatch = dfsSpanHierarchy(
             newRootSpanId,
-            newSpanNamesHierarchy
+            newSpanNamesHierarchy,
           );
           if (subtreeMatch.length > 0) {
             // We found a full match in the child tree.
@@ -582,7 +582,7 @@ describe('Tracing Tests', () => {
   function expectSpanHierarchy(...spanNamesHierarchy: string[]): void {
     expect(spanNamesHierarchy.length).to.be.greaterThan(
       0,
-      'The expected spans hierarchy was empty'
+      'The expected spans hierarchy was empty',
     );
 
     let matchingSpanHierarchy: SpanData[] = [];
@@ -599,20 +599,20 @@ describe('Tracing Tests', () => {
     for (let i = 0; i < rootSpanIds.length; ++i) {
       matchingSpanHierarchy = dfsSpanHierarchy(
         rootSpanIds[i],
-        spanNamesHierarchy
+        spanNamesHierarchy,
       );
       if (matchingSpanHierarchy.length > 0) break;
     }
 
     expect(matchingSpanHierarchy.length).to.be.greaterThan(
       0,
-      `Was not able to find the following span hierarchy: ${spanNamesHierarchy}`
+      `Was not able to find the following span hierarchy: ${spanNamesHierarchy}`,
     );
     logger(
       'expectSpanHierarchy',
       null,
       'Found the following span hierarchy:',
-      matchingSpanHierarchy
+      matchingSpanHierarchy,
     );
 
     for (let i = 0; i + 1 < matchingSpanHierarchy.length; ++i) {
@@ -620,7 +620,7 @@ describe('Tracing Tests', () => {
       const childSpan = matchingSpanHierarchy[i + 1];
       expect(childSpan.traceId).to.equal(
         parentSpan.traceId,
-        `'${childSpan.name}' and '${parentSpan.name}' spans do not belong to the same trace`
+        `'${childSpan.name}' and '${parentSpan.name}' spans do not belong to the same trace`,
       );
 
       // The Cloud Trace API does not return span attributes and events.
@@ -637,7 +637,7 @@ describe('Tracing Tests', () => {
             // this attribute on the leaf spans.
           } else {
             expect(childSpan.attributes[attributesKey]).to.be.equal(
-              settingsAttributes[attributesKey]
+              settingsAttributes[attributesKey],
             );
           }
         }
@@ -648,7 +648,7 @@ describe('Tracing Tests', () => {
   // Ensures that the given span exists and has exactly all the given attributes.
   function expectSpanHasAttributes(
     spanName: string,
-    attributes: Attributes
+    attributes: Attributes,
   ): void {
     // The Cloud Trace API does not return span attributes and events.
     if (testConfig.e2e) {
@@ -664,7 +664,7 @@ describe('Tracing Tests', () => {
     // to this function.
     for (const attributesKey in attributes) {
       expect(span!.attributes[attributesKey]).to.be.equal(
-        attributes[attributesKey]
+        attributes[attributesKey],
       );
     }
   }
@@ -765,13 +765,13 @@ describe('Tracing Tests', () => {
   function runTestCases() {
     it('document reference get()', async () => {
       await runFirestoreOperationInRootSpan(() =>
-        firestore.collection('foo').doc('bar').get()
+        firestore.collection('foo').doc('bar').get(),
       );
       await waitForCompletedSpans(3);
       expectSpanHierarchy(
         SPAN_NAME_TEST_ROOT,
         SPAN_NAME_DOC_REF_GET,
-        SPAN_NAME_BATCH_GET_DOCUMENTS
+        SPAN_NAME_BATCH_GET_DOCUMENTS,
       );
       expectSpanHasEvents(SPAN_NAME_BATCH_GET_DOCUMENTS, [
         'Firestore.batchGetDocuments: Start',
@@ -782,37 +782,37 @@ describe('Tracing Tests', () => {
 
     it('document reference create()', async () => {
       await runFirestoreOperationInRootSpan(() =>
-        firestore.collection('foo').doc().create({})
+        firestore.collection('foo').doc().create({}),
       );
       await waitForCompletedSpans(3);
       expectSpanHierarchy(
         SPAN_NAME_TEST_ROOT,
         SPAN_NAME_DOC_REF_CREATE,
-        SPAN_NAME_BATCH_COMMIT
+        SPAN_NAME_BATCH_COMMIT,
       );
     });
 
     it('document reference delete()', async () => {
       await runFirestoreOperationInRootSpan(() =>
-        firestore.collection('foo').doc('bar').delete()
+        firestore.collection('foo').doc('bar').delete(),
       );
       await waitForCompletedSpans(3);
       expectSpanHierarchy(
         SPAN_NAME_TEST_ROOT,
         SPAN_NAME_DOC_REF_DELETE,
-        SPAN_NAME_BATCH_COMMIT
+        SPAN_NAME_BATCH_COMMIT,
       );
     });
 
     it('document reference set()', async () => {
       await runFirestoreOperationInRootSpan(() =>
-        firestore.collection('foo').doc('bar').set({foo: 'bar'})
+        firestore.collection('foo').doc('bar').set({foo: 'bar'}),
       );
       await waitForCompletedSpans(3);
       expectSpanHierarchy(
         SPAN_NAME_TEST_ROOT,
         SPAN_NAME_DOC_REF_SET,
-        SPAN_NAME_BATCH_COMMIT
+        SPAN_NAME_BATCH_COMMIT,
       );
     });
 
@@ -822,30 +822,30 @@ describe('Tracing Tests', () => {
       await firestore.collection('foo').doc('bar').set({foo: 'bar'});
 
       await runFirestoreOperationInRootSpan(() =>
-        firestore.collection('foo').doc('bar').update('foo', 'bar2')
+        firestore.collection('foo').doc('bar').update('foo', 'bar2'),
       );
       await waitForCompletedSpans(3);
       expectSpanHierarchy(
         SPAN_NAME_TEST_ROOT,
         SPAN_NAME_DOC_REF_UPDATE,
-        SPAN_NAME_BATCH_COMMIT
+        SPAN_NAME_BATCH_COMMIT,
       );
     });
 
     it('document reference list collections', async () => {
       await runFirestoreOperationInRootSpan(() =>
-        firestore.collection('foo').doc('bar').listCollections()
+        firestore.collection('foo').doc('bar').listCollections(),
       );
       await waitForCompletedSpans(2);
       expectSpanHierarchy(
         SPAN_NAME_TEST_ROOT,
-        SPAN_NAME_DOC_REF_LIST_COLLECTIONS
+        SPAN_NAME_DOC_REF_LIST_COLLECTIONS,
       );
     });
 
     it('aggregate query get()', async () => {
       await runFirestoreOperationInRootSpan(() =>
-        firestore.collection('foo').count().get()
+        firestore.collection('foo').count().get(),
       );
       await waitForCompletedSpans(2);
       expectSpanHierarchy(SPAN_NAME_TEST_ROOT, SPAN_NAME_AGGREGATION_QUERY_GET);
@@ -858,31 +858,31 @@ describe('Tracing Tests', () => {
 
     it('collection reference add()', async () => {
       await runFirestoreOperationInRootSpan(() =>
-        firestore.collection('foo').add({foo: 'bar'})
+        firestore.collection('foo').add({foo: 'bar'}),
       );
       await waitForCompletedSpans(4);
       expectSpanHierarchy(
         SPAN_NAME_TEST_ROOT,
         SPAN_NAME_COL_REF_ADD,
         SPAN_NAME_DOC_REF_CREATE,
-        SPAN_NAME_BATCH_COMMIT
+        SPAN_NAME_BATCH_COMMIT,
       );
     });
 
     it('collection reference list documents', async () => {
       await runFirestoreOperationInRootSpan(() =>
-        firestore.collection('foo').listDocuments()
+        firestore.collection('foo').listDocuments(),
       );
       await waitForCompletedSpans(2);
       expectSpanHierarchy(
         SPAN_NAME_TEST_ROOT,
-        SPAN_NAME_COL_REF_LIST_DOCUMENTS
+        SPAN_NAME_COL_REF_LIST_DOCUMENTS,
       );
     });
 
     it('query get()', async () => {
       await runFirestoreOperationInRootSpan(() =>
-        firestore.collection('foo').where('foo', '==', 'bar').limit(1).get()
+        firestore.collection('foo').where('foo', '==', 'bar').limit(1).get(),
       );
       await waitForCompletedSpans(2);
       expectSpanHierarchy(SPAN_NAME_TEST_ROOT, SPAN_NAME_QUERY_GET);
@@ -898,7 +898,7 @@ describe('Tracing Tests', () => {
       const docRef1 = firestore.collection('foo').doc('1');
       const docRef2 = firestore.collection('foo').doc('2');
       await runFirestoreOperationInRootSpan(() =>
-        firestore.getAll(docRef1, docRef2)
+        firestore.getAll(docRef1, docRef2),
       );
       await waitForCompletedSpans(2);
       expectSpanHierarchy(SPAN_NAME_TEST_ROOT, SPAN_NAME_BATCH_GET_DOCUMENTS);
@@ -927,27 +927,27 @@ describe('Tracing Tests', () => {
       expectSpanHierarchy(
         SPAN_NAME_TEST_ROOT,
         SPAN_NAME_TRANSACTION_RUN,
-        SPAN_NAME_TRANSACTION_GET_DOCUMENT
+        SPAN_NAME_TRANSACTION_GET_DOCUMENT,
       );
       expectSpanHierarchy(
         SPAN_NAME_TEST_ROOT,
         SPAN_NAME_TRANSACTION_RUN,
-        SPAN_NAME_TRANSACTION_GET_DOCUMENTS
+        SPAN_NAME_TRANSACTION_GET_DOCUMENTS,
       );
       expectSpanHierarchy(
         SPAN_NAME_TEST_ROOT,
         SPAN_NAME_TRANSACTION_RUN,
-        SPAN_NAME_TRANSACTION_GET_QUERY
+        SPAN_NAME_TRANSACTION_GET_QUERY,
       );
       expectSpanHierarchy(
         SPAN_NAME_TEST_ROOT,
         SPAN_NAME_TRANSACTION_RUN,
-        SPAN_NAME_TRANSACTION_GET_AGGREGATION_QUERY
+        SPAN_NAME_TRANSACTION_GET_AGGREGATION_QUERY,
       );
       expectSpanHierarchy(
         SPAN_NAME_TEST_ROOT,
         SPAN_NAME_TRANSACTION_RUN,
-        SPAN_NAME_TRANSACTION_COMMIT
+        SPAN_NAME_TRANSACTION_COMMIT,
       );
     });
 
@@ -980,11 +980,11 @@ describe('Tracing Tests', () => {
       await runFirestoreOperationInRootSpan(async () => {
         const bulkWriter = firestore.bulkWriter();
         // No need to await the set operations as 'close()' will commit all writes before closing.
-        bulkWriter.set(firestore.collection('foo').doc(), {foo: 1});
-        bulkWriter.set(firestore.collection('foo').doc(), {foo: 2});
-        bulkWriter.set(firestore.collection('foo').doc(), {foo: 3});
-        bulkWriter.set(firestore.collection('foo').doc(), {foo: 4});
-        bulkWriter.set(firestore.collection('foo').doc(), {foo: 5});
+        void bulkWriter.set(firestore.collection('foo').doc(), {foo: 1});
+        void bulkWriter.set(firestore.collection('foo').doc(), {foo: 2});
+        void bulkWriter.set(firestore.collection('foo').doc(), {foo: 3});
+        void bulkWriter.set(firestore.collection('foo').doc(), {foo: 4});
+        void bulkWriter.set(firestore.collection('foo').doc(), {foo: 5});
         await bulkWriter.close();
       });
 
