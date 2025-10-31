@@ -114,6 +114,24 @@ function getTestRoot(settings: Settings = {}): CollectionReference {
   return firestore.collection(`node_${version}_${autoId()}`);
 }
 
+/**
+ * Returns a Blob with the size equal to the largest number of bytes allowed to
+ * be stored in a Firestore document.
+ */
+function getLargestDocContent(): object {
+  const MAX_BYTES_PER_FIELD_VALUE = 1048487;
+  // Subtract 8 for '__name__', 20 for its value, and 4 for 'blob'.
+  const numBytesToUse = MAX_BYTES_PER_FIELD_VALUE - 8 - 20 - 4;
+
+  const bytes = new Uint8Array(numBytesToUse);
+  for (let i = 0; i < bytes.length; i++) {
+    // Fill with random byte (0-255)
+    bytes[i] = Math.floor(Math.random() * 256);
+  }
+
+  return {blob: Buffer.from(bytes)};
+}
+
 describe('Firestore class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
@@ -3936,6 +3954,37 @@ describe('Query class', () => {
       unsubscribe();
     });
 
+    it('can listen to large query snapshots', async () => {
+      const content = getLargestDocContent();
+      const collRef = firestore.collection(autoId());
+      await collRef.doc().set(content);
+      const unsubscribe = collRef.onSnapshot(snapshot => {
+        currentDeferred.resolve(snapshot);
+      });
+      const querySnapshot = await waitForSnapshot();
+      expect(querySnapshot.docs.length).to.equal(1);
+      expect(querySnapshot.docs[0].data()).to.deep.equal(content);
+      unsubscribe();
+    }).timeout(10_000);
+
+    it('can listen to large document snapshots', async () => {
+      const content = getLargestDocContent();
+      const collRef = firestore.collection(autoId());
+      const docRef = collRef.doc();
+      await docRef.set(content);
+      const deferredPromise = new DeferredPromise<DocumentSnapshot>();
+      deferredPromise.promise = new Promise((resolve, reject) => {
+        deferredPromise.resolve = resolve;
+        deferredPromise.reject = reject;
+      });
+      const unsubscribe = docRef.onSnapshot(snapshot => {
+        deferredPromise.resolve(snapshot);
+      });
+      const documentSnapshot = await deferredPromise.promise!;
+      expect(documentSnapshot.data()).to.deep.equal(content);
+      unsubscribe();
+    }).timeout(10_000);
+
     it('snapshot listener sorts query by DocumentId same way as server', async () => {
       const batch = firestore.batch();
       batch.set(randomCol.doc('A'), {a: 1});
@@ -7658,6 +7707,79 @@ describe('Bundle building', () => {
     delete (expected.fields!.value as any).valueType;
     expect(bundledDoc).to.deep.equal(expected);
   });
+});
+
+describe('Test large documents', () => {
+  let firestore: Firestore;
+
+  beforeEach(async () => {
+    firestore = new Firestore({});
+  });
+
+  afterEach(() => verifyInstance(firestore));
+
+  it('can CRUD and query large documents', async () => {
+    const coll = firestore.collection(autoId());
+    const docRef = coll.doc();
+    const data = getLargestDocContent();
+
+    // Set
+    await docRef.set(data);
+
+    // Get
+    let docSnap = await docRef.get();
+    expect(docSnap.data()).to.deep.equal(data);
+
+    // Update
+    const newData = getLargestDocContent();
+    await docRef.update(newData);
+    docSnap = await docRef.get();
+    expect(docSnap.data()).to.deep.equal(newData);
+
+    // Query
+    const querySnap = await coll.get();
+    expect(querySnap.size).to.equal(1);
+    expect(querySnap.docs[0].data()).to.deep.equal(newData);
+
+    // Delete
+    await docRef.delete();
+    docSnap = await docRef.get();
+    expect(docSnap.exists).to.be.false;
+  });
+
+  it('can CRUD large documents inside transaction', async () => {
+    const coll = firestore.collection(autoId());
+    const data = getLargestDocContent();
+    const newData = getLargestDocContent();
+
+    const docRef1 = coll.doc('doc1');
+    const docRef2 = coll.doc('doc2');
+    const docRef3 = coll.doc('doc3');
+    await docRef1.set(data);
+    await docRef3.set(data);
+
+    await firestore.runTransaction(async tx => {
+      // Get and update
+      const docSnap = await tx.get(docRef1);
+      expect(docSnap.data()).to.deep.equal(data);
+      tx.update(docRef1, newData);
+
+      // Set
+      tx.set(docRef2, data);
+
+      // Delete
+      tx.delete(docRef3);
+    });
+
+    let docSnap = await docRef1.get();
+    expect(docSnap.data()).to.deep.equal(newData);
+
+    docSnap = await docRef2.get();
+    expect(docSnap.data()).to.deep.equal(data);
+
+    docSnap = await docRef3.get();
+    expect(docSnap.exists).to.be.false;
+  }).timeout(10_000);
 });
 
 describe('Types test', () => {
