@@ -121,5 +121,8 @@ export {
   join,
   currentTimestamp,
   arrayConcat,
+  type,
+  timestampTruncate,
+  split,
   // TODO(new-expression): Add new expression exports above this line
 } from './expression';

@@ -22,6 +22,7 @@ import {FieldPath} from '../path';
 import {
   fieldOrExpression,
   isFirestoreValue,
+  isString,
   valueToDefaultExpr,
   vectorToExpr,
 } from './pipeline-util';
@@ -922,17 +923,27 @@ export abstract class Expression
 
   /**
    * @beta
-   * Creates an expression that removes leading and trailing whitespace from a string.
+   * Creates an expression that removes leading and trailing characters from a string or byte array.
    *
    * ```typescript
    * // Trim whitespace from the 'userInput' field
    * field("userInput").trim();
-   * ```
    *
-   * @return A new `Expression` representing the trimmed string.
+   * // Trim quotes from the 'userInput' field
+   * field("userInput").trim('"');
+   * ```
+   * @param valueToTrim Optional This parameter is treated as a set of characters or bytes that will be
+   * trimmed from the input. If not specified, then whitespace will be trimmed.
+   * @return A new `Expr` representing the trimmed string or byte array.
    */
-  trim(): FunctionExpression {
-    return new FunctionExpression('trim', [this]);
+  trim(
+    valueToTrim?: string | Expression | Uint8Array | Buffer,
+  ): FunctionExpression {
+    const args: Expression[] = [this];
+    if (valueToTrim) {
+      args.push(valueToDefaultExpr(valueToTrim));
+    }
+    return new FunctionExpression('trim', args);
   }
 
   /**
@@ -2024,6 +2035,110 @@ export abstract class Expression
    */
   arraySum(): FunctionExpression {
     return new FunctionExpression('sum', [this]);
+  }
+
+  /**
+   * @beta
+   * Creates an expression that splits the result of this expression into an
+   * array of substrings based on the provided delimiter.
+   *
+   * @example
+   * ```typescript
+   * // Split the 'scoresCsv' field on delimiter ','
+   * field('scoresCsv').split(',')
+   * ```
+   *
+   * @return A new {@code Expression} representing the split function.
+   */
+  split(delimiter: string): FunctionExpression;
+
+  /**
+   * @beta
+   * Creates an expression that splits the result of this expression into an
+   * array of substrings based on the provided delimiter.
+   *
+   * @example
+   * ```typescript
+   * // Split the 'scores' field on delimiter ',' or ':' depending on the stored format
+   * field('scores').split(conditional(field('format').equal('csv'), constant(','), constant(':'))
+   * ```
+   *
+   * @return A new {@code Expression} representing the split function.
+   */
+  split(delimiter: Expression): FunctionExpression;
+  split(delimiter: string | Expression): FunctionExpression {
+    return new FunctionExpression('split', [
+      this,
+      valueToDefaultExpr(delimiter),
+    ]);
+  }
+
+  /**
+   * Creates an expression that truncates a timestamp to a specified granularity.
+   *
+   * @example
+   * ```typescript
+   * // Truncate the 'createdAt' timestamp to the beginning of the day.
+   * field('createdAt').timestampTruncate('day')
+   * ```
+   *
+   * @param granularity The granularity to truncate to.
+   * @param timezone The timezone to use for truncation. Valid values are from
+   * the TZ database (e.g., "America/Los_Angeles") or in the format "Etc/GMT-1".
+   * @return A new {Expression} representing the truncated timestamp.
+   */
+  timestampTruncate(
+    granularity: firestore.Pipelines.TimeGranularity,
+    timezone?: string | Expression,
+  ): FunctionExpression;
+
+  /**
+   * Creates an expression that truncates a timestamp to a specified granularity.
+   *
+   * @example
+   * ```typescript
+   * // Truncate the 'createdAt' timestamp to the granularity specified in the field 'granularity'.
+   * field('createdAt').timestampTruncate(field('granularity'))
+   * ```
+   *
+   * @param granularity The granularity to truncate to.
+   * @param timezone The timezone to use for truncation. Valid values are from
+   * the TZ database (e.g., "America/Los_Angeles") or in the format "Etc/GMT-1".
+   * @return A new {Expression} representing the truncated timestamp.
+   */
+  timestampTruncate(
+    granularity: Expression,
+    timezone?: string | Expression,
+  ): FunctionExpression;
+  timestampTruncate(
+    granularity: firestore.Pipelines.TimeGranularity | Expression,
+    timezone?: string | Expression,
+  ): FunctionExpression {
+    const internalGranularity = isString(granularity)
+      ? granularity.toLowerCase()
+      : granularity;
+
+    const args = [this, valueToDefaultExpr(internalGranularity)];
+    if (timezone) {
+      args.push(valueToDefaultExpr(timezone));
+    }
+    return new FunctionExpression('timestamp_trunc', args);
+  }
+
+  /**
+   * @beta
+   * Creates an expression that returns the data type of this expression's result, as a string.
+   *
+   * @example
+   * ```typescript
+   * // Get the data type of the value in field 'title'
+   * field('title').type()
+   * ```
+   *
+   * @return A new {Expression} representing the data type.
+   */
+  type(): FunctionExpression {
+    return new FunctionExpression('type', [this]);
   }
 
   // TODO(new-expression): Add new expression method definitions above this line
@@ -5574,33 +5689,54 @@ export function toUpper(expr: Expression | string): FunctionExpression {
 
 /**
  * @beta
- * Creates an expression that removes leading and trailing whitespace from a string field.
+ *
+ * Creates an expression that removes leading and trailing whitespace from a string or byte array.
  *
  * ```typescript
  * // Trim whitespace from the 'userInput' field
  * trim("userInput");
+ *
+ * // Trim quotes from the 'userInput' field
+ * trim("userInput", '"');
  * ```
  *
- * @param fieldName The name of the field containing the string.
- * @return A new {@code Expression} representing the trimmed string.
+ * @param fieldName The name of the field containing the string or byte array.
+ * @param valueToTrim Optional This parameter is treated as a set of characters or bytes that will be
+ * trimmed from the input. If not specified, then whitespace will be trimmed.
+ * @return A new {@code Expr} representing the trimmed string.
  */
-export function trim(fieldName: string): FunctionExpression;
+export function trim(
+  fieldName: string,
+  valueToTrim?: string | Expression,
+): FunctionExpression;
 
 /**
  * @beta
- * Creates an expression that removes leading and trailing whitespace from a string expression.
+ *
+ * Creates an expression that removes leading and trailing characters from a string or byte array expression.
  *
  * ```typescript
  * // Trim whitespace from the 'userInput' field
  * trim(field("userInput"));
+ *
+ * // Trim quotes from the 'userInput' field
+ * trim(field("userInput"), '"');
  * ```
  *
- * @param stringExpression The expression representing the string to trim.
- * @return A new {@code Expression} representing the trimmed string.
+ * @param stringExpression The expression representing the string or byte array to trim.
+ * @param valueToTrim Optional This parameter is treated as a set of characters or bytes that will be
+ * trimmed from the input. If not specified, then whitespace will be trimmed.
+ * @return A new {@code Expr} representing the trimmed string or byte array.
  */
-export function trim(stringExpression: Expression): FunctionExpression;
-export function trim(expr: Expression | string): FunctionExpression {
-  return fieldOrExpression(expr).trim();
+export function trim(
+  stringExpression: Expression,
+  valueToTrim?: string | Expression,
+): FunctionExpression;
+export function trim(
+  expr: Expression | string,
+  valueToTrim?: string | Expression,
+): FunctionExpression {
+  return fieldOrExpression(expr).trim(valueToTrim);
 }
 
 /**
@@ -7156,6 +7292,219 @@ export function arraySum(fieldName: string): FunctionExpression;
 export function arraySum(expression: Expression): FunctionExpression;
 export function arraySum(expr: Expression | string): FunctionExpression {
   return fieldOrExpression(expr).arraySum();
+}
+/**
+ * @beta
+ * Creates an expression that splits the value of a field on the provided delimiter.
+ *
+ * @example
+ * ```typescript
+ * // Split the 'scoresCsv' field on delimiter ','
+ * split('scoresCsv', ',')
+ * ```
+ *
+ * @param fieldName Split the value in this field.
+ * @param delimiter Split on this delimiter.
+ *
+ * @return A new {@code Expression} representing the split function.
+ */
+export function split(fieldName: string, delimiter: string): FunctionExpression;
+
+/**
+ * @beta
+ * Creates an expression that splits the value of a field on the provided delimiter.
+ *
+ * @example
+ * ```typescript
+ * // Split the 'scores' field on delimiter ',' or ':' depending on the stored format
+ * split('scores', conditional(field('format').equal('csv'), constant(','), constant(':'))
+ * ```
+ *
+ * @param fieldName Split the value in this field.
+ * @param delimiter Split on this delimiter returned by evaluating this expression.
+ *
+ * @return A new {@code Expression} representing the split function.
+ */
+export function split(
+  fieldName: string,
+  delimiter: Expression,
+): FunctionExpression;
+
+/**
+ * @beta
+ * Creates an expression that splits a string into an array of substrings based on the provided delimiter.
+ *
+ * @example
+ * ```typescript
+ * // Split the 'scoresCsv' field on delimiter ','
+ * split(field('scoresCsv'), ',')
+ * ```
+ *
+ * @param expression Split the result of this expression.
+ * @param delimiter Split on this delimiter.
+ *
+ * @return A new {@code Expression} representing the split function.
+ */
+export function split(
+  expression: Expression,
+  delimiter: string,
+): FunctionExpression;
+
+/**
+ * @beta
+ * Creates an expression that splits a string into an array of substrings based on the provided delimiter.
+ *
+ * @example
+ * ```typescript
+ * // Split the 'scores' field on delimiter ',' or ':' depending on the stored format
+ * split(field('scores'), conditional(field('format').equal('csv'), constant(','), constant(':'))
+ * ```
+ *
+ * @param expression Split the result of this expression.
+ * @param delimiter Split on this delimiter returned by evaluating this expression.
+ *
+ * @return A new {@code Expression} representing the split function.
+ */
+export function split(
+  expression: Expression,
+  delimiter: Expression,
+): FunctionExpression;
+export function split(
+  fieldNameOrExpression: string | Expression,
+  delimiter: string | Expression,
+): FunctionExpression {
+  return fieldOrExpression(fieldNameOrExpression).split(
+    valueToDefaultExpr(delimiter),
+  );
+}
+
+/**
+ * Creates an expression that truncates a timestamp to a specified granularity.
+ *
+ * @example
+ * ```typescript
+ * // Truncate the 'createdAt' timestamp to the beginning of the day.
+ * field('createdAt').timestampTruncate('day')
+ * ```
+ *
+ * @param fieldName Truncate the timestamp value contained in this field.
+ * @param granularity The granularity to truncate to.
+ * @param timezone The timezone to use for truncation. Valid values are from
+ * the TZ database (e.g., "America/Los_Angeles") or in the format "Etc/GMT-1".
+ * @return A new {Expression} representing the truncated timestamp.
+ */
+export function timestampTruncate(
+  fieldName: string,
+  granularity: firestore.Pipelines.TimeGranularity,
+  timezone?: string | Expression,
+): FunctionExpression;
+
+/**
+ * Creates an expression that truncates a timestamp to a specified granularity.
+ *
+ * @example
+ * ```typescript
+ * // Truncate the 'createdAt' timestamp to the granularity specified in the field 'granularity'.
+ * field('createdAt').timestampTruncate(field('granularity'))
+ * ```
+ *
+ * @param fieldName Truncate the timestamp value contained in this field.
+ * @param granularity The granularity to truncate to.
+ * @param timezone The timezone to use for truncation. Valid values are from
+ * the TZ database (e.g., "America/Los_Angeles") or in the format "Etc/GMT-1".
+ * @return A new {Expression} representing the truncated timestamp.
+ */
+export function timestampTruncate(
+  fieldName: string,
+  granularity: Expression,
+  timezone?: string | Expression,
+): FunctionExpression;
+
+/**
+ * Creates an expression that truncates a timestamp to a specified granularity.
+ *
+ * @example
+ * ```typescript
+ * // Truncate the 'createdAt' timestamp to the beginning of the day.
+ * field('createdAt').timestampTruncate('day')
+ * ```
+ *
+ * @param timestampExpression Truncate the timestamp value that is returned by this expression.
+ * @param granularity The granularity to truncate to.
+ * @param timezone The timezone to use for truncation. Valid values are from
+ * the TZ database (e.g., "America/Los_Angeles") or in the format "Etc/GMT-1".
+ * @return A new {Expression} representing the truncated timestamp.
+ */
+export function timestampTruncate(
+  timestampExpression: Expression,
+  granularity: firestore.Pipelines.TimeGranularity,
+  timezone?: string | Expression,
+): FunctionExpression;
+
+/**
+ * Creates an expression that truncates a timestamp to a specified granularity.
+ *
+ * @example
+ * ```typescript
+ * // Truncate the 'createdAt' timestamp to the granularity specified in the field 'granularity'.
+ * field('createdAt').timestampTruncate(field('granularity'))
+ * ```
+ *
+ * @param timestampExpression Truncate the timestamp value that is returned by this expression.
+ * @param granularity The granularity to truncate to.
+ * @param timezone The timezone to use for truncation. Valid values are from
+ * the TZ database (e.g., "America/Los_Angeles") or in the format "Etc/GMT-1".
+ * @return A new {Expression} representing the truncated timestamp.
+ */
+export function timestampTruncate(
+  timestampExpression: Expression,
+  granularity: Expression,
+  timezone?: string | Expression,
+): FunctionExpression;
+export function timestampTruncate(
+  fieldNameOrExpression: string | Expression,
+  granularity: firestore.Pipelines.TimeGranularity | Expression,
+  timezone?: string | Expression,
+): FunctionExpression {
+  const internalGranularity = isString(granularity)
+    ? valueToDefaultExpr(granularity.toLowerCase())
+    : granularity;
+  return fieldOrExpression(fieldNameOrExpression).timestampTruncate(
+    internalGranularity,
+    timezone,
+  );
+}
+
+/**
+ * @beta
+ * Creates an expression that returns the data type of the data in the specified field.
+ *
+ * @example
+ * ```typescript
+ * // Get the data type of the value in field 'title'
+ * type('title')
+ * ```
+ *
+ * @return A new {Expression} representing the data type.
+ */
+export function type(fieldName: string): FunctionExpression;
+/**
+ * @beta
+ * Creates an expression that returns the data type of an expression's result.
+ *
+ * @example
+ * ```typescript
+ * // Get the data type of a conditional expression
+ * type(conditional(exists('foo'), constant(1), constant(true)))
+ * ```
+ *
+ * @return A new {Expression} representing the data type.
+ */
+export function type(expression: Expression): FunctionExpression;
+export function type(
+  fieldNameOrExpression: string | Expression,
+): FunctionExpression {
+  return fieldOrExpression(fieldNameOrExpression).type();
 }
 
 // TODO(new-expression): Add new top-level expression function definitions above this line
