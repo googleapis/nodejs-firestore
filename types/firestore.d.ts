@@ -76,9 +76,28 @@ declare namespace FirebaseFirestore {
     ? T
     : T extends {}
       ? {
-          [K in keyof T]?: UpdateData<T[K]> | FieldValue;
+          // If `string extends K`, this is an index signature like
+          // `{[key: string]: { foo: bool }}`. In the generated UpdateData
+          // indexed properties can match their type or any child types.
+          [K in keyof T]?: string extends K
+            ? PartialWithFieldValue<ChildTypes<T[K]>>
+            : UpdateData<T[K]> | FieldValue;
         } & NestedUpdateFields<T>
       : Partial<T>;
+
+  /**
+   * For the given type, return a union type of T
+   * and the types of all child properties of T.
+   */
+  export type ChildTypes<T> =
+    T extends Record<string, unknown>
+      ?
+          | {
+              [K in keyof T & string]: ChildTypes<T[K]>;
+            }[keyof T & string]
+          | T
+      : T;
+
   /** Primitive types. */
   export type Primitive = string | number | boolean | undefined | null;
   /**
@@ -89,7 +108,13 @@ declare namespace FirebaseFirestore {
   export type NestedUpdateFields<T extends Record<string, unknown>> =
     UnionToIntersection<
       {
-        [K in keyof T & string]: ChildUpdateFields<K, T[K]>;
+        // If `string extends K`, this is an index signature like
+        // `{[key: string]: { foo: bool }}`. We map these properties to
+        // `never`, which prevents prefixing a nested key with `[string]`.
+        // We don't want to generate a field like `[string].foo: bool`.
+        [K in keyof T & string]: string extends K
+          ? never
+          : ChildUpdateFields<K, T[K]>;
       }[keyof T & string] // Also include the generated prefix-string keys.
     >;
   /**
@@ -105,7 +130,8 @@ declare namespace FirebaseFirestore {
   export type ChildUpdateFields<K extends string, V> =
     // Only allow nesting for map values
     V extends Record<string, unknown>
-      ? // (e.g. Prefix 'bar.' to create: 'bar.baz' and 'bar.qux'.
+      ? // Recurse into the map and add the prefix in front of each key
+        // (for example prefix 'bar.' to create: 'bar.baz' and 'bar.qux').
         AddPrefixToKeys<K, UpdateData<V>>
       : never;
   /**
@@ -117,9 +143,21 @@ declare namespace FirebaseFirestore {
     T extends Record<string, unknown>,
   > =
     // Remap K => Prefix.K. See https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#key-remapping-via-as
+
+    // `string extends K : ...` is used to detect index signatures
+    // like `{[key: string]: bool}`. We map these properties to type `any`
+    // because a field path like `foo.[string]` will match `foo.bar` or a
+    // sub-path `foo.bar.baz`. Because it matches a sub-path, we have to
+    // make this type a union to including all types of the sub-path properties.
+    // This is a significant downside to using index signatures in types for `T`
+    // for `UpdateData<T>`.
+
     {
-      [K in keyof T & string as `${Prefix}.${K}`]+?: T[K];
+      [K in keyof T & string as `${Prefix}.${K}`]+?: string extends K
+        ? ChildTypes<T[K]>
+        : T[K];
     };
+
   /**
    * Given a union type `U = T1 | T2 | ...`, returns an intersected type
    * `(T1 & T2 & ...)`.

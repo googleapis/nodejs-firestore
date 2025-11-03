@@ -4,6 +4,28 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [8.0.0](https://github.com/googleapis/nodejs-firestore/compare/v7.11.6...v8.0.0) (2025-10-29)
+
+
+### ⚠ BREAKING CHANGES
+
+* Update WithFieldData and PartialWithFieldData to ignore methods on types ([#2294](https://github.com/googleapis/nodejs-firestore/issues/2294))
+* migrate to Node 18 ([#2399](https://github.com/googleapis/nodejs-firestore/issues/2399))
+
+### Features
+
+* Support for index signatures in UpdateData&lt;T&gt; ([#1953](https://github.com/googleapis/nodejs-firestore/issues/1953)) ([afa206d](https://github.com/googleapis/nodejs-firestore/commit/afa206d17ce2d0905ce02e723c2c92bea368ba3a))
+
+
+### Bug Fixes
+
+* Update WithFieldData and PartialWithFieldData to ignore methods on types ([#2294](https://github.com/googleapis/nodejs-firestore/issues/2294)) ([481430f](https://github.com/googleapis/nodejs-firestore/commit/481430ffc12bdaf3e3a92aa89a2ce389756ce9da))
+
+
+### Miscellaneous Chores
+
+* Migrate to Node 18 ([#2399](https://github.com/googleapis/nodejs-firestore/issues/2399)) ([e5c3118](https://github.com/googleapis/nodejs-firestore/commit/e5c31184325b84ef8dcb456ec0a7a4807038c838))
+
 ## [7.11.6](https://github.com/googleapis/nodejs-firestore/compare/v7.11.5...v7.11.6) (2025-09-26)
 
 
