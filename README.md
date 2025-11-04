@@ -97,7 +97,7 @@ async function quickstart() {
 quickstart();
 
 ```
-
+TODO (piplines) - cover Piplines getting started content
 
 
 ## Samples
@@ -107,6 +107,7 @@ Samples are in the [`samples/`](https://github.com/googleapis/nodejs-firestore/t
 | Sample                      | Source Code                       | Try it |
 | --------------------------- | --------------------------------- | ------ |
 | Limit-to-last-query | [source code](https://github.com/googleapis/nodejs-firestore/blob/main/samples/limit-to-last-query.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/limit-to-last-query.js,samples/README.md) |
+| Pipelines-quickstart | [source code](https://github.com/googleapis/nodejs-firestore/blob/main/samples/pipelines-quickstart.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/pipelines-quickstart.js,samples/README.md) |
 | Quickstart | [source code](https://github.com/googleapis/nodejs-firestore/blob/main/samples/quickstart.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/quickstart.js,samples/README.md) |
 | Solution-counters | [source code](https://github.com/googleapis/nodejs-firestore/blob/main/samples/solution-counters.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/solution-counters.js,samples/README.md) |
 
