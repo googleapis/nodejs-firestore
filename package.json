@@ -122,6 +122,7 @@
       "types": "./types/pipelines.d.ts",
       "default": "./build/src/pipelines/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./build/src/path": "./build/src/path.js"
   }
 }
