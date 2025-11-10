@@ -21,6 +21,7 @@ Applications that use Google&#x27;s Server SDKs should not be used in end-user e
 * [Before you begin](#before-you-begin)
 * [Samples](#samples)
   * [Limit-to-last-query](#limit-to-last-query)
+  * [Pipelines-quickstart](#pipelines-quickstart)
   * [Quickstart](#quickstart)
   * [Solution-counters](#solution-counters)
 
@@ -49,6 +50,23 @@ __Usage:__
 
 
 `node samples/limit-to-last-query.js`
+
+
+-----
+
+
+
+
+### Pipelines-quickstart
+
+View the [source code](https://github.com/googleapis/nodejs-firestore/blob/main/samples/pipelines-quickstart.js).
+
+[![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/pipelines-quickstart.js,samples/README.md)
+
+__Usage:__
+
+
+`node samples/pipelines-quickstart.js`
 
 
 -----
