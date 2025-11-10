@@ -1,7 +1,7 @@
 {
   "name": "@google-cloud/firestore",
   "description": "Firestore Client Library for Node.js",
-  "version": "8.0.0",
+  "version": "8.1.0-eap-pipelines.2",
   "license": "Apache-2.0",
   "author": "Google Inc.",
   "engines": {
@@ -14,7 +14,8 @@
     "build/protos",
     "build/src",
     "!build/src/**/*.map",
-    "types"
+    "types",
+    "pipelines"
   ],
   "keywords": [
     "google apis client",
@@ -111,5 +112,17 @@
     "through2": "^4.0.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
+  },
+  "exports": {
+    ".": {
+      "types": "./types/firestore.d.ts",
+      "default": "./build/src/index.js"
+    },
+    "./pipelines": {
+      "types": "./types/pipelines.d.ts",
+      "default": "./build/src/pipelines/index.js"
+    },
+    "./package.json": "./package.json",
+    "./build/src/path": "./build/src/path.js"
   }
 }

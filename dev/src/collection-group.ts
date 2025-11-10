@@ -201,7 +201,6 @@ export class CollectionGroup<
    * @return {CollectionGroup} A `CollectionGroup` that uses the provided
    * converter.
    */
-  withConverter(converter: null): CollectionGroup;
   withConverter<
     NewAppModelType,
     NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
@@ -209,7 +208,7 @@ export class CollectionGroup<
     converter: firestore.FirestoreDataConverter<
       NewAppModelType,
       NewDbModelType
-    >,
+    > | null,
   ): CollectionGroup<NewAppModelType, NewDbModelType>;
   withConverter<
     NewAppModelType,

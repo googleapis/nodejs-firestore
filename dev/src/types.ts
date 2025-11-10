@@ -64,6 +64,10 @@ export interface GapicClient {
     request?: api.IBatchGetDocumentsRequest,
     options?: CallOptions,
   ): Duplex;
+  executePipeline(
+    request?: api.IExecutePipelineRequest,
+    options?: CallOptions,
+  ): Duplex;
   runQuery(request?: api.IRunQueryRequest, options?: CallOptions): Duplex;
   runAggregationQuery(
     request?: api.IRunAggregationQueryRequest,
@@ -96,6 +100,7 @@ export type FirestoreUnaryMethod =
 
 /** Streaming methods used in the Firestore SDK. */
 export type FirestoreStreamingMethod =
+  | 'executePipeline'
   | 'listen'
   | 'partitionQueryStream'
   | 'runQuery'

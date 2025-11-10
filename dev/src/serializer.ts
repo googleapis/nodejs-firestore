@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DocumentData} from '@google-cloud/firestore';
+import * as firestore from '@google-cloud/firestore';
 
 import * as proto from '../protos/firestore_v1_proto_api';
 
@@ -22,11 +22,12 @@ import {DeleteTransform, FieldTransform, VectorValue} from './field-value';
 import {detectGoogleProtobufValueType, detectValueType} from './convert';
 import {GeoPoint} from './geo-point';
 import {DocumentReference, Firestore} from './index';
-import {FieldPath, QualifiedResourcePath} from './path';
+import {FieldPath, ObjectValueFieldPath, QualifiedResourcePath} from './path';
 import {Timestamp} from './timestamp';
 import {ApiMapValue, ValidationOptions} from './types';
-import {isEmpty, isObject, isPlainObject} from './util';
+import {forEach, isEmpty, isObject, isPlainObject} from './util';
 import {customObjectMessage, invalidArgumentMessage} from './validate';
+import {Pipeline} from './pipelines';
 
 import api = proto.google.firestore.v1;
 import {
@@ -34,6 +35,11 @@ import {
   RESERVED_MAP_KEY_VECTOR_VALUE,
   VECTOR_MAP_VECTORS_KEY,
 } from './map-type';
+import {google} from '../protos/firestore_v1_proto_api';
+import IMapValue = google.firestore.v1.IMapValue;
+import IValue = google.firestore.v1.IValue;
+import Value = google.firestore.v1.Value;
+import {isString} from './pipelines/pipeline-util';
 
 /**
  * The maximum depth of a Firestore object.
@@ -62,14 +68,14 @@ export interface Serializable {
  */
 export class Serializer {
   private allowUndefined: boolean;
-  private createReference: (path: string) => DocumentReference;
+  private createDocumentReference: (path: string) => DocumentReference;
   private createInteger: (n: number | string) => number | BigInt;
 
-  constructor(firestore: Firestore) {
+  constructor(private firestore: Firestore) {
     // Instead of storing the `firestore` object, we store just a reference to
     // its `.doc()` method. This avoid a circular reference, which breaks
     // JSON.stringify().
-    this.createReference = path => firestore.doc(path);
+    this.createDocumentReference = path => firestore.doc(path);
     this.createInteger = n =>
       firestore._settings.useBigInt ? BigInt(n) : Number(n);
     this.allowUndefined = !!firestore._settings.ignoreUndefinedProperties;
@@ -83,7 +89,7 @@ export class Serializer {
    * @param obj The object to encode.
    * @returns The Firestore 'Fields' representation
    */
-  encodeFields(obj: DocumentData): ApiMapValue {
+  encodeFields(obj: firestore.DocumentData): ApiMapValue {
     const fields: ApiMapValue = {};
 
     for (const prop of Object.keys(obj)) {
@@ -105,6 +111,22 @@ export class Serializer {
    * @param val The object to encode
    * @returns The Firestore Proto or null if we are deleting a field.
    */
+  encodeValue(val: FieldTransform | undefined): null;
+  encodeValue(
+    val:
+      | string
+      | boolean
+      | number
+      | bigint
+      | Date
+      | null
+      | Buffer
+      | Uint8Array
+      | VectorValue
+      | Map<string, unknown>
+      | Pipeline,
+  ): api.IValue;
+  encodeValue(val: unknown): api.IValue | null;
   encodeValue(val: unknown): api.IValue | null {
     if (val instanceof FieldTransform) {
       return null;
@@ -177,10 +199,23 @@ export class Serializer {
       return val._toProto(this);
     }
 
+    if (val instanceof Pipeline) {
+      return {
+        pipelineValue: val._toProto(),
+      };
+    }
+
     if (isObject(val)) {
       const toProto = val['toProto'];
       if (typeof toProto === 'function') {
         return toProto.bind(val)();
+      }
+    }
+
+    if (isObject(val)) {
+      const _toProto = val['_toProto'];
+      if (typeof _toProto === 'function') {
+        return _toProto.bind(val)(this);
       }
     }
 
@@ -200,6 +235,21 @@ export class Serializer {
       }
 
       return array;
+    }
+
+    if (val instanceof Map) {
+      const map: api.IMapValue = {fields: {}};
+      for (const [key, value] of val.entries()) {
+        if (typeof key !== 'string') {
+          throw new Error(`Cannot encode map with non-string key: ${key}`);
+        }
+
+        map.fields![key] = this.encodeValue(value)!;
+      }
+
+      return {
+        mapValue: map,
+      };
     }
 
     if (typeof val === 'object' && isPlainObject(val)) {
@@ -224,6 +274,14 @@ export class Serializer {
     }
 
     throw new Error(`Cannot encode value: ${val}`);
+  }
+
+  encodeReference(
+    path: string | firestore.DocumentReference | firestore.CollectionReference,
+  ): api.IValue {
+    return {
+      referenceValue: isString(path) ? path : path.path,
+    };
   }
 
   /**
@@ -282,7 +340,13 @@ export class Serializer {
         const resourcePath = QualifiedResourcePath.fromSlashSeparatedString(
           proto.referenceValue!,
         );
-        return this.createReference(resourcePath.relativeName);
+        if (resourcePath.isDocument) {
+          return this.createDocumentReference(resourcePath.relativeName);
+        } else {
+          throw new Error(
+            `The SDK does not currently support decoding referenceValues for collections or partitions. Actual path value: '${proto.referenceValue!}'`,
+          );
+        }
       }
       case 'arrayValue': {
         const array: unknown[] = [];
@@ -299,7 +363,7 @@ export class Serializer {
       case 'mapValue': {
         const fields = proto.mapValue!.fields;
         if (fields) {
-          const obj: DocumentData = {};
+          const obj: firestore.DocumentData = {};
           for (const prop of Object.keys(fields)) {
             obj[prop] = this.decodeValue(fields[prop]);
           }
@@ -546,6 +610,8 @@ export function validateUserInput(
     // Ok.
   } else if (value === null) {
     // Ok.
+  } else if (isProtoValueSerializable(value)) {
+    // Ok.
   } else if (typeof value === 'object') {
     throw new Error(customObjectMessage(arg, value, path));
   }
@@ -564,4 +630,131 @@ function isMomentJsType(value: unknown): value is {toDate(): Date} {
     value.constructor.name === 'Moment' &&
     typeof (value as {toDate: unknown}).toDate === 'function'
   );
+}
+
+export function isProtoValueSerializable(
+  value: unknown,
+): value is ProtoValueSerializable {
+  return (
+    !!value &&
+    typeof (value as ProtoValueSerializable)._toProto === 'function' &&
+    (value as ProtoValueSerializable)._protoValueType === 'ProtoValue'
+  );
+}
+
+export interface ProtoSerializable<ProtoType> {
+  _toProto(serializer: Serializer): ProtoType;
+}
+
+export interface ProtoValueSerializable extends ProtoSerializable<api.IValue> {
+  // Supports runtime identification of the ProtoSerializable<ProtoValue> type.
+  _protoValueType: 'ProtoValue';
+}
+
+export interface HasUserData {
+  _validateUserData(ignoreUndefinedProperties: boolean): void;
+}
+
+export function hasUserData(value: unknown): value is HasUserData {
+  return typeof (value as HasUserData)._validateUserData === 'function';
+}
+
+/**
+ * An ObjectValue represents a MapValue in the Firestore Proto and offers the
+ * ability to add and remove fields.
+ */
+export class ObjectValue {
+  constructor(readonly value: {mapValue: IMapValue}) {}
+
+  static empty(): ObjectValue {
+    return new ObjectValue({mapValue: {}});
+  }
+
+  /**
+   * Sets the field to the provided value.
+   *
+   * @param path - The field path to set.
+   * @param value - The value to set.
+   */
+  set(path: ObjectValueFieldPath, value: IValue): void {
+    const fieldsMap = this.getFieldsMap(path.popLast());
+    fieldsMap[path.lastSegment()] = Value.fromObject(value).toJSON();
+  }
+
+  /**
+   * Sets the provided fields to the provided values.
+   *
+   * @param data - A map of fields to values (or null for deletes).
+   */
+  setAll(data: Map<ObjectValueFieldPath, IValue | null>): void {
+    let parent = new ObjectValueFieldPath();
+
+    let upserts: {[key: string]: IValue} = {};
+    let deletes: string[] = [];
+
+    data.forEach((value, path) => {
+      if (!parent.isImmediateParentOf(path)) {
+        // Insert the accumulated changes at this parent location
+        const fieldsMap = this.getFieldsMap(parent);
+        this.applyChanges(fieldsMap, upserts, deletes);
+        upserts = {};
+        deletes = [];
+        parent = path.popLast();
+      }
+
+      if (value) {
+        upserts[path.lastSegment()] = Value.fromObject(value).toJSON();
+      } else {
+        deletes.push(path.lastSegment());
+      }
+    });
+
+    const fieldsMap = this.getFieldsMap(parent);
+    this.applyChanges(fieldsMap, upserts, deletes);
+  }
+
+  /**
+   * Returns the map that contains the leaf element of `path`. If the parent
+   * entry does not yet exist, or if it is not a map, a new map will be created.
+   */
+  private getFieldsMap(path: ObjectValueFieldPath): Record<string, IValue> {
+    let current = this.value;
+
+    if (!current.mapValue!.fields) {
+      current.mapValue = {fields: {}};
+    }
+
+    for (let i = 0; i < path.size; ++i) {
+      let next = current.mapValue!.fields![path.get(i)];
+      if (!isMapValue(next) || !next.mapValue.fields) {
+        next = {mapValue: {fields: {}}};
+        current.mapValue!.fields![path.get(i)] = next;
+      }
+      current = next as {mapValue: IMapValue};
+    }
+
+    return current.mapValue!.fields!;
+  }
+
+  /**
+   * Modifies `fieldsMap` by adding, replacing or deleting the specified
+   * entries.
+   */
+  private applyChanges(
+    fieldsMap: Record<string, IValue>,
+    inserts: {[key: string]: IValue},
+    deletes: string[],
+  ): void {
+    forEach(inserts, (key, val) => (fieldsMap[key] = val));
+    for (const field of deletes) {
+      delete fieldsMap[field];
+    }
+  }
+}
+
+/** Returns true if `value` is a MapValue. */
+export function isMapValue(
+  value?: IValue | null,
+): value is {mapValue: IMapValue} {
+  return !!value && 'mapValue' in value;
 }

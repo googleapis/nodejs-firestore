@@ -565,7 +565,6 @@ export class DocumentReference<
     return {referenceValue: this.formattedName};
   }
 
-  withConverter(converter: null): DocumentReference;
   withConverter<
     NewAppModelType,
     NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
@@ -573,7 +572,7 @@ export class DocumentReference<
     converter: firestore.FirestoreDataConverter<
       NewAppModelType,
       NewDbModelType
-    >,
+    > | null,
   ): DocumentReference<NewAppModelType, NewDbModelType>;
   /**
    * Applies a custom data converter to this DocumentReference, allowing you to

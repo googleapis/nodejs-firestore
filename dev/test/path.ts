@@ -45,17 +45,71 @@ describe('ResourcePath', () => {
   });
 
   it('parses strings', () => {
+    // parse reference to db root
     let path = QualifiedResourcePath.fromSlashSeparatedString(DATABASE_ROOT);
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents`);
+    expect(path.isCollection).to.equal(false);
+    expect(path.isDocument).to.equal(false);
+
+    // parse reference to db root with `/documents`
+    path = QualifiedResourcePath.fromSlashSeparatedString(
+      `${DATABASE_ROOT}/documents`,
+    );
+    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents`);
+    expect(path.isCollection).to.equal(false);
+    expect(path.isDocument).to.equal(false);
+
+    // parse reference to collection
     path = QualifiedResourcePath.fromSlashSeparatedString(
       `${DATABASE_ROOT}/documents/foo`,
     );
     expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo`);
+    expect(path.isCollection).to.equal(true);
+    expect(path.isDocument).to.equal(false);
+
+    // parse reference to document
+    path = QualifiedResourcePath.fromSlashSeparatedString(
+      `${DATABASE_ROOT}/documents/foo/bar`,
+    );
+    expect(path.formattedName).to.equal(`${DATABASE_ROOT}/documents/foo/bar`);
+    expect(path.isCollection).to.equal(false);
+    expect(path.isDocument).to.equal(true);
+
+    // parse reference to nested collection
+    path = QualifiedResourcePath.fromSlashSeparatedString(
+      `${DATABASE_ROOT}/documents/foo/bar/baz`,
+    );
+    expect(path.formattedName).to.equal(
+      `${DATABASE_ROOT}/documents/foo/bar/baz`,
+    );
+    expect(path.isCollection).to.equal(true);
+    expect(path.isDocument).to.equal(false);
+
     expect(() => {
       path = QualifiedResourcePath.fromSlashSeparatedString(
         'projects/project/databases',
       );
     }).to.throw("Resource name 'projects/project/databases' is not valid");
+  });
+
+  it('does not parse invalid paths', () => {
+    const invalidPaths: string[] = [
+      'projects/PPP/databases/DDD/wrong',
+      'projects/PPP/databases/DDD//',
+      'projects/PPP/databases/DDD/documentsBAD',
+      'projects/PPP/databases/DDD/documents//',
+      'projects/PPP/databases/DDD/documents/ok//ok',
+      'projects/PPP/databases//DDD/documents',
+      'projects/PPP/databases/DDD/documents/',
+      'projects/PPP/databases//documents',
+      'projects//databases/DDD/documents',
+    ];
+
+    invalidPaths.forEach(invalidPath => {
+      expect(() => {
+        QualifiedResourcePath.fromSlashSeparatedString(invalidPath);
+      }).to.throw(`Resource name '${invalidPath}' is not valid`);
+    });
   });
 
   it('accepts newlines', () => {

@@ -65,7 +65,7 @@ use(chaiAsPromised);
 
 const version = require('../../package.json').version;
 
-class DeferredPromise<T> {
+export class DeferredPromise<T> {
   resolve: Function;
   reject: Function;
   promise: Promise<T> | null;
@@ -101,17 +101,39 @@ if (process.env.NODE_ENV === 'DEBUG') {
   setLogFunction(console.log);
 }
 
-function getTestRoot(settings: Settings = {}): CollectionReference {
+export function getTestDb(settings: Settings = {}): Firestore {
   const internalSettings: Settings = {};
   if (process.env.FIRESTORE_NAMED_DATABASE) {
     internalSettings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
   }
 
-  const firestore = new Firestore({
+  if (process.env.FIRESTORE_TARGET_BACKEND) {
+    switch (process.env.FIRESTORE_TARGET_BACKEND.toUpperCase()) {
+      case 'PROD': {
+        break;
+      }
+      case 'QA': {
+        internalSettings.host = 'staging-firestore.sandbox.googleapis.com';
+        break;
+      }
+      case 'NIGHTLY': {
+        internalSettings.host = 'test-firestore.sandbox.googleapis.com';
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  }
+
+  return new Firestore({
     ...internalSettings,
     ...settings, // caller settings take precedent over internal settings
   });
-  return firestore.collection(`node_${version}_${autoId()}`);
+}
+
+export function getTestRoot(settings: Settings = {}): CollectionReference {
+  return getTestDb(settings).collection(`node_${version}_${autoId()}`);
 }
 
 describe('Firestore class', () => {

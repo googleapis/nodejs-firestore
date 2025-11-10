@@ -3,7 +3,11 @@
   "overrides": [
     {
       "files": [
-        "dev/src/*.ts"
+        "dev/src/**/*.ts"
+      ],
+      "excludedFiles": [
+        "dev/src/v1/*.ts",
+        "dev/src/v1beta1/*.ts"
       ],
       "parser": "@typescript-eslint/parser",
       "rules": {
@@ -14,7 +18,14 @@
             "allowTypedFunctionExpressions": true
           }
         ],
-        "no-console": ["error", {"allow": ["error"]}]
+        "no-console": ["error", {"allow": ["error"]}],
+        "@typescript-eslint/no-unused-vars": [
+          "warn",
+          {
+            // Ignore args that are underscore only
+            "argsIgnorePattern": "^_$"
+          }
+        ]
       }
     },
     {
@@ -33,6 +44,13 @@
           {
             "object": "it",
             "property": "only"
+          }
+        ],
+        "@typescript-eslint/no-unused-vars": [
+          "warn",
+          {
+            // Ignore args that are underscore only
+            "argsIgnorePattern": "^_$"
           }
         ]
       }

@@ -2418,7 +2418,7 @@ describe('DocumentReference watch', () => {
           streamHelper.write({
             documentChange: {
               document: {
-                name: `projects/${PROJECT_ID}/databases/(default)/col/wrong`,
+                name: `projects/${PROJECT_ID}/databases/(default)/documents/col/wrong`,
                 fields: {},
                 createTime: {seconds: 1, nanos: 2},
                 updateTime: {seconds: 3, nanos: 4},
