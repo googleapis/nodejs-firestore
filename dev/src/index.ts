@@ -1556,7 +1556,10 @@ export class Firestore implements firestore.Firestore {
 
         // If the project ID was undefined when the TraceUtil was set up, we
         // need to record it.
-        this._traceUtil.recordProjectId(this.projectId);
+        this._traceUtil.recordProjectIdAndResourceName(
+          this.projectId,
+          this.databaseId,
+        );
       } catch (err) {
         logger(
           'Firestore.initializeIfNeeded',
