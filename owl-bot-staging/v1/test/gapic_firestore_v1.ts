@@ -1440,6 +1440,142 @@ describe('v1.FirestoreClient', () => {
         });
     });
 
+    describe('executePipeline', () => {
+        it('invokes executePipeline without error', async () => {
+            const client = new firestoreModule.v1.FirestoreClient({
+              credentials: {client_email: 'bogus', private_key: 'bogus'},
+              projectId: 'bogus',
+            });
+            await client.initialize();
+            const request = generateSampleMessage(
+              new protos.google.firestore.v1.ExecutePipelineRequest()
+            );
+            // path template: projects/*/databases/{database_id=*}/**
+            request.database = 'projects/value/databases/value/value';
+            const expectedHeaderRequestParams = 'database_id=value';
+            const expectedResponse = generateSampleMessage(
+              new protos.google.firestore.v1.ExecutePipelineResponse()
+            );
+            client.innerApiCalls.executePipeline = stubServerStreamingCall(expectedResponse);
+            const stream = client.executePipeline(request);
+            const promise = new Promise((resolve, reject) => {
+                stream.on('data', (response: protos.google.firestore.v1.ExecutePipelineResponse) => {
+                    resolve(response);
+                });
+                stream.on('error', (err: Error) => {
+                    reject(err);
+                });
+            });
+            const response = await promise;
+            assert.deepStrictEqual(response, expectedResponse);
+            const actualRequest = (client.innerApiCalls.executePipeline as SinonStub)
+                .getCall(0).args[0];
+            assert.deepStrictEqual(actualRequest, request);
+            const actualHeaderRequestParams = (client.innerApiCalls.executePipeline as SinonStub)
+                .getCall(0).args[1].otherArgs.headers['x-goog-request-params'];
+            assert(actualHeaderRequestParams.includes(expectedHeaderRequestParams));
+        });
+
+        it('invokes executePipeline without error and gaxServerStreamingRetries enabled', async () => {
+            const client = new firestoreModule.v1.FirestoreClient({
+              credentials: {client_email: 'bogus', private_key: 'bogus'},
+              projectId: 'bogus',
+              gaxServerStreamingRetries: true
+            });
+            await client.initialize();
+            const request = generateSampleMessage(
+              new protos.google.firestore.v1.ExecutePipelineRequest()
+            );
+            // path template: projects/*/databases/{database_id=*}/**
+            request.database = 'projects/value/databases/value/value';
+            const expectedHeaderRequestParams = 'database_id=value';
+            const expectedResponse = generateSampleMessage(
+              new protos.google.firestore.v1.ExecutePipelineResponse()
+            );
+            client.innerApiCalls.executePipeline = stubServerStreamingCall(expectedResponse);
+            const stream = client.executePipeline(request);
+            const promise = new Promise((resolve, reject) => {
+                stream.on('data', (response: protos.google.firestore.v1.ExecutePipelineResponse) => {
+                    resolve(response);
+                });
+                stream.on('error', (err: Error) => {
+                    reject(err);
+                });
+            });
+            const response = await promise;
+            assert.deepStrictEqual(response, expectedResponse);
+            const actualRequest = (client.innerApiCalls.executePipeline as SinonStub)
+                .getCall(0).args[0];
+            assert.deepStrictEqual(actualRequest, request);
+            const actualHeaderRequestParams = (client.innerApiCalls.executePipeline as SinonStub)
+                .getCall(0).args[1].otherArgs.headers['x-goog-request-params'];
+            assert(actualHeaderRequestParams.includes(expectedHeaderRequestParams));
+        });
+
+        it('invokes executePipeline with error', async () => {
+            const client = new firestoreModule.v1.FirestoreClient({
+              credentials: {client_email: 'bogus', private_key: 'bogus'},
+              projectId: 'bogus',
+            });
+            await client.initialize();
+            const request = generateSampleMessage(
+              new protos.google.firestore.v1.ExecutePipelineRequest()
+            );
+            // path template: projects/*/databases/{database_id=*}/**
+            request.database = 'projects/value/databases/value/value';
+            const expectedHeaderRequestParams = 'database_id=value';
+            const expectedError = new Error('expected');
+            client.innerApiCalls.executePipeline = stubServerStreamingCall(undefined, expectedError);
+            const stream = client.executePipeline(request);
+            const promise = new Promise((resolve, reject) => {
+                stream.on('data', (response: protos.google.firestore.v1.ExecutePipelineResponse) => {
+                    resolve(response);
+                });
+                stream.on('error', (err: Error) => {
+                    reject(err);
+                });
+            });
+            await assert.rejects(promise, expectedError);
+            const actualRequest = (client.innerApiCalls.executePipeline as SinonStub)
+                .getCall(0).args[0];
+            assert.deepStrictEqual(actualRequest, request);
+            const actualHeaderRequestParams = (client.innerApiCalls.executePipeline as SinonStub)
+                .getCall(0).args[1].otherArgs.headers['x-goog-request-params'];
+            assert(actualHeaderRequestParams.includes(expectedHeaderRequestParams));
+        });
+
+        it('invokes executePipeline with closed client', async () => {
+            const client = new firestoreModule.v1.FirestoreClient({
+              credentials: {client_email: 'bogus', private_key: 'bogus'},
+              projectId: 'bogus',
+            });
+            await client.initialize();
+            const request = generateSampleMessage(
+              new protos.google.firestore.v1.ExecutePipelineRequest()
+            );
+            // path template: projects/*/databases/{database_id=*}/**
+            request.database = 'projects/value/databases/value/value';
+            const expectedError = new Error('The client has already been closed.');
+            client.close().catch(err => {throw err});
+            const stream = client.executePipeline(request, {retryRequestOptions: {noResponseRetries: 0}});
+            const promise = new Promise((resolve, reject) => {
+                stream.on('data', (response: protos.google.firestore.v1.ExecutePipelineResponse) => {
+                    resolve(response);
+                });
+                stream.on('error', (err: Error) => {
+                    reject(err);
+                });
+            });
+            await assert.rejects(promise, expectedError);
+        });
+        it('should create a client with gaxServerStreamingRetries enabled', () => {
+            const client = new firestoreModule.v1.FirestoreClient({
+                gaxServerStreamingRetries: true,
+            });
+            assert(client);
+        });
+    });
+
     describe('runAggregationQuery', () => {
         it('invokes runAggregationQuery without error', async () => {
             const client = new firestoreModule.v1.FirestoreClient({

@@ -202,6 +202,7 @@ export class FirestoreClient {
     this.descriptors.stream = {
       batchGetDocuments: new this._gaxModule.StreamDescriptor(this._gaxModule.StreamType.SERVER_STREAMING, !!opts.fallback, !!opts.gaxServerStreamingRetries),
       runQuery: new this._gaxModule.StreamDescriptor(this._gaxModule.StreamType.SERVER_STREAMING, !!opts.fallback, !!opts.gaxServerStreamingRetries),
+      executePipeline: new this._gaxModule.StreamDescriptor(this._gaxModule.StreamType.SERVER_STREAMING, !!opts.fallback, !!opts.gaxServerStreamingRetries),
       runAggregationQuery: new this._gaxModule.StreamDescriptor(this._gaxModule.StreamType.SERVER_STREAMING, !!opts.fallback, !!opts.gaxServerStreamingRetries),
       write: new this._gaxModule.StreamDescriptor(this._gaxModule.StreamType.BIDI_STREAMING, !!opts.fallback, !!opts.gaxServerStreamingRetries),
       listen: new this._gaxModule.StreamDescriptor(this._gaxModule.StreamType.BIDI_STREAMING, !!opts.fallback, !!opts.gaxServerStreamingRetries)
@@ -250,7 +251,7 @@ export class FirestoreClient {
     // Iterate over each of the methods that the service provides
     // and create an API call method for each.
     const firestoreStubMethods =
-        ['getDocument', 'listDocuments', 'updateDocument', 'deleteDocument', 'batchGetDocuments', 'beginTransaction', 'commit', 'rollback', 'runQuery', 'runAggregationQuery', 'partitionQuery', 'write', 'listen', 'listCollectionIds', 'batchWrite', 'createDocument'];
+        ['getDocument', 'listDocuments', 'updateDocument', 'deleteDocument', 'batchGetDocuments', 'beginTransaction', 'commit', 'rollback', 'runQuery', 'executePipeline', 'runAggregationQuery', 'partitionQuery', 'write', 'listen', 'listCollectionIds', 'batchWrite', 'createDocument'];
     for (const methodName of firestoreStubMethods) {
       const callPromise = this.firestoreStub.then(
         stub => (...args: Array<{}>) => {
@@ -1317,6 +1318,79 @@ export class FirestoreClient {
     this.initialize().catch(err => {throw err});
     this._log.info('runQuery stream %j', options);
     return this.innerApiCalls.runQuery(request, options);
+  }
+
+/**
+ * Executes a pipeline query.
+ *
+ * @param {Object} request
+ *   The request object that will be sent.
+ * @param {string} request.database
+ *   Required. Database identifier, in the form
+ *   `projects/{project}/databases/{database}`.
+ * @param {google.firestore.v1.StructuredPipeline} request.structuredPipeline
+ *   A pipelined operation.
+ * @param {Buffer} request.transaction
+ *   Run the query within an already active transaction.
+ *
+ *   The value here is the opaque transaction ID to execute the query in.
+ * @param {google.firestore.v1.TransactionOptions} request.newTransaction
+ *   Execute the pipeline in a new transaction.
+ *
+ *   The identifier of the newly created transaction will be returned in the
+ *   first response on the stream. This defaults to a read-only transaction.
+ * @param {google.protobuf.Timestamp} request.readTime
+ *   Execute the pipeline in a snapshot transaction at the given time.
+ *
+ *   This must be a microsecond precision timestamp within the past one hour,
+ *   or if Point-in-Time Recovery is enabled, can additionally be a whole
+ *   minute timestamp within the past 7 days.
+ * @param {object} [options]
+ *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+ * @returns {Stream}
+ *   An object stream which emits {@link protos.google.firestore.v1.ExecutePipelineResponse|ExecutePipelineResponse} on 'data' event.
+ *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#server-streaming | documentation }
+ *   for more details and examples.
+ * @example <caption>include:samples/generated/v1/firestore.execute_pipeline.js</caption>
+ * region_tag:firestore_v1_generated_Firestore_ExecutePipeline_async
+ */
+  executePipeline(
+      request?: protos.google.firestore.v1.IExecutePipelineRequest,
+      options?: CallOptions):
+    gax.CancellableStream{
+    request = request || {};
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    let routingParameter = {};
+    {
+      const fieldValue = request.database;
+      if (fieldValue !== undefined && fieldValue !== null) {
+        const match = fieldValue.toString().match(RegExp('projects/(?<project_id>[^/]+)(?:/.*)?'));
+        if (match) {
+          const parameterValue = match.groups?.['project_id'] ?? fieldValue;
+          Object.assign(routingParameter, { project_id: parameterValue });
+        }
+      }
+    }
+    {
+      const fieldValue = request.database;
+      if (fieldValue !== undefined && fieldValue !== null) {
+        const match = fieldValue.toString().match(RegExp('projects/[^/]+/databases/(?<database_id>[^/]+)(?:/.*)?'));
+        if (match) {
+          const parameterValue = match.groups?.['database_id'] ?? fieldValue;
+          Object.assign(routingParameter, { database_id: parameterValue });
+        }
+      }
+    }
+    options.otherArgs.headers[
+      'x-goog-request-params'
+    ] = this._gaxModule.routingHeader.fromParams(
+      routingParameter
+    );
+    this.initialize().catch(err => {throw err});
+    this._log.info('executePipeline stream %j', options);
+    return this.innerApiCalls.executePipeline(request, options);
   }
 
 /**

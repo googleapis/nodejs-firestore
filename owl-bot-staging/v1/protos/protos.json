@@ -60,7 +60,10 @@
                         "referenceValue",
                         "geoPointValue",
                         "arrayValue",
-                        "mapValue"
+                        "mapValue",
+                        "fieldReferenceValue",
+                        "functionValue",
+                        "pipelineValue"
                       ]
                     }
                   },
@@ -108,6 +111,18 @@
                     "mapValue": {
                       "type": "MapValue",
                       "id": 6
+                    },
+                    "fieldReferenceValue": {
+                      "type": "string",
+                      "id": 19
+                    },
+                    "functionValue": {
+                      "type": "Function",
+                      "id": 20
+                    },
+                    "pipelineValue": {
+                      "type": "Pipeline",
+                      "id": 21
                     }
                   }
                 },
@@ -126,6 +141,74 @@
                       "keyType": "string",
                       "type": "Value",
                       "id": 1
+                    }
+                  }
+                },
+                "Function": {
+                  "fields": {
+                    "name": {
+                      "type": "string",
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
+                    },
+                    "args": {
+                      "rule": "repeated",
+                      "type": "Value",
+                      "id": 2,
+                      "options": {
+                        "(google.api.field_behavior)": "OPTIONAL"
+                      }
+                    },
+                    "options": {
+                      "keyType": "string",
+                      "type": "Value",
+                      "id": 3,
+                      "options": {
+                        "(google.api.field_behavior)": "OPTIONAL"
+                      }
+                    }
+                  }
+                },
+                "Pipeline": {
+                  "fields": {
+                    "stages": {
+                      "rule": "repeated",
+                      "type": "Stage",
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
+                    }
+                  },
+                  "nested": {
+                    "Stage": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
+                          }
+                        },
+                        "args": {
+                          "rule": "repeated",
+                          "type": "Value",
+                          "id": 2,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
+                        },
+                        "options": {
+                          "keyType": "string",
+                          "type": "Value",
+                          "id": 3,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
+                        }
+                      }
                     }
                   }
                 },
@@ -224,6 +307,14 @@
                           "id": 2
                         }
                       }
+                    }
+                  }
+                },
+                "ExplainStats": {
+                  "fields": {
+                    "data": {
+                      "type": "google.protobuf.Any",
+                      "id": 1
                     }
                   }
                 },
@@ -399,6 +490,39 @@
                               "post": "/v1/{parent=projects/*/databases/*/documents/*/**}:runQuery",
                               "body": "*"
                             }
+                          }
+                        }
+                      ]
+                    },
+                    "ExecutePipeline": {
+                      "requestType": "ExecutePipelineRequest",
+                      "responseType": "ExecutePipelineResponse",
+                      "responseStream": true,
+                      "options": {
+                        "(google.api.http).post": "/v1/{database=projects/*/databases/*}/documents:executePipeline",
+                        "(google.api.http).body": "*",
+                        "(google.api.routing).routing_parameters.field": "database",
+                        "(google.api.routing).routing_parameters.path_template": "projects/*/databases/{database_id=*}/**"
+                      },
+                      "parsedOptions": [
+                        {
+                          "(google.api.http)": {
+                            "post": "/v1/{database=projects/*/databases/*}/documents:executePipeline",
+                            "body": "*"
+                          }
+                        },
+                        {
+                          "(google.api.routing)": {
+                            "routing_parameters": [
+                              {
+                                "field": "database",
+                                "path_template": "projects/{project_id=*}/**"
+                              },
+                              {
+                                "field": "database",
+                                "path_template": "projects/*/databases/{database_id=*}/**"
+                              }
+                            ]
                           }
                         }
                       ]
@@ -951,6 +1075,68 @@
                     }
                   }
                 },
+                "ExecutePipelineRequest": {
+                  "oneofs": {
+                    "pipelineType": {
+                      "oneof": [
+                        "structuredPipeline"
+                      ]
+                    },
+                    "consistencySelector": {
+                      "oneof": [
+                        "transaction",
+                        "newTransaction",
+                        "readTime"
+                      ]
+                    }
+                  },
+                  "fields": {
+                    "database": {
+                      "type": "string",
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
+                    },
+                    "structuredPipeline": {
+                      "type": "StructuredPipeline",
+                      "id": 2
+                    },
+                    "transaction": {
+                      "type": "bytes",
+                      "id": 5
+                    },
+                    "newTransaction": {
+                      "type": "TransactionOptions",
+                      "id": 6
+                    },
+                    "readTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 7
+                    }
+                  }
+                },
+                "ExecutePipelineResponse": {
+                  "fields": {
+                    "transaction": {
+                      "type": "bytes",
+                      "id": 1
+                    },
+                    "results": {
+                      "rule": "repeated",
+                      "type": "Document",
+                      "id": 2
+                    },
+                    "executionTime": {
+                      "type": "google.protobuf.Timestamp",
+                      "id": 3
+                    },
+                    "explainStats": {
+                      "type": "ExplainStats",
+                      "id": 4
+                    }
+                  }
+                },
                 "RunAggregationQueryRequest": {
                   "oneofs": {
                     "queryType": {
@@ -1379,6 +1565,25 @@
                       "rule": "repeated",
                       "type": "google.rpc.Status",
                       "id": 2
+                    }
+                  }
+                },
+                "StructuredPipeline": {
+                  "fields": {
+                    "pipeline": {
+                      "type": "Pipeline",
+                      "id": 1,
+                      "options": {
+                        "(google.api.field_behavior)": "REQUIRED"
+                      }
+                    },
+                    "options": {
+                      "keyType": "string",
+                      "type": "Value",
+                      "id": 2,
+                      "options": {
+                        "(google.api.field_behavior)": "OPTIONAL"
+                      }
                     }
                   }
                 },
@@ -3821,6 +4026,18 @@
                 }
               }
             },
+            "Any": {
+              "fields": {
+                "type_url": {
+                  "type": "string",
+                  "id": 1
+                },
+                "value": {
+                  "type": "bytes",
+                  "id": 2
+                }
+              }
+            },
             "Duration": {
               "fields": {
                 "seconds": {
@@ -3907,18 +4124,6 @@
             },
             "Empty": {
               "fields": {}
-            },
-            "Any": {
-              "fields": {
-                "type_url": {
-                  "type": "string",
-                  "id": 1
-                },
-                "value": {
-                  "type": "bytes",
-                  "id": 2
-                }
-              }
             }
           }
         },

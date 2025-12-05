@@ -488,6 +488,62 @@
       }
     },
     {
+      "regionTag": "firestore_v1_generated_Firestore_ExecutePipeline_async",
+      "title": "Firestore executePipeline Sample",
+      "origin": "API_DEFINITION",
+      "description": " Executes a pipeline query.",
+      "canonical": true,
+      "file": "firestore.execute_pipeline.js",
+      "language": "JAVASCRIPT",
+      "segments": [
+        {
+          "start": 25,
+          "end": 78,
+          "type": "FULL"
+        }
+      ],
+      "clientMethod": {
+        "shortName": "ExecutePipeline",
+        "fullName": "google.firestore.v1.Firestore.ExecutePipeline",
+        "async": true,
+        "parameters": [
+          {
+            "name": "database",
+            "type": "TYPE_STRING"
+          },
+          {
+            "name": "structured_pipeline",
+            "type": ".google.firestore.v1.StructuredPipeline"
+          },
+          {
+            "name": "transaction",
+            "type": "TYPE_BYTES"
+          },
+          {
+            "name": "new_transaction",
+            "type": ".google.firestore.v1.TransactionOptions"
+          },
+          {
+            "name": "read_time",
+            "type": ".google.protobuf.Timestamp"
+          }
+        ],
+        "resultType": ".google.firestore.v1.ExecutePipelineResponse",
+        "client": {
+          "shortName": "FirestoreClient",
+          "fullName": "google.firestore.v1.FirestoreClient"
+        },
+        "method": {
+          "shortName": "ExecutePipeline",
+          "fullName": "google.firestore.v1.Firestore.ExecutePipeline",
+          "service": {
+            "shortName": "Firestore",
+            "fullName": "google.firestore.v1.Firestore"
+          }
+        }
+      }
+    },
+    {
       "regionTag": "firestore_v1_generated_Firestore_RunAggregationQuery_async",
       "title": "Firestore runAggregationQuery Sample",
       "origin": "API_DEFINITION",
