@@ -41,7 +41,7 @@ export function findNearestQuery(
   fieldPath: string,
   queryVector: Array<number>,
   limit: number,
-  measure: api.StructuredQuery.FindNearest.DistanceMeasure
+  measure: api.StructuredQuery.FindNearest.DistanceMeasure,
 ): api.IStructuredQuery {
   return {
     findNearest: {
@@ -99,8 +99,8 @@ describe('Vector(findNearest) query interface', () => {
             queryVector: [40, 41, 42],
             distanceMeasure: 'COSINE',
             limit: 10,
-          })
-        )
+          }),
+        ),
     ).to.be.true;
     expect(
       queryA
@@ -116,8 +116,8 @@ describe('Vector(findNearest) query interface', () => {
             queryVector: [40, 41, 42],
             distanceMeasure: 'EUCLIDEAN',
             limit: 10,
-          })
-        )
+          }),
+        ),
     ).to.be.true;
     expect(
       queryA
@@ -135,8 +135,8 @@ describe('Vector(findNearest) query interface', () => {
             distanceMeasure: 'EUCLIDEAN',
             limit: 10,
             distanceThreshold: 0.125,
-          })
-        )
+          }),
+        ),
     ).to.be.true;
     expect(
       queryA
@@ -156,8 +156,8 @@ describe('Vector(findNearest) query interface', () => {
             limit: 10,
             distanceThreshold: 0.125,
             distanceResultField: new FieldPath('foo'),
-          })
-        )
+          }),
+        ),
     ).to.be.true;
     expect(
       queryA
@@ -175,8 +175,8 @@ describe('Vector(findNearest) query interface', () => {
             distanceMeasure: 'EUCLIDEAN',
             limit: 10,
             distanceResultField: new FieldPath('distance'),
-          })
-        )
+          }),
+        ),
     ).to.be.true;
 
     expect(
@@ -193,8 +193,8 @@ describe('Vector(findNearest) query interface', () => {
             queryVector: [40, 41, 42],
             distanceMeasure: 'COSINE',
             limit: 10,
-          })
-        )
+          }),
+        ),
     ).to.be.false;
     expect(
       queryA
@@ -210,8 +210,8 @@ describe('Vector(findNearest) query interface', () => {
             queryVector: [40, 42],
             distanceMeasure: 'COSINE',
             limit: 10,
-          })
-        )
+          }),
+        ),
     ).to.be.false;
     expect(
       queryA
@@ -227,8 +227,8 @@ describe('Vector(findNearest) query interface', () => {
             queryVector: [40, 41, 42],
             distanceMeasure: 'COSINE',
             limit: 1000,
-          })
-        )
+          }),
+        ),
     ).to.be.false;
     expect(
       queryA
@@ -244,8 +244,8 @@ describe('Vector(findNearest) query interface', () => {
             queryVector: [40, 42],
             distanceMeasure: 'EUCLIDEAN',
             limit: 10,
-          })
-        )
+          }),
+        ),
     ).to.be.false;
     expect(
       queryA
@@ -263,8 +263,8 @@ describe('Vector(findNearest) query interface', () => {
             distanceMeasure: 'EUCLIDEAN',
             limit: 10,
             distanceThreshold: 0.125,
-          })
-        )
+          }),
+        ),
     ).to.be.false;
     expect(
       queryA
@@ -281,8 +281,8 @@ describe('Vector(findNearest) query interface', () => {
             distanceMeasure: 'EUCLIDEAN',
             limit: 10,
             distanceThreshold: 1,
-          })
-        )
+          }),
+        ),
     ).to.be.false;
     expect(
       queryA
@@ -299,8 +299,8 @@ describe('Vector(findNearest) query interface', () => {
             queryVector: [40, 41, 42],
             distanceMeasure: 'EUCLIDEAN',
             limit: 10,
-          })
-        )
+          }),
+        ),
     ).to.be.false;
     expect(
       queryA
@@ -318,8 +318,8 @@ describe('Vector(findNearest) query interface', () => {
             distanceMeasure: 'EUCLIDEAN',
             limit: 10,
             distanceResultField: 'result',
-          })
-        )
+          }),
+        ),
     ).to.be.false;
     expect(
       queryA
@@ -337,8 +337,8 @@ describe('Vector(findNearest) query interface', () => {
             distanceMeasure: 'EUCLIDEAN',
             limit: 10,
             distanceResultField: new FieldPath('foo'),
-          })
-        )
+          }),
+        ),
     ).to.be.false;
     expect(
       queryA
@@ -355,8 +355,8 @@ describe('Vector(findNearest) query interface', () => {
             distanceMeasure: 'EUCLIDEAN',
             limit: 10,
             distanceResultField: new FieldPath('foo'),
-          })
-        )
+          }),
+        ),
     ).to.be.false;
     expect(
       queryA
@@ -373,8 +373,8 @@ describe('Vector(findNearest) query interface', () => {
             queryVector: [40, 41, 42],
             distanceMeasure: 'EUCLIDEAN',
             limit: 10,
-          })
-        )
+          }),
+        ),
     ).to.be.false;
   });
 
@@ -394,8 +394,8 @@ describe('Vector(findNearest) query interface', () => {
             queryVector: [40, 41, 42],
             distanceMeasure: 'COSINE',
             limit: 10,
-          })
-        )
+          }),
+        ),
     ).to.be.true;
     expect(
       queryA
@@ -409,8 +409,8 @@ describe('Vector(findNearest) query interface', () => {
             queryVector: [40, 41, 42, 43],
             distanceMeasure: 'DOT_PRODUCT',
             limit: 1,
-          })
-        )
+          }),
+        ),
     ).to.be.true;
   });
 
@@ -420,7 +420,7 @@ describe('Vector(findNearest) query interface', () => {
         queryEquals(
           request,
           fieldFiltersQuery('foo', 'EQUAL', 'bar'),
-          findNearestQuery('embedding', [3, 4, 5], 100, 'COSINE')
+          findNearestQuery('embedding', [3, 4, 5], 100, 'COSINE'),
         );
         return emptyQueryStream();
       },
@@ -486,7 +486,7 @@ describe('Vector(findNearest) query interface', () => {
         runQuery: request => {
           queryEquals(
             request,
-            findNearestQuery('embedding', [1], 2, distanceMeasure)
+            findNearestQuery('embedding', [1], 2, distanceMeasure),
           );
           return stream(result('first'), result('second'));
         },

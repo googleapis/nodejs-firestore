@@ -40,7 +40,11 @@ declare namespace FirebaseFirestore {
     | (T extends Primitive
         ? T
         : T extends {}
-          ? {[K in keyof T]?: PartialWithFieldValue<T[K]> | FieldValue}
+          ? {
+              [K in keyof T]?: T[K] extends Function
+                ? T[K]
+                : PartialWithFieldValue<T[K]> | FieldValue;
+            }
           : never);
 
   /**
@@ -52,7 +56,11 @@ declare namespace FirebaseFirestore {
     | (T extends Primitive
         ? T
         : T extends {}
-          ? {[K in keyof T]: WithFieldValue<T[K]> | FieldValue}
+          ? {
+              [K in keyof T]: T[K] extends Function
+                ? T[K]
+                : WithFieldValue<T[K]> | FieldValue;
+            }
           : never);
 
   /**
@@ -72,8 +80,28 @@ declare namespace FirebaseFirestore {
   export type UpdateData<T> = T extends Primitive
     ? T
     : T extends {}
-      ? {[K in keyof T]?: UpdateData<T[K]> | FieldValue} & NestedUpdateFields<T>
+      ? {
+          // If `string extends K`, this is an index signature like
+          // `{[key: string]: { foo: bool }}`. In the generated UpdateData
+          // indexed properties can match their type or any child types.
+          [K in keyof T]?: string extends K
+            ? PartialWithFieldValue<ChildTypes<T[K]>>
+            : UpdateData<T[K]> | FieldValue;
+        } & NestedUpdateFields<T>
       : Partial<T>;
+
+  /**
+   * For the given type, return a union type of T
+   * and the types of all child properties of T.
+   */
+  export type ChildTypes<T> =
+    T extends Record<string, unknown>
+      ?
+          | {
+              [K in keyof T & string]: ChildTypes<T[K]>;
+            }[keyof T & string]
+          | T
+      : T;
 
   /** Primitive types. */
   export type Primitive = string | number | boolean | undefined | null;
@@ -86,7 +114,13 @@ declare namespace FirebaseFirestore {
   export type NestedUpdateFields<T extends Record<string, unknown>> =
     UnionToIntersection<
       {
-        [K in keyof T & string]: ChildUpdateFields<K, T[K]>;
+        // If `string extends K`, this is an index signature like
+        // `{[key: string]: { foo: bool }}`. We map these properties to
+        // `never`, which prevents prefixing a nested key with `[string]`.
+        // We don't want to generate a field like `[string].foo: bool`.
+        [K in keyof T & string]: string extends K
+          ? never
+          : ChildUpdateFields<K, T[K]>;
       }[keyof T & string] // Also include the generated prefix-string keys.
     >;
 
@@ -104,7 +138,7 @@ declare namespace FirebaseFirestore {
     // Only allow nesting for map values
     V extends Record<string, unknown>
       ? // Recurse into the map and add the prefix in front of each key
-        // (e.g. Prefix 'bar.' to create: 'bar.baz' and 'bar.qux'.
+        // (for example prefix 'bar.' to create: 'bar.baz' and 'bar.qux').
         AddPrefixToKeys<K, UpdateData<V>>
       : // UpdateData is always a map of values.
         never;
@@ -118,7 +152,20 @@ declare namespace FirebaseFirestore {
     T extends Record<string, unknown>,
   > =
     // Remap K => Prefix.K. See https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#key-remapping-via-as
-    {[K in keyof T & string as `${Prefix}.${K}`]+?: T[K]};
+
+    // `string extends K : ...` is used to detect index signatures
+    // like `{[key: string]: bool}`. We map these properties to type `any`
+    // because a field path like `foo.[string]` will match `foo.bar` or a
+    // sub-path `foo.bar.baz`. Because it matches a sub-path, we have to
+    // make this type a union to including all types of the sub-path properties.
+    // This is a significant downside to using index signatures in types for `T`
+    // for `UpdateData<T>`.
+
+    {
+      [K in keyof T & string as `${Prefix}.${K}`]+?: string extends K
+        ? ChildTypes<T[K]>
+        : T[K];
+    };
 
   /**
    * Given a union type `U = T1 | T2 | ...`, returns an intersected type
@@ -344,7 +391,7 @@ declare namespace FirebaseFirestore {
      * as `FieldValue.delete()` to be used as property values.
      */
     toFirestore(
-      modelObject: WithFieldValue<AppModelType>
+      modelObject: WithFieldValue<AppModelType>,
     ): WithFieldValue<DbModelType>;
 
     /**
@@ -362,7 +409,7 @@ declare namespace FirebaseFirestore {
      */
     toFirestore(
       modelObject: PartialWithFieldValue<AppModelType>,
-      options: SetOptions
+      options: SetOptions,
     ): PartialWithFieldValue<DbModelType>;
 
     /**
@@ -623,7 +670,7 @@ declare namespace FirebaseFirestore {
      */
     recursiveDelete(
       ref: CollectionReference<any, any> | DocumentReference<any, any>,
-      bulkWriter?: BulkWriter
+      bulkWriter?: BulkWriter,
     ): Promise<void>;
 
     /**
@@ -683,7 +730,7 @@ declare namespace FirebaseFirestore {
       updateFunction: (transaction: Transaction) => Promise<T>,
       transactionOptions?:
         | ReadWriteTransactionOptions
-        | ReadOnlyTransactionOptions
+        | ReadOnlyTransactionOptions,
     ): Promise<T>;
 
     /**
@@ -771,7 +818,7 @@ declare namespace FirebaseFirestore {
      * @return A QuerySnapshot for the retrieved data.
      */
     get<AppModelType, DbModelType extends DocumentData>(
-      query: Query<AppModelType, DbModelType>
+      query: Query<AppModelType, DbModelType>,
     ): Promise<QuerySnapshot<AppModelType, DbModelType>>;
 
     /**
@@ -782,7 +829,7 @@ declare namespace FirebaseFirestore {
      * @return A DocumentSnapshot for the read data.
      */
     get<AppModelType, DbModelType extends DocumentData>(
-      documentRef: DocumentReference<AppModelType, DbModelType>
+      documentRef: DocumentReference<AppModelType, DbModelType>,
     ): Promise<DocumentSnapshot<AppModelType, DbModelType>>;
 
     /**
@@ -801,7 +848,7 @@ declare namespace FirebaseFirestore {
         AggregateSpecType,
         AppModelType,
         DbModelType
-      >
+      >,
     ): Promise<
       AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
     >;
@@ -838,7 +885,7 @@ declare namespace FirebaseFirestore {
      */
     create<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): Transaction;
 
     /**
@@ -863,11 +910,11 @@ declare namespace FirebaseFirestore {
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: PartialWithFieldValue<AppModelType>,
-      options: SetOptions
+      options: SetOptions,
     ): Transaction;
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): Transaction;
 
     /**
@@ -888,7 +935,7 @@ declare namespace FirebaseFirestore {
     update<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: UpdateData<DbModelType>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): Transaction;
 
     /**
@@ -927,7 +974,7 @@ declare namespace FirebaseFirestore {
      */
     delete(
       documentRef: DocumentReference<any, any>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): Transaction;
   }
 
@@ -954,7 +1001,7 @@ declare namespace FirebaseFirestore {
      */
     create<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): Promise<WriteResult>;
 
     /**
@@ -975,7 +1022,7 @@ declare namespace FirebaseFirestore {
      */
     delete(
       documentRef: DocumentReference<any, any>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): Promise<WriteResult>;
 
     /**
@@ -1005,11 +1052,11 @@ declare namespace FirebaseFirestore {
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: PartialWithFieldValue<AppModelType>,
-      options: SetOptions
+      options: SetOptions,
     ): Promise<WriteResult>;
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): Promise<WriteResult>;
 
     /**
@@ -1039,7 +1086,7 @@ declare namespace FirebaseFirestore {
     update<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: UpdateData<DbModelType>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): Promise<WriteResult>;
 
     /**
@@ -1085,8 +1132,8 @@ declare namespace FirebaseFirestore {
     onWriteResult(
       callback: (
         documentRef: DocumentReference<any, any>,
-        result: WriteResult
-      ) => void
+        result: WriteResult,
+      ) => void,
     ): void;
 
     /**
@@ -1102,7 +1149,7 @@ declare namespace FirebaseFirestore {
      * `false` will stop the retry loop.
      */
     onWriteError(
-      shouldRetryCallback: (error: BulkWriterError) => boolean
+      shouldRetryCallback: (error: BulkWriterError) => boolean,
     ): void;
 
     /**
@@ -1212,7 +1259,7 @@ declare namespace FirebaseFirestore {
      */
     create<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): WriteBatch;
 
     /**
@@ -1237,11 +1284,11 @@ declare namespace FirebaseFirestore {
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: PartialWithFieldValue<AppModelType>,
-      options: SetOptions
+      options: SetOptions,
     ): WriteBatch;
     set<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): WriteBatch;
 
     /**
@@ -1262,7 +1309,7 @@ declare namespace FirebaseFirestore {
     update<AppModelType, DbModelType extends DocumentData>(
       documentRef: DocumentReference<AppModelType, DbModelType>,
       data: UpdateData<DbModelType>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): WriteBatch;
 
     /**
@@ -1301,7 +1348,7 @@ declare namespace FirebaseFirestore {
      */
     delete(
       documentRef: DocumentReference<any, any>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): WriteBatch;
 
     /**
@@ -1471,7 +1518,7 @@ declare namespace FirebaseFirestore {
      */
     set(
       data: PartialWithFieldValue<AppModelType>,
-      options: SetOptions
+      options: SetOptions,
     ): Promise<WriteResult>;
     set(data: WithFieldValue<AppModelType>): Promise<WriteResult>;
 
@@ -1490,7 +1537,7 @@ declare namespace FirebaseFirestore {
      */
     update(
       data: UpdateData<DbModelType>,
-      precondition?: Precondition
+      precondition?: Precondition,
     ): Promise<WriteResult>;
 
     /**
@@ -1545,7 +1592,7 @@ declare namespace FirebaseFirestore {
      */
     onSnapshot(
       onNext: (snapshot: DocumentSnapshot<AppModelType, DbModelType>) => void,
-      onError?: (error: Error) => void
+      onError?: (error: Error) => void,
     ): () => void;
 
     /**
@@ -1571,7 +1618,7 @@ declare namespace FirebaseFirestore {
       NewAppModelType,
       NewDbModelType extends DocumentData = DocumentData,
     >(
-      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>
+      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>,
     ): DocumentReference<NewAppModelType, NewDbModelType>;
     withConverter(converter: null): DocumentReference;
   }
@@ -1738,7 +1785,7 @@ declare namespace FirebaseFirestore {
     where(
       fieldPath: string | FieldPath,
       opStr: WhereFilterOp,
-      value: any
+      value: any,
     ): Query<AppModelType, DbModelType>;
 
     /**
@@ -1768,7 +1815,7 @@ declare namespace FirebaseFirestore {
      */
     orderBy(
       fieldPath: string | FieldPath,
-      directionStr?: OrderByDirection
+      directionStr?: OrderByDirection,
     ): Query<AppModelType, DbModelType>;
 
     /**
@@ -1836,7 +1883,7 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     startAt(
-      snapshot: DocumentSnapshot<any, any>
+      snapshot: DocumentSnapshot<any, any>,
     ): Query<AppModelType, DbModelType>;
 
     /**
@@ -1860,7 +1907,7 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     startAfter(
-      snapshot: DocumentSnapshot<any, any>
+      snapshot: DocumentSnapshot<any, any>,
     ): Query<AppModelType, DbModelType>;
 
     /**
@@ -1884,7 +1931,7 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     endBefore(
-      snapshot: DocumentSnapshot<any, any>
+      snapshot: DocumentSnapshot<any, any>,
     ): Query<AppModelType, DbModelType>;
 
     /**
@@ -1908,7 +1955,7 @@ declare namespace FirebaseFirestore {
      * @return The created Query.
      */
     endAt(
-      snapshot: DocumentSnapshot<any, any>
+      snapshot: DocumentSnapshot<any, any>,
     ): Query<AppModelType, DbModelType>;
 
     /**
@@ -1938,7 +1985,7 @@ declare namespace FirebaseFirestore {
      *  from the query execution (if any), and the query results (if any).
      */
     explain(
-      options?: ExplainOptions
+      options?: ExplainOptions,
     ): Promise<ExplainResults<QuerySnapshot<AppModelType, DbModelType>>>;
 
     /**
@@ -1992,7 +2039,7 @@ declare namespace FirebaseFirestore {
      */
     onSnapshot(
       onNext: (snapshot: QuerySnapshot<AppModelType, DbModelType>) => void,
-      onError?: (error: Error) => void
+      onError?: (error: Error) => void,
     ): () => void;
 
     /**
@@ -2049,7 +2096,7 @@ declare namespace FirebaseFirestore {
      * ```
      */
     aggregate<T extends AggregateSpec>(
-      aggregateSpec: T
+      aggregateSpec: T,
     ): AggregateQuery<T, AppModelType, DbModelType>;
 
     /**
@@ -2086,7 +2133,7 @@ declare namespace FirebaseFirestore {
       options: {
         limit: number;
         distanceMeasure: 'EUCLIDEAN' | 'COSINE' | 'DOT_PRODUCT';
-      }
+      },
     ): VectorQuery<AppModelType, DbModelType>;
 
     /**
@@ -2118,7 +2165,7 @@ declare namespace FirebaseFirestore {
      * See {@link VectorQueryOptions}.
      */
     findNearest(
-      options: VectorQueryOptions
+      options: VectorQueryOptions,
     ): VectorQuery<AppModelType, DbModelType>;
 
     /**
@@ -2143,7 +2190,7 @@ declare namespace FirebaseFirestore {
       NewAppModelType,
       NewDbModelType extends DocumentData = DocumentData,
     >(
-      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>
+      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>,
     ): Query<NewAppModelType, NewDbModelType>;
     withConverter(converter: null): Query;
   }
@@ -2195,9 +2242,9 @@ declare namespace FirebaseFirestore {
      */
     forEach(
       callback: (
-        result: QueryDocumentSnapshot<AppModelType, DbModelType>
+        result: QueryDocumentSnapshot<AppModelType, DbModelType>,
       ) => void,
-      thisArg?: any
+      thisArg?: any,
     ): void;
 
     /**
@@ -2257,9 +2304,9 @@ declare namespace FirebaseFirestore {
      */
     forEach(
       callback: (
-        result: QueryDocumentSnapshot<AppModelType, DbModelType>
+        result: QueryDocumentSnapshot<AppModelType, DbModelType>,
       ) => void,
-      thisArg?: any
+      thisArg?: any,
     ): void;
 
     /**
@@ -2386,7 +2433,7 @@ declare namespace FirebaseFirestore {
      * newly created document after it has been written to the backend.
      */
     add(
-      data: WithFieldValue<AppModelType>
+      data: WithFieldValue<AppModelType>,
     ): Promise<DocumentReference<AppModelType, DbModelType>>;
 
     /**
@@ -2412,7 +2459,7 @@ declare namespace FirebaseFirestore {
       NewAppModelType,
       NewDbModelType extends DocumentData = DocumentData,
     >(
-      converter: FirestoreDataConverter<NewAppModelType>
+      converter: FirestoreDataConverter<NewAppModelType>,
     ): CollectionReference<NewAppModelType, NewDbModelType>;
     withConverter(converter: null): CollectionReference;
   }
@@ -2438,7 +2485,7 @@ declare namespace FirebaseFirestore {
      * @return An AsyncIterable of `QueryPartition`s.
      */
     getPartitions(
-      desiredPartitionCount: number
+      desiredPartitionCount: number,
     ): AsyncIterable<QueryPartition<AppModelType, DbModelType>>;
 
     /**
@@ -2491,7 +2538,7 @@ declare namespace FirebaseFirestore {
       NewAppModelType,
       NewDbModelType extends DocumentData = DocumentData,
     >(
-      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>
+      converter: FirestoreDataConverter<NewAppModelType, NewDbModelType>,
     ): CollectionGroup<NewAppModelType, NewDbModelType>;
     withConverter(converter: null): CollectionGroup;
   }
@@ -2645,7 +2692,7 @@ declare namespace FirebaseFirestore {
      *  from the query execution (if any), and the query results (if any).
      */
     explain(
-      options?: ExplainOptions
+      options?: ExplainOptions,
     ): Promise<
       ExplainResults<
         AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
@@ -2665,7 +2712,7 @@ declare namespace FirebaseFirestore {
      * defined above, or `false` otherwise.
      */
     isEqual(
-      other: AggregateQuery<AggregateSpecType, AppModelType, DbModelType>
+      other: AggregateQuery<AggregateSpecType, AppModelType, DbModelType>,
     ): boolean;
   }
 
@@ -2718,7 +2765,7 @@ declare namespace FirebaseFirestore {
         AggregateSpecType,
         AppModelType,
         DbModelType
-      >
+      >,
     ): boolean;
   }
 
@@ -2994,7 +3041,7 @@ declare namespace FirebaseFirestore {
      * @returns This instance.
      */
     add<AppModelType, DbModelType extends DocumentData>(
-      documentSnapshot: DocumentSnapshot<AppModelType, DbModelType>
+      documentSnapshot: DocumentSnapshot<AppModelType, DbModelType>,
     ): BundleBuilder;
 
     /**
@@ -3007,7 +3054,7 @@ declare namespace FirebaseFirestore {
      */
     add<AppModelType, DbModelType extends DocumentData>(
       queryName: string,
-      querySnapshot: QuerySnapshot<AppModelType, DbModelType>
+      querySnapshot: QuerySnapshot<AppModelType, DbModelType>,
     ): BundleBuilder;
 
     /**
@@ -3095,7 +3142,7 @@ declare namespace FirebaseFirestore {
     static where(
       fieldPath: string | FieldPath,
       opStr: WhereFilterOp,
-      value: unknown
+      value: unknown,
     ): Filter;
 
     /**

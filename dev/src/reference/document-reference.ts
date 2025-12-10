@@ -72,7 +72,7 @@ export class DocumentReference<
      * @internal
      * @private
      **/
-    readonly _converter = defaultConverter<AppModelType, DbModelType>()
+    readonly _converter = defaultConverter<AppModelType, DbModelType>(),
   ) {}
 
   /**
@@ -182,7 +182,7 @@ export class DocumentReference<
     return new CollectionReference<AppModelType, DbModelType>(
       this._firestore,
       this._path.parent()!,
-      this._converter
+      this._converter,
     );
   }
 
@@ -210,7 +210,7 @@ export class DocumentReference<
       SPAN_NAME_DOC_REF_GET,
       () => {
         return this._firestore.getAll(this).then(([result]) => result);
-      }
+      },
     );
   }
 
@@ -235,7 +235,7 @@ export class DocumentReference<
     const path = this._path.append(collectionPath);
     if (!path.isCollection) {
       throw new Error(
-        `Value for argument "collectionPath" must point to a collection, but was "${collectionPath}". Your path does not contain an odd number of components.`
+        `Value for argument "collectionPath" must point to a collection, but was "${collectionPath}". Your path does not contain an odd number of components.`,
       );
     }
 
@@ -267,10 +267,6 @@ export class DocumentReference<
         return this.firestore.initializeIfNeeded(tag).then(() => {
           const request: api.IListCollectionIdsRequest = {
             parent: this.formattedName,
-            // Setting `pageSize` to an arbitrarily large value lets the backend cap
-            // the page size (currently to 300). Note that the backend rejects
-            // MAX_INT32 (b/146883794).
-            pageSize: Math.pow(2, 16) - 1,
           };
           return this._firestore
             .request<
@@ -291,7 +287,7 @@ export class DocumentReference<
               return collections;
             });
         });
-      }
+      },
     );
   }
 
@@ -325,7 +321,7 @@ export class DocumentReference<
           .create(this, data)
           .commit()
           .then(([writeResult]) => writeResult);
-      }
+      },
     );
   }
 
@@ -363,13 +359,13 @@ export class DocumentReference<
           .delete(this, precondition)
           .commit()
           .then(([writeResult]) => writeResult);
-      }
+      },
     );
   }
 
   set(
     data: firestore.PartialWithFieldValue<AppModelType>,
-    options: firestore.SetOptions
+    options: firestore.SetOptions,
   ): Promise<WriteResult>;
   set(data: firestore.WithFieldValue<AppModelType>): Promise<WriteResult>;
   /**
@@ -404,7 +400,7 @@ export class DocumentReference<
    */
   set(
     data: firestore.PartialWithFieldValue<AppModelType>,
-    options?: firestore.SetOptions
+    options?: firestore.SetOptions,
   ): Promise<WriteResult> {
     return this._firestore._traceUtil.startActiveSpan(
       SPAN_NAME_DOC_REF_SET,
@@ -415,11 +411,11 @@ export class DocumentReference<
         } else {
           writeBatch = writeBatch.set(
             this,
-            data as firestore.WithFieldValue<AppModelType>
+            data as firestore.WithFieldValue<AppModelType>,
           );
         }
         return writeBatch.commit().then(([writeResult]) => writeResult);
-      }
+      },
     );
   }
 
@@ -475,7 +471,7 @@ export class DocumentReference<
           .update(this, dataOrField, ...preconditionOrValues)
           .commit()
           .then(([writeResult]) => writeResult);
-      }
+      },
     );
   }
 
@@ -509,9 +505,9 @@ export class DocumentReference<
    */
   onSnapshot(
     onNext: (
-      snapshot: firestore.DocumentSnapshot<AppModelType, DbModelType>
+      snapshot: firestore.DocumentSnapshot<AppModelType, DbModelType>,
     ) => void,
-    onError?: (error: Error) => void
+    onError?: (error: Error) => void,
   ): () => void {
     validateFunction('onNext', onNext);
     validateFunction('onError', onError, {optional: true});
@@ -530,10 +526,10 @@ export class DocumentReference<
       const ref = new DocumentReference(
         this._firestore,
         this._path,
-        this._converter
+        this._converter,
       );
       const document = new DocumentSnapshotBuilder<AppModelType, DbModelType>(
-        ref
+        ref,
       );
       document.readTime = readTime;
       onNext(document.build());
@@ -548,7 +544,7 @@ export class DocumentReference<
    * value.
    */
   isEqual(
-    other: firestore.DocumentReference<AppModelType, DbModelType>
+    other: firestore.DocumentReference<AppModelType, DbModelType>,
   ): boolean {
     return (
       this === other ||
@@ -574,7 +570,10 @@ export class DocumentReference<
     NewAppModelType,
     NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
-    converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
+    converter: firestore.FirestoreDataConverter<
+      NewAppModelType,
+      NewDbModelType
+    >,
   ): DocumentReference<NewAppModelType, NewDbModelType>;
   /**
    * Applies a custom data converter to this DocumentReference, allowing you to
@@ -634,12 +633,12 @@ export class DocumentReference<
     converter: firestore.FirestoreDataConverter<
       NewAppModelType,
       NewDbModelType
-    > | null
+    > | null,
   ): DocumentReference<NewAppModelType, NewDbModelType> {
     return new DocumentReference<NewAppModelType, NewDbModelType>(
       this.firestore,
       this._path,
-      converter ?? defaultConverter()
+      converter ?? defaultConverter(),
     );
   }
 }

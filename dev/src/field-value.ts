@@ -320,7 +320,7 @@ export abstract class FieldTransform extends FieldValue {
    */
   abstract toProto(
     serializer: Serializer,
-    fieldPath: FieldPath
+    fieldPath: FieldPath,
   ): api.DocumentTransform.IFieldTransform;
 }
 
@@ -368,7 +368,7 @@ export class DeleteTransform extends FieldTransform {
 
   toProto(): never {
     throw new Error(
-      'FieldValue.delete() should not be included in a FieldTransform'
+      'FieldValue.delete() should not be included in a FieldTransform',
     );
   }
 }
@@ -420,7 +420,7 @@ class ServerTimestampTransform extends FieldTransform {
 
   toProto(
     serializer: Serializer,
-    fieldPath: FieldPath
+    fieldPath: FieldPath,
   ): api.DocumentTransform.IFieldTransform {
     return {
       fieldPath: fieldPath.formattedName,
@@ -470,7 +470,7 @@ class NumericIncrementTransform extends FieldTransform {
 
   toProto(
     serializer: Serializer,
-    fieldPath: FieldPath
+    fieldPath: FieldPath,
   ): api.DocumentTransform.IFieldTransform {
     const encodedOperand = serializer.encodeValue(this.operand)!;
     return {fieldPath: fieldPath.formattedName, increment: encodedOperand};
@@ -526,7 +526,7 @@ class ArrayUnionTransform extends FieldTransform {
 
   toProto(
     serializer: Serializer,
-    fieldPath: FieldPath
+    fieldPath: FieldPath,
   ): api.DocumentTransform.IFieldTransform {
     const encodedElements = serializer.encodeValue(this.elements)!.arrayValue!;
     return {
@@ -585,7 +585,7 @@ class ArrayRemoveTransform extends FieldTransform {
 
   toProto(
     serializer: Serializer,
-    fieldPath: FieldPath
+    fieldPath: FieldPath,
   ): api.DocumentTransform.IFieldTransform {
     const encodedElements = serializer.encodeValue(this.elements)!.arrayValue!;
     return {
@@ -617,14 +617,14 @@ class ArrayRemoveTransform extends FieldTransform {
 function validateArrayElement(
   arg: string | number,
   value: unknown,
-  allowUndefined: boolean
+  allowUndefined: boolean,
 ): void {
   if (Array.isArray(value)) {
     throw new Error(
       `${invalidArgumentMessage(
         arg,
-        'array element'
-      )} Nested arrays are not supported.`
+        'array element',
+      )} Nested arrays are not supported.`,
     );
   }
   validateUserInput(
@@ -634,6 +634,6 @@ function validateArrayElement(
     /*path=*/ {allowDeletes: 'none', allowTransforms: false, allowUndefined},
     /*path=*/ undefined,
     /*level=*/ 0,
-    /*inArray=*/ true
+    /*inArray=*/ true,
   );
 }

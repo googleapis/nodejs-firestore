@@ -59,7 +59,7 @@ export class CollectionReference<
   constructor(
     firestore: Firestore,
     path: ResourcePath,
-    converter?: firestore.FirestoreDataConverter<AppModelType, DbModelType>
+    converter?: firestore.FirestoreDataConverter<AppModelType, DbModelType>,
   ) {
     super(firestore, QueryOptions.forCollectionQuery(path, converter));
   }
@@ -71,7 +71,7 @@ export class CollectionReference<
    */
   get _resourcePath(): ResourcePath {
     return this._queryOptions.parentPath.append(
-      this._queryOptions.collectionId
+      this._queryOptions.collectionId,
     );
   }
 
@@ -111,7 +111,7 @@ export class CollectionReference<
     if (this._queryOptions.parentPath.isDocument) {
       return new DocumentReference(
         this.firestore,
-        this._queryOptions.parentPath
+        this._queryOptions.parentPath,
       );
     }
 
@@ -176,17 +176,13 @@ export class CollectionReference<
           const parentPath =
             this._queryOptions.parentPath.toQualifiedResourcePath(
               this.firestore.projectId,
-              this.firestore.databaseId
+              this.firestore.databaseId,
             );
 
           const request: api.IListDocumentsRequest = {
             parent: parentPath.formattedName,
             collectionId: this.id,
             showMissing: true,
-            // Setting `pageSize` to an arbitrarily large value lets the backend cap
-            // the page size (currently to 300). Note that the backend rejects
-            // MAX_INT32 (b/146883794).
-            pageSize: Math.pow(2, 16) - 1,
             mask: {fieldPaths: []},
           };
 
@@ -200,13 +196,13 @@ export class CollectionReference<
               // so we do not need to manually sort them.
               return documents.map(doc => {
                 const path = QualifiedResourcePath.fromSlashSeparatedString(
-                  doc.name!
+                  doc.name!,
                 );
                 return this.doc(path.id!);
               });
             });
         });
-      }
+      },
     );
   }
 
@@ -241,14 +237,14 @@ export class CollectionReference<
     const path = this._resourcePath.append(documentPath!);
     if (!path.isDocument) {
       throw new Error(
-        `Value for argument "documentPath" must point to a document, but was "${documentPath}". Your path does not contain an even number of components.`
+        `Value for argument "documentPath" must point to a document, but was "${documentPath}". Your path does not contain an even number of components.`,
       );
     }
 
     return new DocumentReference(
       this.firestore,
       path,
-      this._queryOptions.converter
+      this._queryOptions.converter,
     );
   }
 
@@ -272,7 +268,7 @@ export class CollectionReference<
    * ```
    */
   add(
-    data: firestore.WithFieldValue<AppModelType>
+    data: firestore.WithFieldValue<AppModelType>,
   ): Promise<DocumentReference<AppModelType, DbModelType>> {
     return this._firestore._traceUtil.startActiveSpan(
       SPAN_NAME_COL_REF_ADD,
@@ -282,12 +278,12 @@ export class CollectionReference<
           'data',
           firestoreData,
           /*allowDeletes=*/ false,
-          this._allowUndefined
+          this._allowUndefined,
         );
 
         const documentRef = this.doc();
         return documentRef.create(data).then(() => documentRef);
-      }
+      },
     );
   }
 
@@ -299,7 +295,7 @@ export class CollectionReference<
    * provided value.
    */
   isEqual(
-    other: firestore.CollectionReference<AppModelType, DbModelType>
+    other: firestore.CollectionReference<AppModelType, DbModelType>,
   ): boolean {
     return (
       this === other ||
@@ -312,7 +308,10 @@ export class CollectionReference<
     NewAppModelType,
     NewDbModelType extends firestore.DocumentData = firestore.DocumentData,
   >(
-    converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>
+    converter: firestore.FirestoreDataConverter<
+      NewAppModelType,
+      NewDbModelType
+    >,
   ): CollectionReference<NewAppModelType, NewDbModelType>;
   /**
    * Applies a custom data converter to this CollectionReference, allowing you
@@ -372,12 +371,12 @@ export class CollectionReference<
     converter: firestore.FirestoreDataConverter<
       NewAppModelType,
       NewDbModelType
-    > | null
+    > | null,
   ): CollectionReference<NewAppModelType, NewDbModelType> {
     return new CollectionReference<NewAppModelType, NewDbModelType>(
       this.firestore,
       this._resourcePath,
-      converter ?? defaultConverter()
+      converter ?? defaultConverter(),
     );
   }
 }
