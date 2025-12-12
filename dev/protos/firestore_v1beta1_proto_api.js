@@ -5400,6 +5400,7 @@
                  * @property {Array.<google.protobuf.IUninterpretedOption>|null} [uninterpretedOption] MethodOptions uninterpretedOption
                  * @property {google.api.IHttpRule|null} [".google.api.http"] MethodOptions .google.api.http
                  * @property {Array.<string>|null} [".google.api.methodSignature"] MethodOptions .google.api.methodSignature
+                 * @property {google.api.IRoutingRule|null} [".google.api.routing"] MethodOptions .google.api.routing
                  * @property {google.longrunning.IOperationInfo|null} [".google.longrunning.operationInfo"] MethodOptions .google.longrunning.operationInfo
                  */
     
@@ -5467,6 +5468,14 @@
                  * @instance
                  */
                 MethodOptions.prototype[".google.api.methodSignature"] = $util.emptyArray;
+    
+                /**
+                 * MethodOptions .google.api.routing.
+                 * @member {google.api.IRoutingRule|null|undefined} .google.api.routing
+                 * @memberof google.protobuf.MethodOptions
+                 * @instance
+                 */
+                MethodOptions.prototype[".google.api.routing"] = null;
     
                 /**
                  * MethodOptions .google.longrunning.operationInfo.
@@ -5537,6 +5546,11 @@
                         for (var i = 0; i < object[".google.api.methodSignature"].length; ++i)
                             message[".google.api.methodSignature"][i] = String(object[".google.api.methodSignature"][i]);
                     }
+                    if (object[".google.api.routing"] != null) {
+                        if (typeof object[".google.api.routing"] !== "object")
+                            throw TypeError(".google.protobuf.MethodOptions..google.api.routing: object expected");
+                        message[".google.api.routing"] = $root.google.api.RoutingRule.fromObject(object[".google.api.routing"]);
+                    }
                     if (object[".google.longrunning.operationInfo"] != null) {
                         if (typeof object[".google.longrunning.operationInfo"] !== "object")
                             throw TypeError(".google.protobuf.MethodOptions..google.longrunning.operationInfo: object expected");
@@ -5568,6 +5582,7 @@
                         object.features = null;
                         object[".google.longrunning.operationInfo"] = null;
                         object[".google.api.http"] = null;
+                        object[".google.api.routing"] = null;
                     }
                     if (message.deprecated != null && message.hasOwnProperty("deprecated"))
                         object.deprecated = message.deprecated;
@@ -5589,6 +5604,8 @@
                     }
                     if (message[".google.api.http"] != null && message.hasOwnProperty(".google.api.http"))
                         object[".google.api.http"] = $root.google.api.HttpRule.toObject(message[".google.api.http"], options);
+                    if (message[".google.api.routing"] != null && message.hasOwnProperty(".google.api.routing"))
+                        object[".google.api.routing"] = $root.google.api.RoutingRule.toObject(message[".google.api.routing"], options);
                     return object;
                 };
     
@@ -20069,6 +20086,7 @@
                      * @interface IExperimentalFeatures
                      * @property {boolean|null} [restAsyncIoEnabled] ExperimentalFeatures restAsyncIoEnabled
                      * @property {boolean|null} [protobufPythonicTypesEnabled] ExperimentalFeatures protobufPythonicTypesEnabled
+                     * @property {boolean|null} [unversionedPackageDisabled] ExperimentalFeatures unversionedPackageDisabled
                      */
     
                     /**
@@ -20103,6 +20121,14 @@
                     ExperimentalFeatures.prototype.protobufPythonicTypesEnabled = false;
     
                     /**
+                     * ExperimentalFeatures unversionedPackageDisabled.
+                     * @member {boolean} unversionedPackageDisabled
+                     * @memberof google.api.PythonSettings.ExperimentalFeatures
+                     * @instance
+                     */
+                    ExperimentalFeatures.prototype.unversionedPackageDisabled = false;
+    
+                    /**
                      * Creates an ExperimentalFeatures message from a plain object. Also converts values to their respective internal types.
                      * @function fromObject
                      * @memberof google.api.PythonSettings.ExperimentalFeatures
@@ -20118,6 +20144,8 @@
                             message.restAsyncIoEnabled = Boolean(object.restAsyncIoEnabled);
                         if (object.protobufPythonicTypesEnabled != null)
                             message.protobufPythonicTypesEnabled = Boolean(object.protobufPythonicTypesEnabled);
+                        if (object.unversionedPackageDisabled != null)
+                            message.unversionedPackageDisabled = Boolean(object.unversionedPackageDisabled);
                         return message;
                     };
     
@@ -20137,11 +20165,14 @@
                         if (options.defaults) {
                             object.restAsyncIoEnabled = false;
                             object.protobufPythonicTypesEnabled = false;
+                            object.unversionedPackageDisabled = false;
                         }
                         if (message.restAsyncIoEnabled != null && message.hasOwnProperty("restAsyncIoEnabled"))
                             object.restAsyncIoEnabled = message.restAsyncIoEnabled;
                         if (message.protobufPythonicTypesEnabled != null && message.hasOwnProperty("protobufPythonicTypesEnabled"))
                             object.protobufPythonicTypesEnabled = message.protobufPythonicTypesEnabled;
+                        if (message.unversionedPackageDisabled != null && message.hasOwnProperty("unversionedPackageDisabled"))
+                            object.unversionedPackageDisabled = message.unversionedPackageDisabled;
                         return object;
                     };
     
@@ -21612,6 +21643,229 @@
                 return ResourceReference;
             })();
     
+            api.RoutingRule = (function() {
+    
+                /**
+                 * Properties of a RoutingRule.
+                 * @memberof google.api
+                 * @interface IRoutingRule
+                 * @property {Array.<google.api.IRoutingParameter>|null} [routingParameters] RoutingRule routingParameters
+                 */
+    
+                /**
+                 * Constructs a new RoutingRule.
+                 * @memberof google.api
+                 * @classdesc Represents a RoutingRule.
+                 * @implements IRoutingRule
+                 * @constructor
+                 * @param {google.api.IRoutingRule=} [properties] Properties to set
+                 */
+                function RoutingRule(properties) {
+                    this.routingParameters = [];
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * RoutingRule routingParameters.
+                 * @member {Array.<google.api.IRoutingParameter>} routingParameters
+                 * @memberof google.api.RoutingRule
+                 * @instance
+                 */
+                RoutingRule.prototype.routingParameters = $util.emptyArray;
+    
+                /**
+                 * Creates a RoutingRule message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.RoutingRule
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.RoutingRule} RoutingRule
+                 */
+                RoutingRule.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.RoutingRule)
+                        return object;
+                    var message = new $root.google.api.RoutingRule();
+                    if (object.routingParameters) {
+                        if (!Array.isArray(object.routingParameters))
+                            throw TypeError(".google.api.RoutingRule.routingParameters: array expected");
+                        message.routingParameters = [];
+                        for (var i = 0; i < object.routingParameters.length; ++i) {
+                            if (typeof object.routingParameters[i] !== "object")
+                                throw TypeError(".google.api.RoutingRule.routingParameters: object expected");
+                            message.routingParameters[i] = $root.google.api.RoutingParameter.fromObject(object.routingParameters[i]);
+                        }
+                    }
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a RoutingRule message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.RoutingRule
+                 * @static
+                 * @param {google.api.RoutingRule} message RoutingRule
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                RoutingRule.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.arrays || options.defaults)
+                        object.routingParameters = [];
+                    if (message.routingParameters && message.routingParameters.length) {
+                        object.routingParameters = [];
+                        for (var j = 0; j < message.routingParameters.length; ++j)
+                            object.routingParameters[j] = $root.google.api.RoutingParameter.toObject(message.routingParameters[j], options);
+                    }
+                    return object;
+                };
+    
+                /**
+                 * Converts this RoutingRule to JSON.
+                 * @function toJSON
+                 * @memberof google.api.RoutingRule
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                RoutingRule.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for RoutingRule
+                 * @function getTypeUrl
+                 * @memberof google.api.RoutingRule
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                RoutingRule.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.api.RoutingRule";
+                };
+    
+                return RoutingRule;
+            })();
+    
+            api.RoutingParameter = (function() {
+    
+                /**
+                 * Properties of a RoutingParameter.
+                 * @memberof google.api
+                 * @interface IRoutingParameter
+                 * @property {string|null} [field] RoutingParameter field
+                 * @property {string|null} [pathTemplate] RoutingParameter pathTemplate
+                 */
+    
+                /**
+                 * Constructs a new RoutingParameter.
+                 * @memberof google.api
+                 * @classdesc Represents a RoutingParameter.
+                 * @implements IRoutingParameter
+                 * @constructor
+                 * @param {google.api.IRoutingParameter=} [properties] Properties to set
+                 */
+                function RoutingParameter(properties) {
+                    if (properties)
+                        for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                            if (properties[keys[i]] != null)
+                                this[keys[i]] = properties[keys[i]];
+                }
+    
+                /**
+                 * RoutingParameter field.
+                 * @member {string} field
+                 * @memberof google.api.RoutingParameter
+                 * @instance
+                 */
+                RoutingParameter.prototype.field = "";
+    
+                /**
+                 * RoutingParameter pathTemplate.
+                 * @member {string} pathTemplate
+                 * @memberof google.api.RoutingParameter
+                 * @instance
+                 */
+                RoutingParameter.prototype.pathTemplate = "";
+    
+                /**
+                 * Creates a RoutingParameter message from a plain object. Also converts values to their respective internal types.
+                 * @function fromObject
+                 * @memberof google.api.RoutingParameter
+                 * @static
+                 * @param {Object.<string,*>} object Plain object
+                 * @returns {google.api.RoutingParameter} RoutingParameter
+                 */
+                RoutingParameter.fromObject = function fromObject(object) {
+                    if (object instanceof $root.google.api.RoutingParameter)
+                        return object;
+                    var message = new $root.google.api.RoutingParameter();
+                    if (object.field != null)
+                        message.field = String(object.field);
+                    if (object.pathTemplate != null)
+                        message.pathTemplate = String(object.pathTemplate);
+                    return message;
+                };
+    
+                /**
+                 * Creates a plain object from a RoutingParameter message. Also converts values to other types if specified.
+                 * @function toObject
+                 * @memberof google.api.RoutingParameter
+                 * @static
+                 * @param {google.api.RoutingParameter} message RoutingParameter
+                 * @param {$protobuf.IConversionOptions} [options] Conversion options
+                 * @returns {Object.<string,*>} Plain object
+                 */
+                RoutingParameter.toObject = function toObject(message, options) {
+                    if (!options)
+                        options = {};
+                    var object = {};
+                    if (options.defaults) {
+                        object.field = "";
+                        object.pathTemplate = "";
+                    }
+                    if (message.field != null && message.hasOwnProperty("field"))
+                        object.field = message.field;
+                    if (message.pathTemplate != null && message.hasOwnProperty("pathTemplate"))
+                        object.pathTemplate = message.pathTemplate;
+                    return object;
+                };
+    
+                /**
+                 * Converts this RoutingParameter to JSON.
+                 * @function toJSON
+                 * @memberof google.api.RoutingParameter
+                 * @instance
+                 * @returns {Object.<string,*>} JSON object
+                 */
+                RoutingParameter.prototype.toJSON = function toJSON() {
+                    return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+                };
+    
+                /**
+                 * Gets the default type url for RoutingParameter
+                 * @function getTypeUrl
+                 * @memberof google.api.RoutingParameter
+                 * @static
+                 * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns {string} The default type url
+                 */
+                RoutingParameter.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+                    if (typeUrlPrefix === undefined) {
+                        typeUrlPrefix = "type.googleapis.com";
+                    }
+                    return typeUrlPrefix + "/google.api.RoutingParameter";
+                };
+    
+                return RoutingParameter;
+            })();
+    
             return api;
         })();
     
@@ -22252,6 +22506,7 @@
                  * @property {string|null} [filter] ListOperationsRequest filter
                  * @property {number|null} [pageSize] ListOperationsRequest pageSize
                  * @property {string|null} [pageToken] ListOperationsRequest pageToken
+                 * @property {boolean|null} [returnPartialSuccess] ListOperationsRequest returnPartialSuccess
                  */
     
                 /**
@@ -22302,6 +22557,14 @@
                 ListOperationsRequest.prototype.pageToken = "";
     
                 /**
+                 * ListOperationsRequest returnPartialSuccess.
+                 * @member {boolean} returnPartialSuccess
+                 * @memberof google.longrunning.ListOperationsRequest
+                 * @instance
+                 */
+                ListOperationsRequest.prototype.returnPartialSuccess = false;
+    
+                /**
                  * Creates a ListOperationsRequest message from a plain object. Also converts values to their respective internal types.
                  * @function fromObject
                  * @memberof google.longrunning.ListOperationsRequest
@@ -22321,6 +22584,8 @@
                         message.pageSize = object.pageSize | 0;
                     if (object.pageToken != null)
                         message.pageToken = String(object.pageToken);
+                    if (object.returnPartialSuccess != null)
+                        message.returnPartialSuccess = Boolean(object.returnPartialSuccess);
                     return message;
                 };
     
@@ -22342,6 +22607,7 @@
                         object.pageSize = 0;
                         object.pageToken = "";
                         object.name = "";
+                        object.returnPartialSuccess = false;
                     }
                     if (message.filter != null && message.hasOwnProperty("filter"))
                         object.filter = message.filter;
@@ -22351,6 +22617,8 @@
                         object.pageToken = message.pageToken;
                     if (message.name != null && message.hasOwnProperty("name"))
                         object.name = message.name;
+                    if (message.returnPartialSuccess != null && message.hasOwnProperty("returnPartialSuccess"))
+                        object.returnPartialSuccess = message.returnPartialSuccess;
                     return object;
                 };
     
@@ -22391,6 +22659,7 @@
                  * @interface IListOperationsResponse
                  * @property {Array.<google.longrunning.IOperation>|null} [operations] ListOperationsResponse operations
                  * @property {string|null} [nextPageToken] ListOperationsResponse nextPageToken
+                 * @property {Array.<string>|null} [unreachable] ListOperationsResponse unreachable
                  */
     
                 /**
@@ -22403,6 +22672,7 @@
                  */
                 function ListOperationsResponse(properties) {
                     this.operations = [];
+                    this.unreachable = [];
                     if (properties)
                         for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                             if (properties[keys[i]] != null)
@@ -22424,6 +22694,14 @@
                  * @instance
                  */
                 ListOperationsResponse.prototype.nextPageToken = "";
+    
+                /**
+                 * ListOperationsResponse unreachable.
+                 * @member {Array.<string>} unreachable
+                 * @memberof google.longrunning.ListOperationsResponse
+                 * @instance
+                 */
+                ListOperationsResponse.prototype.unreachable = $util.emptyArray;
     
                 /**
                  * Creates a ListOperationsResponse message from a plain object. Also converts values to their respective internal types.
@@ -22449,6 +22727,13 @@
                     }
                     if (object.nextPageToken != null)
                         message.nextPageToken = String(object.nextPageToken);
+                    if (object.unreachable) {
+                        if (!Array.isArray(object.unreachable))
+                            throw TypeError(".google.longrunning.ListOperationsResponse.unreachable: array expected");
+                        message.unreachable = [];
+                        for (var i = 0; i < object.unreachable.length; ++i)
+                            message.unreachable[i] = String(object.unreachable[i]);
+                    }
                     return message;
                 };
     
@@ -22465,8 +22750,10 @@
                     if (!options)
                         options = {};
                     var object = {};
-                    if (options.arrays || options.defaults)
+                    if (options.arrays || options.defaults) {
                         object.operations = [];
+                        object.unreachable = [];
+                    }
                     if (options.defaults)
                         object.nextPageToken = "";
                     if (message.operations && message.operations.length) {
@@ -22476,6 +22763,11 @@
                     }
                     if (message.nextPageToken != null && message.hasOwnProperty("nextPageToken"))
                         object.nextPageToken = message.nextPageToken;
+                    if (message.unreachable && message.unreachable.length) {
+                        object.unreachable = [];
+                        for (var j = 0; j < message.unreachable.length; ++j)
+                            object.unreachable[j] = message.unreachable[j];
+                    }
                     return object;
                 };
     

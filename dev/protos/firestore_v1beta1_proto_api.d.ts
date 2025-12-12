@@ -15,6 +15,7 @@
  */
 
 import * as $protobuf from "protobufjs";
+import Long = require("long");
 /** Namespace google. */
 export namespace google {
 
@@ -2037,6 +2038,9 @@ export namespace google {
 
             /** MethodOptions .google.api.methodSignature */
             ".google.api.methodSignature"?: (string[]|null);
+
+            /** MethodOptions .google.api.routing */
+            ".google.api.routing"?: (google.api.IRoutingRule|null);
 
             /** MethodOptions .google.longrunning.operationInfo */
             ".google.longrunning.operationInfo"?: (google.longrunning.IOperationInfo|null);
@@ -8102,6 +8106,9 @@ export namespace google {
 
                 /** ExperimentalFeatures protobufPythonicTypesEnabled */
                 protobufPythonicTypesEnabled?: (boolean|null);
+
+                /** ExperimentalFeatures unversionedPackageDisabled */
+                unversionedPackageDisabled?: (boolean|null);
             }
 
             /** Represents an ExperimentalFeatures. */
@@ -8118,6 +8125,9 @@ export namespace google {
 
                 /** ExperimentalFeatures protobufPythonicTypesEnabled. */
                 public protobufPythonicTypesEnabled: boolean;
+
+                /** ExperimentalFeatures unversionedPackageDisabled. */
+                public unversionedPackageDisabled: boolean;
 
                 /**
                  * Creates an ExperimentalFeatures message from a plain object. Also converts values to their respective internal types.
@@ -8724,6 +8734,108 @@ export namespace google {
              */
             public static getTypeUrl(typeUrlPrefix?: string): string;
         }
+
+        /** Properties of a RoutingRule. */
+        interface IRoutingRule {
+
+            /** RoutingRule routingParameters */
+            routingParameters?: (google.api.IRoutingParameter[]|null);
+        }
+
+        /** Represents a RoutingRule. */
+        class RoutingRule implements IRoutingRule {
+
+            /**
+             * Constructs a new RoutingRule.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IRoutingRule);
+
+            /** RoutingRule routingParameters. */
+            public routingParameters: google.api.IRoutingParameter[];
+
+            /**
+             * Creates a RoutingRule message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns RoutingRule
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.RoutingRule;
+
+            /**
+             * Creates a plain object from a RoutingRule message. Also converts values to other types if specified.
+             * @param message RoutingRule
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.RoutingRule, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this RoutingRule to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for RoutingRule
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a RoutingParameter. */
+        interface IRoutingParameter {
+
+            /** RoutingParameter field */
+            field?: (string|null);
+
+            /** RoutingParameter pathTemplate */
+            pathTemplate?: (string|null);
+        }
+
+        /** Represents a RoutingParameter. */
+        class RoutingParameter implements IRoutingParameter {
+
+            /**
+             * Constructs a new RoutingParameter.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IRoutingParameter);
+
+            /** RoutingParameter field. */
+            public field: string;
+
+            /** RoutingParameter pathTemplate. */
+            public pathTemplate: string;
+
+            /**
+             * Creates a RoutingParameter message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns RoutingParameter
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.RoutingParameter;
+
+            /**
+             * Creates a plain object from a RoutingParameter message. Also converts values to other types if specified.
+             * @param message RoutingParameter
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.RoutingParameter, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this RoutingParameter to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for RoutingParameter
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
     }
 
     /** Namespace rpc. */
@@ -9050,6 +9162,9 @@ export namespace google {
 
             /** ListOperationsRequest pageToken */
             pageToken?: (string|null);
+
+            /** ListOperationsRequest returnPartialSuccess */
+            returnPartialSuccess?: (boolean|null);
         }
 
         /** Represents a ListOperationsRequest. */
@@ -9072,6 +9187,9 @@ export namespace google {
 
             /** ListOperationsRequest pageToken. */
             public pageToken: string;
+
+            /** ListOperationsRequest returnPartialSuccess. */
+            public returnPartialSuccess: boolean;
 
             /**
              * Creates a ListOperationsRequest message from a plain object. Also converts values to their respective internal types.
@@ -9110,6 +9228,9 @@ export namespace google {
 
             /** ListOperationsResponse nextPageToken */
             nextPageToken?: (string|null);
+
+            /** ListOperationsResponse unreachable */
+            unreachable?: (string[]|null);
         }
 
         /** Represents a ListOperationsResponse. */
@@ -9126,6 +9247,9 @@ export namespace google {
 
             /** ListOperationsResponse nextPageToken. */
             public nextPageToken: string;
+
+            /** ListOperationsResponse unreachable. */
+            public unreachable: string[];
 
             /**
              * Creates a ListOperationsResponse message from a plain object. Also converts values to their respective internal types.
