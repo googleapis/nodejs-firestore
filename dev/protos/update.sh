@@ -48,7 +48,7 @@ git clone --single-branch --branch v26.1 --depth 1 https://github.com/google/pro
 
 # Copy necessary protos.
 mkdir -p "${PROTOS_DIR}/google/api"
-cp googleapis/google/api/{annotations,client,field_behavior,http,launch_stage,resource}.proto \
+cp googleapis/google/api/{annotations,client,field_behavior,http,launch_stage,resource,routing}.proto \
    "${PROTOS_DIR}/google/api/"
 
 mkdir -p "${PROTOS_DIR}/google/firestore/v1"
