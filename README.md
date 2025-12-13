@@ -98,9 +98,10 @@ quickstart();
 
 ```
 
-### Using the Pipelines API
+### Using the client library with Pipelines
 
-```
+```javascript
+
 const {Firestore} = require('@google-cloud/firestore');
 
 // Require/import Pipelines from '@google-cloud/firestore/pipelines'
@@ -148,6 +149,7 @@ async function pipelinesQuickstart() {
   });
 }
 pipelinesQuickstart();
+
 ```
 
 
