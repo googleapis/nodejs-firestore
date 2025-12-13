@@ -1,7 +1,4 @@
 {
-  "options": {
-    "syntax": "proto3"
-  },
   "nested": {
     "google": {
       "nested": {
@@ -122,6 +119,13 @@
                         "(google.api.resource).pattern": "projects/{project}/databases/{database}",
                         "(google.api.resource).style": "DECLARATIVE_FRIENDLY"
                       },
+                      "oneofs": {
+                        "_freeTier": {
+                          "oneof": [
+                            "freeTier"
+                          ]
+                        }
+                      },
                       "fields": {
                         "name": {
                           "type": "string",
@@ -221,9 +225,32 @@
                             "(google.api.field_behavior)": "OUTPUT_ONLY"
                           }
                         },
+                        "tags": {
+                          "keyType": "string",
+                          "type": "string",
+                          "id": 29,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
+                        },
+                        "freeTier": {
+                          "type": "bool",
+                          "id": 30,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY",
+                            "proto3_optional": true
+                          }
+                        },
                         "etag": {
                           "type": "string",
                           "id": 99
+                        },
+                        "databaseEdition": {
+                          "type": "DatabaseEdition",
+                          "id": 28,
+                          "options": {
+                            "(google.api.field_behavior)": "IMMUTABLE"
+                          }
                         }
                       },
                       "nested": {
@@ -360,6 +387,13 @@
                               }
                             }
                           }
+                        },
+                        "DatabaseEdition": {
+                          "values": {
+                            "DATABASE_EDITION_UNSPECIFIED": 0,
+                            "STANDARD": 1,
+                            "ENTERPRISE": 2
+                          }
                         }
                       }
                     },
@@ -456,6 +490,27 @@
                         "state": {
                           "type": "State",
                           "id": 4
+                        },
+                        "density": {
+                          "type": "Density",
+                          "id": 6,
+                          "options": {
+                            "(google.api.field_behavior)": "IMMUTABLE"
+                          }
+                        },
+                        "multikey": {
+                          "type": "bool",
+                          "id": 7,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
+                        },
+                        "shardCount": {
+                          "type": "int32",
+                          "id": 8,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
                         }
                       },
                       "nested": {
@@ -470,7 +525,8 @@
                         "ApiScope": {
                           "values": {
                             "ANY_API": 0,
-                            "DATASTORE_MODE_API": 1
+                            "DATASTORE_MODE_API": 1,
+                            "MONGODB_COMPATIBLE_API": 2
                           }
                         },
                         "IndexField": {
@@ -550,6 +606,14 @@
                             "CREATING": 1,
                             "READY": 2,
                             "NEEDS_REPAIR": 3
+                          }
+                        },
+                        "Density": {
+                          "values": {
+                            "DENSITY_UNSPECIFIED": 0,
+                            "SPARSE_ALL": 1,
+                            "SPARSE_ANY": 2,
+                            "DENSE": 3
                           }
                         }
                       }
@@ -908,6 +972,140 @@
                             }
                           ]
                         },
+                        "CreateUserCreds": {
+                          "requestType": "CreateUserCredsRequest",
+                          "responseType": "UserCreds",
+                          "options": {
+                            "(google.api.http).post": "/v1/{parent=projects/*/databases/*}/userCreds",
+                            "(google.api.http).body": "user_creds",
+                            "(google.api.method_signature)": "parent,user_creds,user_creds_id"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "post": "/v1/{parent=projects/*/databases/*}/userCreds",
+                                "body": "user_creds"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "parent,user_creds,user_creds_id"
+                            }
+                          ]
+                        },
+                        "GetUserCreds": {
+                          "requestType": "GetUserCredsRequest",
+                          "responseType": "UserCreds",
+                          "options": {
+                            "(google.api.http).get": "/v1/{name=projects/*/databases/*/userCreds/*}",
+                            "(google.api.method_signature)": "name"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "get": "/v1/{name=projects/*/databases/*/userCreds/*}"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "name"
+                            }
+                          ]
+                        },
+                        "ListUserCreds": {
+                          "requestType": "ListUserCredsRequest",
+                          "responseType": "ListUserCredsResponse",
+                          "options": {
+                            "(google.api.http).get": "/v1/{parent=projects/*/databases/*}/userCreds",
+                            "(google.api.method_signature)": "parent"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "get": "/v1/{parent=projects/*/databases/*}/userCreds"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "parent"
+                            }
+                          ]
+                        },
+                        "EnableUserCreds": {
+                          "requestType": "EnableUserCredsRequest",
+                          "responseType": "UserCreds",
+                          "options": {
+                            "(google.api.http).post": "/v1/{name=projects/*/databases/*/userCreds/*}:enable",
+                            "(google.api.http).body": "*",
+                            "(google.api.method_signature)": "name"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "post": "/v1/{name=projects/*/databases/*/userCreds/*}:enable",
+                                "body": "*"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "name"
+                            }
+                          ]
+                        },
+                        "DisableUserCreds": {
+                          "requestType": "DisableUserCredsRequest",
+                          "responseType": "UserCreds",
+                          "options": {
+                            "(google.api.http).post": "/v1/{name=projects/*/databases/*/userCreds/*}:disable",
+                            "(google.api.http).body": "*",
+                            "(google.api.method_signature)": "name"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "post": "/v1/{name=projects/*/databases/*/userCreds/*}:disable",
+                                "body": "*"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "name"
+                            }
+                          ]
+                        },
+                        "ResetUserPassword": {
+                          "requestType": "ResetUserPasswordRequest",
+                          "responseType": "UserCreds",
+                          "options": {
+                            "(google.api.http).post": "/v1/{name=projects/*/databases/*/userCreds/*}:resetPassword",
+                            "(google.api.http).body": "*",
+                            "(google.api.method_signature)": "name"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "post": "/v1/{name=projects/*/databases/*/userCreds/*}:resetPassword",
+                                "body": "*"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "name"
+                            }
+                          ]
+                        },
+                        "DeleteUserCreds": {
+                          "requestType": "DeleteUserCredsRequest",
+                          "responseType": "google.protobuf.Empty",
+                          "options": {
+                            "(google.api.http).delete": "/v1/{name=projects/*/databases/*/userCreds/*}",
+                            "(google.api.method_signature)": "name"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "delete": "/v1/{name=projects/*/databases/*/userCreds/*}"
+                              }
+                            },
+                            {
+                              "(google.api.method_signature)": "name"
+                            }
+                          ]
+                        },
                         "GetBackup": {
                           "requestType": "GetBackupRequest",
                           "responseType": "Backup",
@@ -1079,6 +1277,46 @@
                               "(google.api.method_signature)": "name"
                             }
                           ]
+                        },
+                        "CloneDatabase": {
+                          "requestType": "CloneDatabaseRequest",
+                          "responseType": "google.longrunning.Operation",
+                          "options": {
+                            "(google.api.http).post": "/v1/{parent=projects/*}/databases:clone",
+                            "(google.api.http).body": "*",
+                            "(google.api.routing).routing_parameters.field": "pitr_snapshot.database",
+                            "(google.api.routing).routing_parameters.path_template": "projects/*/databases/{database_id=*}/**",
+                            "(google.longrunning.operation_info).response_type": "Database",
+                            "(google.longrunning.operation_info).metadata_type": "CloneDatabaseMetadata"
+                          },
+                          "parsedOptions": [
+                            {
+                              "(google.api.http)": {
+                                "post": "/v1/{parent=projects/*}/databases:clone",
+                                "body": "*"
+                              }
+                            },
+                            {
+                              "(google.api.routing)": {
+                                "routing_parameters": [
+                                  {
+                                    "field": "pitr_snapshot.database",
+                                    "path_template": "projects/{project_id=*}/**"
+                                  },
+                                  {
+                                    "field": "pitr_snapshot.database",
+                                    "path_template": "projects/*/databases/{database_id=*}/**"
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "(google.longrunning.operation_info)": {
+                                "response_type": "Database",
+                                "metadata_type": "CloneDatabaseMetadata"
+                              }
+                            }
+                          ]
                         }
                       }
                     },
@@ -1189,6 +1427,113 @@
                     },
                     "DeleteDatabaseMetadata": {
                       "fields": {}
+                    },
+                    "CreateUserCredsRequest": {
+                      "fields": {
+                        "parent": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).child_type": "firestore.googleapis.com/UserCreds"
+                          }
+                        },
+                        "userCreds": {
+                          "type": "UserCreds",
+                          "id": 2,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
+                          }
+                        },
+                        "userCredsId": {
+                          "type": "string",
+                          "id": 3,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
+                          }
+                        }
+                      }
+                    },
+                    "GetUserCredsRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/UserCreds"
+                          }
+                        }
+                      }
+                    },
+                    "ListUserCredsRequest": {
+                      "fields": {
+                        "parent": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).child_type": "firestore.googleapis.com/UserCreds"
+                          }
+                        }
+                      }
+                    },
+                    "ListUserCredsResponse": {
+                      "fields": {
+                        "userCreds": {
+                          "rule": "repeated",
+                          "type": "UserCreds",
+                          "id": 1
+                        }
+                      }
+                    },
+                    "EnableUserCredsRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/UserCreds"
+                          }
+                        }
+                      }
+                    },
+                    "DisableUserCredsRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/UserCreds"
+                          }
+                        }
+                      }
+                    },
+                    "ResetUserPasswordRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/UserCreds"
+                          }
+                        }
+                      }
+                    },
+                    "DeleteUserCredsRequest": {
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/UserCreds"
+                          }
+                        }
+                      }
                     },
                     "CreateBackupScheduleRequest": {
                       "fields": {
@@ -1585,6 +1930,55 @@
                           "options": {
                             "(google.api.field_behavior)": "OPTIONAL"
                           }
+                        },
+                        "tags": {
+                          "keyType": "string",
+                          "type": "string",
+                          "id": 10,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
+                        }
+                      }
+                    },
+                    "CloneDatabaseRequest": {
+                      "fields": {
+                        "parent": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).child_type": "firestore.googleapis.com/Database"
+                          }
+                        },
+                        "databaseId": {
+                          "type": "string",
+                          "id": 2,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
+                          }
+                        },
+                        "pitrSnapshot": {
+                          "type": "PitrSnapshot",
+                          "id": 6,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
+                          }
+                        },
+                        "encryptionConfig": {
+                          "type": "Database.EncryptionConfig",
+                          "id": 4,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
+                        },
+                        "tags": {
+                          "keyType": "string",
+                          "type": "string",
+                          "id": 5,
+                          "options": {
+                            "(google.api.field_behavior)": "OPTIONAL"
+                          }
                         }
                       }
                     },
@@ -1853,6 +2247,37 @@
                         }
                       }
                     },
+                    "CloneDatabaseMetadata": {
+                      "fields": {
+                        "startTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 1
+                        },
+                        "endTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 2
+                        },
+                        "operationState": {
+                          "type": "OperationState",
+                          "id": 3
+                        },
+                        "database": {
+                          "type": "string",
+                          "id": 4,
+                          "options": {
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/Database"
+                          }
+                        },
+                        "pitrSnapshot": {
+                          "type": "PitrSnapshot",
+                          "id": 7
+                        },
+                        "progressPercentage": {
+                          "type": "Progress",
+                          "id": 6
+                        }
+                      }
+                    },
                     "Progress": {
                       "fields": {
                         "estimatedWork": {
@@ -1875,6 +2300,32 @@
                         "SUCCESSFUL": 5,
                         "FAILED": 6,
                         "CANCELLED": 7
+                      }
+                    },
+                    "PitrSnapshot": {
+                      "fields": {
+                        "database": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED",
+                            "(google.api.resource_reference).type": "firestore.googleapis.com/Database"
+                          }
+                        },
+                        "databaseUid": {
+                          "type": "bytes",
+                          "id": 2,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
+                        "snapshotTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 3,
+                          "options": {
+                            "(google.api.field_behavior)": "REQUIRED"
+                          }
+                        }
                       }
                     },
                     "BackupSchedule": {
@@ -1937,6 +2388,82 @@
                         }
                       }
                     },
+                    "UserCreds": {
+                      "options": {
+                        "(google.api.resource).type": "firestore.googleapis.com/UserCreds",
+                        "(google.api.resource).pattern": "projects/{project}/databases/{database}/userCreds/{user_creds}",
+                        "(google.api.resource).plural": "userCreds",
+                        "(google.api.resource).singular": "userCreds"
+                      },
+                      "oneofs": {
+                        "UserCredsIdentity": {
+                          "oneof": [
+                            "resourceIdentity"
+                          ]
+                        }
+                      },
+                      "fields": {
+                        "name": {
+                          "type": "string",
+                          "id": 1,
+                          "options": {
+                            "(google.api.field_behavior)": "IDENTIFIER"
+                          }
+                        },
+                        "createTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 2,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
+                        "updateTime": {
+                          "type": "google.protobuf.Timestamp",
+                          "id": 3,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
+                        "state": {
+                          "type": "State",
+                          "id": 4,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
+                        "securePassword": {
+                          "type": "string",
+                          "id": 5,
+                          "options": {
+                            "(google.api.field_behavior)": "OUTPUT_ONLY"
+                          }
+                        },
+                        "resourceIdentity": {
+                          "type": "ResourceIdentity",
+                          "id": 6
+                        }
+                      },
+                      "nested": {
+                        "State": {
+                          "values": {
+                            "STATE_UNSPECIFIED": 0,
+                            "ENABLED": 1,
+                            "DISABLED": 2
+                          }
+                        },
+                        "ResourceIdentity": {
+                          "fields": {
+                            "principal": {
+                              "type": "string",
+                              "id": 1,
+                              "options": {
+                                "(google.api.field_behavior)": "OUTPUT_ONLY"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
                     "LocationMetadata": {
                       "fields": {}
                     }
@@ -1948,12 +2475,11 @@
         },
         "api": {
           "options": {
-            "go_package": "google.golang.org/genproto/googleapis/api;api",
+            "go_package": "google.golang.org/genproto/googleapis/api/annotations;annotations",
             "java_multiple_files": true,
-            "java_outer_classname": "LaunchStageProto",
+            "java_outer_classname": "RoutingProto",
             "java_package": "com.google.api",
-            "objc_class_prefix": "GAPI",
-            "cc_enable_arenas": true
+            "objc_class_prefix": "GAPI"
           },
           "nested": {
             "fieldBehavior": {
@@ -2336,6 +2862,10 @@
                     "protobufPythonicTypesEnabled": {
                       "type": "bool",
                       "id": 2
+                    },
+                    "unversionedPackageDisabled": {
+                      "type": "bool",
+                      "id": 3
                     }
                   }
                 }
@@ -2485,6 +3015,32 @@
                 "GA": 4,
                 "DEPRECATED": 5
               }
+            },
+            "routing": {
+              "type": "google.api.RoutingRule",
+              "id": 72295729,
+              "extend": "google.protobuf.MethodOptions"
+            },
+            "RoutingRule": {
+              "fields": {
+                "routingParameters": {
+                  "rule": "repeated",
+                  "type": "RoutingParameter",
+                  "id": 2
+                }
+              }
+            },
+            "RoutingParameter": {
+              "fields": {
+                "field": {
+                  "type": "string",
+                  "id": 1
+                },
+                "pathTemplate": {
+                  "type": "string",
+                  "id": 2
+                }
+              }
             }
           }
         },
@@ -2500,6 +3056,7 @@
           },
           "nested": {
             "FileDescriptorSet": {
+              "edition": "proto2",
               "fields": {
                 "file": {
                   "rule": "repeated",
@@ -2509,6 +3066,7 @@
               }
             },
             "Edition": {
+              "edition": "proto2",
               "values": {
                 "EDITION_UNKNOWN": 0,
                 "EDITION_PROTO2": 998,
@@ -2524,6 +3082,7 @@
               }
             },
             "FileDescriptorProto": {
+              "edition": "proto2",
               "fields": {
                 "name": {
                   "type": "string",
@@ -2541,18 +3100,12 @@
                 "publicDependency": {
                   "rule": "repeated",
                   "type": "int32",
-                  "id": 10,
-                  "options": {
-                    "packed": false
-                  }
+                  "id": 10
                 },
                 "weakDependency": {
                   "rule": "repeated",
                   "type": "int32",
-                  "id": 11,
-                  "options": {
-                    "packed": false
-                  }
+                  "id": 11
                 },
                 "messageType": {
                   "rule": "repeated",
@@ -2593,6 +3146,7 @@
               }
             },
             "DescriptorProto": {
+              "edition": "proto2",
               "fields": {
                 "name": {
                   "type": "string",
@@ -2675,6 +3229,7 @@
               }
             },
             "ExtensionRangeOptions": {
+              "edition": "proto2",
               "fields": {
                 "uninterpretedOption": {
                   "rule": "repeated",
@@ -2748,6 +3303,7 @@
               }
             },
             "FieldDescriptorProto": {
+              "edition": "proto2",
               "fields": {
                 "name": {
                   "type": "string",
@@ -2827,6 +3383,7 @@
               }
             },
             "OneofDescriptorProto": {
+              "edition": "proto2",
               "fields": {
                 "name": {
                   "type": "string",
@@ -2839,6 +3396,7 @@
               }
             },
             "EnumDescriptorProto": {
+              "edition": "proto2",
               "fields": {
                 "name": {
                   "type": "string",
@@ -2880,6 +3438,7 @@
               }
             },
             "EnumValueDescriptorProto": {
+              "edition": "proto2",
               "fields": {
                 "name": {
                   "type": "string",
@@ -2896,6 +3455,7 @@
               }
             },
             "ServiceDescriptorProto": {
+              "edition": "proto2",
               "fields": {
                 "name": {
                   "type": "string",
@@ -2913,6 +3473,7 @@
               }
             },
             "MethodDescriptorProto": {
+              "edition": "proto2",
               "fields": {
                 "name": {
                   "type": "string",
@@ -2947,6 +3508,7 @@
               }
             },
             "FileOptions": {
+              "edition": "proto2",
               "fields": {
                 "javaPackage": {
                   "type": "string",
@@ -3088,6 +3650,7 @@
               }
             },
             "MessageOptions": {
+              "edition": "proto2",
               "fields": {
                 "messageSetWireFormat": {
                   "type": "bool",
@@ -3161,6 +3724,7 @@
               ]
             },
             "FieldOptions": {
+              "edition": "proto2",
               "fields": {
                 "ctype": {
                   "type": "CType",
@@ -3222,10 +3786,7 @@
                 "targets": {
                   "rule": "repeated",
                   "type": "OptionTargetType",
-                  "id": 19,
-                  "options": {
-                    "packed": false
-                  }
+                  "id": 19
                 },
                 "editionDefaults": {
                   "rule": "repeated",
@@ -3309,6 +3870,7 @@
               }
             },
             "OneofOptions": {
+              "edition": "proto2",
               "fields": {
                 "features": {
                   "type": "FeatureSet",
@@ -3328,6 +3890,7 @@
               ]
             },
             "EnumOptions": {
+              "edition": "proto2",
               "fields": {
                 "allowAlias": {
                   "type": "bool",
@@ -3371,6 +3934,7 @@
               ]
             },
             "EnumValueOptions": {
+              "edition": "proto2",
               "fields": {
                 "deprecated": {
                   "type": "bool",
@@ -3404,6 +3968,7 @@
               ]
             },
             "ServiceOptions": {
+              "edition": "proto2",
               "fields": {
                 "features": {
                   "type": "FeatureSet",
@@ -3430,6 +3995,7 @@
               ]
             },
             "MethodOptions": {
+              "edition": "proto2",
               "fields": {
                 "deprecated": {
                   "type": "bool",
@@ -3472,6 +4038,7 @@
               }
             },
             "UninterpretedOption": {
+              "edition": "proto2",
               "fields": {
                 "name": {
                   "rule": "repeated",
@@ -3521,6 +4088,7 @@
               }
             },
             "FeatureSet": {
+              "edition": "proto2",
               "fields": {
                 "fieldPresence": {
                   "type": "FieldPresence",
@@ -3658,6 +4226,7 @@
               }
             },
             "FeatureSetDefaults": {
+              "edition": "proto2",
               "fields": {
                 "defaults": {
                   "rule": "repeated",
@@ -3689,6 +4258,7 @@
               }
             },
             "SourceCodeInfo": {
+              "edition": "proto2",
               "fields": {
                 "location": {
                   "rule": "repeated",
@@ -3702,12 +4272,18 @@
                     "path": {
                       "rule": "repeated",
                       "type": "int32",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "packed": true
+                      }
                     },
                     "span": {
                       "rule": "repeated",
                       "type": "int32",
-                      "id": 2
+                      "id": 2,
+                      "options": {
+                        "packed": true
+                      }
                     },
                     "leadingComments": {
                       "type": "string",
@@ -3727,6 +4303,7 @@
               }
             },
             "GeneratedCodeInfo": {
+              "edition": "proto2",
               "fields": {
                 "annotation": {
                   "rule": "repeated",
@@ -3740,7 +4317,10 @@
                     "path": {
                       "rule": "repeated",
                       "type": "int32",
-                      "id": 1
+                      "id": 1,
+                      "options": {
+                        "packed": true
+                      }
                     },
                     "sourceFile": {
                       "type": "string",
@@ -3994,7 +4574,6 @@
         },
         "longrunning": {
           "options": {
-            "cc_enable_arenas": true,
             "csharp_namespace": "Google.LongRunning",
             "go_package": "cloud.google.com/go/longrunning/autogen/longrunningpb;longrunningpb",
             "java_multiple_files": true,
@@ -4151,6 +4730,10 @@
                 "pageToken": {
                   "type": "string",
                   "id": 3
+                },
+                "returnPartialSuccess": {
+                  "type": "bool",
+                  "id": 5
                 }
               }
             },
@@ -4164,6 +4747,14 @@
                 "nextPageToken": {
                   "type": "string",
                   "id": 2
+                },
+                "unreachable": {
+                  "rule": "repeated",
+                  "type": "string",
+                  "id": 3,
+                  "options": {
+                    "(google.api.field_behavior)": "UNORDERED_LIST"
+                  }
                 }
               }
             },

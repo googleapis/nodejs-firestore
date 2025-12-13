@@ -15,6 +15,7 @@
  */
 
 import * as $protobuf from "protobufjs";
+import Long = require("long");
 /** Namespace google. */
 export namespace google {
 
@@ -232,8 +233,17 @@ export namespace google {
                     /** Database sourceInfo */
                     sourceInfo?: (google.firestore.admin.v1.Database.ISourceInfo|null);
 
+                    /** Database tags */
+                    tags?: ({ [k: string]: string }|null);
+
+                    /** Database freeTier */
+                    freeTier?: (boolean|null);
+
                     /** Database etag */
                     etag?: (string|null);
+
+                    /** Database databaseEdition */
+                    databaseEdition?: (google.firestore.admin.v1.Database.DatabaseEdition|null);
                 }
 
                 /** Represents a Database. */
@@ -296,8 +306,17 @@ export namespace google {
                     /** Database sourceInfo. */
                     public sourceInfo?: (google.firestore.admin.v1.Database.ISourceInfo|null);
 
+                    /** Database tags. */
+                    public tags: { [k: string]: string };
+
+                    /** Database freeTier. */
+                    public freeTier?: (boolean|null);
+
                     /** Database etag. */
                     public etag: string;
+
+                    /** Database databaseEdition. */
+                    public databaseEdition: google.firestore.admin.v1.Database.DatabaseEdition;
 
                     /**
                      * Creates a Database message from a plain object. Also converts values to their respective internal types.
@@ -709,6 +728,10 @@ export namespace google {
                             public static getTypeUrl(typeUrlPrefix?: string): string;
                         }
                     }
+
+                    /** DatabaseEdition enum. */
+                    type DatabaseEdition =
+                        "DATABASE_EDITION_UNSPECIFIED"| "STANDARD"| "ENTERPRISE";
                 }
 
                 /** Properties of a Field. */
@@ -912,6 +935,15 @@ export namespace google {
 
                     /** Index state */
                     state?: (google.firestore.admin.v1.Index.State|null);
+
+                    /** Index density */
+                    density?: (google.firestore.admin.v1.Index.Density|null);
+
+                    /** Index multikey */
+                    multikey?: (boolean|null);
+
+                    /** Index shardCount */
+                    shardCount?: (number|null);
                 }
 
                 /** Represents an Index. */
@@ -937,6 +969,15 @@ export namespace google {
 
                     /** Index state. */
                     public state: google.firestore.admin.v1.Index.State;
+
+                    /** Index density. */
+                    public density: google.firestore.admin.v1.Index.Density;
+
+                    /** Index multikey. */
+                    public multikey: boolean;
+
+                    /** Index shardCount. */
+                    public shardCount: number;
 
                     /**
                      * Creates an Index message from a plain object. Also converts values to their respective internal types.
@@ -975,7 +1016,7 @@ export namespace google {
 
                     /** ApiScope enum. */
                     type ApiScope =
-                        "ANY_API"| "DATASTORE_MODE_API";
+                        "ANY_API"| "DATASTORE_MODE_API"| "MONGODB_COMPATIBLE_API";
 
                     /** Properties of an IndexField. */
                     interface IIndexField {
@@ -1162,6 +1203,10 @@ export namespace google {
                     /** State enum. */
                     type State =
                         "STATE_UNSPECIFIED"| "CREATING"| "READY"| "NEEDS_REPAIR";
+
+                    /** Density enum. */
+                    type Density =
+                        "DENSITY_UNSPECIFIED"| "SPARSE_ALL"| "SPARSE_ANY"| "DENSE";
                 }
 
                 /** Represents a FirestoreAdmin */
@@ -1386,6 +1431,104 @@ export namespace google {
                     public deleteDatabase(request: google.firestore.admin.v1.IDeleteDatabaseRequest): Promise<google.longrunning.Operation>;
 
                     /**
+                     * Calls CreateUserCreds.
+                     * @param request CreateUserCredsRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and UserCreds
+                     */
+                    public createUserCreds(request: google.firestore.admin.v1.ICreateUserCredsRequest, callback: google.firestore.admin.v1.FirestoreAdmin.CreateUserCredsCallback): void;
+
+                    /**
+                     * Calls CreateUserCreds.
+                     * @param request CreateUserCredsRequest message or plain object
+                     * @returns Promise
+                     */
+                    public createUserCreds(request: google.firestore.admin.v1.ICreateUserCredsRequest): Promise<google.firestore.admin.v1.UserCreds>;
+
+                    /**
+                     * Calls GetUserCreds.
+                     * @param request GetUserCredsRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and UserCreds
+                     */
+                    public getUserCreds(request: google.firestore.admin.v1.IGetUserCredsRequest, callback: google.firestore.admin.v1.FirestoreAdmin.GetUserCredsCallback): void;
+
+                    /**
+                     * Calls GetUserCreds.
+                     * @param request GetUserCredsRequest message or plain object
+                     * @returns Promise
+                     */
+                    public getUserCreds(request: google.firestore.admin.v1.IGetUserCredsRequest): Promise<google.firestore.admin.v1.UserCreds>;
+
+                    /**
+                     * Calls ListUserCreds.
+                     * @param request ListUserCredsRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and ListUserCredsResponse
+                     */
+                    public listUserCreds(request: google.firestore.admin.v1.IListUserCredsRequest, callback: google.firestore.admin.v1.FirestoreAdmin.ListUserCredsCallback): void;
+
+                    /**
+                     * Calls ListUserCreds.
+                     * @param request ListUserCredsRequest message or plain object
+                     * @returns Promise
+                     */
+                    public listUserCreds(request: google.firestore.admin.v1.IListUserCredsRequest): Promise<google.firestore.admin.v1.ListUserCredsResponse>;
+
+                    /**
+                     * Calls EnableUserCreds.
+                     * @param request EnableUserCredsRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and UserCreds
+                     */
+                    public enableUserCreds(request: google.firestore.admin.v1.IEnableUserCredsRequest, callback: google.firestore.admin.v1.FirestoreAdmin.EnableUserCredsCallback): void;
+
+                    /**
+                     * Calls EnableUserCreds.
+                     * @param request EnableUserCredsRequest message or plain object
+                     * @returns Promise
+                     */
+                    public enableUserCreds(request: google.firestore.admin.v1.IEnableUserCredsRequest): Promise<google.firestore.admin.v1.UserCreds>;
+
+                    /**
+                     * Calls DisableUserCreds.
+                     * @param request DisableUserCredsRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and UserCreds
+                     */
+                    public disableUserCreds(request: google.firestore.admin.v1.IDisableUserCredsRequest, callback: google.firestore.admin.v1.FirestoreAdmin.DisableUserCredsCallback): void;
+
+                    /**
+                     * Calls DisableUserCreds.
+                     * @param request DisableUserCredsRequest message or plain object
+                     * @returns Promise
+                     */
+                    public disableUserCreds(request: google.firestore.admin.v1.IDisableUserCredsRequest): Promise<google.firestore.admin.v1.UserCreds>;
+
+                    /**
+                     * Calls ResetUserPassword.
+                     * @param request ResetUserPasswordRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and UserCreds
+                     */
+                    public resetUserPassword(request: google.firestore.admin.v1.IResetUserPasswordRequest, callback: google.firestore.admin.v1.FirestoreAdmin.ResetUserPasswordCallback): void;
+
+                    /**
+                     * Calls ResetUserPassword.
+                     * @param request ResetUserPasswordRequest message or plain object
+                     * @returns Promise
+                     */
+                    public resetUserPassword(request: google.firestore.admin.v1.IResetUserPasswordRequest): Promise<google.firestore.admin.v1.UserCreds>;
+
+                    /**
+                     * Calls DeleteUserCreds.
+                     * @param request DeleteUserCredsRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Empty
+                     */
+                    public deleteUserCreds(request: google.firestore.admin.v1.IDeleteUserCredsRequest, callback: google.firestore.admin.v1.FirestoreAdmin.DeleteUserCredsCallback): void;
+
+                    /**
+                     * Calls DeleteUserCreds.
+                     * @param request DeleteUserCredsRequest message or plain object
+                     * @returns Promise
+                     */
+                    public deleteUserCreds(request: google.firestore.admin.v1.IDeleteUserCredsRequest): Promise<google.protobuf.Empty>;
+
+                    /**
                      * Calls GetBackup.
                      * @param request GetBackupRequest message or plain object
                      * @param callback Node-style callback called with the error, if any, and Backup
@@ -1510,6 +1653,20 @@ export namespace google {
                      * @returns Promise
                      */
                     public deleteBackupSchedule(request: google.firestore.admin.v1.IDeleteBackupScheduleRequest): Promise<google.protobuf.Empty>;
+
+                    /**
+                     * Calls CloneDatabase.
+                     * @param request CloneDatabaseRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Operation
+                     */
+                    public cloneDatabase(request: google.firestore.admin.v1.ICloneDatabaseRequest, callback: google.firestore.admin.v1.FirestoreAdmin.CloneDatabaseCallback): void;
+
+                    /**
+                     * Calls CloneDatabase.
+                     * @param request CloneDatabaseRequest message or plain object
+                     * @returns Promise
+                     */
+                    public cloneDatabase(request: google.firestore.admin.v1.ICloneDatabaseRequest): Promise<google.longrunning.Operation>;
                 }
 
                 namespace FirestoreAdmin {
@@ -1620,6 +1777,55 @@ export namespace google {
                     type DeleteDatabaseCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
 
                     /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#createUserCreds}.
+                     * @param error Error, if any
+                     * @param [response] UserCreds
+                     */
+                    type CreateUserCredsCallback = (error: (Error|null), response?: google.firestore.admin.v1.UserCreds) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#getUserCreds}.
+                     * @param error Error, if any
+                     * @param [response] UserCreds
+                     */
+                    type GetUserCredsCallback = (error: (Error|null), response?: google.firestore.admin.v1.UserCreds) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#listUserCreds}.
+                     * @param error Error, if any
+                     * @param [response] ListUserCredsResponse
+                     */
+                    type ListUserCredsCallback = (error: (Error|null), response?: google.firestore.admin.v1.ListUserCredsResponse) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#enableUserCreds}.
+                     * @param error Error, if any
+                     * @param [response] UserCreds
+                     */
+                    type EnableUserCredsCallback = (error: (Error|null), response?: google.firestore.admin.v1.UserCreds) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#disableUserCreds}.
+                     * @param error Error, if any
+                     * @param [response] UserCreds
+                     */
+                    type DisableUserCredsCallback = (error: (Error|null), response?: google.firestore.admin.v1.UserCreds) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#resetUserPassword}.
+                     * @param error Error, if any
+                     * @param [response] UserCreds
+                     */
+                    type ResetUserPasswordCallback = (error: (Error|null), response?: google.firestore.admin.v1.UserCreds) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#deleteUserCreds}.
+                     * @param error Error, if any
+                     * @param [response] Empty
+                     */
+                    type DeleteUserCredsCallback = (error: (Error|null), response?: google.protobuf.Empty) => void;
+
+                    /**
                      * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#getBackup}.
                      * @param error Error, if any
                      * @param [response] Backup
@@ -1681,6 +1887,13 @@ export namespace google {
                      * @param [response] Empty
                      */
                     type DeleteBackupScheduleCallback = (error: (Error|null), response?: google.protobuf.Empty) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#cloneDatabase}.
+                     * @param error Error, if any
+                     * @param [response] Operation
+                     */
+                    type CloneDatabaseCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
                 }
 
                 /** Properties of a ListDatabasesRequest. */
@@ -2127,6 +2340,402 @@ export namespace google {
 
                     /**
                      * Gets the default type url for DeleteDatabaseMetadata
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a CreateUserCredsRequest. */
+                interface ICreateUserCredsRequest {
+
+                    /** CreateUserCredsRequest parent */
+                    parent?: (string|null);
+
+                    /** CreateUserCredsRequest userCreds */
+                    userCreds?: (google.firestore.admin.v1.IUserCreds|null);
+
+                    /** CreateUserCredsRequest userCredsId */
+                    userCredsId?: (string|null);
+                }
+
+                /** Represents a CreateUserCredsRequest. */
+                class CreateUserCredsRequest implements ICreateUserCredsRequest {
+
+                    /**
+                     * Constructs a new CreateUserCredsRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.ICreateUserCredsRequest);
+
+                    /** CreateUserCredsRequest parent. */
+                    public parent: string;
+
+                    /** CreateUserCredsRequest userCreds. */
+                    public userCreds?: (google.firestore.admin.v1.IUserCreds|null);
+
+                    /** CreateUserCredsRequest userCredsId. */
+                    public userCredsId: string;
+
+                    /**
+                     * Creates a CreateUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns CreateUserCredsRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.CreateUserCredsRequest;
+
+                    /**
+                     * Creates a plain object from a CreateUserCredsRequest message. Also converts values to other types if specified.
+                     * @param message CreateUserCredsRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.CreateUserCredsRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this CreateUserCredsRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for CreateUserCredsRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a GetUserCredsRequest. */
+                interface IGetUserCredsRequest {
+
+                    /** GetUserCredsRequest name */
+                    name?: (string|null);
+                }
+
+                /** Represents a GetUserCredsRequest. */
+                class GetUserCredsRequest implements IGetUserCredsRequest {
+
+                    /**
+                     * Constructs a new GetUserCredsRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IGetUserCredsRequest);
+
+                    /** GetUserCredsRequest name. */
+                    public name: string;
+
+                    /**
+                     * Creates a GetUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns GetUserCredsRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.GetUserCredsRequest;
+
+                    /**
+                     * Creates a plain object from a GetUserCredsRequest message. Also converts values to other types if specified.
+                     * @param message GetUserCredsRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.GetUserCredsRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this GetUserCredsRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for GetUserCredsRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a ListUserCredsRequest. */
+                interface IListUserCredsRequest {
+
+                    /** ListUserCredsRequest parent */
+                    parent?: (string|null);
+                }
+
+                /** Represents a ListUserCredsRequest. */
+                class ListUserCredsRequest implements IListUserCredsRequest {
+
+                    /**
+                     * Constructs a new ListUserCredsRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IListUserCredsRequest);
+
+                    /** ListUserCredsRequest parent. */
+                    public parent: string;
+
+                    /**
+                     * Creates a ListUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns ListUserCredsRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.ListUserCredsRequest;
+
+                    /**
+                     * Creates a plain object from a ListUserCredsRequest message. Also converts values to other types if specified.
+                     * @param message ListUserCredsRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.ListUserCredsRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this ListUserCredsRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for ListUserCredsRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a ListUserCredsResponse. */
+                interface IListUserCredsResponse {
+
+                    /** ListUserCredsResponse userCreds */
+                    userCreds?: (google.firestore.admin.v1.IUserCreds[]|null);
+                }
+
+                /** Represents a ListUserCredsResponse. */
+                class ListUserCredsResponse implements IListUserCredsResponse {
+
+                    /**
+                     * Constructs a new ListUserCredsResponse.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IListUserCredsResponse);
+
+                    /** ListUserCredsResponse userCreds. */
+                    public userCreds: google.firestore.admin.v1.IUserCreds[];
+
+                    /**
+                     * Creates a ListUserCredsResponse message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns ListUserCredsResponse
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.ListUserCredsResponse;
+
+                    /**
+                     * Creates a plain object from a ListUserCredsResponse message. Also converts values to other types if specified.
+                     * @param message ListUserCredsResponse
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.ListUserCredsResponse, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this ListUserCredsResponse to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for ListUserCredsResponse
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of an EnableUserCredsRequest. */
+                interface IEnableUserCredsRequest {
+
+                    /** EnableUserCredsRequest name */
+                    name?: (string|null);
+                }
+
+                /** Represents an EnableUserCredsRequest. */
+                class EnableUserCredsRequest implements IEnableUserCredsRequest {
+
+                    /**
+                     * Constructs a new EnableUserCredsRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IEnableUserCredsRequest);
+
+                    /** EnableUserCredsRequest name. */
+                    public name: string;
+
+                    /**
+                     * Creates an EnableUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns EnableUserCredsRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.EnableUserCredsRequest;
+
+                    /**
+                     * Creates a plain object from an EnableUserCredsRequest message. Also converts values to other types if specified.
+                     * @param message EnableUserCredsRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.EnableUserCredsRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this EnableUserCredsRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for EnableUserCredsRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a DisableUserCredsRequest. */
+                interface IDisableUserCredsRequest {
+
+                    /** DisableUserCredsRequest name */
+                    name?: (string|null);
+                }
+
+                /** Represents a DisableUserCredsRequest. */
+                class DisableUserCredsRequest implements IDisableUserCredsRequest {
+
+                    /**
+                     * Constructs a new DisableUserCredsRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IDisableUserCredsRequest);
+
+                    /** DisableUserCredsRequest name. */
+                    public name: string;
+
+                    /**
+                     * Creates a DisableUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns DisableUserCredsRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.DisableUserCredsRequest;
+
+                    /**
+                     * Creates a plain object from a DisableUserCredsRequest message. Also converts values to other types if specified.
+                     * @param message DisableUserCredsRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.DisableUserCredsRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this DisableUserCredsRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for DisableUserCredsRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a ResetUserPasswordRequest. */
+                interface IResetUserPasswordRequest {
+
+                    /** ResetUserPasswordRequest name */
+                    name?: (string|null);
+                }
+
+                /** Represents a ResetUserPasswordRequest. */
+                class ResetUserPasswordRequest implements IResetUserPasswordRequest {
+
+                    /**
+                     * Constructs a new ResetUserPasswordRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IResetUserPasswordRequest);
+
+                    /** ResetUserPasswordRequest name. */
+                    public name: string;
+
+                    /**
+                     * Creates a ResetUserPasswordRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns ResetUserPasswordRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.ResetUserPasswordRequest;
+
+                    /**
+                     * Creates a plain object from a ResetUserPasswordRequest message. Also converts values to other types if specified.
+                     * @param message ResetUserPasswordRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.ResetUserPasswordRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this ResetUserPasswordRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for ResetUserPasswordRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a DeleteUserCredsRequest. */
+                interface IDeleteUserCredsRequest {
+
+                    /** DeleteUserCredsRequest name */
+                    name?: (string|null);
+                }
+
+                /** Represents a DeleteUserCredsRequest. */
+                class DeleteUserCredsRequest implements IDeleteUserCredsRequest {
+
+                    /**
+                     * Constructs a new DeleteUserCredsRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IDeleteUserCredsRequest);
+
+                    /** DeleteUserCredsRequest name. */
+                    public name: string;
+
+                    /**
+                     * Creates a DeleteUserCredsRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns DeleteUserCredsRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.DeleteUserCredsRequest;
+
+                    /**
+                     * Creates a plain object from a DeleteUserCredsRequest message. Also converts values to other types if specified.
+                     * @param message DeleteUserCredsRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.DeleteUserCredsRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this DeleteUserCredsRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for DeleteUserCredsRequest
                      * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                      * @returns The default type url
                      */
@@ -3383,6 +3992,9 @@ export namespace google {
 
                     /** RestoreDatabaseRequest encryptionConfig */
                     encryptionConfig?: (google.firestore.admin.v1.Database.IEncryptionConfig|null);
+
+                    /** RestoreDatabaseRequest tags */
+                    tags?: ({ [k: string]: string }|null);
                 }
 
                 /** Represents a RestoreDatabaseRequest. */
@@ -3405,6 +4017,9 @@ export namespace google {
 
                     /** RestoreDatabaseRequest encryptionConfig. */
                     public encryptionConfig?: (google.firestore.admin.v1.Database.IEncryptionConfig|null);
+
+                    /** RestoreDatabaseRequest tags. */
+                    public tags: { [k: string]: string };
 
                     /**
                      * Creates a RestoreDatabaseRequest message from a plain object. Also converts values to their respective internal types.
@@ -3429,6 +4044,78 @@ export namespace google {
 
                     /**
                      * Gets the default type url for RestoreDatabaseRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a CloneDatabaseRequest. */
+                interface ICloneDatabaseRequest {
+
+                    /** CloneDatabaseRequest parent */
+                    parent?: (string|null);
+
+                    /** CloneDatabaseRequest databaseId */
+                    databaseId?: (string|null);
+
+                    /** CloneDatabaseRequest pitrSnapshot */
+                    pitrSnapshot?: (google.firestore.admin.v1.IPitrSnapshot|null);
+
+                    /** CloneDatabaseRequest encryptionConfig */
+                    encryptionConfig?: (google.firestore.admin.v1.Database.IEncryptionConfig|null);
+
+                    /** CloneDatabaseRequest tags */
+                    tags?: ({ [k: string]: string }|null);
+                }
+
+                /** Represents a CloneDatabaseRequest. */
+                class CloneDatabaseRequest implements ICloneDatabaseRequest {
+
+                    /**
+                     * Constructs a new CloneDatabaseRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.ICloneDatabaseRequest);
+
+                    /** CloneDatabaseRequest parent. */
+                    public parent: string;
+
+                    /** CloneDatabaseRequest databaseId. */
+                    public databaseId: string;
+
+                    /** CloneDatabaseRequest pitrSnapshot. */
+                    public pitrSnapshot?: (google.firestore.admin.v1.IPitrSnapshot|null);
+
+                    /** CloneDatabaseRequest encryptionConfig. */
+                    public encryptionConfig?: (google.firestore.admin.v1.Database.IEncryptionConfig|null);
+
+                    /** CloneDatabaseRequest tags. */
+                    public tags: { [k: string]: string };
+
+                    /**
+                     * Creates a CloneDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns CloneDatabaseRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.CloneDatabaseRequest;
+
+                    /**
+                     * Creates a plain object from a CloneDatabaseRequest message. Also converts values to other types if specified.
+                     * @param message CloneDatabaseRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.CloneDatabaseRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this CloneDatabaseRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for CloneDatabaseRequest
                      * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                      * @returns The default type url
                      */
@@ -4124,6 +4811,84 @@ export namespace google {
                     public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
 
+                /** Properties of a CloneDatabaseMetadata. */
+                interface ICloneDatabaseMetadata {
+
+                    /** CloneDatabaseMetadata startTime */
+                    startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** CloneDatabaseMetadata endTime */
+                    endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** CloneDatabaseMetadata operationState */
+                    operationState?: (google.firestore.admin.v1.OperationState|null);
+
+                    /** CloneDatabaseMetadata database */
+                    database?: (string|null);
+
+                    /** CloneDatabaseMetadata pitrSnapshot */
+                    pitrSnapshot?: (google.firestore.admin.v1.IPitrSnapshot|null);
+
+                    /** CloneDatabaseMetadata progressPercentage */
+                    progressPercentage?: (google.firestore.admin.v1.IProgress|null);
+                }
+
+                /** Represents a CloneDatabaseMetadata. */
+                class CloneDatabaseMetadata implements ICloneDatabaseMetadata {
+
+                    /**
+                     * Constructs a new CloneDatabaseMetadata.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.ICloneDatabaseMetadata);
+
+                    /** CloneDatabaseMetadata startTime. */
+                    public startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** CloneDatabaseMetadata endTime. */
+                    public endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** CloneDatabaseMetadata operationState. */
+                    public operationState: google.firestore.admin.v1.OperationState;
+
+                    /** CloneDatabaseMetadata database. */
+                    public database: string;
+
+                    /** CloneDatabaseMetadata pitrSnapshot. */
+                    public pitrSnapshot?: (google.firestore.admin.v1.IPitrSnapshot|null);
+
+                    /** CloneDatabaseMetadata progressPercentage. */
+                    public progressPercentage?: (google.firestore.admin.v1.IProgress|null);
+
+                    /**
+                     * Creates a CloneDatabaseMetadata message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns CloneDatabaseMetadata
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.CloneDatabaseMetadata;
+
+                    /**
+                     * Creates a plain object from a CloneDatabaseMetadata message. Also converts values to other types if specified.
+                     * @param message CloneDatabaseMetadata
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.CloneDatabaseMetadata, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this CloneDatabaseMetadata to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for CloneDatabaseMetadata
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
                 /** Properties of a Progress. */
                 interface IProgress {
 
@@ -4181,6 +4946,66 @@ export namespace google {
                 /** OperationState enum. */
                 type OperationState =
                     "OPERATION_STATE_UNSPECIFIED"| "INITIALIZING"| "PROCESSING"| "CANCELLING"| "FINALIZING"| "SUCCESSFUL"| "FAILED"| "CANCELLED";
+
+                /** Properties of a PitrSnapshot. */
+                interface IPitrSnapshot {
+
+                    /** PitrSnapshot database */
+                    database?: (string|null);
+
+                    /** PitrSnapshot databaseUid */
+                    databaseUid?: (Uint8Array|null);
+
+                    /** PitrSnapshot snapshotTime */
+                    snapshotTime?: (google.protobuf.ITimestamp|null);
+                }
+
+                /** Represents a PitrSnapshot. */
+                class PitrSnapshot implements IPitrSnapshot {
+
+                    /**
+                     * Constructs a new PitrSnapshot.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IPitrSnapshot);
+
+                    /** PitrSnapshot database. */
+                    public database: string;
+
+                    /** PitrSnapshot databaseUid. */
+                    public databaseUid: Uint8Array;
+
+                    /** PitrSnapshot snapshotTime. */
+                    public snapshotTime?: (google.protobuf.ITimestamp|null);
+
+                    /**
+                     * Creates a PitrSnapshot message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns PitrSnapshot
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.PitrSnapshot;
+
+                    /**
+                     * Creates a plain object from a PitrSnapshot message. Also converts values to other types if specified.
+                     * @param message PitrSnapshot
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.PitrSnapshot, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this PitrSnapshot to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for PitrSnapshot
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
 
                 /** Properties of a BackupSchedule. */
                 interface IBackupSchedule {
@@ -4351,6 +5176,142 @@ export namespace google {
                      * @returns The default type url
                      */
                     public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a UserCreds. */
+                interface IUserCreds {
+
+                    /** UserCreds name */
+                    name?: (string|null);
+
+                    /** UserCreds createTime */
+                    createTime?: (google.protobuf.ITimestamp|null);
+
+                    /** UserCreds updateTime */
+                    updateTime?: (google.protobuf.ITimestamp|null);
+
+                    /** UserCreds state */
+                    state?: (google.firestore.admin.v1.UserCreds.State|null);
+
+                    /** UserCreds securePassword */
+                    securePassword?: (string|null);
+
+                    /** UserCreds resourceIdentity */
+                    resourceIdentity?: (google.firestore.admin.v1.UserCreds.IResourceIdentity|null);
+                }
+
+                /** Represents a UserCreds. */
+                class UserCreds implements IUserCreds {
+
+                    /**
+                     * Constructs a new UserCreds.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IUserCreds);
+
+                    /** UserCreds name. */
+                    public name: string;
+
+                    /** UserCreds createTime. */
+                    public createTime?: (google.protobuf.ITimestamp|null);
+
+                    /** UserCreds updateTime. */
+                    public updateTime?: (google.protobuf.ITimestamp|null);
+
+                    /** UserCreds state. */
+                    public state: google.firestore.admin.v1.UserCreds.State;
+
+                    /** UserCreds securePassword. */
+                    public securePassword: string;
+
+                    /** UserCreds resourceIdentity. */
+                    public resourceIdentity?: (google.firestore.admin.v1.UserCreds.IResourceIdentity|null);
+
+                    /** UserCreds UserCredsIdentity. */
+                    public UserCredsIdentity?: "resourceIdentity";
+
+                    /**
+                     * Creates a UserCreds message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns UserCreds
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.UserCreds;
+
+                    /**
+                     * Creates a plain object from a UserCreds message. Also converts values to other types if specified.
+                     * @param message UserCreds
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.UserCreds, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this UserCreds to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for UserCreds
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                namespace UserCreds {
+
+                    /** State enum. */
+                    type State =
+                        "STATE_UNSPECIFIED"| "ENABLED"| "DISABLED";
+
+                    /** Properties of a ResourceIdentity. */
+                    interface IResourceIdentity {
+
+                        /** ResourceIdentity principal */
+                        principal?: (string|null);
+                    }
+
+                    /** Represents a ResourceIdentity. */
+                    class ResourceIdentity implements IResourceIdentity {
+
+                        /**
+                         * Constructs a new ResourceIdentity.
+                         * @param [properties] Properties to set
+                         */
+                        constructor(properties?: google.firestore.admin.v1.UserCreds.IResourceIdentity);
+
+                        /** ResourceIdentity principal. */
+                        public principal: string;
+
+                        /**
+                         * Creates a ResourceIdentity message from a plain object. Also converts values to their respective internal types.
+                         * @param object Plain object
+                         * @returns ResourceIdentity
+                         */
+                        public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.UserCreds.ResourceIdentity;
+
+                        /**
+                         * Creates a plain object from a ResourceIdentity message. Also converts values to other types if specified.
+                         * @param message ResourceIdentity
+                         * @param [options] Conversion options
+                         * @returns Plain object
+                         */
+                        public static toObject(message: google.firestore.admin.v1.UserCreds.ResourceIdentity, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                        /**
+                         * Converts this ResourceIdentity to JSON.
+                         * @returns JSON object
+                         */
+                        public toJSON(): { [k: string]: any };
+
+                        /**
+                         * Gets the default type url for ResourceIdentity
+                         * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                         * @returns The default type url
+                         */
+                        public static getTypeUrl(typeUrlPrefix?: string): string;
+                    }
                 }
 
                 /** Properties of a LocationMetadata. */
@@ -5263,6 +6224,9 @@ export namespace google {
 
                 /** ExperimentalFeatures protobufPythonicTypesEnabled */
                 protobufPythonicTypesEnabled?: (boolean|null);
+
+                /** ExperimentalFeatures unversionedPackageDisabled */
+                unversionedPackageDisabled?: (boolean|null);
             }
 
             /** Represents an ExperimentalFeatures. */
@@ -5279,6 +6243,9 @@ export namespace google {
 
                 /** ExperimentalFeatures protobufPythonicTypesEnabled. */
                 public protobufPythonicTypesEnabled: boolean;
+
+                /** ExperimentalFeatures unversionedPackageDisabled. */
+                public unversionedPackageDisabled: boolean;
 
                 /**
                  * Creates an ExperimentalFeatures message from a plain object. Also converts values to their respective internal types.
@@ -5732,6 +6699,108 @@ export namespace google {
         /** LaunchStage enum. */
         type LaunchStage =
             "LAUNCH_STAGE_UNSPECIFIED"| "UNIMPLEMENTED"| "PRELAUNCH"| "EARLY_ACCESS"| "ALPHA"| "BETA"| "GA"| "DEPRECATED";
+
+        /** Properties of a RoutingRule. */
+        interface IRoutingRule {
+
+            /** RoutingRule routingParameters */
+            routingParameters?: (google.api.IRoutingParameter[]|null);
+        }
+
+        /** Represents a RoutingRule. */
+        class RoutingRule implements IRoutingRule {
+
+            /**
+             * Constructs a new RoutingRule.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IRoutingRule);
+
+            /** RoutingRule routingParameters. */
+            public routingParameters: google.api.IRoutingParameter[];
+
+            /**
+             * Creates a RoutingRule message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns RoutingRule
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.RoutingRule;
+
+            /**
+             * Creates a plain object from a RoutingRule message. Also converts values to other types if specified.
+             * @param message RoutingRule
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.RoutingRule, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this RoutingRule to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for RoutingRule
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        /** Properties of a RoutingParameter. */
+        interface IRoutingParameter {
+
+            /** RoutingParameter field */
+            field?: (string|null);
+
+            /** RoutingParameter pathTemplate */
+            pathTemplate?: (string|null);
+        }
+
+        /** Represents a RoutingParameter. */
+        class RoutingParameter implements IRoutingParameter {
+
+            /**
+             * Constructs a new RoutingParameter.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.IRoutingParameter);
+
+            /** RoutingParameter field. */
+            public field: string;
+
+            /** RoutingParameter pathTemplate. */
+            public pathTemplate: string;
+
+            /**
+             * Creates a RoutingParameter message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns RoutingParameter
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.RoutingParameter;
+
+            /**
+             * Creates a plain object from a RoutingParameter message. Also converts values to other types if specified.
+             * @param message RoutingParameter
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.RoutingParameter, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this RoutingParameter to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for RoutingParameter
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
     }
 
     /** Namespace protobuf. */
@@ -7518,6 +8587,9 @@ export namespace google {
 
             /** MethodOptions .google.api.methodSignature */
             ".google.api.methodSignature"?: (string[]|null);
+
+            /** MethodOptions .google.api.routing */
+            ".google.api.routing"?: (google.api.IRoutingRule|null);
 
             /** MethodOptions .google.longrunning.operationInfo */
             ".google.longrunning.operationInfo"?: (google.longrunning.IOperationInfo|null);
@@ -9384,6 +10456,9 @@ export namespace google {
 
             /** ListOperationsRequest pageToken */
             pageToken?: (string|null);
+
+            /** ListOperationsRequest returnPartialSuccess */
+            returnPartialSuccess?: (boolean|null);
         }
 
         /** Represents a ListOperationsRequest. */
@@ -9406,6 +10481,9 @@ export namespace google {
 
             /** ListOperationsRequest pageToken. */
             public pageToken: string;
+
+            /** ListOperationsRequest returnPartialSuccess. */
+            public returnPartialSuccess: boolean;
 
             /**
              * Creates a ListOperationsRequest message from a plain object. Also converts values to their respective internal types.
@@ -9444,6 +10522,9 @@ export namespace google {
 
             /** ListOperationsResponse nextPageToken */
             nextPageToken?: (string|null);
+
+            /** ListOperationsResponse unreachable */
+            unreachable?: (string[]|null);
         }
 
         /** Represents a ListOperationsResponse. */
@@ -9460,6 +10541,9 @@ export namespace google {
 
             /** ListOperationsResponse nextPageToken. */
             public nextPageToken: string;
+
+            /** ListOperationsResponse unreachable. */
+            public unreachable: string[];
 
             /**
              * Creates a ListOperationsResponse message from a plain object. Also converts values to their respective internal types.
