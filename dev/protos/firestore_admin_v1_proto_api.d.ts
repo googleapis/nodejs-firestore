@@ -233,6 +233,9 @@ export namespace google {
                     /** Database sourceInfo */
                     sourceInfo?: (google.firestore.admin.v1.Database.ISourceInfo|null);
 
+                    /** Database tags */
+                    tags?: ({ [k: string]: string }|null);
+
                     /** Database freeTier */
                     freeTier?: (boolean|null);
 
@@ -303,6 +306,9 @@ export namespace google {
                     /** Database sourceInfo. */
                     public sourceInfo?: (google.firestore.admin.v1.Database.ISourceInfo|null);
 
+                    /** Database tags. */
+                    public tags: { [k: string]: string };
+
                     /** Database freeTier. */
                     public freeTier?: (boolean|null);
 
@@ -311,9 +317,6 @@ export namespace google {
 
                     /** Database databaseEdition. */
                     public databaseEdition: google.firestore.admin.v1.Database.DatabaseEdition;
-
-                    /** Database _freeTier. */
-                    public _freeTier?: "freeTier";
 
                     /**
                      * Creates a Database message from a plain object. Also converts values to their respective internal types.
@@ -1650,6 +1653,20 @@ export namespace google {
                      * @returns Promise
                      */
                     public deleteBackupSchedule(request: google.firestore.admin.v1.IDeleteBackupScheduleRequest): Promise<google.protobuf.Empty>;
+
+                    /**
+                     * Calls CloneDatabase.
+                     * @param request CloneDatabaseRequest message or plain object
+                     * @param callback Node-style callback called with the error, if any, and Operation
+                     */
+                    public cloneDatabase(request: google.firestore.admin.v1.ICloneDatabaseRequest, callback: google.firestore.admin.v1.FirestoreAdmin.CloneDatabaseCallback): void;
+
+                    /**
+                     * Calls CloneDatabase.
+                     * @param request CloneDatabaseRequest message or plain object
+                     * @returns Promise
+                     */
+                    public cloneDatabase(request: google.firestore.admin.v1.ICloneDatabaseRequest): Promise<google.longrunning.Operation>;
                 }
 
                 namespace FirestoreAdmin {
@@ -1870,6 +1887,13 @@ export namespace google {
                      * @param [response] Empty
                      */
                     type DeleteBackupScheduleCallback = (error: (Error|null), response?: google.protobuf.Empty) => void;
+
+                    /**
+                     * Callback as used by {@link google.firestore.admin.v1.FirestoreAdmin#cloneDatabase}.
+                     * @param error Error, if any
+                     * @param [response] Operation
+                     */
+                    type CloneDatabaseCallback = (error: (Error|null), response?: google.longrunning.Operation) => void;
                 }
 
                 /** Properties of a ListDatabasesRequest. */
@@ -3968,6 +3992,9 @@ export namespace google {
 
                     /** RestoreDatabaseRequest encryptionConfig */
                     encryptionConfig?: (google.firestore.admin.v1.Database.IEncryptionConfig|null);
+
+                    /** RestoreDatabaseRequest tags */
+                    tags?: ({ [k: string]: string }|null);
                 }
 
                 /** Represents a RestoreDatabaseRequest. */
@@ -3990,6 +4017,9 @@ export namespace google {
 
                     /** RestoreDatabaseRequest encryptionConfig. */
                     public encryptionConfig?: (google.firestore.admin.v1.Database.IEncryptionConfig|null);
+
+                    /** RestoreDatabaseRequest tags. */
+                    public tags: { [k: string]: string };
 
                     /**
                      * Creates a RestoreDatabaseRequest message from a plain object. Also converts values to their respective internal types.
@@ -4014,6 +4044,78 @@ export namespace google {
 
                     /**
                      * Gets the default type url for RestoreDatabaseRequest
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
+                /** Properties of a CloneDatabaseRequest. */
+                interface ICloneDatabaseRequest {
+
+                    /** CloneDatabaseRequest parent */
+                    parent?: (string|null);
+
+                    /** CloneDatabaseRequest databaseId */
+                    databaseId?: (string|null);
+
+                    /** CloneDatabaseRequest pitrSnapshot */
+                    pitrSnapshot?: (google.firestore.admin.v1.IPitrSnapshot|null);
+
+                    /** CloneDatabaseRequest encryptionConfig */
+                    encryptionConfig?: (google.firestore.admin.v1.Database.IEncryptionConfig|null);
+
+                    /** CloneDatabaseRequest tags */
+                    tags?: ({ [k: string]: string }|null);
+                }
+
+                /** Represents a CloneDatabaseRequest. */
+                class CloneDatabaseRequest implements ICloneDatabaseRequest {
+
+                    /**
+                     * Constructs a new CloneDatabaseRequest.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.ICloneDatabaseRequest);
+
+                    /** CloneDatabaseRequest parent. */
+                    public parent: string;
+
+                    /** CloneDatabaseRequest databaseId. */
+                    public databaseId: string;
+
+                    /** CloneDatabaseRequest pitrSnapshot. */
+                    public pitrSnapshot?: (google.firestore.admin.v1.IPitrSnapshot|null);
+
+                    /** CloneDatabaseRequest encryptionConfig. */
+                    public encryptionConfig?: (google.firestore.admin.v1.Database.IEncryptionConfig|null);
+
+                    /** CloneDatabaseRequest tags. */
+                    public tags: { [k: string]: string };
+
+                    /**
+                     * Creates a CloneDatabaseRequest message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns CloneDatabaseRequest
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.CloneDatabaseRequest;
+
+                    /**
+                     * Creates a plain object from a CloneDatabaseRequest message. Also converts values to other types if specified.
+                     * @param message CloneDatabaseRequest
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.CloneDatabaseRequest, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this CloneDatabaseRequest to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for CloneDatabaseRequest
                      * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
                      * @returns The default type url
                      */
@@ -4709,6 +4811,84 @@ export namespace google {
                     public static getTypeUrl(typeUrlPrefix?: string): string;
                 }
 
+                /** Properties of a CloneDatabaseMetadata. */
+                interface ICloneDatabaseMetadata {
+
+                    /** CloneDatabaseMetadata startTime */
+                    startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** CloneDatabaseMetadata endTime */
+                    endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** CloneDatabaseMetadata operationState */
+                    operationState?: (google.firestore.admin.v1.OperationState|null);
+
+                    /** CloneDatabaseMetadata database */
+                    database?: (string|null);
+
+                    /** CloneDatabaseMetadata pitrSnapshot */
+                    pitrSnapshot?: (google.firestore.admin.v1.IPitrSnapshot|null);
+
+                    /** CloneDatabaseMetadata progressPercentage */
+                    progressPercentage?: (google.firestore.admin.v1.IProgress|null);
+                }
+
+                /** Represents a CloneDatabaseMetadata. */
+                class CloneDatabaseMetadata implements ICloneDatabaseMetadata {
+
+                    /**
+                     * Constructs a new CloneDatabaseMetadata.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.ICloneDatabaseMetadata);
+
+                    /** CloneDatabaseMetadata startTime. */
+                    public startTime?: (google.protobuf.ITimestamp|null);
+
+                    /** CloneDatabaseMetadata endTime. */
+                    public endTime?: (google.protobuf.ITimestamp|null);
+
+                    /** CloneDatabaseMetadata operationState. */
+                    public operationState: google.firestore.admin.v1.OperationState;
+
+                    /** CloneDatabaseMetadata database. */
+                    public database: string;
+
+                    /** CloneDatabaseMetadata pitrSnapshot. */
+                    public pitrSnapshot?: (google.firestore.admin.v1.IPitrSnapshot|null);
+
+                    /** CloneDatabaseMetadata progressPercentage. */
+                    public progressPercentage?: (google.firestore.admin.v1.IProgress|null);
+
+                    /**
+                     * Creates a CloneDatabaseMetadata message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns CloneDatabaseMetadata
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.CloneDatabaseMetadata;
+
+                    /**
+                     * Creates a plain object from a CloneDatabaseMetadata message. Also converts values to other types if specified.
+                     * @param message CloneDatabaseMetadata
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.CloneDatabaseMetadata, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this CloneDatabaseMetadata to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for CloneDatabaseMetadata
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
+
                 /** Properties of a Progress. */
                 interface IProgress {
 
@@ -4766,6 +4946,66 @@ export namespace google {
                 /** OperationState enum. */
                 type OperationState =
                     "OPERATION_STATE_UNSPECIFIED"| "INITIALIZING"| "PROCESSING"| "CANCELLING"| "FINALIZING"| "SUCCESSFUL"| "FAILED"| "CANCELLED";
+
+                /** Properties of a PitrSnapshot. */
+                interface IPitrSnapshot {
+
+                    /** PitrSnapshot database */
+                    database?: (string|null);
+
+                    /** PitrSnapshot databaseUid */
+                    databaseUid?: (Uint8Array|null);
+
+                    /** PitrSnapshot snapshotTime */
+                    snapshotTime?: (google.protobuf.ITimestamp|null);
+                }
+
+                /** Represents a PitrSnapshot. */
+                class PitrSnapshot implements IPitrSnapshot {
+
+                    /**
+                     * Constructs a new PitrSnapshot.
+                     * @param [properties] Properties to set
+                     */
+                    constructor(properties?: google.firestore.admin.v1.IPitrSnapshot);
+
+                    /** PitrSnapshot database. */
+                    public database: string;
+
+                    /** PitrSnapshot databaseUid. */
+                    public databaseUid: Uint8Array;
+
+                    /** PitrSnapshot snapshotTime. */
+                    public snapshotTime?: (google.protobuf.ITimestamp|null);
+
+                    /**
+                     * Creates a PitrSnapshot message from a plain object. Also converts values to their respective internal types.
+                     * @param object Plain object
+                     * @returns PitrSnapshot
+                     */
+                    public static fromObject(object: { [k: string]: any }): google.firestore.admin.v1.PitrSnapshot;
+
+                    /**
+                     * Creates a plain object from a PitrSnapshot message. Also converts values to other types if specified.
+                     * @param message PitrSnapshot
+                     * @param [options] Conversion options
+                     * @returns Plain object
+                     */
+                    public static toObject(message: google.firestore.admin.v1.PitrSnapshot, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                    /**
+                     * Converts this PitrSnapshot to JSON.
+                     * @returns JSON object
+                     */
+                    public toJSON(): { [k: string]: any };
+
+                    /**
+                     * Gets the default type url for PitrSnapshot
+                     * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                     * @returns The default type url
+                     */
+                    public static getTypeUrl(typeUrlPrefix?: string): string;
+                }
 
                 /** Properties of a BackupSchedule. */
                 interface IBackupSchedule {
@@ -5496,6 +5736,9 @@ export namespace google {
 
             /** CommonLanguageSettings destinations */
             destinations?: (google.api.ClientLibraryDestination[]|null);
+
+            /** CommonLanguageSettings selectiveGapicGeneration */
+            selectiveGapicGeneration?: (google.api.ISelectiveGapicGeneration|null);
         }
 
         /** Represents a CommonLanguageSettings. */
@@ -5512,6 +5755,9 @@ export namespace google {
 
             /** CommonLanguageSettings destinations. */
             public destinations: google.api.ClientLibraryDestination[];
+
+            /** CommonLanguageSettings selectiveGapicGeneration. */
+            public selectiveGapicGeneration?: (google.api.ISelectiveGapicGeneration|null);
 
             /**
              * Creates a CommonLanguageSettings message from a plain object. Also converts values to their respective internal types.
@@ -5919,6 +6165,9 @@ export namespace google {
 
             /** PythonSettings common */
             common?: (google.api.ICommonLanguageSettings|null);
+
+            /** PythonSettings experimentalFeatures */
+            experimentalFeatures?: (google.api.PythonSettings.IExperimentalFeatures|null);
         }
 
         /** Represents a PythonSettings. */
@@ -5932,6 +6181,9 @@ export namespace google {
 
             /** PythonSettings common. */
             public common?: (google.api.ICommonLanguageSettings|null);
+
+            /** PythonSettings experimentalFeatures. */
+            public experimentalFeatures?: (google.api.PythonSettings.IExperimentalFeatures|null);
 
             /**
              * Creates a PythonSettings message from a plain object. Also converts values to their respective internal types.
@@ -5960,6 +6212,69 @@ export namespace google {
              * @returns The default type url
              */
             public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
+
+        namespace PythonSettings {
+
+            /** Properties of an ExperimentalFeatures. */
+            interface IExperimentalFeatures {
+
+                /** ExperimentalFeatures restAsyncIoEnabled */
+                restAsyncIoEnabled?: (boolean|null);
+
+                /** ExperimentalFeatures protobufPythonicTypesEnabled */
+                protobufPythonicTypesEnabled?: (boolean|null);
+
+                /** ExperimentalFeatures unversionedPackageDisabled */
+                unversionedPackageDisabled?: (boolean|null);
+            }
+
+            /** Represents an ExperimentalFeatures. */
+            class ExperimentalFeatures implements IExperimentalFeatures {
+
+                /**
+                 * Constructs a new ExperimentalFeatures.
+                 * @param [properties] Properties to set
+                 */
+                constructor(properties?: google.api.PythonSettings.IExperimentalFeatures);
+
+                /** ExperimentalFeatures restAsyncIoEnabled. */
+                public restAsyncIoEnabled: boolean;
+
+                /** ExperimentalFeatures protobufPythonicTypesEnabled. */
+                public protobufPythonicTypesEnabled: boolean;
+
+                /** ExperimentalFeatures unversionedPackageDisabled. */
+                public unversionedPackageDisabled: boolean;
+
+                /**
+                 * Creates an ExperimentalFeatures message from a plain object. Also converts values to their respective internal types.
+                 * @param object Plain object
+                 * @returns ExperimentalFeatures
+                 */
+                public static fromObject(object: { [k: string]: any }): google.api.PythonSettings.ExperimentalFeatures;
+
+                /**
+                 * Creates a plain object from an ExperimentalFeatures message. Also converts values to other types if specified.
+                 * @param message ExperimentalFeatures
+                 * @param [options] Conversion options
+                 * @returns Plain object
+                 */
+                public static toObject(message: google.api.PythonSettings.ExperimentalFeatures, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+                /**
+                 * Converts this ExperimentalFeatures to JSON.
+                 * @returns JSON object
+                 */
+                public toJSON(): { [k: string]: any };
+
+                /**
+                 * Gets the default type url for ExperimentalFeatures
+                 * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+                 * @returns The default type url
+                 */
+                public static getTypeUrl(typeUrlPrefix?: string): string;
+            }
         }
 
         /** Properties of a NodeSettings. */
@@ -6141,6 +6456,9 @@ export namespace google {
 
             /** GoSettings common */
             common?: (google.api.ICommonLanguageSettings|null);
+
+            /** GoSettings renamedServices */
+            renamedServices?: ({ [k: string]: string }|null);
         }
 
         /** Represents a GoSettings. */
@@ -6154,6 +6472,9 @@ export namespace google {
 
             /** GoSettings common. */
             public common?: (google.api.ICommonLanguageSettings|null);
+
+            /** GoSettings renamedServices. */
+            public renamedServices: { [k: string]: string };
 
             /**
              * Creates a GoSettings message from a plain object. Also converts values to their respective internal types.
@@ -6320,6 +6641,60 @@ export namespace google {
         /** ClientLibraryDestination enum. */
         type ClientLibraryDestination =
             "CLIENT_LIBRARY_DESTINATION_UNSPECIFIED"| "GITHUB"| "PACKAGE_MANAGER";
+
+        /** Properties of a SelectiveGapicGeneration. */
+        interface ISelectiveGapicGeneration {
+
+            /** SelectiveGapicGeneration methods */
+            methods?: (string[]|null);
+
+            /** SelectiveGapicGeneration generateOmittedAsInternal */
+            generateOmittedAsInternal?: (boolean|null);
+        }
+
+        /** Represents a SelectiveGapicGeneration. */
+        class SelectiveGapicGeneration implements ISelectiveGapicGeneration {
+
+            /**
+             * Constructs a new SelectiveGapicGeneration.
+             * @param [properties] Properties to set
+             */
+            constructor(properties?: google.api.ISelectiveGapicGeneration);
+
+            /** SelectiveGapicGeneration methods. */
+            public methods: string[];
+
+            /** SelectiveGapicGeneration generateOmittedAsInternal. */
+            public generateOmittedAsInternal: boolean;
+
+            /**
+             * Creates a SelectiveGapicGeneration message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns SelectiveGapicGeneration
+             */
+            public static fromObject(object: { [k: string]: any }): google.api.SelectiveGapicGeneration;
+
+            /**
+             * Creates a plain object from a SelectiveGapicGeneration message. Also converts values to other types if specified.
+             * @param message SelectiveGapicGeneration
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(message: google.api.SelectiveGapicGeneration, options?: $protobuf.IConversionOptions): { [k: string]: any };
+
+            /**
+             * Converts this SelectiveGapicGeneration to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: any };
+
+            /**
+             * Gets the default type url for SelectiveGapicGeneration
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+        }
 
         /** LaunchStage enum. */
         type LaunchStage =
@@ -8213,11 +8588,11 @@ export namespace google {
             /** MethodOptions .google.api.methodSignature */
             ".google.api.methodSignature"?: (string[]|null);
 
-            /** MethodOptions .google.longrunning.operationInfo */
-            ".google.longrunning.operationInfo"?: (google.longrunning.IOperationInfo|null);
-
             /** MethodOptions .google.api.routing */
             ".google.api.routing"?: (google.api.IRoutingRule|null);
+
+            /** MethodOptions .google.longrunning.operationInfo */
+            ".google.longrunning.operationInfo"?: (google.longrunning.IOperationInfo|null);
         }
 
         /** Represents a MethodOptions. */
@@ -10081,6 +10456,9 @@ export namespace google {
 
             /** ListOperationsRequest pageToken */
             pageToken?: (string|null);
+
+            /** ListOperationsRequest returnPartialSuccess */
+            returnPartialSuccess?: (boolean|null);
         }
 
         /** Represents a ListOperationsRequest. */
@@ -10103,6 +10481,9 @@ export namespace google {
 
             /** ListOperationsRequest pageToken. */
             public pageToken: string;
+
+            /** ListOperationsRequest returnPartialSuccess. */
+            public returnPartialSuccess: boolean;
 
             /**
              * Creates a ListOperationsRequest message from a plain object. Also converts values to their respective internal types.
@@ -10141,6 +10522,9 @@ export namespace google {
 
             /** ListOperationsResponse nextPageToken */
             nextPageToken?: (string|null);
+
+            /** ListOperationsResponse unreachable */
+            unreachable?: (string[]|null);
         }
 
         /** Represents a ListOperationsResponse. */
@@ -10157,6 +10541,9 @@ export namespace google {
 
             /** ListOperationsResponse nextPageToken. */
             public nextPageToken: string;
+
+            /** ListOperationsResponse unreachable. */
+            public unreachable: string[];
 
             /**
              * Creates a ListOperationsResponse message from a plain object. Also converts values to their respective internal types.

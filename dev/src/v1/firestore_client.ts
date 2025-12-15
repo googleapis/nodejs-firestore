@@ -31,7 +31,7 @@ import type {
 import {Transform, PassThrough} from 'stream';
 import * as protos from '../../protos/firestore_v1_proto_api';
 import jsonProtos = require('../../protos/v1.json');
-import {loggingUtils as logging} from 'google-gax';
+import {loggingUtils as logging, decodeAnyProtosInArray} from 'google-gax';
 
 /**
  * Client JSON configuration object, loaded from
@@ -63,8 +63,8 @@ export class FirestoreClient {
   private _defaults: {[method: string]: gax.CallSettings};
   private _universeDomain: string;
   private _servicePath: string;
-  private _stubFailed = false;
   private _log = logging.log('firestore');
+
   auth: gax.GoogleAuth;
   descriptors: Descriptors = {
     page: {},
@@ -152,6 +152,9 @@ export class FirestoreClient {
       opts?.fallback ??
       (typeof window !== 'undefined' && typeof window?.fetch === 'function');
     opts = Object.assign({servicePath, port, clientConfig, fallback}, opts);
+
+    // Request numeric enum values if REST transport is used.
+    opts.numericEnums = true;
 
     // If scopes are unset in options and we're connecting to a non-default endpoint, set scopes just in case.
     if (servicePath !== this._servicePath && !('scopes' in opts)) {
@@ -294,12 +297,9 @@ export class FirestoreClient {
    */
   initialize() {
     // If the client stub promise is already initialized, return immediately.
-    if (this.firestoreStub && !this._stubFailed) {
+    if (this.firestoreStub) {
       return this.firestoreStub;
     }
-
-    // Reset _stubFailed because we are re-attempting create
-    this._stubFailed = false;
 
     // Put together the "service stub" for
     // google.firestore.v1.Firestore.
@@ -337,8 +337,8 @@ export class FirestoreClient {
     ];
     for (const methodName of firestoreStubMethods) {
       const callPromise = this.firestoreStub.then(
-        stub => {
-          return (...args: Array<{}>) => {
+        stub =>
+          (...args: Array<{}>) => {
             if (this._terminated) {
               if (methodName in this.descriptors.stream) {
                 const stream = new PassThrough({objectMode: true});
@@ -356,14 +356,9 @@ export class FirestoreClient {
             }
             const func = stub[methodName];
             return func.apply(stub, args);
-          };
-        },
-        (err: Error | null | undefined) => {
-          this._stubFailed = true;
-          this._log.error('Failed to create the gax client stub.', err);
-          return () => {
-            throw err;
-          };
+          },
+        (err: Error | null | undefined) => () => {
+          throw err;
         },
       );
 
@@ -591,7 +586,23 @@ export class FirestoreClient {
           this._log.info('getDocument response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Updates or inserts a document.
@@ -716,7 +727,23 @@ export class FirestoreClient {
           this._log.info('updateDocument response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Deletes a document.
@@ -828,7 +855,23 @@ export class FirestoreClient {
           this._log.info('deleteDocument response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Starts a new transaction.
@@ -944,7 +987,23 @@ export class FirestoreClient {
           this._log.info('beginTransaction response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Commits a transaction, while optionally updating documents.
@@ -1059,7 +1118,23 @@ export class FirestoreClient {
           this._log.info('commit response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Rolls back a transaction.
@@ -1170,7 +1245,23 @@ export class FirestoreClient {
           this._log.info('rollback response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Applies a batch of write operations.
@@ -1296,7 +1387,23 @@ export class FirestoreClient {
           this._log.info('batchWrite response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Creates a new document.
@@ -1392,7 +1499,7 @@ export class FirestoreClient {
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
         parent: request.parent ?? '',
-        collection_id: request.collectionId ?? '',
+        collection_id: request.collectionId?.toString() ?? '',
       });
     this.initialize().catch(err => {
       throw err;
@@ -1421,7 +1528,23 @@ export class FirestoreClient {
           this._log.info('createDocument response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
 
   /**
@@ -1877,7 +2000,7 @@ export class FirestoreClient {
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
         parent: request.parent ?? '',
-        collection_id: request.collectionId ?? '',
+        collection_id: request.collectionId?.toString() ?? '',
       });
     this.initialize().catch(err => {
       throw err;
@@ -1991,7 +2114,7 @@ export class FirestoreClient {
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
         parent: request.parent ?? '',
-        collection_id: request.collectionId ?? '',
+        collection_id: request.collectionId?.toString() ?? '',
       });
     const defaultCallSettings = this._defaults['listDocuments'];
     const callSettings = defaultCallSettings.merge(options);
@@ -2091,7 +2214,7 @@ export class FirestoreClient {
     options.otherArgs.headers['x-goog-request-params'] =
       this._gaxModule.routingHeader.fromParams({
         parent: request.parent ?? '',
-        collection_id: request.collectionId ?? '',
+        collection_id: request.collectionId?.toString() ?? '',
       });
     const defaultCallSettings = this._defaults['listDocuments'];
     const callSettings = defaultCallSettings.merge(options);

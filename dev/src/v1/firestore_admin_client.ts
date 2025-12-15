@@ -33,7 +33,7 @@ import type {
 import {Transform} from 'stream';
 import * as protos from '../../protos/firestore_admin_v1_proto_api';
 import jsonProtos = require('../../protos/admin_v1.json');
-import {loggingUtils as logging} from 'google-gax';
+import {loggingUtils as logging, decodeAnyProtosInArray} from 'google-gax';
 
 /**
  * Client JSON configuration object, loaded from
@@ -284,7 +284,7 @@ export class FirestoreAdminClient {
       ),
     };
 
-    const protoFilesRoot = this._gaxModule.protobuf.Root.fromJSON(jsonProtos);
+    const protoFilesRoot = this._gaxModule.protobufFromJSON(jsonProtos);
     // This API contains "long-running operations", which return a
     // an Operation object that allows for tracking of the operation,
     // rather than holding a request open.
@@ -371,6 +371,12 @@ export class FirestoreAdminClient {
     const restoreDatabaseMetadata = protoFilesRoot.lookup(
       '.google.firestore.admin.v1.RestoreDatabaseMetadata',
     ) as gax.protobuf.Type;
+    const cloneDatabaseResponse = protoFilesRoot.lookup(
+      '.google.firestore.admin.v1.Database',
+    ) as gax.protobuf.Type;
+    const cloneDatabaseMetadata = protoFilesRoot.lookup(
+      '.google.firestore.admin.v1.CloneDatabaseMetadata',
+    ) as gax.protobuf.Type;
 
     this.descriptors.longrunning = {
       createIndex: new this._gaxModule.LongrunningDescriptor(
@@ -417,6 +423,11 @@ export class FirestoreAdminClient {
         this.operationsClient,
         restoreDatabaseResponse.decode.bind(restoreDatabaseResponse),
         restoreDatabaseMetadata.decode.bind(restoreDatabaseMetadata),
+      ),
+      cloneDatabase: new this._gaxModule.LongrunningDescriptor(
+        this.operationsClient,
+        cloneDatabaseResponse.decode.bind(cloneDatabaseResponse),
+        cloneDatabaseMetadata.decode.bind(cloneDatabaseMetadata),
       ),
     };
 
@@ -501,6 +512,7 @@ export class FirestoreAdminClient {
       'listBackupSchedules',
       'updateBackupSchedule',
       'deleteBackupSchedule',
+      'cloneDatabase',
     ];
     for (const methodName of firestoreAdminStubMethods) {
       const callPromise = this.firestoreAdminStub.then(
@@ -728,7 +740,23 @@ export class FirestoreAdminClient {
           this._log.info('getIndex response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Deletes a composite index.
@@ -841,7 +869,23 @@ export class FirestoreAdminClient {
           this._log.info('deleteIndex response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Gets the metadata and configuration for a Field.
@@ -950,7 +994,23 @@ export class FirestoreAdminClient {
           this._log.info('getField response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Gets information about a database.
@@ -1063,7 +1123,23 @@ export class FirestoreAdminClient {
           this._log.info('getDatabase response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * List all the databases in the project.
@@ -1178,7 +1254,23 @@ export class FirestoreAdminClient {
           this._log.info('listDatabases response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Create a user creds.
@@ -1306,7 +1398,23 @@ export class FirestoreAdminClient {
           this._log.info('createUserCreds response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Gets a user creds resource. Note that the returned resource does not
@@ -1420,7 +1528,23 @@ export class FirestoreAdminClient {
           this._log.info('getUserCreds response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * List all user creds in the database. Note that the returned resource
@@ -1534,7 +1658,23 @@ export class FirestoreAdminClient {
           this._log.info('listUserCreds response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Enables a user creds. No-op if the user creds are already enabled.
@@ -1653,7 +1793,23 @@ export class FirestoreAdminClient {
           this._log.info('enableUserCreds response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Disables a user creds. No-op if the user creds are already disabled.
@@ -1772,7 +1928,23 @@ export class FirestoreAdminClient {
           this._log.info('disableUserCreds response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Resets the password of a user creds.
@@ -1894,7 +2066,23 @@ export class FirestoreAdminClient {
           this._log.info('resetUserPassword response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Deletes a user creds.
@@ -2013,7 +2201,23 @@ export class FirestoreAdminClient {
           this._log.info('deleteUserCreds response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Gets information about a backup.
@@ -2123,7 +2327,23 @@ export class FirestoreAdminClient {
           this._log.info('getBackup response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Lists all the backups.
@@ -2253,7 +2473,23 @@ export class FirestoreAdminClient {
           this._log.info('listBackups response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Deletes a backup.
@@ -2367,7 +2603,23 @@ export class FirestoreAdminClient {
           this._log.info('deleteBackup response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Creates a backup schedule on a database.
@@ -2494,7 +2746,23 @@ export class FirestoreAdminClient {
           this._log.info('createBackupSchedule response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Gets information about a backup schedule.
@@ -2618,7 +2886,23 @@ export class FirestoreAdminClient {
           this._log.info('getBackupSchedule response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * List backup schedules.
@@ -2741,7 +3025,23 @@ export class FirestoreAdminClient {
           this._log.info('listBackupSchedules response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Updates a backup schedule.
@@ -2864,7 +3164,23 @@ export class FirestoreAdminClient {
           this._log.info('updateBackupSchedule response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
   /**
    * Deletes a backup schedule.
@@ -2988,7 +3304,23 @@ export class FirestoreAdminClient {
           this._log.info('deleteBackupSchedule response %j', response);
           return [response, options, rawResponse];
         },
-      );
+      )
+      .catch((error: any) => {
+        if (
+          error &&
+          'statusDetails' in error &&
+          error.statusDetails instanceof Array
+        ) {
+          const protos = this._gaxModule.protobuf.Root.fromJSON(
+            jsonProtos,
+          ) as unknown as gax.protobuf.Type;
+          error.statusDetails = decodeAnyProtosInArray(
+            error.statusDetails,
+            protos,
+          );
+        }
+        throw error;
+      });
   }
 
   /**
@@ -4518,6 +4850,11 @@ export class FirestoreAdminClient {
    *   If this field is not specified, the restored database will use
    *   the same encryption configuration as the backup, namely
    *   {@link protos.google.firestore.admin.v1.Database.EncryptionConfig.use_source_encryption|use_source_encryption}.
+   * @param {number[]} request.tags
+   *   Optional. Immutable. Tags to be bound to the restored database.
+   *
+   *   The tags should be provided in the format of
+   *   `tagKeys/{tag_key_id} -> tagValues/{tag_value_id}`.
    * @param {object} [options]
    *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
    * @returns {Promise} - The promise which resolves to an array.
@@ -4678,6 +5015,244 @@ export class FirestoreAdminClient {
     return decodeOperation as LROperation<
       protos.google.firestore.admin.v1.Database,
       protos.google.firestore.admin.v1.RestoreDatabaseMetadata
+    >;
+  }
+  /**
+   * Creates a new database by cloning an existing one.
+   *
+   * The new database must be in the same cloud region or multi-region location
+   * as the existing database. This behaves similar to
+   * {@link protos.google.firestore.admin.v1.FirestoreAdmin.CreateDatabase|FirestoreAdmin.CreateDatabase}
+   * except instead of creating a new empty database, a new database is created
+   * with the database type, index configuration, and documents from an existing
+   * database.
+   *
+   * The {@link protos.google.longrunning.Operation|long-running operation} can be used to
+   * track the progress of the clone, with the Operation's
+   * {@link protos.google.longrunning.Operation.metadata|metadata} field type being the
+   * {@link protos.google.firestore.admin.v1.CloneDatabaseMetadata|CloneDatabaseMetadata}.
+   * The {@link protos.google.longrunning.Operation.response|response} type is the
+   * {@link protos.google.firestore.admin.v1.Database|Database} if the clone was
+   * successful. The new database is not readable or writeable until the LRO has
+   * completed.
+   *
+   * @param {Object} request
+   *   The request object that will be sent.
+   * @param {string} request.parent
+   *   Required. The project to clone the database in. Format is
+   *   `projects/{project_id}`.
+   * @param {string} request.databaseId
+   *   Required. The ID to use for the database, which will become the final
+   *   component of the database's resource name. This database ID must not be
+   *   associated with an existing database.
+   *
+   *   This value should be 4-63 characters. Valid characters are /{@link protos.0-9|a-z}-/
+   *   with first character a letter and the last a letter or a number. Must not
+   *   be UUID-like /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
+   *
+   *   "(default)" database ID is also valid.
+   * @param {google.firestore.admin.v1.PitrSnapshot} request.pitrSnapshot
+   *   Required. Specification of the PITR data to clone from. The source database
+   *   must exist.
+   *
+   *   The cloned database will be created in the same location as the source
+   *   database.
+   * @param {google.firestore.admin.v1.Database.EncryptionConfig} [request.encryptionConfig]
+   *   Optional. Encryption configuration for the cloned database.
+   *
+   *   If this field is not specified, the cloned database will use
+   *   the same encryption configuration as the source database, namely
+   *   {@link protos.google.firestore.admin.v1.Database.EncryptionConfig.use_source_encryption|use_source_encryption}.
+   * @param {number[]} request.tags
+   *   Optional. Immutable. Tags to be bound to the cloned database.
+   *
+   *   The tags should be provided in the format of
+   *   `tagKeys/{tag_key_id} -> tagValues/{tag_value_id}`.
+   * @param {object} [options]
+   *   Call options. See {@link https://googleapis.dev/nodejs/google-gax/latest/interfaces/CallOptions.html|CallOptions} for more details.
+   * @returns {Promise} - The promise which resolves to an array.
+   *   The first element of the array is an object representing
+   *   a long running operation. Its `promise()` method returns a promise
+   *   you can `await` for.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.clone_database.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_CloneDatabase_async
+   */
+  cloneDatabase(
+    request?: protos.google.firestore.admin.v1.ICloneDatabaseRequest,
+    options?: CallOptions,
+  ): Promise<
+    [
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.ICloneDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | undefined,
+      {} | undefined,
+    ]
+  >;
+  cloneDatabase(
+    request: protos.google.firestore.admin.v1.ICloneDatabaseRequest,
+    options: CallOptions,
+    callback: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.ICloneDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >,
+  ): void;
+  cloneDatabase(
+    request: protos.google.firestore.admin.v1.ICloneDatabaseRequest,
+    callback: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.ICloneDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >,
+  ): void;
+  cloneDatabase(
+    request?: protos.google.firestore.admin.v1.ICloneDatabaseRequest,
+    optionsOrCallback?:
+      | CallOptions
+      | Callback<
+          LROperation<
+            protos.google.firestore.admin.v1.IDatabase,
+            protos.google.firestore.admin.v1.ICloneDatabaseMetadata
+          >,
+          protos.google.longrunning.IOperation | null | undefined,
+          {} | null | undefined
+        >,
+    callback?: Callback<
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.ICloneDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | null | undefined,
+      {} | null | undefined
+    >,
+  ): Promise<
+    [
+      LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.ICloneDatabaseMetadata
+      >,
+      protos.google.longrunning.IOperation | undefined,
+      {} | undefined,
+    ]
+  > | void {
+    request = request || {};
+    let options: CallOptions;
+    if (typeof optionsOrCallback === 'function' && callback === undefined) {
+      callback = optionsOrCallback;
+      options = {};
+    } else {
+      options = optionsOrCallback as CallOptions;
+    }
+    options = options || {};
+    options.otherArgs = options.otherArgs || {};
+    options.otherArgs.headers = options.otherArgs.headers || {};
+    const routingParameter = {};
+    {
+      const fieldValue = request.pitrSnapshot?.database;
+      if (fieldValue !== undefined && fieldValue !== null) {
+        const match = fieldValue
+          .toString()
+          .match(RegExp('projects/(?<project_id>[^/]+)(?:/.*)?'));
+        if (match) {
+          const parameterValue = match.groups?.['project_id'] ?? fieldValue;
+          Object.assign(routingParameter, {project_id: parameterValue});
+        }
+      }
+    }
+    {
+      const fieldValue = request.pitrSnapshot?.database;
+      if (fieldValue !== undefined && fieldValue !== null) {
+        const match = fieldValue
+          .toString()
+          .match(
+            RegExp('projects/[^/]+/databases/(?<database_id>[^/]+)(?:/.*)?'),
+          );
+        if (match) {
+          const parameterValue = match.groups?.['database_id'] ?? fieldValue;
+          Object.assign(routingParameter, {database_id: parameterValue});
+        }
+      }
+    }
+    options.otherArgs.headers['x-goog-request-params'] =
+      this._gaxModule.routingHeader.fromParams(routingParameter);
+    this.initialize().catch(err => {
+      throw err;
+    });
+    const wrappedCallback:
+      | Callback<
+          LROperation<
+            protos.google.firestore.admin.v1.IDatabase,
+            protos.google.firestore.admin.v1.ICloneDatabaseMetadata
+          >,
+          protos.google.longrunning.IOperation | null | undefined,
+          {} | null | undefined
+        >
+      | undefined = callback
+      ? (error, response, rawResponse, _) => {
+          this._log.info('cloneDatabase response %j', rawResponse);
+          callback!(error, response, rawResponse, _); // We verified callback above.
+        }
+      : undefined;
+    this._log.info('cloneDatabase request %j', request);
+    return this.innerApiCalls
+      .cloneDatabase(request, options, wrappedCallback)
+      ?.then(
+        ([response, rawResponse, _]: [
+          LROperation<
+            protos.google.firestore.admin.v1.IDatabase,
+            protos.google.firestore.admin.v1.ICloneDatabaseMetadata
+          >,
+          protos.google.longrunning.IOperation | undefined,
+          {} | undefined,
+        ]) => {
+          this._log.info('cloneDatabase response %j', rawResponse);
+          return [response, rawResponse, _];
+        },
+      );
+  }
+  /**
+   * Check the status of the long running operation returned by `cloneDatabase()`.
+   * @param {String} name
+   *   The operation name that will be passed.
+   * @returns {Promise} - The promise which resolves to an object.
+   *   The decoded operation object has result and metadata field to get information from.
+   *   Please see the {@link https://github.com/googleapis/gax-nodejs/blob/master/client-libraries.md#long-running-operations | documentation }
+   *   for more details and examples.
+   * @example <caption>include:samples/generated/v1/firestore_admin.clone_database.js</caption>
+   * region_tag:firestore_v1_generated_FirestoreAdmin_CloneDatabase_async
+   */
+  async checkCloneDatabaseProgress(
+    name: string,
+  ): Promise<
+    LROperation<
+      protos.google.firestore.admin.v1.Database,
+      protos.google.firestore.admin.v1.CloneDatabaseMetadata
+    >
+  > {
+    this._log.info('cloneDatabase long-running');
+    const request =
+      new this._gaxModule.operationsProtos.google.longrunning.GetOperationRequest(
+        {name},
+      );
+    const [operation] = await this.operationsClient.getOperation(request);
+    const decodeOperation = new this._gaxModule.Operation(
+      operation,
+      this.descriptors.longrunning.cloneDatabase,
+      this._gaxModule.createDefaultBackoffSettings(),
+    );
+    return decodeOperation as LROperation<
+      protos.google.firestore.admin.v1.Database,
+      protos.google.firestore.admin.v1.CloneDatabaseMetadata
     >;
   }
   /**

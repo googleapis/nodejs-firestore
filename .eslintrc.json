@@ -52,7 +52,8 @@
             // Ignore args that are underscore only
             "argsIgnorePattern": "^_$"
           }
-        ]
+        ],
+        "@typescript-eslint/no-floating-promises": "warn"
       }
     }
   ]

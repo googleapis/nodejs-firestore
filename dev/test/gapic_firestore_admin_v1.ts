@@ -4739,6 +4739,192 @@ describe('v1.FirestoreAdminClient', () => {
     });
   });
 
+  describe('cloneDatabase', () => {
+    it('invokes cloneDatabase without error', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      await client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.admin.v1.CloneDatabaseRequest(),
+      );
+      request.pitrSnapshot = {};
+      // path template: projects/*/databases/{database_id=*}/**
+      request.pitrSnapshot.database = 'projects/value/databases/value/value';
+      const expectedHeaderRequestParams = 'database_id=value';
+      const expectedResponse = generateSampleMessage(
+        new protos.google.longrunning.Operation(),
+      );
+      client.innerApiCalls.cloneDatabase =
+        stubLongRunningCall(expectedResponse);
+      const [operation] = await client.cloneDatabase(request);
+      const [response] = await operation.promise();
+      assert.deepStrictEqual(response, expectedResponse);
+      const actualRequest = (
+        client.innerApiCalls.cloneDatabase as SinonStub
+      ).getCall(0).args[0];
+      assert.deepStrictEqual(actualRequest, request);
+      const actualHeaderRequestParams = (
+        client.innerApiCalls.cloneDatabase as SinonStub
+      ).getCall(0).args[1].otherArgs.headers['x-goog-request-params'];
+      assert(actualHeaderRequestParams.includes(expectedHeaderRequestParams));
+    });
+
+    it('invokes cloneDatabase without error using callback', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      await client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.admin.v1.CloneDatabaseRequest(),
+      );
+      request.pitrSnapshot = {};
+      // path template: projects/*/databases/{database_id=*}/**
+      request.pitrSnapshot.database = 'projects/value/databases/value/value';
+      const expectedHeaderRequestParams = 'database_id=value';
+      const expectedResponse = generateSampleMessage(
+        new protos.google.longrunning.Operation(),
+      );
+      client.innerApiCalls.cloneDatabase =
+        stubLongRunningCallWithCallback(expectedResponse);
+      const promise = new Promise((resolve, reject) => {
+        client.cloneDatabase(
+          request,
+          (
+            err?: Error | null,
+            result?: LROperation<
+              protos.google.firestore.admin.v1.IDatabase,
+              protos.google.firestore.admin.v1.ICloneDatabaseMetadata
+            > | null,
+          ) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          },
+        );
+      });
+      const operation = (await promise) as LROperation<
+        protos.google.firestore.admin.v1.IDatabase,
+        protos.google.firestore.admin.v1.ICloneDatabaseMetadata
+      >;
+      const [response] = await operation.promise();
+      assert.deepStrictEqual(response, expectedResponse);
+      const actualRequest = (
+        client.innerApiCalls.cloneDatabase as SinonStub
+      ).getCall(0).args[0];
+      assert.deepStrictEqual(actualRequest, request);
+      const actualHeaderRequestParams = (
+        client.innerApiCalls.cloneDatabase as SinonStub
+      ).getCall(0).args[1].otherArgs.headers['x-goog-request-params'];
+      assert(actualHeaderRequestParams.includes(expectedHeaderRequestParams));
+    });
+
+    it('invokes cloneDatabase with call error', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      await client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.admin.v1.CloneDatabaseRequest(),
+      );
+      request.pitrSnapshot = {};
+      // path template: projects/*/databases/{database_id=*}/**
+      request.pitrSnapshot.database = 'projects/value/databases/value/value';
+      const expectedHeaderRequestParams = 'database_id=value';
+      const expectedError = new Error('expected');
+      client.innerApiCalls.cloneDatabase = stubLongRunningCall(
+        undefined,
+        expectedError,
+      );
+      await assert.rejects(client.cloneDatabase(request), expectedError);
+      const actualRequest = (
+        client.innerApiCalls.cloneDatabase as SinonStub
+      ).getCall(0).args[0];
+      assert.deepStrictEqual(actualRequest, request);
+      const actualHeaderRequestParams = (
+        client.innerApiCalls.cloneDatabase as SinonStub
+      ).getCall(0).args[1].otherArgs.headers['x-goog-request-params'];
+      assert(actualHeaderRequestParams.includes(expectedHeaderRequestParams));
+    });
+
+    it('invokes cloneDatabase with LRO error', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      await client.initialize();
+      const request = generateSampleMessage(
+        new protos.google.firestore.admin.v1.CloneDatabaseRequest(),
+      );
+      request.pitrSnapshot = {};
+      // path template: projects/*/databases/{database_id=*}/**
+      request.pitrSnapshot.database = 'projects/value/databases/value/value';
+      const expectedHeaderRequestParams = 'database_id=value';
+      const expectedError = new Error('expected');
+      client.innerApiCalls.cloneDatabase = stubLongRunningCall(
+        undefined,
+        undefined,
+        expectedError,
+      );
+      const [operation] = await client.cloneDatabase(request);
+      await assert.rejects(operation.promise(), expectedError);
+      const actualRequest = (
+        client.innerApiCalls.cloneDatabase as SinonStub
+      ).getCall(0).args[0];
+      assert.deepStrictEqual(actualRequest, request);
+      const actualHeaderRequestParams = (
+        client.innerApiCalls.cloneDatabase as SinonStub
+      ).getCall(0).args[1].otherArgs.headers['x-goog-request-params'];
+      assert(actualHeaderRequestParams.includes(expectedHeaderRequestParams));
+    });
+
+    it('invokes checkCloneDatabaseProgress without error', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      await client.initialize();
+      const expectedResponse = generateSampleMessage(
+        new operationsProtos.google.longrunning.Operation(),
+      );
+      expectedResponse.name = 'test';
+      expectedResponse.response = {type_url: 'url', value: Buffer.from('')};
+      expectedResponse.metadata = {type_url: 'url', value: Buffer.from('')};
+
+      client.operationsClient.getOperation = stubSimpleCall(expectedResponse);
+      const decodedOperation = await client.checkCloneDatabaseProgress(
+        expectedResponse.name,
+      );
+      assert.deepStrictEqual(decodedOperation.name, expectedResponse.name);
+      assert(decodedOperation.metadata);
+      assert((client.operationsClient.getOperation as SinonStub).getCall(0));
+    });
+
+    it('invokes checkCloneDatabaseProgress with error', async () => {
+      const client = new firestoreadminModule.FirestoreAdminClient({
+        credentials: {client_email: 'bogus', private_key: 'bogus'},
+        projectId: 'bogus',
+      });
+      await client.initialize();
+      const expectedError = new Error('expected');
+
+      client.operationsClient.getOperation = stubSimpleCall(
+        undefined,
+        expectedError,
+      );
+      await assert.rejects(
+        client.checkCloneDatabaseProgress(''),
+        expectedError,
+      );
+      assert((client.operationsClient.getOperation as SinonStub).getCall(0));
+    });
+  });
+
   describe('listIndexes', () => {
     it('invokes listIndexes without error', async () => {
       const client = new firestoreadminModule.FirestoreAdminClient({
@@ -5404,7 +5590,7 @@ describe('v1.FirestoreAdminClient', () => {
         .stub()
         .callsArgWith(2, null, expectedResponse);
       const promise = new Promise((resolve, reject) => {
-        void client.getLocation(
+        client.getLocation(
           request,
           expectedOptions,
           (

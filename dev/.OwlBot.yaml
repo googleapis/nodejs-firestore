@@ -11,7 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-docker:
-  image: gcr.io/cloud-devrel-public-resources/owlbot-nodejs:latest
-  digest: sha256:1c50961ec998cd24968d5b2628e8d88a36b612ea881e71bfd171c93cc9d08b9e
-# created: 2025-12-02T19:51:56.208302619Z
+
+deep-copy-regex:
+    - source: /google/firestore/google-firestore-nodejs
+      dest: /owl-bot-staging/google-firestore
+
+api-name: firestore
