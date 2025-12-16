@@ -136,6 +136,7 @@ import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 
 import {afterEach, describe, it} from 'mocha';
+import '../test/util/mocha_extensions';
 import {verifyInstance} from '../test/util/helpers';
 import {getTestDb, getTestRoot} from './firestore';
 
@@ -147,7 +148,7 @@ use(chaiAsPromised);
 const timestampDeltaMS = 3000;
 
 // eslint-disable-next-line no-restricted-properties
-(process.env.RUN_ENTERPRISE_TESTS ? describe.only : describe.skip)(
+(process.env.RUN_ENTERPRISE_TESTS ? describe : describe.skip)(
   'Pipeline class',
   () => {
     let firestore: Firestore;
@@ -4483,7 +4484,7 @@ const timestampDeltaMS = 3000;
 // This is the Query integration tests from the lite API (no cache support)
 // with some additional test cases added for more complete coverage.
 // eslint-disable-next-line no-restricted-properties
-(process.env.RUN_ENTERPRISE_TESTS ? describe.only : describe.skip)(
+(process.env.RUN_ENTERPRISE_TESTS ? describe : describe.skip)(
   'Query to Pipeline',
   () => {
     async function execute(ppl: Pipeline): Promise<PipelineSnapshot> {

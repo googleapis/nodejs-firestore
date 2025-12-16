@@ -468,9 +468,9 @@ export function isPreferRest(): boolean {
   );
 }
 
-export function itIf(
-  condition: boolean | 'only',
-): Mocha.TestFunction | Mocha.PendingTestFunction {
-  // eslint-disable-next-line no-restricted-properties
-  return condition === 'only' ? it.only : condition ? it : it.skip;
+/**
+ * Returns a value indicating whether the tests are running against an Enterprise edition DB
+ */
+export function isEnterprise(): boolean {
+  return !!process.env.RUN_ENTERPRISE_TESTS;
 }
