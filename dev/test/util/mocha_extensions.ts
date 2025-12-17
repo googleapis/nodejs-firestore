@@ -22,18 +22,31 @@ import {describe, it} from 'mocha';
 // Helper to make a type itselt (T) and optionally union that with (T['skip'])
 type tOrSkipT<T> = T | (T extends {skip: unknown} ? T['skip'] : T);
 
-interface ExtendMochaTypeWithHelpers<T> {
-  // Declare helpers
-  skipEnterprise: tOrSkipT<T>;
-  skipEmulator: tOrSkipT<T>;
-  skipClassic: tOrSkipT<T>;
-}
-
 declare module 'mocha' {
-  type TestFunction = ExtendMochaTypeWithHelpers<TestFunction>;
-  type PendingTestFunction = ExtendMochaTypeWithHelpers<PendingTestFunction>;
-  type SuiteFunction = ExtendMochaTypeWithHelpers<SuiteFunction>;
-  type PendingSuiteFunction = ExtendMochaTypeWithHelpers<PendingSuiteFunction>;
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  interface TestFunction {
+    skipEnterprise: tOrSkipT<TestFunction>;
+    skipEmulator: tOrSkipT<TestFunction>;
+    skipClassic: tOrSkipT<TestFunction>;
+  }
+
+  interface PendingTestFunction {
+    skipEnterprise: tOrSkipT<PendingTestFunction>;
+    skipEmulator: tOrSkipT<PendingTestFunction>;
+    skipClassic: tOrSkipT<PendingTestFunction>;
+  }
+
+  interface SuiteFunction {
+    skipEnterprise: tOrSkipT<SuiteFunction>;
+    skipEmulator: tOrSkipT<SuiteFunction>;
+    skipClassic: tOrSkipT<SuiteFunction>;
+  }
+
+  interface PendingSuiteFunction {
+    skipEnterprise: tOrSkipT<PendingSuiteFunction>;
+    skipEmulator: tOrSkipT<PendingSuiteFunction>;
+    skipClassic: tOrSkipT<PendingSuiteFunction>;
+  }
 }
 
 // Define helpers
@@ -85,4 +98,6 @@ export function mixinSkipImplementations(obj: unknown): void {
 }
 
 // TODO add mocha functions that must be extended
-[it, it.skip, describe, describe.skip].forEach(mixinSkipImplementations);
+[global.it, global.describe, it, it.skip, describe, describe.skip].forEach(
+  mixinSkipImplementations,
+);
