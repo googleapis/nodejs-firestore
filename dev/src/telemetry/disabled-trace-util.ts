@@ -42,5 +42,5 @@ export class DisabledTraceUtil implements TraceUtil {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  recordProjectId(projectId: string): void {}
+  recordProjectIdAndResourceName(projectId: string, databaseId: string): void {}
 }

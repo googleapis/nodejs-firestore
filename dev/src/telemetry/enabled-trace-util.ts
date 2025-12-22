@@ -26,7 +26,12 @@ import {
 } from '@opentelemetry/api';
 
 import {Span} from './span';
-import {ATTRIBUTE_SETTINGS_PREFIX, Attributes, TraceUtil} from './trace-util';
+import {
+  ATTRIBUTE_GCP_RESOURCE_NAME,
+  ATTRIBUTE_SETTINGS_PREFIX,
+  Attributes,
+  TraceUtil,
+} from './trace-util';
 
 import {interfaces} from '../v1/firestore_client_config.json';
 import {FirestoreClient} from '../v1';
@@ -69,6 +74,7 @@ export class EnabledTraceUtil implements TraceUtil {
       );
     }
 
+    const databaseId: string = settings.databaseId || DEFAULT_DATABASE_ID;
     this.settingsAttributes = {};
     this.settingsAttributes['otel.scope.name'] = libName;
     this.settingsAttributes['otel.scope.version'] = libVersion;
@@ -76,10 +82,13 @@ export class EnabledTraceUtil implements TraceUtil {
     if (settings.projectId) {
       this.settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.project_id`] =
         settings.projectId;
+
+      this.settingsAttributes[ATTRIBUTE_GCP_RESOURCE_NAME] =
+        `//firestore.googleapis.com/projects/${settings.projectId}/databases/${databaseId}`;
     }
 
     this.settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.database_id`] =
-      settings.databaseId || DEFAULT_DATABASE_ID;
+      databaseId;
 
     const host =
       settings.servicePath ?? settings.host ?? 'firestore.googleapis.com';
@@ -139,9 +148,11 @@ export class EnabledTraceUtil implements TraceUtil {
       defaultRetrySettings.rpc_timeout_multiplier.toString();
   }
 
-  recordProjectId(projectId: string): void {
+  recordProjectIdAndResourceName(projectId: string, databaseId: string): void {
     this.settingsAttributes[`${ATTRIBUTE_SETTINGS_PREFIX}.project_id`] =
       projectId;
+    this.settingsAttributes[ATTRIBUTE_GCP_RESOURCE_NAME] =
+      `//firestore.googleapis.com/projects/${projectId}/databases/${databaseId}`;
     this.currentSpan().setAttributes(this.settingsAttributes);
   }
 
