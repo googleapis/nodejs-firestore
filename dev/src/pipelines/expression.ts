@@ -99,6 +99,28 @@ export abstract class Expression
 
   /**
    * @beta
+   * Wraps the expression in a [BooleanExpression].
+   *
+   * @return A [BooleanExpression] representing the same expression.
+   */
+  asBoolean(): BooleanExpression {
+    if (this instanceof BooleanExpression) {
+      return this;
+    } else if (this instanceof Constant) {
+      return new BooleanConstant(this);
+    } else if (this instanceof Field) {
+      return new BooleanField(this);
+    } else if (this instanceof FunctionExpression) {
+      return new BooleanFunctionExpression(this);
+    } else {
+      throw new Error(
+        `Conversion of type ${typeof this} to BooleanExpression not supported.`,
+      );
+    }
+  }
+
+  /**
+   * @beta
    * Creates an expression that subtracts another expression from this expression.
    *
    * ```typescript
@@ -250,7 +272,10 @@ export abstract class Expression
    */
   equal(value: unknown): BooleanExpression;
   equal(other: unknown): BooleanExpression {
-    return new BooleanExpression('equal', [this, valueToDefaultExpr(other)]);
+    return new FunctionExpression('equal', [
+      this,
+      valueToDefaultExpr(other),
+    ]).asBoolean();
   }
 
   /**
@@ -281,10 +306,10 @@ export abstract class Expression
    */
   notEqual(value: unknown): BooleanExpression;
   notEqual(other: unknown): BooleanExpression {
-    return new BooleanExpression('not_equal', [
+    return new FunctionExpression('not_equal', [
       this,
       valueToDefaultExpr(other),
-    ]);
+    ]).asBoolean();
   }
 
   /**
@@ -315,10 +340,10 @@ export abstract class Expression
    */
   lessThan(value: unknown): BooleanExpression;
   lessThan(other: unknown): BooleanExpression {
-    return new BooleanExpression('less_than', [
+    return new FunctionExpression('less_than', [
       this,
       valueToDefaultExpr(other),
-    ]);
+    ]).asBoolean();
   }
 
   /**
@@ -350,10 +375,10 @@ export abstract class Expression
    */
   lessThanOrEqual(value: unknown): BooleanExpression;
   lessThanOrEqual(other: unknown): BooleanExpression {
-    return new BooleanExpression('less_than_or_equal', [
+    return new FunctionExpression('less_than_or_equal', [
       this,
       valueToDefaultExpr(other),
-    ]);
+    ]).asBoolean();
   }
 
   /**
@@ -384,10 +409,10 @@ export abstract class Expression
    */
   greaterThan(value: unknown): BooleanExpression;
   greaterThan(other: unknown): BooleanExpression {
-    return new BooleanExpression('greater_than', [
+    return new FunctionExpression('greater_than', [
       this,
       valueToDefaultExpr(other),
-    ]);
+    ]).asBoolean();
   }
 
   /**
@@ -420,10 +445,10 @@ export abstract class Expression
    */
   greaterThanOrEqual(value: unknown): BooleanExpression;
   greaterThanOrEqual(other: unknown): BooleanExpression {
-    return new BooleanExpression('greater_than_or_equal', [
+    return new FunctionExpression('greater_than_or_equal', [
       this,
       valueToDefaultExpr(other),
-    ]);
+    ]).asBoolean();
   }
 
   /**
@@ -475,10 +500,10 @@ export abstract class Expression
    */
   arrayContains(value: unknown): BooleanExpression;
   arrayContains(element: unknown): BooleanExpression {
-    return new BooleanExpression('array_contains', [
+    return new FunctionExpression('array_contains', [
       this,
       valueToDefaultExpr(element),
-    ]);
+    ]).asBoolean();
   }
 
   /**
@@ -512,7 +537,10 @@ export abstract class Expression
     const normalizedExpr = Array.isArray(values)
       ? new ListOfExprs(values.map(valueToDefaultExpr))
       : cast<Expression>(values);
-    return new BooleanExpression('array_contains_all', [this, normalizedExpr]);
+    return new FunctionExpression('array_contains_all', [
+      this,
+      normalizedExpr,
+    ]).asBoolean();
   }
 
   /**
@@ -549,7 +577,10 @@ export abstract class Expression
     const normalizedExpr = Array.isArray(values)
       ? new ListOfExprs(values.map(valueToDefaultExpr))
       : cast<Expression>(values);
-    return new BooleanExpression('array_contains_any', [this, normalizedExpr]);
+    return new FunctionExpression('array_contains_any', [
+      this,
+      normalizedExpr,
+    ]).asBoolean();
   }
 
   /**
@@ -615,7 +646,7 @@ export abstract class Expression
     const exprOthers = Array.isArray(others)
       ? new ListOfExprs(others.map(valueToDefaultExpr))
       : cast<Expression>(others);
-    return new BooleanExpression('equal_any', [this, exprOthers]);
+    return new FunctionExpression('equal_any', [this, exprOthers]).asBoolean();
   }
 
   /**
@@ -650,7 +681,10 @@ export abstract class Expression
     const exprOthers = Array.isArray(others)
       ? new ListOfExprs(others.map(valueToDefaultExpr))
       : cast<Expression>(others);
-    return new BooleanExpression('not_equal_any', [this, exprOthers]);
+    return new FunctionExpression('not_equal_any', [
+      this,
+      exprOthers,
+    ]).asBoolean();
   }
 
   /**
@@ -665,7 +699,7 @@ export abstract class Expression
    * @return A new `Expression` representing the 'exists' check.
    */
   exists(): BooleanExpression {
-    return new BooleanExpression('exists', [this]);
+    return new FunctionExpression('exists', [this]).asBoolean();
   }
 
   /**
@@ -695,7 +729,7 @@ export abstract class Expression
    * @param pattern The pattern to search for. You can use "%" as a wildcard character.
    * @return A new `Expression` representing the 'like' comparison.
    */
-  like(pattern: string): FunctionExpression;
+  like(pattern: string): BooleanExpression;
 
   /**
    * @beta
@@ -709,12 +743,12 @@ export abstract class Expression
    * @param pattern The pattern to search for. You can use "%" as a wildcard character.
    * @return A new `Expression` representing the 'like' comparison.
    */
-  like(pattern: Expression): FunctionExpression;
-  like(stringOrExpr: string | Expression): FunctionExpression {
-    return new BooleanExpression('like', [
+  like(pattern: Expression): BooleanExpression;
+  like(stringOrExpr: string | Expression): BooleanExpression {
+    return new FunctionExpression('like', [
       this,
       valueToDefaultExpr(stringOrExpr),
-    ]);
+    ]).asBoolean();
   }
 
   /**
@@ -747,10 +781,10 @@ export abstract class Expression
    */
   regexContains(pattern: Expression): BooleanExpression;
   regexContains(stringOrExpr: string | Expression): BooleanExpression {
-    return new BooleanExpression('regex_contains', [
+    return new FunctionExpression('regex_contains', [
       this,
       valueToDefaultExpr(stringOrExpr),
-    ]);
+    ]).asBoolean();
   }
 
   /**
@@ -781,10 +815,10 @@ export abstract class Expression
    */
   regexMatch(pattern: Expression): BooleanExpression;
   regexMatch(stringOrExpr: string | Expression): BooleanExpression {
-    return new BooleanExpression('regex_match', [
+    return new FunctionExpression('regex_match', [
       this,
       valueToDefaultExpr(stringOrExpr),
-    ]);
+    ]).asBoolean();
   }
 
   /**
@@ -815,10 +849,10 @@ export abstract class Expression
    */
   stringContains(expr: Expression): BooleanExpression;
   stringContains(stringOrExpr: string | Expression): BooleanExpression {
-    return new BooleanExpression('string_contains', [
+    return new FunctionExpression('string_contains', [
       this,
       valueToDefaultExpr(stringOrExpr),
-    ]);
+    ]).asBoolean();
   }
 
   /**
@@ -850,10 +884,10 @@ export abstract class Expression
    */
   startsWith(prefix: Expression): BooleanExpression;
   startsWith(stringOrExpr: string | Expression): BooleanExpression {
-    return new BooleanExpression('starts_with', [
+    return new FunctionExpression('starts_with', [
       this,
       valueToDefaultExpr(stringOrExpr),
-    ]);
+    ]).asBoolean();
   }
 
   /**
@@ -885,10 +919,10 @@ export abstract class Expression
    */
   endsWith(suffix: Expression): BooleanExpression;
   endsWith(stringOrExpr: string | Expression): BooleanExpression {
-    return new BooleanExpression('ends_with', [
+    return new FunctionExpression('ends_with', [
       this,
       valueToDefaultExpr(stringOrExpr),
-    ]);
+    ]).asBoolean();
   }
 
   /**
@@ -1651,7 +1685,7 @@ export abstract class Expression
    * @return A new {@code BooleanExpression} representing the 'isError' check.
    */
   isError(): BooleanExpression {
-    return new BooleanExpression('is_error', [this]);
+    return new FunctionExpression('is_error', [this]).asBoolean();
   }
 
   /**
@@ -1707,7 +1741,7 @@ export abstract class Expression
    * @return A new {@code BooleanExpression} representing the 'isAbsent' check.
    */
   isAbsent(): BooleanExpression {
-    return new BooleanExpression('is_absent', [this]);
+    return new FunctionExpression('is_absent', [this]).asBoolean();
   }
 
   /**
@@ -2642,7 +2676,16 @@ export function constant(value: firestore.VectorValue): Expression;
 export function constant(value: unknown): Expression;
 
 export function constant(value: unknown): Expression {
-  return new Constant(value);
+  return _constant(value);
+}
+
+export function _constant(value: unknown): Constant | BooleanExpression {
+  const c = new Constant(value);
+  if (typeof value === 'boolean') {
+    return new BooleanConstant(c);
+  } else {
+    return c;
+  }
 }
 
 /**
@@ -2686,7 +2729,7 @@ export class FunctionExpression extends Expression {
   readonly expressionType: firestore.Pipelines.ExpressionType = 'Function';
 
   constructor(
-    protected name: string,
+    public _methodName: string,
     private params: Expression[],
   ) {
     super();
@@ -2700,7 +2743,7 @@ export class FunctionExpression extends Expression {
   _toProto(serializer: Serializer): api.IValue {
     return {
       functionValue: {
-        name: this.name,
+        name: this._methodName,
         args: this.params.map(p => cast<Expression>(p)._toProto(serializer)),
       },
     };
@@ -2750,7 +2793,7 @@ class MapFunctionExpr extends FunctionExpression {
     }
     return {
       functionValue: {
-        name: this.name,
+        name: this._methodName,
         args: args,
       },
     };
@@ -2793,7 +2836,7 @@ class ArrayFunctionExpr extends FunctionExpression {
   _toProto(serializer: Serializer): api.IValue {
     return {
       functionValue: {
-        name: this.name,
+        name: this._methodName,
         args: this.values
           .filter(v => !!v)
           .map(value => value!._toProto(serializer)),
@@ -2822,11 +2865,11 @@ class ArrayFunctionExpr extends FunctionExpression {
  * This expression type is useful for filter conditions.
  *
  */
-export class BooleanExpression
-  extends FunctionExpression
+export abstract class BooleanExpression
+  extends Expression
   implements firestore.Pipelines.BooleanExpression
 {
-  returnType: 'boolean' = 'boolean' as const;
+  abstract get _expr(): Expression;
 
   /**
    * @beta
@@ -2856,7 +2899,7 @@ export class BooleanExpression
    * @return A new {@code Expression} representing the negated filter condition.
    */
   not(): BooleanExpression {
-    return new BooleanExpression('not', [this]);
+    return new FunctionExpression('not', [this]).asBoolean();
   }
 
   /**
@@ -2894,8 +2937,98 @@ export class BooleanExpression
    * produces an error.
    * @return A new {@code Expr} representing the 'ifError' operation.
    */
-  ifError(catchValue: BooleanExpression): BooleanExpression {
-    return new BooleanExpression('if_error', [this, catchValue]);
+  ifError(catchValue: BooleanExpression): BooleanExpression;
+
+  /**
+   * @beta
+   *
+   * Creates an expression that returns the `catch` argument if there is an
+   * error, else return the result of this expression.
+   *
+   * ```typescript
+   * // Create an expression that protects against a divide by zero error
+   * // but always returns a boolean expression.
+   * constant(50).divide('length').gt(1).ifError(false);
+   * ```
+   *
+   * @param catchValue The value that will be returned if this expression
+   * produces an error.
+   * @return A new {@code Expr} representing the 'ifError' operation.
+   */
+  ifError(catchValue: boolean): BooleanExpression;
+
+  /**
+   * @beta
+   *
+   * Creates an expression that returns the `catch` argument if there is an
+   * error, else return the result of this expression.
+   *
+   * ```typescript
+   * // Create an expression that protects against a divide by zero error.
+   * constant(50).divide('length').gt(1).ifError(constant(0));
+   * ```
+   *
+   * @param catchValue The value that will be returned if this expression
+   * produces an error.
+   * @return A new {@code Expr} representing the 'ifError' operation.
+   */
+  ifError(catchValue: Expression): FunctionExpression;
+
+  /**
+   * @beta
+   *
+   * Creates an expression that returns the `catch` argument if there is an
+   * error, else return the result of this expression.
+   *
+   * ```typescript
+   * // Create an expression that protects against a divide by zero error.
+   * constant(50).divide('length').gt(1).ifError(0);
+   * ```
+   *
+   * @param catchValue The value that will be returned if this expression
+   * produces an error.
+   * @return A new {@code Expr} representing the 'ifError' operation.
+   */
+  ifError(catchValue: unknown): FunctionExpression;
+  ifError(catchValue: unknown): unknown {
+    const normalizedCatchValue = valueToDefaultExpr(catchValue);
+    const expr = new FunctionExpression('if_error', [
+      this,
+      normalizedCatchValue,
+    ]);
+
+    return normalizedCatchValue instanceof BooleanExpression
+      ? expr.asBoolean()
+      : expr;
+  }
+
+  _toProto(serializer: Serializer): api.IValue {
+    return this._expr._toProto(serializer);
+  }
+
+  _validateUserData(ignoreUndefinedProperties: boolean): void {
+    this._expr._validateUserData(ignoreUndefinedProperties);
+  }
+}
+
+export class BooleanFunctionExpression extends BooleanExpression {
+  readonly expressionType: firestore.Pipelines.ExpressionType = 'Function';
+  constructor(readonly _expr: FunctionExpression) {
+    super();
+  }
+}
+
+export class BooleanConstant extends BooleanExpression {
+  readonly expressionType: firestore.Pipelines.ExpressionType = 'Constant';
+  constructor(readonly _expr: Constant) {
+    super();
+  }
+}
+
+export class BooleanField extends BooleanExpression {
+  readonly expressionType: firestore.Pipelines.ExpressionType = 'Field';
+  constructor(readonly _expr: Field) {
+    super();
   }
 }
 
@@ -3044,6 +3177,7 @@ export function ifError(
 
 /**
  * @beta
+ *
  * Creates an expression that returns the `catch` argument if there is an
  * error, else return the result of the `try` argument evaluation.
  *
@@ -3065,6 +3199,7 @@ export function ifError(
 
 /**
  * @beta
+ *
  * Creates an expression that returns the `catch` argument if there is an
  * error, else return the result of the `try` argument evaluation.
  *
@@ -3083,15 +3218,16 @@ export function ifError(
   tryExpr: Expression,
   catchValue: unknown,
 ): FunctionExpression;
+
 export function ifError(
   tryExpr: Expression,
   catchValue: unknown,
-): FunctionExpression {
+): FunctionExpression | BooleanExpression {
   if (
     tryExpr instanceof BooleanExpression &&
     catchValue instanceof BooleanExpression
   ) {
-    return tryExpr.ifError(catchValue);
+    return tryExpr.ifError(catchValue).asBoolean();
   } else {
     return tryExpr.ifError(valueToDefaultExpr(catchValue));
   }
@@ -4279,7 +4415,7 @@ export function arrayConcat(
 export function arrayContains(
   array: Expression,
   element: Expression,
-): FunctionExpression;
+): BooleanExpression;
 
 /**
  * @beta
@@ -4297,7 +4433,7 @@ export function arrayContains(
 export function arrayContains(
   array: Expression,
   element: unknown,
-): FunctionExpression;
+): BooleanExpression;
 
 /**
  * @beta
@@ -4315,7 +4451,7 @@ export function arrayContains(
 export function arrayContains(
   fieldName: string,
   element: Expression,
-): FunctionExpression;
+): BooleanExpression;
 
 /**
  * @beta
@@ -4740,7 +4876,11 @@ export function xor(
   second: BooleanExpression,
   ...additionalConditions: BooleanExpression[]
 ): BooleanExpression {
-  return new BooleanExpression('xor', [first, second, ...additionalConditions]);
+  return new FunctionExpression('xor', [
+    first,
+    second,
+    ...additionalConditions,
+  ]).asBoolean();
 }
 
 /**
@@ -5220,7 +5360,7 @@ export function like(
 export function like(
   left: Expression | string,
   pattern: Expression | string,
-): FunctionExpression {
+): BooleanExpression {
   const leftExpr = fieldOrExpression(left);
   const patternExpr = valueToDefaultExpr(pattern);
   return leftExpr.like(patternExpr);
@@ -6678,7 +6818,7 @@ export function and(
   second: BooleanExpression,
   ...more: BooleanExpression[]
 ): BooleanExpression {
-  return new BooleanExpression('and', [first, second, ...more]);
+  return new FunctionExpression('and', [first, second, ...more]).asBoolean();
 }
 
 /**
@@ -6701,7 +6841,7 @@ export function or(
   second: BooleanExpression,
   ...more: BooleanExpression[]
 ): BooleanExpression {
-  return new BooleanExpression('or', [first, second, ...more]);
+  return new FunctionExpression('or', [first, second, ...more]).asBoolean();
 }
 
 /**

@@ -3227,6 +3227,13 @@ declare namespace FirebaseFirestore {
       ): FunctionExpression;
       /**
        * @beta
+       * Wraps the expression in a [BooleanExpression].
+       *
+       * @return A [BooleanExpression] representing the same expression.
+       */
+      asBoolean(): BooleanExpression;
+      /**
+       * @beta
        * Creates an expression that subtracts another expression from this expression.
        *
        * ```typescript
@@ -3688,9 +3695,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param pattern The string pattern to search for. You can use "%" as a wildcard character within the pattern.
-       * @return A new {@link FunctionExpression} representing the 'like' comparison.
+       * @return A new {@link BooleanExpression} representing the 'like' comparison.
        */
-      like(pattern: string): FunctionExpression;
+      like(pattern: string): BooleanExpression;
 
       /**
        * @beta
@@ -3702,9 +3709,9 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param pattern An {@link Expression} that evaluates to the string pattern to search for. You can use "%" as a wildcard character within the pattern.
-       * @return A new {@link FunctionExpression} representing the 'like' comparison.
+       * @return A new {@link BooleanExpression} representing the 'like' comparison.
        */
-      like(pattern: Expression): FunctionExpression;
+      like(pattern: Expression): BooleanExpression;
       /**
        * @beta
        * Creates an expression that checks if a string contains a specified regular expression as a
@@ -3716,7 +3723,7 @@ declare namespace FirebaseFirestore {
        * ```
        *
        * @param pattern The regular expression to use for the search.
-       * @return A new `Expression` representing the 'contains' comparison.
+       * @return A new `BooleanExpression` representing the 'contains' comparison.
        */
       regexContains(pattern: string): BooleanExpression;
 
@@ -5245,13 +5252,7 @@ declare namespace FirebaseFirestore {
      * This expression type is useful for filter conditions.
      *
      */
-    export class BooleanExpression extends FunctionExpression {
-      /**
-       * @beta
-       * @internal
-       * @private
-       */
-      returnType: 'boolean';
+    export abstract class BooleanExpression extends Expression {
       /**
        * @beta
        * Creates an aggregation that finds the count of input documents satisfying
@@ -5265,6 +5266,7 @@ declare namespace FirebaseFirestore {
        * @return A new `AggregateFunction` representing the 'countIf' aggregation.
        */
       countIf(): AggregateFunction;
+
       /**
        * @beta
        * Creates an expression that negates this boolean expression.
@@ -5277,6 +5279,96 @@ declare namespace FirebaseFirestore {
        * @return A new {@code Expression} representing the negated filter condition.
        */
       not(): BooleanExpression;
+
+      /**
+       * @beta
+       * Creates a conditional expression that evaluates to the 'then' expression
+       * if `this` expression evaluates to `true`,
+       * or evaluates to the 'else' expression if `this` expressions evaluates `false`.
+       *
+       * ```typescript
+       * // If 'age' is greater than 18, return "Adult"; otherwise, return "Minor".
+       * field("age").greaterThanOrEqual(18).conditional(constant("Adult"), constant("Minor"));
+       * ```
+       *
+       * @param thenExpr The expression to evaluate if the condition is true.
+       * @param elseExpr The expression to evaluate if the condition is false.
+       * @return A new {@code Expr} representing the conditional expression.
+       */
+      conditional(
+        thenExpr: Expression,
+        elseExpr: Expression,
+      ): FunctionExpression;
+
+      /**
+       * @beta
+       *
+       * Creates an expression that returns the `catch` argument if there is an
+       * error, else return the result of this expression.
+       *
+       * ```typescript
+       * // Create an expression that protects against a divide by zero error
+       * // but always returns a boolean expression.
+       * constant(50).divide('length').gt(1).ifError(constant(false));
+       * ```
+       *
+       * @param catchValue The value that will be returned if this expression
+       * produces an error.
+       * @return A new {@code Expr} representing the 'ifError' operation.
+       */
+      ifError(catchValue: BooleanExpression): BooleanExpression;
+
+      /**
+       * @beta
+       *
+       * Creates an expression that returns the `catch` argument if there is an
+       * error, else return the result of this expression.
+       *
+       * ```typescript
+       * // Create an expression that protects against a divide by zero error
+       * // but always returns a boolean expression.
+       * constant(50).divide('length').gt(1).ifError(false);
+       * ```
+       *
+       * @param catchValue The value that will be returned if this expression
+       * produces an error.
+       * @return A new {@code Expr} representing the 'ifError' operation.
+       */
+      ifError(catchValue: boolean): BooleanExpression;
+
+      /**
+       * @beta
+       *
+       * Creates an expression that returns the `catch` argument if there is an
+       * error, else return the result of this expression.
+       *
+       * ```typescript
+       * // Create an expression that protects against a divide by zero error.
+       * constant(50).divide('length').gt(1).ifError(constant(0));
+       * ```
+       *
+       * @param catchValue The value that will be returned if this expression
+       * produces an error.
+       * @return A new {@code Expr} representing the 'ifError' operation.
+       */
+      ifError(catchValue: Expression): FunctionExpression;
+
+      /**
+       * @beta
+       *
+       * Creates an expression that returns the `catch` argument if there is an
+       * error, else return the result of this expression.
+       *
+       * ```typescript
+       * // Create an expression that protects against a divide by zero error.
+       * constant(50).divide('length').gt(1).ifError(0);
+       * ```
+       *
+       * @param catchValue The value that will be returned if this expression
+       * produces an error.
+       * @return A new {@code Expr} representing the 'ifError' operation.
+       */
+      ifError(catchValue: unknown): FunctionExpression;
     }
     /**
      * @beta
@@ -5380,7 +5472,7 @@ declare namespace FirebaseFirestore {
      * ```
      *
      * @param value The expression to check.
-     * @return A new {@code Expression} representing the 'isError' check.
+     * @return A new {@code BooleanExpression} representing the 'isError' check.
      */
     export function isError(value: Expression): BooleanExpression;
     /**
@@ -5400,14 +5492,16 @@ declare namespace FirebaseFirestore {
      * @param tryExpr The try expression.
      * @param catchExpr The catch expression that will be evaluated and
      * returned if the tryExpr produces an error.
-     * @return A new {@code Expr} representing the 'ifError' operation.
+     * @return A new {@code BooleanExpression} representing the 'ifError' operation.
      */
     export function ifError(
       tryExpr: BooleanExpression,
       catchExpr: BooleanExpression,
     ): BooleanExpression;
+
     /**
      * @beta
+     *
      * Creates an expression that returns the `catch` argument if there is an
      * error, else return the result of the `try` argument evaluation.
      *
@@ -5426,8 +5520,10 @@ declare namespace FirebaseFirestore {
       tryExpr: Expression,
       catchExpr: Expression,
     ): FunctionExpression;
+
     /**
      * @beta
+     *
      * Creates an expression that returns the `catch` argument if there is an
      * error, else return the result of the `try` argument evaluation.
      *
@@ -5446,6 +5542,7 @@ declare namespace FirebaseFirestore {
       tryExpr: Expression,
       catchValue: unknown,
     ): FunctionExpression;
+
     /**
      * @beta
      * Creates an expression that returns `true` if a value is absent. Otherwise,
@@ -6502,7 +6599,7 @@ declare namespace FirebaseFirestore {
     export function arrayContains(
       array: Expression,
       element: Expression,
-    ): FunctionExpression;
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if an array expression contains a specific element.
@@ -6519,7 +6616,7 @@ declare namespace FirebaseFirestore {
     export function arrayContains(
       array: Expression,
       element: unknown,
-    ): FunctionExpression;
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's array value contains a specific element.
@@ -6536,7 +6633,7 @@ declare namespace FirebaseFirestore {
     export function arrayContains(
       fieldName: string,
       element: Expression,
-    ): FunctionExpression;
+    ): BooleanExpression;
     /**
      * @beta
      * Creates an expression that checks if a field's array value contains a specific value.

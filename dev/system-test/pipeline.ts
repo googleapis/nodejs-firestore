@@ -19,7 +19,6 @@ import {
 } from '@google-cloud/firestore';
 
 import {
-  BooleanExpression,
   map,
   array,
   field,
@@ -1038,8 +1037,8 @@ const timestampDeltaMS = 3000;
         });
 
         it('rejects groups without accumulators', async () => {
-          void expect(
-            firestore
+          void expect(async () => {
+            await firestore
               .pipeline()
               .collection(randomCol.path)
               .where(lessThan('published', 1900))
@@ -1047,8 +1046,8 @@ const timestampDeltaMS = 3000;
                 accumulators: [],
                 groups: ['genre'],
               })
-              .execute(),
-          ).to.be.rejected;
+              .execute();
+          }).to.throw;
         });
 
         it('returns group and accumulate results', async () => {
@@ -2944,11 +2943,11 @@ const timestampDeltaMS = 3000;
             .pipeline()
             .collection(randomCol.path)
             .where(
-              new BooleanExpression('and', [
+              new FunctionExpression('and', [
                 field('rating').greaterThan(0),
                 field('title').charLength().lessThan(5),
                 field('tags').arrayContains('propaganda'),
-              ]),
+              ]).asBoolean(),
             )
             .select('title')
             .execute();
@@ -2962,10 +2961,10 @@ const timestampDeltaMS = 3000;
             .pipeline()
             .collection(randomCol.path)
             .where(
-              new BooleanExpression('array_contains_any', [
+              new FunctionExpression('array_contains_any', [
                 field('tags'),
                 array(['politics']),
-              ]),
+              ]).asBoolean(),
             )
             .select('title')
             .execute();
