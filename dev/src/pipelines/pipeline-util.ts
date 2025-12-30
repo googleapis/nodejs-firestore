@@ -527,7 +527,10 @@ export function toPipelineBooleanExpr(
       }
       case 'NOT_IN': {
         const values = value?.arrayValue?.values?.map(val => constant(val));
-        return and(field.exists(), field.notEqualAny(values!));
+        // In Enterprise DB's NOT_IN will match a field that does not exist,
+        // therefore we do not want an existence filter for the NOT_IN conversion
+        // so the Query and Pipeline behavior are consistent in Enterprise.
+        return field.notEqualAny(values!);
       }
     }
   } else if (f instanceof CompositeFilterInternal) {

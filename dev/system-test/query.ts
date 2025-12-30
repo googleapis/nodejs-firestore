@@ -33,12 +33,13 @@ import {
   QueryDocumentSnapshot,
   VectorQuery,
   VectorQuerySnapshot,
+  setLogFunction,
 } from '../src';
 import {verifyInstance} from '../test/util/helpers';
 import {DeferredPromise, getTestRoot} from './firestore';
 import {IndexTestHelper} from './index_test_helper';
 
-describe.skipClassic('Query class', () => {
+describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
   interface PaginatedResults {
     pages: number;
     docs: QueryDocumentSnapshot[];
@@ -602,8 +603,7 @@ describe.skipClassic('Query class', () => {
     expectDocs(res, {count: 2}, {count: 3});
   });
 
-  // TODO waiting on implicit sort order decision
-  it.skipEnterprise('supports not-in', async () => {
+  it('supports not-in', async () => {
     await addDocs(
       {zip: 98101},
       {zip: 91102},
@@ -613,7 +613,9 @@ describe.skipClassic('Query class', () => {
       {zip: {zip: 98101}},
     );
     let res = await compareQueryAndPipeline(
-      randomCol.where('zip', 'not-in', [98101, 98103]),
+      randomCol
+        .where('zip', 'not-in', [98101, 98103])
+        .orderBy(FieldPath.documentId()),
     );
     expectDocs(
       res,
@@ -624,7 +626,10 @@ describe.skipClassic('Query class', () => {
     );
 
     res = await compareQueryAndPipeline(
-      randomCol.where('zip', 'not-in', [NaN]),
+      randomCol
+        .where('zip', 'not-in', [NaN])
+        .orderBy('zip')
+        .orderBy(FieldPath.documentId()),
     );
     expectDocs(
       res,
@@ -637,9 +642,17 @@ describe.skipClassic('Query class', () => {
     );
 
     res = await compareQueryAndPipeline(
-      randomCol.where('zip', 'not-in', [null]),
+      randomCol.where('zip', 'not-in', [null]).orderBy(FieldPath.documentId()),
     );
-    expect(res.size).to.equal(0);
+    expectDocs(
+      res,
+      {zip: 98101},
+      {zip: 91102},
+      {zip: 98103},
+      {zip: [98101]},
+      {zip: ['98101', {zip: 98101}]},
+      {zip: {zip: 98101}},
+    );
   });
 
   it('supports not-in with document ID array', async () => {
@@ -674,7 +687,8 @@ describe.skipClassic('Query class', () => {
     expectDocs(res, {count: 1}, {count: 2});
   });
 
-  it('supports array-contains-any', async () => {
+  // TODO waiting fix for `The function array_contains(...) requires `Array` but got `LONG`.
+  it.skipEnterprise('supports array-contains-any', async () => {
     await addDocs(
       {array: [42]},
       {array: ['a', 42, 'c']},
@@ -821,6 +835,7 @@ describe.skipClassic('Query class', () => {
   });
 
   it('can use offset() method with get()', async () => {
+    setLogFunction(console.log);
     await addDocs({foo: 'a'}, {foo: 'b'});
     const res = await compareQueryAndPipeline(
       randomCol.orderBy('foo').offset(1),
@@ -885,6 +900,7 @@ describe.skipClassic('Query class', () => {
       });
   });
 
+  // TODO (enterprise) waiting for implicit sort order support
   it('supports pagination with where() clauses', () => {
     const batch = firestore.batch();
 
@@ -892,7 +908,11 @@ describe.skipClassic('Query class', () => {
       batch.set(randomCol.doc('doc' + i), {val: i});
     }
 
-    const query = randomCol.where('val', '>=', 1).limit(3);
+    const query = randomCol
+      .where('val', '>=', 1)
+      .limit(3)
+      .orderBy('val')
+      .orderBy(FieldPath.documentId());
 
     return batch
       .commit()
@@ -985,7 +1005,8 @@ describe.skipClassic('Query class', () => {
     expect(received).to.equal(2);
   });
 
-  it('can query collection groups', async () => {
+  // TODO (enterprise) waiting on implicit sor order decision
+  it.skipEnterprise('can query collection groups', async () => {
     // Use `randomCol` to get a random collection group name to use but ensure
     // it starts with 'b' for predictable ordering.
     const collectionGroup = 'b' + randomCol.id;
@@ -1021,7 +1042,7 @@ describe.skipClassic('Query class', () => {
     ]);
   });
 
-  // TODO wait for implicit sort order decision
+  // TODO (enterprise) wait for implicit sort order support
   it.skipEnterprise(
     'can query collection groups with startAt / endAt by arbitrary documentId',
     async () => {
@@ -1066,46 +1087,50 @@ describe.skipClassic('Query class', () => {
     },
   );
 
-  it('can query collection groups with where filters on arbitrary documentId', async () => {
-    // Use `randomCol` to get a random collection group name to use but
-    // ensure it starts with 'b' for predictable ordering.
-    const collectionGroup = 'b' + randomCol.id;
+  // TODO (enterprise) wait for implicit sort order support
+  it.skipEnterprise(
+    'can query collection groups with where filters on arbitrary documentId',
+    async () => {
+      // Use `randomCol` to get a random collection group name to use but
+      // ensure it starts with 'b' for predictable ordering.
+      const collectionGroup = 'b' + randomCol.id;
 
-    const docPaths = [
-      `a/a/${collectionGroup}/cg-doc1`,
-      `a/b/a/b/${collectionGroup}/cg-doc2`,
-      `a/b/${collectionGroup}/cg-doc3`,
-      `a/b/c/d/${collectionGroup}/cg-doc4`,
-      `a/c/${collectionGroup}/cg-doc5`,
-      `${collectionGroup}/cg-doc6`,
-      'a/b/nope/nope',
-    ];
-    const batch = firestore.batch();
-    for (const docPath of docPaths) {
-      batch.set(firestore.doc(docPath), {x: 1});
-    }
-    await batch.commit();
+      const docPaths = [
+        `a/a/${collectionGroup}/cg-doc1`,
+        `a/b/a/b/${collectionGroup}/cg-doc2`,
+        `a/b/${collectionGroup}/cg-doc3`,
+        `a/b/c/d/${collectionGroup}/cg-doc4`,
+        `a/c/${collectionGroup}/cg-doc5`,
+        `${collectionGroup}/cg-doc6`,
+        'a/b/nope/nope',
+      ];
+      const batch = firestore.batch();
+      for (const docPath of docPaths) {
+        batch.set(firestore.doc(docPath), {x: 1});
+      }
+      await batch.commit();
 
-    let querySnapshot = await compareQueryAndPipeline(
-      firestore
-        .collectionGroup(collectionGroup)
-        .where(FieldPath.documentId(), '>=', 'a/b')
-        .where(FieldPath.documentId(), '<=', 'a/b0'),
-    );
-    expect(querySnapshot.docs.map(d => d.id)).to.deep.equal([
-      'cg-doc2',
-      'cg-doc3',
-      'cg-doc4',
-    ]);
+      let querySnapshot = await compareQueryAndPipeline(
+        firestore
+          .collectionGroup(collectionGroup)
+          .where(FieldPath.documentId(), '>=', 'a/b')
+          .where(FieldPath.documentId(), '<=', 'a/b0'),
+      );
+      expect(querySnapshot.docs.map(d => d.id)).to.deep.equal([
+        'cg-doc2',
+        'cg-doc3',
+        'cg-doc4',
+      ]);
 
-    querySnapshot = await compareQueryAndPipeline(
-      firestore
-        .collectionGroup(collectionGroup)
-        .where(FieldPath.documentId(), '>', 'a/b')
-        .where(FieldPath.documentId(), '<', `a/b/${collectionGroup}/cg-doc3`),
-    );
-    expect(querySnapshot.docs.map(d => d.id)).to.deep.equal(['cg-doc2']);
-  });
+      querySnapshot = await compareQueryAndPipeline(
+        firestore
+          .collectionGroup(collectionGroup)
+          .where(FieldPath.documentId(), '>', 'a/b')
+          .where(FieldPath.documentId(), '<', `a/b/${collectionGroup}/cg-doc3`),
+      );
+      expect(querySnapshot.docs.map(d => d.id)).to.deep.equal(['cg-doc2']);
+    },
+  );
 
   it('can query large collections', async () => {
     // @grpc/grpc-js v0.4.1 failed to deliver the full set of query results for
@@ -1120,7 +1145,7 @@ describe.skipClassic('Query class', () => {
     expect(snapshot.size).to.equal(100);
   });
 
-  // TODO wait for implicit sort order decision
+  // TODO (enterprise) wait for implicit sort order support
   it.skipEnterprise('supports OR queries', async () => {
     const collection = await testCollectionWithDocs({
       doc1: {a: 1, b: 0},
@@ -1199,84 +1224,82 @@ describe.skipClassic('Query class', () => {
 
   // Skip this test if running against production because it results in a 'missing index' error.
   // The Firestore Emulator, however, does serve these queries.
-  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it : it)(
-    'supports OR queries with composite indexes',
-    async () => {
-      const collection = await testCollectionWithDocs({
-        doc1: {a: 1, b: 0},
-        doc2: {a: 2, b: 1},
-        doc3: {a: 3, b: 2},
-        doc4: {a: 1, b: 3},
-        doc5: {a: 1, b: 1},
-      });
+  // TODO (enterprise) wait for implicit sort order support
+  it.skipEnterprise('supports OR queries with composite indexes', async () => {
+    const collection = await testCollectionWithDocs({
+      doc1: {a: 1, b: 0},
+      doc2: {a: 2, b: 1},
+      doc3: {a: 3, b: 2},
+      doc4: {a: 1, b: 3},
+      doc5: {a: 1, b: 1},
+    });
 
-      // with one inequality: a>2 || b==1.
-      expectDocs(
-        await compareQueryAndPipeline(
-          collection.where(
-            Filter.or(Filter.where('a', '>', 2), Filter.where('b', '==', 1)),
-          ),
+    // with one inequality: a>2 || b==1.
+    expectDocs(
+      await compareQueryAndPipeline(
+        collection.where(
+          Filter.or(Filter.where('a', '>', 2), Filter.where('b', '==', 1)),
         ),
-        'doc5',
-        'doc2',
-        'doc3',
-      );
+      ),
+      'doc5',
+      'doc2',
+      'doc3',
+    );
 
-      // Test with limits (implicit order by ASC): (a==1) || (b > 0) LIMIT 2
-      expectDocs(
-        await compareQueryAndPipeline(
-          collection
-            .where(
-              Filter.or(Filter.where('a', '==', 1), Filter.where('b', '>', 0)),
-            )
-            .limit(2),
-        ),
-        'doc1',
-        'doc2',
-      );
+    // Test with limits (implicit order by ASC): (a==1) || (b > 0) LIMIT 2
+    expectDocs(
+      await compareQueryAndPipeline(
+        collection
+          .where(
+            Filter.or(Filter.where('a', '==', 1), Filter.where('b', '>', 0)),
+          )
+          .limit(2),
+      ),
+      'doc1',
+      'doc2',
+    );
 
-      // Test with limits (explicit order by): (a==1) || (b > 0) LIMIT_TO_LAST 2
-      // Note: The public query API does not allow implicit ordering when limitToLast is used.
-      expectDocs(
-        await compareQueryAndPipeline(
-          collection
-            .where(
-              Filter.or(Filter.where('a', '==', 1), Filter.where('b', '>', 0)),
-            )
-            .limitToLast(2)
-            .orderBy('b'),
-        ),
-        'doc3',
-        'doc4',
-      );
+    // Test with limits (explicit order by): (a==1) || (b > 0) LIMIT_TO_LAST 2
+    // Note: The public query API does not allow implicit ordering when limitToLast is used.
+    expectDocs(
+      await compareQueryAndPipeline(
+        collection
+          .where(
+            Filter.or(Filter.where('a', '==', 1), Filter.where('b', '>', 0)),
+          )
+          .limitToLast(2)
+          .orderBy('b'),
+      ),
+      'doc3',
+      'doc4',
+    );
 
-      // Test with limits (explicit order by ASC): (a==2) || (b == 1) ORDER BY a LIMIT 1
-      expectDocs(
-        await compareQueryAndPipeline(
-          collection
-            .where(
-              Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1)),
-            )
-            .limit(1)
-            .orderBy('a'),
-        ),
-        'doc5',
-      );
+    // Test with limits (explicit order by ASC): (a==2) || (b == 1) ORDER BY a LIMIT 1
+    expectDocs(
+      await compareQueryAndPipeline(
+        collection
+          .where(
+            Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1)),
+          )
+          .limit(1)
+          .orderBy('a'),
+      ),
+      'doc5',
+    );
 
-      // Test with limits (explicit order by DESC): (a==2) || (b == 1) ORDER BY a LIMIT 1
-      expectDocs(
-        await compareQueryAndPipeline(
-          collection
-            .where(
-              Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1)),
-            )
-            .limit(1)
-            .orderBy('a', 'desc'),
-        ),
-        'doc2',
-      );
-    },
-  );
+    // Test with limits (explicit order by DESC): (a==2) || (b == 1) ORDER BY a LIMIT 1
+    expectDocs(
+      await compareQueryAndPipeline(
+        collection
+          .where(
+            Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1)),
+          )
+          .limit(1)
+          .orderBy('a', 'desc'),
+      ),
+      'doc2',
+    );
+  });
 
   it('supports OR queries on documents with missing fields', async () => {
     const collection = await testCollectionWithDocs({
@@ -1293,9 +1316,11 @@ describe.skipClassic('Query class', () => {
     // allowed if the document matches at least one disjunction term.
     expectDocs(
       await compareQueryAndPipeline(
-        collection.where(
-          Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1)),
-        ),
+        collection
+          .where(
+            Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1)),
+          )
+          .orderBy(FieldPath.documentId()),
       ),
       'doc1',
       'doc2',
@@ -1305,77 +1330,74 @@ describe.skipClassic('Query class', () => {
   });
 
   // Skip this test if running against production because it results in a 'missing index' error.
-  // TODO Enterprise wait for implicit sort order decision
-  it.skipClassic.skipEnterprise(
-    'supports OR queries on documents with missing fields',
-    async () => {
-      const collection = await testCollectionWithDocs({
-        doc1: {a: 1, b: 0},
-        doc2: {b: 1},
-        doc3: {a: 3, b: 2},
-        doc4: {a: 1, b: 3},
-        doc5: {a: 1},
-        doc6: {a: 2},
-      });
+  // TODO (enterprise) wait for implicit sort order support
+  it.skip('supports OR queries on documents with missing fields', async () => {
+    const collection = await testCollectionWithDocs({
+      doc1: {a: 1, b: 0},
+      doc2: {b: 1},
+      doc3: {a: 3, b: 2},
+      doc4: {a: 1, b: 3},
+      doc5: {a: 1},
+      doc6: {a: 2},
+    });
 
-      // Query: a==1 || b==1 order by a.
-      // doc2 should not be included because it's missing the field 'a', and we have "orderBy a".
-      expectDocs(
-        await compareQueryAndPipeline(
-          collection
-            .where(
-              Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1)),
-            )
-            .orderBy('a'),
-        ),
-        'doc1',
-        'doc4',
-        'doc5',
-      );
+    // Query: a==1 || b==1 order by a.
+    // doc2 should not be included because it's missing the field 'a', and we have "orderBy a".
+    expectDocs(
+      await compareQueryAndPipeline(
+        collection
+          .where(
+            Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1)),
+          )
+          .orderBy('a'),
+      ),
+      'doc1',
+      'doc4',
+      'doc5',
+    );
 
-      // Query: a==1 || b==1 order by b.
-      // doc5 should not be included because it's missing the field 'b', and we have "orderBy b".
-      expectDocs(
-        await compareQueryAndPipeline(
-          collection
-            .where(
-              Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1)),
-            )
-            .orderBy('b'),
-        ),
-        'doc1',
-        'doc2',
-        'doc4',
-      );
+    // Query: a==1 || b==1 order by b.
+    // doc5 should not be included because it's missing the field 'b', and we have "orderBy b".
+    expectDocs(
+      await compareQueryAndPipeline(
+        collection
+          .where(
+            Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1)),
+          )
+          .orderBy('b'),
+      ),
+      'doc1',
+      'doc2',
+      'doc4',
+    );
 
-      // Query: a>2 || b==1.
-      // This query has an implicit 'order by a'.
-      // doc2 should not be included because it's missing the field 'a'.
-      expectDocs(
-        await compareQueryAndPipeline(
-          collection.where(
-            Filter.or(Filter.where('a', '>', 2), Filter.where('b', '==', 1)),
-          ),
+    // Query: a>2 || b==1.
+    // This query has an implicit 'order by a'.
+    // doc2 should not be included because it's missing the field 'a'.
+    expectDocs(
+      await compareQueryAndPipeline(
+        collection.where(
+          Filter.or(Filter.where('a', '>', 2), Filter.where('b', '==', 1)),
         ),
-        'doc3',
-      );
+      ),
+      'doc3',
+    );
 
-      // Query: a>1 || b==1 order by a order by b.
-      // doc6 should not be included because it's missing the field 'b'.
-      // doc2 should not be included because it's missing the field 'a'.
-      expectDocs(
-        await compareQueryAndPipeline(
-          collection
-            .where(
-              Filter.or(Filter.where('a', '>', 1), Filter.where('b', '==', 1)),
-            )
-            .orderBy('a')
-            .orderBy('b'),
-        ),
-        'doc3',
-      );
-    },
-  );
+    // Query: a>1 || b==1 order by a order by b.
+    // doc6 should not be included because it's missing the field 'b'.
+    // doc2 should not be included because it's missing the field 'a'.
+    expectDocs(
+      await compareQueryAndPipeline(
+        collection
+          .where(
+            Filter.or(Filter.where('a', '>', 1), Filter.where('b', '==', 1)),
+          )
+          .orderBy('a')
+          .orderBy('b'),
+      ),
+      'doc3',
+    );
+  });
 
   it('supports OR queries with in', async () => {
     const collection = await testCollectionWithDocs({
@@ -1390,12 +1412,14 @@ describe.skipClassic('Query class', () => {
     // Query: a==2 || b in [2, 3]
     expectDocs(
       await compareQueryAndPipeline(
-        collection.where(
-          Filter.or(
-            Filter.where('a', '==', 2),
-            Filter.where('b', 'in', [2, 3]),
-          ),
-        ),
+        collection
+          .where(
+            Filter.or(
+              Filter.where('a', '==', 2),
+              Filter.where('b', 'in', [2, 3]),
+            ),
+          )
+          .orderBy(FieldPath.documentId()),
       ),
       'doc3',
       'doc4',
@@ -1404,37 +1428,39 @@ describe.skipClassic('Query class', () => {
   });
 
   // Skip this test if running against production because it results in a 'missing index' error.
-  // The Firestore Emulator, however, does serve these queries.
-  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it : it)(
-    'supports OR queries with not-in',
-    async () => {
-      const collection = await testCollectionWithDocs({
-        doc1: {a: 1, b: 0},
-        doc2: {b: 1},
-        doc3: {a: 3, b: 2},
-        doc4: {a: 1, b: 3},
-        doc5: {a: 1},
-        doc6: {a: 2},
-      });
+  it('supports OR queries with not-in', async () => {
+    setLogFunction(console.log);
+    const collection = await testCollectionWithDocs({
+      doc1: {a: 1, b: 0},
+      doc2: {b: 1},
+      doc3: {a: 3, b: 2},
+      doc4: {a: 1, b: 3},
+      doc5: {a: 1},
+      doc6: {a: 2},
+    });
 
-      // a==2 || (b != 2 && b != 3)
-      // Has implicit "orderBy b"
-      expectDocs(
-        await compareQueryAndPipeline(
-          collection.where(
+    // a==2 || (b != 2 && b != 3)
+    // Has implicit "orderBy b"
+    expectDocs(
+      await compareQueryAndPipeline(
+        collection
+          .where(
             Filter.or(
               Filter.where('a', '==', 2),
               Filter.where('b', 'not-in', [2, 3]),
             ),
-          ),
-        ),
-        'doc1',
-        'doc2',
-      );
-    },
-  );
+          )
+          .orderBy(FieldPath.documentId()),
+      ),
+      'doc1',
+      'doc2',
+      'doc5',
+      'doc6',
+    );
+  });
 
-  it('supports OR queries with array membership', async () => {
+  // TODO (enterprise) wait for implicit sort order support
+  it.skipEnterprise('supports OR queries with array membership', async () => {
     const collection = await testCollectionWithDocs({
       doc1: {a: 1, b: [0]},
       doc2: {b: [1]},

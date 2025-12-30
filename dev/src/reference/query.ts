@@ -773,9 +773,14 @@ export class Query<
     }
 
     // orders
-    const existsConditions = this.createImplicitOrderBy().map(fieldOrder => {
-      return field(fieldOrder.field).exists();
-    });
+    // Ignore inequality fields when creating implicit order-bys
+    // for generating existsConditions, because existence filters
+    // will have already been added in the call to `toPipelineBooleanExpr`
+    const existsConditions = this.createImplicitOrderBy(true).map(
+      fieldOrder => {
+        return field(fieldOrder.field).exists();
+      },
+    );
     if (existsConditions.length > 1) {
       const [first, second, ...rest] = existsConditions;
       pipeline = pipeline.where(and(first, second, ...rest));
@@ -858,6 +863,11 @@ export class Query<
       }
     }
 
+    // offset
+    if (this._queryOptions.offset) {
+      pipeline = pipeline.offset(this._queryOptions.offset);
+    }
+
     return pipeline;
   }
 
@@ -921,7 +931,7 @@ export class Query<
     return this.createImplicitOrderBy();
   }
 
-  private createImplicitOrderBy(): FieldOrder[] {
+  private createImplicitOrderBy(ignoreInequalityFields = false): FieldOrder[] {
     const fieldOrders = this._queryOptions.fieldOrders.slice();
     const fieldsNormalized = new Set([
       ...fieldOrders.map(item => item.field.toString()),
@@ -933,21 +943,23 @@ export class Query<
         ? directionOperators.ASC
         : fieldOrders[fieldOrders.length - 1].direction;
 
-    /**
-     * Any inequality fields not explicitly ordered should be implicitly ordered in a
-     * lexicographical order. When there are multiple inequality filters on the same field, the
-     * field should be added only once.
-     * Note: getInequalityFilterFields function sorts the key field before
-     * other fields. However, we want the key field to be sorted last.
-     */
-    const inequalityFields = this.getInequalityFilterFields();
-    for (const field of inequalityFields) {
-      if (
-        !fieldsNormalized.has(field.toString()) &&
-        !field.isEqual(FieldPath.documentId())
-      ) {
-        fieldOrders.push(new FieldOrder(field, lastDirection));
-        fieldsNormalized.add(field.toString());
+    if (!ignoreInequalityFields) {
+      /**
+       * Any inequality fields not explicitly ordered should be implicitly ordered in a
+       * lexicographical order. When there are multiple inequality filters on the same field, the
+       * field should be added only once.
+       * Note: getInequalityFilterFields function sorts the key field before
+       * other fields. However, we want the key field to be sorted last.
+       */
+      const inequalityFields = this.getInequalityFilterFields();
+      for (const field of inequalityFields) {
+        if (
+          !fieldsNormalized.has(field.toString()) &&
+          !field.isEqual(FieldPath.documentId())
+        ) {
+          fieldOrders.push(new FieldOrder(field, lastDirection));
+          fieldsNormalized.add(field.toString());
+        }
       }
     }
 

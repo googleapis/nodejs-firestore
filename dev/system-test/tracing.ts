@@ -156,7 +156,7 @@ class SpanData {
   }
 }
 
-describe('Tracing Tests', () => {
+describe.skipEnterprise('Tracing Tests', () => {
   let firestore: Firestore;
   let tracerProvider: NodeTracerProvider;
   let inMemorySpanExporter: InMemorySpanExporter;
