@@ -4,6 +4,30 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [8.1.0](https://github.com/googleapis/nodejs-firestore/compare/v8.0.0...v8.1.0) (2025-12-22)
+
+
+### Features
+
+* [GAPIC] add Firestore CloneDatabase support ([a0c74b7](https://github.com/googleapis/nodejs-firestore/commit/a0c74b78a0a5896004126ba827a02f4c8d374fd0))
+* [GAPIC] add methods from gax to cache proto root and process custom error details ([a0c74b7](https://github.com/googleapis/nodejs-firestore/commit/a0c74b78a0a5896004126ba827a02f4c8d374fd0))
+* [GAPIC] add protobufjs 2023 edition support ([a0c74b7](https://github.com/googleapis/nodejs-firestore/commit/a0c74b78a0a5896004126ba827a02f4c8d374fd0))
+* [GAPIC] add request/response debug logging to gapics, update templates to gax 5 and node 18 ([#1671](https://github.com/googleapis/nodejs-firestore/issues/1671)) ([a0c74b7](https://github.com/googleapis/nodejs-firestore/commit/a0c74b78a0a5896004126ba827a02f4c8d374fd0))
+* [GAPIC] add the UserCreds API ([a0c74b7](https://github.com/googleapis/nodejs-firestore/commit/a0c74b78a0a5896004126ba827a02f4c8d374fd0))
+* [GAPIC] await/catch promises, and update listOperationsAsync return type ([a0c74b7](https://github.com/googleapis/nodejs-firestore/commit/a0c74b78a0a5896004126ba827a02f4c8d374fd0))
+* [GAPIC] Expose tags field in Database and RestoreDatabaseRequest public protos ([a0c74b7](https://github.com/googleapis/nodejs-firestore/commit/a0c74b78a0a5896004126ba827a02f4c8d374fd0))
+* [GAPIC] new Firestore index modes and Database Editions ([a0c74b7](https://github.com/googleapis/nodejs-firestore/commit/a0c74b78a0a5896004126ba827a02f4c8d374fd0))
+* [GAPIC] publish the pipelines API to the stable branch ([a0c74b7](https://github.com/googleapis/nodejs-firestore/commit/a0c74b78a0a5896004126ba827a02f4c8d374fd0))
+* [GAPIC] selective gapic support for typescript generation ([a0c74b7](https://github.com/googleapis/nodejs-firestore/commit/a0c74b78a0a5896004126ba827a02f4c8d374fd0))
+* Adding gcp resource name span attribute ([#2454](https://github.com/googleapis/nodejs-firestore/issues/2454)) ([bc0c73d](https://github.com/googleapis/nodejs-firestore/commit/bc0c73db1fc840bf34115ffab20d7b48eb0a76e5))
+
+
+### Bug Fixes
+
+* [GAPIC] add json files to tsconfig templates ([#1692](https://github.com/googleapis/nodejs-firestore/issues/1692)) (ba6be1d) ([a0c74b7](https://github.com/googleapis/nodejs-firestore/commit/a0c74b78a0a5896004126ba827a02f4c8d374fd0))
+* [GAPIC] catch dangling promises ([a0c74b7](https://github.com/googleapis/nodejs-firestore/commit/a0c74b78a0a5896004126ba827a02f4c8d374fd0))
+* [GAPIC] distinguish plural and singular path templates ([a0c74b7](https://github.com/googleapis/nodejs-firestore/commit/a0c74b78a0a5896004126ba827a02f4c8d374fd0))
+
 ## [8.0.0](https://github.com/googleapis/nodejs-firestore/compare/v7.11.6...v8.0.0) (2025-10-29)
 
 
