@@ -244,7 +244,7 @@ function arrayConcat(firstArrayField: string, secondArray: Expression | unknown[
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
 //
 // @beta
-function arrayContains(array: Expression, element: Expression): FunctionExpression;
+function arrayContains(array: Expression, element: Expression): BooleanExpression;
 
 // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
 // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
@@ -252,7 +252,7 @@ function arrayContains(array: Expression, element: Expression): FunctionExpressi
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
 //
 // @beta
-function arrayContains(array: Expression, element: unknown): FunctionExpression;
+function arrayContains(array: Expression, element: unknown): BooleanExpression;
 
 // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
 // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
@@ -260,7 +260,7 @@ function arrayContains(array: Expression, element: unknown): FunctionExpression;
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
 //
 // @beta
-function arrayContains(fieldName: string, element: Expression): FunctionExpression;
+function arrayContains(fieldName: string, element: Expression): BooleanExpression;
 
 // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
 // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
@@ -429,7 +429,7 @@ function average(expression: Expression): AggregateFunction;
 function average(fieldName: string): AggregateFunction;
 
 // @beta
-class BooleanExpression extends FunctionExpression implements firestore.Pipelines.BooleanExpression {
+abstract class BooleanExpression extends Expression implements firestore.Pipelines.BooleanExpression {
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
@@ -437,15 +437,31 @@ class BooleanExpression extends FunctionExpression implements firestore.Pipeline
     conditional(thenExpr: Expression, elseExpr: Expression): FunctionExpression;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     countIf(): AggregateFunction;
+    // (undocumented)
+    abstract get _expr(): Expression;
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
     ifError(catchValue: BooleanExpression): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    ifError(catchValue: boolean): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    ifError(catchValue: Expression): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    ifError(catchValue: unknown): FunctionExpression;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
     not(): BooleanExpression;
     // (undocumented)
-    returnType: 'boolean';
+    _toProto(serializer: Serializer): api.IValue;
+    // (undocumented)
+    _validateUserData(ignoreUndefinedProperties: boolean): void;
 }
 
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
@@ -1494,6 +1510,8 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     as(name: string): AliasedExpression;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    asBoolean(): BooleanExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     ascending(): Ordering;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     average(): AggregateFunction;
@@ -1629,10 +1647,10 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     lessThanOrEqual(value: unknown): BooleanExpression;
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
-    like(pattern: string): FunctionExpression;
+    like(pattern: string): BooleanExpression;
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
-    like(pattern: Expression): FunctionExpression;
+    like(pattern: Expression): BooleanExpression;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
     ln(): FunctionExpression;
@@ -2194,11 +2212,11 @@ function floor(fieldName: string): FunctionExpression;
 
 // @beta
 class FunctionExpression extends Expression {
-    constructor(name: string, params: Expression[]);
+    constructor(_methodName: string, params: Expression[]);
     // (undocumented)
     readonly expressionType: firestore.Pipelines.ExpressionType;
     // (undocumented)
-    protected name: string;
+    _methodName: string;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     //
     // (undocumented)
@@ -4260,6 +4278,10 @@ export class VectorQuery<AppModelType = firestore.DocumentData, DbModelType exte
     // (undocumented)
     _getResponse(explainOptions?: firestore.ExplainOptions): Promise<QueryResponse<VectorQuerySnapshot<AppModelType, DbModelType>>>;
     isEqual(other: firestore.VectorQuery<AppModelType, DbModelType>): boolean;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // @internal (undocumented)
+    _pipeline(): Pipeline;
     get query(): Query<AppModelType, DbModelType>;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     //
@@ -4273,10 +4295,6 @@ export class VectorQuery<AppModelType = firestore.DocumentData, DbModelType exte
     //
     // @internal
     _stream(transactionId?: Uint8Array): NodeJS.ReadableStream;
-    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-    //
-    // @internal (undocumented)
-    _toPipeline(): Pipeline;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     //
     // @internal

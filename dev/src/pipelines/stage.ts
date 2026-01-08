@@ -31,7 +31,7 @@ import {OptionsUtil} from './options-util';
 import {CollectionReference} from '../reference/collection-reference';
 
 /**
- *
+ * Interface for Stage classes.
  */
 export interface Stage extends ProtoSerializable<api.Pipeline.IStage> {
   name: string;
@@ -39,6 +39,9 @@ export interface Stage extends ProtoSerializable<api.Pipeline.IStage> {
   _toProto(serializer: Serializer): api.Pipeline.IStage;
 }
 
+/**
+ * Internal options for RemoveFields stage.
+ */
 export type InternalRemoveFieldsStageOptions = Omit<
   firestore.Pipelines.RemoveFieldsStageOptions,
   'fields'
@@ -47,7 +50,7 @@ export type InternalRemoveFieldsStageOptions = Omit<
 };
 
 /**
- *
+ * RemoveFields stage.
  */
 export class RemoveFields implements Stage {
   name = 'remove_fields';
@@ -68,6 +71,9 @@ export class RemoveFields implements Stage {
   }
 }
 
+/**
+ * Internal options for Aggregate stage.
+ */
 export type InternalAggregateStageOptions = Omit<
   firestore.Pipelines.AggregateStageOptions,
   'groups' | 'accumulators'
@@ -77,6 +83,7 @@ export type InternalAggregateStageOptions = Omit<
 };
 
 /**
+ * Aggregate stage.
  */
 export class Aggregate implements Stage {
   name = 'aggregate';
@@ -100,6 +107,9 @@ export class Aggregate implements Stage {
   }
 }
 
+/**
+ * Internal options for Distinct stage.
+ */
 export type InternalDistinctStageOptions = Omit<
   firestore.Pipelines.DistinctStageOptions,
   'groups'
@@ -108,6 +118,7 @@ export type InternalDistinctStageOptions = Omit<
 };
 
 /**
+ * Distinct stage.
  */
 export class Distinct implements Stage {
   name = 'distinct';
@@ -128,6 +139,9 @@ export class Distinct implements Stage {
   }
 }
 
+/**
+ * Internal options for Collection stage.
+ */
 export type InternalCollectionStageOptions = Omit<
   firestore.Pipelines.CollectionStageOptions,
   'collection'
@@ -136,6 +150,7 @@ export type InternalCollectionStageOptions = Omit<
 };
 
 /**
+ * Collection stage.
  */
 export class CollectionSource implements Stage {
   name = 'collection';
@@ -167,10 +182,14 @@ export class CollectionSource implements Stage {
   }
 }
 
+/**
+ * Internal options for CollectionGroup stage.
+ */
 export type InternalCollectionGroupStageOptions =
   firestore.Pipelines.CollectionGroupStageOptions;
 
 /**
+ * CollectionGroup stage
  */
 export class CollectionGroupSource implements Stage {
   name = 'collection_group';
@@ -198,10 +217,14 @@ export class CollectionGroupSource implements Stage {
   }
 }
 
+/**
+ * Internal options for Database stage.
+ */
 export type InternalDatabaseStageOptions =
   firestore.Pipelines.DatabaseStageOptions;
 
 /**
+ * Database stage.
  */
 export class DatabaseSource implements Stage {
   name = 'database';
@@ -221,6 +244,9 @@ export class DatabaseSource implements Stage {
   }
 }
 
+/**
+ * Internal options for Documents stage.
+ */
 export type InternalDocumentsStageOptions = Omit<
   firestore.Pipelines.DocumentsStageOptions,
   'docs'
@@ -229,6 +255,7 @@ export type InternalDocumentsStageOptions = Omit<
 };
 
 /**
+ * Documents stage.
  */
 export class DocumentsSource implements Stage {
   name = 'documents';
@@ -252,6 +279,9 @@ export class DocumentsSource implements Stage {
   }
 }
 
+/**
+ * Internal options for Where stage.
+ */
 export type InternalWhereStageOptions = Omit<
   firestore.Pipelines.WhereStageOptions,
   'condition'
@@ -260,6 +290,7 @@ export type InternalWhereStageOptions = Omit<
 };
 
 /**
+ * Where stage.
  */
 export class Where implements Stage {
   name = 'where';
@@ -280,6 +311,9 @@ export class Where implements Stage {
   }
 }
 
+/**
+ * Internal options for FindNearest stage.
+ */
 export type InternalFindNearestStageOptions = Omit<
   firestore.Pipelines.FindNearestStageOptions,
   'vectorValue' | 'field' | 'distanceField'
@@ -290,6 +324,7 @@ export type InternalFindNearestStageOptions = Omit<
 };
 
 /**
+ * FindNearest stage.
  */
 export class FindNearest implements Stage {
   name = 'find_nearest';
@@ -321,6 +356,9 @@ export class FindNearest implements Stage {
   }
 }
 
+/**
+ * Internal options for Sample stage.
+ */
 export type InternalSampleStageOptions = Omit<
   firestore.Pipelines.SampleStageOptions,
   'percentage' | 'documents'
@@ -330,6 +368,7 @@ export type InternalSampleStageOptions = Omit<
 };
 
 /**
+ * Sample stage.
  */
 export class Sample implements Stage {
   name = 'sample';
@@ -353,9 +392,13 @@ export class Sample implements Stage {
   }
 }
 
+/**
+ * Internal options for Union stage.
+ */
 export type InternalUnionStageOptions = firestore.Pipelines.UnionStageOptions;
 
 /**
+ * Union stage.
  */
 export class Union implements Stage {
   name = 'union';
@@ -376,6 +419,9 @@ export class Union implements Stage {
   }
 }
 
+/**
+ * Internal options for Unnest stage.
+ */
 export type InternalUnnestStageOptions = Omit<
   firestore.Pipelines.UnnestStageOptions,
   'selectable' | 'indexField'
@@ -386,6 +432,7 @@ export type InternalUnnestStageOptions = Omit<
 };
 
 /**
+ * Unnest stage.
  */
 export class Unnest implements Stage {
   name = 'unnest';
@@ -413,9 +460,13 @@ export class Unnest implements Stage {
   }
 }
 
+/**
+ * Internal options for Limit stage.
+ */
 export type InternalLimitStageOptions = firestore.Pipelines.LimitStageOptions;
 
 /**
+ * Limit stage.
  */
 export class Limit implements Stage {
   name = 'limit';
@@ -436,9 +487,13 @@ export class Limit implements Stage {
   }
 }
 
+/**
+ * Internal options for Offset stage.
+ */
 export type InternalOffsetStageOptions = firestore.Pipelines.OffsetStageOptions;
 
 /**
+ * Offset stage.
  */
 export class Offset implements Stage {
   name = 'offset';
@@ -459,6 +514,9 @@ export class Offset implements Stage {
   }
 }
 
+/**
+ * Internal options for ReplaceWith stage.
+ */
 export type InternalReplaceWithStageOptions = Omit<
   firestore.Pipelines.ReplaceWithStageOptions,
   'map'
@@ -467,6 +525,7 @@ export type InternalReplaceWithStageOptions = Omit<
 };
 
 /**
+ * ReplaceWith stage.
  */
 export class ReplaceWith implements Stage {
   name = 'replace_with';
@@ -490,6 +549,9 @@ export class ReplaceWith implements Stage {
   }
 }
 
+/**
+ * Internal options for Select stage.
+ */
 export type InternalSelectStageOptions = Omit<
   firestore.Pipelines.SelectStageOptions,
   'selections'
@@ -498,6 +560,7 @@ export type InternalSelectStageOptions = Omit<
 };
 
 /**
+ * Select stage.
  */
 export class Select implements Stage {
   name = 'select';
@@ -518,6 +581,9 @@ export class Select implements Stage {
   }
 }
 
+/**
+ * Internal options for AddFields stage.
+ */
 export type InternalAddFieldsStageOptions = Omit<
   firestore.Pipelines.AddFieldsStageOptions,
   'fields'
@@ -526,7 +592,7 @@ export type InternalAddFieldsStageOptions = Omit<
 };
 
 /**
- *
+ * AddFields stage.
  */
 export class AddFields implements Stage {
   name = 'add_fields';
@@ -547,6 +613,9 @@ export class AddFields implements Stage {
   }
 }
 
+/**
+ * Internal options for Sort stage.
+ */
 export type InternalSortStageOptions = Omit<
   firestore.Pipelines.SortStageOptions,
   'orderings'
@@ -555,6 +624,7 @@ export type InternalSortStageOptions = Omit<
 };
 
 /**
+ * Sort stage.
  */
 export class Sort implements Stage {
   name = 'sort';
@@ -576,6 +646,7 @@ export class Sort implements Stage {
 }
 
 /**
+ * Raw stage.
  */
 export class RawStage implements Stage {
   readonly optionsUtil = new OptionsUtil({});

@@ -24,9 +24,51 @@ export type OptionDefinition = {
   nestedOptions?: OptionsDefinitions;
 };
 
+/**
+ * A utility class for formatting known and raw options into the
+ * proto structure utilized by Pipelines.
+ *
+ * @example
+ * ```
+ * myUtil = new OptionsUtil({
+ *     someFoo: {
+ *       serverName: 'some_foo',
+ *     },
+ *     aBar: {
+ *       serverName: 'a_bar',
+ *       nestedOptions: {
+ *         baz: {
+ *           serverName: 'baz',
+ *         }
+ *       },
+ *     },
+ *   });
+ *
+ * optionsProto = myUtil.getOptionsProto(
+ *    serializer,
+ *    {
+ *      someFoo: 1
+ *    },
+ *    {
+ *      aBar.another_unknown_option: "yep"
+ *    });
+ *
+ * // Resulting optionsProto:
+ * // {
+ * //    'some_foo': { integerValue: 1 },
+ * //    'a_bar': { mapValue: { fields: { 'another_unknown_option': {stringValue: 'yep' }}}}
+ * // }
+ * ```
+ */
 export class OptionsUtil {
   constructor(private optionDefinitions: OptionsDefinitions) {}
 
+  /**
+   * Serialize known options to ObjectValue
+   * @param options - Serialize these options.
+   * @param serializer - Use this serializer to serialize primitives to proto.
+   * @private
+   */
   private _getKnownOptions(
     options: Record<string, unknown>,
     serializer: Serializer,
@@ -65,6 +107,16 @@ export class OptionsUtil {
     return knownOptions;
   }
 
+  /**
+   * Serialize known and raw options to a proto object.
+   *  - Renames knownOptions from the SDK name (camel case) to server name (snake case)
+   *  - Serializes values provided for each option to a proto value, using the provided serializer.
+   *  - Overlays optionsOverrides (which represent raw options) onto the result proto.
+   *  - Supports nested objects (`{optionA: { optionB: true }}`) and dot notation (`{optionA.optionB: true}`).
+   * @param serializer
+   * @param knownOptions
+   * @param optionsOverride
+   */
   getOptionsProto(
     serializer: Serializer,
     knownOptions: Record<string, unknown>,
