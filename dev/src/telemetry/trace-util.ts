@@ -75,6 +75,7 @@ export const ATTRIBUTE_KEY_IS_RETRY_WITH_CURSOR = 'retry_query_with_cursor';
 export const ATTRIBUTE_KEY_TRANSACTION_TYPE = 'transaction_type';
 export const ATTRIBUTE_KEY_ATTEMPTS_ALLOWED = 'attempts_allowed';
 export const ATTRIBUTE_KEY_ATTEMPTS_REMAINING = 'attempts_remaining';
+export const ATTRIBUTE_GCP_RESOURCE_NAME = 'gcp.resource.name';
 
 /**
  * @private
@@ -90,5 +91,5 @@ export interface TraceUtil {
 
   currentSpan(): Span;
 
-  recordProjectId(projectId: string): void;
+  recordProjectIdAndResourceName(projectId: string, databaseId: string): void;
 }

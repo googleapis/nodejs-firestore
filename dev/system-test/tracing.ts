@@ -44,6 +44,7 @@ import {
 import {setLogFunction, Firestore} from '../src';
 import {verifyInstance} from '../test/util/helpers';
 import {
+  ATTRIBUTE_GCP_RESOURCE_NAME,
   ATTRIBUTE_KEY_DOC_COUNT,
   ATTRIBUTE_SETTINGS_PREFIX,
   SPAN_NAME_AGGREGATION_QUERY_GET,
@@ -780,6 +781,10 @@ describe.skipEnterprise('Tracing Tests', () => {
         'Firestore.batchGetDocuments: First response received',
         'Firestore.batchGetDocuments: Completed',
       ]);
+
+      expectSpanHasAttributes(SPAN_NAME_BATCH_GET_DOCUMENTS, {
+        [ATTRIBUTE_GCP_RESOURCE_NAME]: `//firestore.googleapis.com/projects/${firestore.projectId}/databases/${firestore.databaseId}`,
+      });
     });
 
     it('document reference create()', async () => {
@@ -792,6 +797,10 @@ describe.skipEnterprise('Tracing Tests', () => {
         SPAN_NAME_DOC_REF_CREATE,
         SPAN_NAME_BATCH_COMMIT,
       );
+
+      expectSpanHasAttributes(SPAN_NAME_BATCH_COMMIT, {
+        [ATTRIBUTE_GCP_RESOURCE_NAME]: `//firestore.googleapis.com/projects/${firestore.projectId}/databases/${firestore.databaseId}`,
+      });
     });
 
     it('document reference delete()', async () => {
@@ -804,6 +813,10 @@ describe.skipEnterprise('Tracing Tests', () => {
         SPAN_NAME_DOC_REF_DELETE,
         SPAN_NAME_BATCH_COMMIT,
       );
+
+      expectSpanHasAttributes(SPAN_NAME_BATCH_COMMIT, {
+        [ATTRIBUTE_GCP_RESOURCE_NAME]: `//firestore.googleapis.com/projects/${firestore.projectId}/databases/${firestore.databaseId}`,
+      });
     });
 
     it('document reference set()', async () => {
@@ -816,6 +829,10 @@ describe.skipEnterprise('Tracing Tests', () => {
         SPAN_NAME_DOC_REF_SET,
         SPAN_NAME_BATCH_COMMIT,
       );
+
+      expectSpanHasAttributes(SPAN_NAME_BATCH_COMMIT, {
+        [ATTRIBUTE_GCP_RESOURCE_NAME]: `//firestore.googleapis.com/projects/${firestore.projectId}/databases/${firestore.databaseId}`,
+      });
     });
 
     it('document reference update()', async () => {
@@ -832,6 +849,10 @@ describe.skipEnterprise('Tracing Tests', () => {
         SPAN_NAME_DOC_REF_UPDATE,
         SPAN_NAME_BATCH_COMMIT,
       );
+
+      expectSpanHasAttributes(SPAN_NAME_BATCH_COMMIT, {
+        [ATTRIBUTE_GCP_RESOURCE_NAME]: `//firestore.googleapis.com/projects/${firestore.projectId}/databases/${firestore.databaseId}`,
+      });
     });
 
     it('document reference list collections', async () => {
@@ -843,6 +864,10 @@ describe.skipEnterprise('Tracing Tests', () => {
         SPAN_NAME_TEST_ROOT,
         SPAN_NAME_DOC_REF_LIST_COLLECTIONS,
       );
+
+      expectSpanHasAttributes(SPAN_NAME_DOC_REF_LIST_COLLECTIONS, {
+        [ATTRIBUTE_GCP_RESOURCE_NAME]: `//firestore.googleapis.com/projects/${firestore.projectId}/databases/${firestore.databaseId}`,
+      });
     });
 
     it('aggregate query get()', async () => {
@@ -869,6 +894,10 @@ describe.skipEnterprise('Tracing Tests', () => {
         SPAN_NAME_DOC_REF_CREATE,
         SPAN_NAME_BATCH_COMMIT,
       );
+
+      expectSpanHasAttributes(SPAN_NAME_BATCH_COMMIT, {
+        [ATTRIBUTE_GCP_RESOURCE_NAME]: `//firestore.googleapis.com/projects/${firestore.projectId}/databases/${firestore.databaseId}`,
+      });
     });
 
     // Enterprise: field mask is not supported
@@ -881,6 +910,10 @@ describe.skipEnterprise('Tracing Tests', () => {
         SPAN_NAME_TEST_ROOT,
         SPAN_NAME_COL_REF_LIST_DOCUMENTS,
       );
+
+      expectSpanHasAttributes(SPAN_NAME_COL_REF_LIST_DOCUMENTS, {
+        [ATTRIBUTE_GCP_RESOURCE_NAME]: `//firestore.googleapis.com/projects/${firestore.projectId}/databases/${firestore.databaseId}`,
+      });
     });
 
     it('query get()', async () => {
@@ -895,6 +928,10 @@ describe.skipEnterprise('Tracing Tests', () => {
         'Firestore.runQuery: First response received',
         'Firestore.runQuery: Completed',
       ]);
+
+      expectSpanHasAttributes(SPAN_NAME_QUERY_GET, {
+        [ATTRIBUTE_GCP_RESOURCE_NAME]: `//firestore.googleapis.com/projects/${firestore.projectId}/databases/${firestore.databaseId}`,
+      });
     });
 
     it('firestore getAll()', async () => {
@@ -910,6 +947,10 @@ describe.skipEnterprise('Tracing Tests', () => {
         'Firestore.batchGetDocuments: First response received',
         'Firestore.batchGetDocuments: Completed',
       ]);
+
+      expectSpanHasAttributes(SPAN_NAME_BATCH_GET_DOCUMENTS, {
+        [ATTRIBUTE_GCP_RESOURCE_NAME]: `//firestore.googleapis.com/projects/${firestore.projectId}/databases/${firestore.databaseId}`,
+      });
     });
 
     it('transaction', async () => {
@@ -932,26 +973,50 @@ describe.skipEnterprise('Tracing Tests', () => {
         SPAN_NAME_TRANSACTION_RUN,
         SPAN_NAME_TRANSACTION_GET_DOCUMENT,
       );
+
+      expectSpanHasAttributes(SPAN_NAME_TRANSACTION_GET_DOCUMENT, {
+        [ATTRIBUTE_GCP_RESOURCE_NAME]: `//firestore.googleapis.com/projects/${firestore.projectId}/databases/${firestore.databaseId}`,
+      });
+
       expectSpanHierarchy(
         SPAN_NAME_TEST_ROOT,
         SPAN_NAME_TRANSACTION_RUN,
         SPAN_NAME_TRANSACTION_GET_DOCUMENTS,
       );
+
+      expectSpanHasAttributes(SPAN_NAME_TRANSACTION_GET_DOCUMENTS, {
+        [ATTRIBUTE_GCP_RESOURCE_NAME]: `//firestore.googleapis.com/projects/${firestore.projectId}/databases/${firestore.databaseId}`,
+      });
+
       expectSpanHierarchy(
         SPAN_NAME_TEST_ROOT,
         SPAN_NAME_TRANSACTION_RUN,
         SPAN_NAME_TRANSACTION_GET_QUERY,
       );
+
+      expectSpanHasAttributes(SPAN_NAME_TRANSACTION_GET_QUERY, {
+        [ATTRIBUTE_GCP_RESOURCE_NAME]: `//firestore.googleapis.com/projects/${firestore.projectId}/databases/${firestore.databaseId}`,
+      });
+
       expectSpanHierarchy(
         SPAN_NAME_TEST_ROOT,
         SPAN_NAME_TRANSACTION_RUN,
         SPAN_NAME_TRANSACTION_GET_AGGREGATION_QUERY,
       );
+
+      expectSpanHasAttributes(SPAN_NAME_TRANSACTION_GET_AGGREGATION_QUERY, {
+        [ATTRIBUTE_GCP_RESOURCE_NAME]: `//firestore.googleapis.com/projects/${firestore.projectId}/databases/${firestore.databaseId}`,
+      });
+
       expectSpanHierarchy(
         SPAN_NAME_TEST_ROOT,
         SPAN_NAME_TRANSACTION_RUN,
         SPAN_NAME_TRANSACTION_COMMIT,
       );
+
+      expectSpanHasAttributes(SPAN_NAME_TRANSACTION_COMMIT, {
+        [ATTRIBUTE_GCP_RESOURCE_NAME]: `//firestore.googleapis.com/projects/${firestore.projectId}/databases/${firestore.databaseId}`,
+      });
     });
 
     it('batch', async () => {
@@ -978,6 +1043,9 @@ describe.skipEnterprise('Tracing Tests', () => {
 
       await waitForCompletedSpans(2);
       expectSpanHierarchy(SPAN_NAME_TEST_ROOT, SPAN_NAME_PARTITION_QUERY);
+      expectSpanHasAttributes(SPAN_NAME_PARTITION_QUERY, {
+        [ATTRIBUTE_GCP_RESOURCE_NAME]: `//firestore.googleapis.com/projects/${firestore.projectId}/databases/${firestore.databaseId}`,
+      });
     });
 
     it('bulk writer', async () => {
@@ -996,6 +1064,7 @@ describe.skipEnterprise('Tracing Tests', () => {
       expectSpanHierarchy(SPAN_NAME_TEST_ROOT, SPAN_NAME_BULK_WRITER_COMMIT);
       expectSpanHasAttributes(SPAN_NAME_BULK_WRITER_COMMIT, {
         [ATTRIBUTE_KEY_DOC_COUNT]: 5,
+        [ATTRIBUTE_GCP_RESOURCE_NAME]: `//firestore.googleapis.com/projects/${firestore.projectId}/databases/${firestore.databaseId}`,
       });
     });
   }
