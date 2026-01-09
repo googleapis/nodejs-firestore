@@ -75,7 +75,7 @@
     "@google-cloud/opentelemetry-cloud-trace-exporter": "^3.0.0",
     "@google-cloud/promisify": "^5.0.0",
     "@google-cloud/trace-agent": "^8.0.0",
-    "@googleapis/cloudtrace": "^3.0.1",
+    "@googleapis/cloudtrace": "^5.0.0",
     "@opentelemetry/context-async-hooks": "^2.0.1",
     "@opentelemetry/sdk-trace-node": "^2.0.1",
     "@types/assert": "^1.5.11",
