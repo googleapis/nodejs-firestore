@@ -92,7 +92,7 @@ export class WriteResult implements firestore.WriteResult {
    * Returns true if this `WriteResult` is equal to the provided value.
    *
    * @param {*} other The value to compare against.
-   * @return true if this `WriteResult` is equal to the provided value.
+   * @returns true if this `WriteResult` is equal to the provided value.
    */
   isEqual(other: firestore.WriteResult): boolean {
     return (

@@ -76,7 +76,7 @@ export class CollectionGroup<
    * @param {number} desiredPartitionCount The desired maximum number of
    * partition points. The number must be strictly positive. The actual number
    * of partitions returned may be fewer.
-   * @return {AsyncIterable<QueryPartition>} An AsyncIterable of
+   * @returns {AsyncIterable<QueryPartition>} An AsyncIterable of
    * `QueryPartition`s.
    */
   async *getPartitions(
@@ -198,7 +198,7 @@ export class CollectionGroup<
    * ```
    * @param {FirestoreDataConverter | null} converter Converts objects to and
    * from Firestore. Passing in `null` removes the current converter.
-   * @return {CollectionGroup} A `CollectionGroup` that uses the provided
+   * @returns {CollectionGroup} A `CollectionGroup` that uses the provided
    * converter.
    */
   withConverter<

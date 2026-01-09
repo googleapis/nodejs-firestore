@@ -282,7 +282,7 @@ abstract class Path<T> {
    * @private
    * @internal
    * @param other The value to compare against.
-   * @return true if this `Path` is equal to the provided value.
+   * @returns true if this `Path` is equal to the provided value.
    */
   isEqual(other: Path<T>): boolean {
     return this === other || this.compareTo(other) === 0;
@@ -387,7 +387,7 @@ export class ResourcePath extends Path<ResourcePath> {
    * @private
    * @internal
    * @param projectId The project ID of the current Firestore project.
-   * @return A fully-qualified resource path pointing to the same element.
+   * @returns A fully-qualified resource path pointing to the same element.
    */
   toQualifiedResourcePath(
     projectId: string,
@@ -774,7 +774,7 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
    * Returns true if this `FieldPath` is equal to the provided value.
    *
    * @param {*} other The value to compare against.
-   * @return {boolean} true if this `FieldPath` is equal to the provided value.
+   * @returns {boolean} true if this `FieldPath` is equal to the provided value.
    */
   isEqual(other: FieldPath): boolean {
     return super.isEqual(other);

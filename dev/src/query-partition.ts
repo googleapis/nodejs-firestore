@@ -80,7 +80,7 @@ export class QueryPartition<
    *
    * ```
    * @type {Array<*>}
-   * @return {Array<*>} A cursor value that can be used with {@link
+   * @returns {Array<*>} A cursor value that can be used with {@link
    * Query#startAt} or `undefined` if this is the first partition.
    */
   get startAt(): unknown[] | undefined {
@@ -116,7 +116,7 @@ export class QueryPartition<
    *
    * ```
    * @type {Array<*>}
-   * @return {Array<*>} A cursor value that can be used with {@link
+   * @returns {Array<*>} A cursor value that can be used with {@link
    * Query#endBefore} or `undefined` if this is the last partition.
    */
   get endBefore(): unknown[] | undefined {
@@ -142,7 +142,7 @@ export class QueryPartition<
    * }
    *
    * ```
-   * @return {Query<T>} A query partitioned by a {@link Query#startAt} and
+   * @returns {Query<T>} A query partitioned by a {@link Query#startAt} and
    * {@link Query#endBefore} cursor.
    */
   toQuery(): Query<AppModelType, DbModelType> {

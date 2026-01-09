@@ -71,7 +71,7 @@ export class Timestamp implements firestore.Timestamp {
    * documentRef.set({ updateTime:Firestore.Timestamp.now() });
    *
    * ```
-   * @return {Timestamp} A new `Timestamp` representing the current date.
+   * @returns {Timestamp} A new `Timestamp` representing the current date.
    */
   static now(): Timestamp {
     return Timestamp.fromMillis(Date.now());
@@ -89,7 +89,7 @@ export class Timestamp implements firestore.Timestamp {
    *
    * ```
    * @param {Date} date The date to initialize the `Timestamp` from.
-   * @return {Timestamp} A new `Timestamp` representing the same point in time
+   * @returns {Timestamp} A new `Timestamp` representing the same point in time
    * as the given date.
    */
   static fromDate(date: Date): Timestamp {
@@ -108,7 +108,7 @@ export class Timestamp implements firestore.Timestamp {
    * ```
    * @param {number} milliseconds Number of milliseconds since Unix epoch
    * 1970-01-01T00:00:00Z.
-   * @return {Timestamp}  A new `Timestamp` representing the same point in time
+   * @returns {Timestamp}  A new `Timestamp` representing the same point in time
    * as the given number of milliseconds.
    */
   static fromMillis(milliseconds: number): Timestamp {
@@ -211,7 +211,7 @@ export class Timestamp implements firestore.Timestamp {
    * });
    *
    * ```
-   * @return {Date} JavaScript `Date` object representing the same point in time
+   * @returns {Date} JavaScript `Date` object representing the same point in time
    * as this `Timestamp`, with millisecond precision.
    */
   toDate(): Date {
@@ -234,7 +234,7 @@ export class Timestamp implements firestore.Timestamp {
    * });
    *
    * ```
-   * @return {number} The point in time corresponding to this timestamp,
+   * @returns {number} The point in time corresponding to this timestamp,
    * represented as the number of milliseconds since Unix epoch
    * 1970-01-01T00:00:00Z.
    */
@@ -257,7 +257,7 @@ export class Timestamp implements firestore.Timestamp {
    *
    * ```
    * @param {any} other The `Timestamp` to compare against.
-   * @return {boolean} 'true' if this `Timestamp` is equal to the provided one.
+   * @returns {boolean} 'true' if this `Timestamp` is equal to the provided one.
    */
   isEqual(other: firestore.Timestamp): boolean {
     return (
@@ -293,7 +293,7 @@ export class Timestamp implements firestore.Timestamp {
    * Converts this object to a primitive `string`, which allows `Timestamp` objects to be compared
    * using the `>`, `<=`, `>=` and `>` operators.
    *
-   * @return {string} a string encoding of this object.
+   * @returns {string} a string encoding of this object.
    */
   valueOf(): string {
     // This method returns a string of the form <seconds>.<nanoseconds> where <seconds> is

@@ -133,7 +133,7 @@ export class Transaction implements firestore.Transaction {
    * documents.
    *
    * @param {Query} query A query to execute.
-   * @return {Promise<QuerySnapshot>} A QuerySnapshot for the retrieved data.
+   * @returns {Promise<QuerySnapshot>} A QuerySnapshot for the retrieved data.
    */
   get<AppModelType, DbModelType extends firestore.DocumentData>(
     query: firestore.Query<AppModelType, DbModelType>,
@@ -144,7 +144,7 @@ export class Transaction implements firestore.Transaction {
    * Holds a pessimistic lock on the returned document.
    *
    * @param {DocumentReference} documentRef A reference to the document to be read.
-   * @return {Promise<DocumentSnapshot>}  A DocumentSnapshot for the read data.
+   * @returns {Promise<DocumentSnapshot>}  A DocumentSnapshot for the read data.
    */
   get<AppModelType, DbModelType extends firestore.DocumentData>(
     documentRef: firestore.DocumentReference<AppModelType, DbModelType>,
@@ -155,7 +155,7 @@ export class Transaction implements firestore.Transaction {
    * documents that were matched by the underlying query.
    *
    * @param aggregateQuery An aggregate query to execute.
-   * @return An AggregateQuerySnapshot for the retrieved data.
+   * @returns An AggregateQuerySnapshot for the retrieved data.
    */
   get<
     AppModelType,
@@ -293,22 +293,22 @@ export class Transaction implements firestore.Transaction {
    * <p>The returned Promise can be used to track the progress of the pipeline execution
    * and retrieve the results (or handle any errors) asynchronously.
    *
-   * <p>The pipeline results are returned in a {@link PipelineSnapshot} object, which contains a list of
-   * {@link PipelineResult} objects. Each {@link PipelineResult} typically represents a single key/value map that
+   * <p>The pipeline results are returned in a `PipelineSnapshot` object, which contains a list of
+   * `PipelineResult` objects. Each `PipelineResult` typically represents a single key/value map that
    * has passed through all the stages of the pipeline, however this might differ depending on the stages involved
    * in the pipeline. For example:
    *
    * <ul>
-   *   <li>If there are no stages or only transformation stages, each {@link PipelineResult}
+   *   <li>If there are no stages or only transformation stages, each `PipelineResult`
    *       represents a single document.</li>
-   *   <li>If there is an aggregation, only a single {@link PipelineResult} is returned,
+   *   <li>If there is an aggregation, only a single `PipelineResult` is returned,
    *       representing the aggregated results over the entire dataset .</li>
-   *   <li>If there is an aggregation stage with grouping, each {@link PipelineResult} represents a
+   *   <li>If there is an aggregation stage with grouping, each `PipelineResult` represents a
    *       distinct group and its associated aggregated values.</li>
    * </ul>
    *
-   * <p>Example:
    *
+   * @example
    * ```typescript
    * const futureResults = await transaction
    *   .execute(
@@ -317,7 +317,7 @@ export class Transaction implements firestore.Transaction {
    *       .select("title", "author", "rating"));
    * ```
    *
-   * @return A Promise representing the asynchronous pipeline execution.
+   * @returns A Promise representing the asynchronous pipeline execution.
    */
   execute(pipeline: Pipeline): Promise<PipelineSnapshot> {
     if (this._writeBatch && !this._writeBatch.isEmpty) {
@@ -1009,7 +1009,7 @@ function isRetryableTransactionError(error: GoogleError): boolean {
  *
  * @private
  * @internal
- * @return A Promise that resolves after the delay expired.
+ * @returns A Promise that resolves after the delay expired.
  */
 async function maybeBackoff(
   backoff: ExponentialBackoff,

@@ -181,7 +181,7 @@ export class DocumentChange<
    * value.
    *
    * @param {*} other The value to compare against.
-   * @return true if this `DocumentChange` is equal to the provided value.
+   * @returns true if this `DocumentChange` is equal to the provided value.
    */
   isEqual(other: firestore.DocumentChange<AppModelType, DbModelType>): boolean {
     if (this === other) {

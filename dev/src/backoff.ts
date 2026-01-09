@@ -248,7 +248,7 @@ export class ExponentialBackoff {
    * Returns a promise that resolves after currentDelayMs, and increases the
    * delay for any subsequent attempts.
    *
-   * @return A Promise that resolves when the current delay elapsed.
+   * @returns A Promise that resolves when the current delay elapsed.
    * @private
    * @internal
    */

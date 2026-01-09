@@ -52,7 +52,27 @@ async function apiReport(opts) {
         'ae-forgotten-export': {
           logLevel: 'warning',
         },
+        'ae-unresolved-link': {
+          // Error on unresolved link because this can
+          // lead to a bad user experience when reading docs.
+          logLevel: 'error'
+        },
+        'ae-extra-release-tag': {
+          // @internal tag is used for TSDoc
+          // @private tag is used for JSDoc
+          // TODO: Suppress this warning until we drop JSDoc.
+          logLevel: 'none'
+        }
       },
+      tsdocMessageReporting: {
+        'tsdoc-param-tag-missing-hyphen': {
+          // TSDoc and JSDoc use different formats for param tags.
+          // TSDoc works fine without the hypen, and JSDoc does not use it.
+          // TODO: Suppress this warning until we drop JSDoc.
+          logLevel: 'none',
+          "addToApiReportFile": false
+        }
+      }
     },
   };
   const apiExtractorConfigPath = join(cwd, 'api-extractor.json');
