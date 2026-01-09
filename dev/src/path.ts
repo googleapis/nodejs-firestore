@@ -43,8 +43,7 @@ export const DEFAULT_DATABASE_ID = '(default)';
  * @type {RegExp}
  */
 const RESOURCE_PATH_RE =
-  // Note: [\s\S] matches all characters including newlines.
-  /^projects\/([^/]*)\/databases\/([^/]*)(?:\/documents\/)?([\s\S]*)$/;
+  /^projects\/([^/]+)\/databases\/([^/]+)(?:\/documents(?:\/([^/]+(?:\/[^/]+)*))?)?$/;
 
 /*!
  * A regular expression to verify whether a field name can be passed to the
@@ -236,8 +235,45 @@ abstract class Path<T> {
    * @returns The newly created Path.
    */
   popLast(): T {
-    this.segments.pop();
-    return this.construct(this.segments);
+    return this.construct(this.segments.slice(0, -1));
+  }
+
+  /**
+   * Returns the last segment from this `Path`;
+   *
+   * @private
+   * @internal
+   * @returns The last segment of this Path.
+   */
+  lastSegment(): string {
+    return this.get(this.size - 1);
+  }
+
+  /**
+   * Returns the path segment at the specified index.
+   * @param index
+   */
+  get(index: number): string {
+    return this.segments[index];
+  }
+
+  /**
+   * Returns `true` if this path is the immediate
+   * parent of the given `potentialChild` path.
+   * @param potentialChild
+   */
+  isImmediateParentOf(potentialChild: this): boolean {
+    if (this.size + 1 !== potentialChild.size) {
+      return false;
+    }
+
+    for (let i = 0; i < this.size; i++) {
+      if (this.get(i) !== potentialChild.get(i)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -418,8 +454,13 @@ export class QualifiedResourcePath extends ResourcePath {
     if (elements) {
       const project = elements[1];
       const database = elements[2];
-      const path = elements[3];
-      return new QualifiedResourcePath(project, database).append(path);
+      const root = new QualifiedResourcePath(project, database);
+
+      if (!elements[3]) {
+        return root;
+      } else {
+        return root.append(elements[3]);
+      }
     }
 
     throw new Error(`Resource name '${absolutePath}' is not valid.`);
@@ -586,6 +627,15 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
   private static _DOCUMENT_ID = new FieldPath('__name__');
 
   /**
+   * @private
+   * @internal
+   * Defines the minimum number of segments allowed in a FieldPath
+   */
+  get _minNumSegments(): number {
+    return 1;
+  }
+
+  /**
    * Constructs a Firestore Field Path.
    *
    * @param {...string} segments Sequence of field names that form this path.
@@ -610,8 +660,6 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
       );
     }
 
-    validateMinNumberOfArguments('FieldPath', segments, 1);
-
     for (let i = 0; i < segments.length; ++i) {
       validateString(i, segments[i]);
       if (segments[i].length === 0) {
@@ -620,6 +668,8 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
     }
 
     super(segments);
+
+    validateMinNumberOfArguments('FieldPath', segments, this._minNumSegments);
   }
 
   /**
@@ -630,6 +680,19 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
    */
   static documentId(): FieldPath {
     return FieldPath._DOCUMENT_ID;
+  }
+
+  /**
+   * Create an empty FieldPath.
+   * @private
+   * @internal
+   *
+   * @returns {FieldPath}
+   */
+  static _emptyPath(): FieldPath {
+    const result = new FieldPath('empty');
+    result.segments.pop();
+    return result;
   }
 
   /**
@@ -715,6 +778,46 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
    */
   isEqual(other: FieldPath): boolean {
     return super.isEqual(other);
+  }
+}
+/**
+ * A dot-separated path for navigating ObjectValues.
+ * This type is like its parent, FieldPath, except
+ * it allows for zero length segments.
+ *
+ * @private
+ * @internal
+ * @class
+ */
+export class ObjectValueFieldPath extends FieldPath {
+  /**
+   * Zero length field paths are allowed in object value traverse.
+   */
+  get _minNumSegments(): number {
+    return 0;
+  }
+
+  constructor(...segments: string[]) {
+    super(...segments);
+  }
+
+  static fromDotNotation(path: string): ObjectValueFieldPath {
+    return new ObjectValueFieldPath(...path.split('.'));
+  }
+
+  /**
+   * Constructs a new instance of FieldPath. We need this instead of using
+   * the normal constructor because polymorphic 'this' doesn't work on static
+   * methods.
+   *
+   * @private
+   * @internal
+   * @override
+   * @param segments Sequence of field names.
+   * @returns The newly created FieldPath.
+   */
+  construct(segments: string[]): FieldPath {
+    return new ObjectValueFieldPath(...segments);
   }
 }
 

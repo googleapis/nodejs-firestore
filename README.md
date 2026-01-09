@@ -98,6 +98,59 @@ quickstart();
 
 ```
 
+### Using the client library with Pipelines
+
+```javascript
+
+const {Firestore} = require('@google-cloud/firestore');
+
+// Require/import Pipelines from '@google-cloud/firestore/pipelines'
+const {field} = require('@google-cloud/firestore/pipelines');
+
+// Create a new client
+const firestore = new Firestore({
+  projectId: 'firestore-sdk-nightly',
+  databaseId: 'enterprise'
+});
+
+async function pipelinesQuickstart() {
+  // Obtain a collection reference.
+  const collection = firestore.collection('books');
+
+  // Enter new documents into the document.
+  await collection.add({
+    "title": "Whispers of the Cobalt Sea",
+    "price": 12.99,
+    "author": "Elara Vance",
+    "yearPublished": 2023
+  });
+  await collection.add({
+    "title": "The Antigravity Cat's Guide to Napping",
+    "price": 24.50,
+    "author": "Mittens the IV",
+    "yearPublished": 2026
+  });
+  console.log('Entered new documents into the collection.');
+
+  // Define a Pipeline query that selects books published this century,
+  // orders them by price, and computes a discounted price (20% off).
+  const pipeline = firestore.pipeline().collection('books')
+      .where(field('yearPublished').greaterThanOrEqual(2000))
+      .sort(field('price').ascending())
+      .select('title', 'author', field('price').multiply(0.8).as('discountedPrice'));
+
+  // Execute the pipeline
+  const pipelineSnapshot = await pipeline.execute();
+  console.log('Executed the Pipeline.');
+
+  console.log('Results:');
+  pipelineSnapshot.results.forEach(pipelineResult=> {
+    console.log(pipelineResult.data());
+  });
+}
+pipelinesQuickstart();
+
+```
 
 
 ## Samples
@@ -107,6 +160,7 @@ Samples are in the [`samples/`](https://github.com/googleapis/nodejs-firestore/t
 | Sample                      | Source Code                       | Try it |
 | --------------------------- | --------------------------------- | ------ |
 | Limit-to-last-query | [source code](https://github.com/googleapis/nodejs-firestore/blob/main/samples/limit-to-last-query.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/limit-to-last-query.js,samples/README.md) |
+| Pipelines-quickstart | [source code](https://github.com/googleapis/nodejs-firestore/blob/main/samples/pipelines-quickstart.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/pipelines-quickstart.js,samples/README.md) |
 | Quickstart | [source code](https://github.com/googleapis/nodejs-firestore/blob/main/samples/quickstart.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/quickstart.js,samples/README.md) |
 | Solution-counters | [source code](https://github.com/googleapis/nodejs-firestore/blob/main/samples/solution-counters.js) | [![Open in Cloud Shell][shell_img]](https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/googleapis/nodejs-firestore&page=editor&open_in_editor=samples/solution-counters.js,samples/README.md) |
 

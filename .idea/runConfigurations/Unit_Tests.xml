@@ -11,7 +11,7 @@
     <ui>bdd</ui>
     <extra-mocha-options>--require ts-node/register/type-check --no-cache --no-timeout</extra-mocha-options>
     <test-kind>PATTERN</test-kind>
-    <test-pattern>$PROJECT_DIR$/dev/test/*.js $PROJECT_DIR$/dev/test/*.ts</test-pattern>
+    <test-pattern>$PROJECT_DIR$/dev/test/*.js $PROJECT_DIR$/dev/test/**/*.ts</test-pattern>
     <method v="2" />
   </configuration>
 </component>

@@ -317,6 +317,30 @@ export function isArrayEqual<T extends {isEqual: (t: T) => boolean}>(
 }
 
 /**
+ * Verifies equality for an optional type using the `isEqual` interface.
+ *
+ * @private
+ * @internal
+ * @param left Optional object supporting `isEqual`.
+ * @param right Optional object supporting `isEqual`.
+ * @return True if equal.
+ */
+export function isOptionalEqual<T extends {isEqual: (t: T) => boolean}>(
+  left: T | undefined,
+  right: T | undefined,
+): boolean {
+  if (left === undefined && right === undefined) {
+    return true;
+  }
+
+  if (left === undefined || right === undefined) {
+    return false;
+  }
+
+  return left.isEqual(right);
+}
+
+/**
  * Verifies equality for an array of primitives.
  *
  * @private
@@ -340,4 +364,28 @@ export function isPrimitiveArrayEqual<T extends number | string>(
   }
 
   return true;
+}
+
+export function cast<T>(
+  val: unknown,
+  constructor?: {new (...args: unknown[]): T},
+): T {
+  if (!constructor) {
+    return val as T;
+  } else if (val instanceof constructor) {
+    return val;
+  }
+
+  throw new Error(`${val} not instance of ${constructor}`);
+}
+
+export function forEach<V>(
+  obj: Record<string, V> | undefined,
+  fn: (key: string, val: V) => void,
+): void {
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      fn(key, obj[key]);
+    }
+  }
 }

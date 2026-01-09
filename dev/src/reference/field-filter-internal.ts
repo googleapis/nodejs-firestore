@@ -48,8 +48,8 @@ export class FieldFilterInternal extends FilterInternal {
   constructor(
     private readonly serializer: Serializer,
     readonly field: FieldPath,
-    private readonly op: api.StructuredQuery.FieldFilter.Operator,
-    private readonly value: unknown,
+    readonly op: api.StructuredQuery.FieldFilter.Operator,
+    readonly value: unknown,
   ) {
     super();
   }
@@ -75,30 +75,62 @@ export class FieldFilterInternal extends FilterInternal {
   }
 
   /**
+   * @private
+   * @internal
+   */
+  isNanChecking(): boolean {
+    return typeof this.value === 'number' && isNaN(this.value);
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  nanOp(): 'IS_NAN' | 'IS_NOT_NAN' {
+    return this.op === 'EQUAL' ? 'IS_NAN' : 'IS_NOT_NAN';
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  isNullChecking(): boolean {
+    return this.value === null;
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  nullOp(): 'IS_NULL' | 'IS_NOT_NULL' {
+    return this.op === 'EQUAL' ? 'IS_NULL' : 'IS_NOT_NULL';
+  }
+
+  /**
    * Generates the proto representation for this field filter.
    *
    * @private
    * @internal
    */
   toProto(): api.StructuredQuery.IFilter {
-    if (typeof this.value === 'number' && isNaN(this.value)) {
+    if (this.isNanChecking()) {
       return {
         unaryFilter: {
           field: {
             fieldPath: this.field.formattedName,
           },
-          op: this.op === 'EQUAL' ? 'IS_NAN' : 'IS_NOT_NAN',
+          op: this.nanOp(),
         },
       };
     }
 
-    if (this.value === null) {
+    if (this.isNullChecking()) {
       return {
         unaryFilter: {
           field: {
             fieldPath: this.field.formattedName,
           },
-          op: this.op === 'EQUAL' ? 'IS_NULL' : 'IS_NOT_NULL',
+          op: this.nullOp(),
         },
       };
     }

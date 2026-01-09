@@ -17,6 +17,8 @@
 import * as protos from '../../protos/firestore_v1_proto_api';
 import api = protos.google.firestore.v1;
 import * as firestore from '@google-cloud/firestore';
+import {field} from '../pipelines';
+import {Pipeline} from '../pipelines';
 
 import {Timestamp} from '../timestamp';
 import {VectorValue} from '../field-value';
@@ -136,6 +138,26 @@ export class VectorQuery<
       throw new Error('No VectorQuerySnapshot result');
     }
     return result;
+  }
+
+  /**
+   * @private
+   * @internal
+   */
+  _pipeline(): Pipeline {
+    const options: firestore.Pipelines.FindNearestStageOptions = {
+      field: field(this._options.vectorField),
+      vectorValue: this._options.queryVector,
+      limit: this._options.limit,
+      distanceMeasure: this._options.distanceMeasure.toLowerCase() as
+        | 'cosine'
+        | 'euclidean'
+        | 'dot_product',
+    };
+    return this.query
+      ._pipeline()
+      .where(field(this._options.vectorField).exists())
+      .findNearest(options);
   }
 
   _getResponse(

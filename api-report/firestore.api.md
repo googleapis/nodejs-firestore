@@ -4,15 +4,45 @@
 
 ```ts
 
-import { DocumentData } from '@google-cloud/firestore';
 import { Duplex } from 'stream';
 import * as firestore from '@google-cloud/firestore';
 import { google } from '../protos/firestore_v1_proto_api';
+import { google as google_2 } from '../../protos/firestore_v1_proto_api';
 import { GoogleError } from 'google-gax';
 import * as proto from '../protos/firestore_v1_proto_api';
 import * as protos from '../../protos/firestore_v1_proto_api';
 import { Readable } from 'stream';
 import { Span as Span_2 } from '@opentelemetry/api';
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function abs(expr: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function abs(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function add(first: Expression, second: Expression | unknown): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function add(fieldName: string, second: Expression | unknown): FunctionExpression;
 
 // @public
 export class Aggregate {
@@ -47,6 +77,31 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
 // @public
 export type AggregateFieldType = ReturnType<typeof AggregateField.count> | ReturnType<typeof AggregateField.sum> | ReturnType<typeof AggregateField.average>;
 
+// Warning: (ae-forgotten-export) The symbol "HasUserData" needs to be exported by the entry point index.d.ts
+//
+// @beta
+class AggregateFunction implements AggregateFunction, HasUserData {
+    constructor(name: string, params: Expression[]);
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    as(name: string): AliasedAggregate;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    _createdFromLiteral: boolean;
+    // (undocumented)
+    expressionType: firestore.Pipelines.ExpressionType;
+    // (undocumented)
+    _protoValueType: "ProtoValue";
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    // Warning: (ae-forgotten-export) The symbol "Serializer" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    _toProto(serializer: Serializer): api.IValue;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // (undocumented)
+    _validateUserData(ignoreUndefinedProperties: boolean): void;
+}
+
 // @public
 export class AggregateQuery<AggregateSpecType extends AggregateSpec, AppModelType = firestore.DocumentData, DbModelType extends firestore.DocumentData = firestore.DocumentData> implements firestore.AggregateQuery<AggregateSpecType, AppModelType, DbModelType> {
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
@@ -73,6 +128,10 @@ export class AggregateQuery<AggregateSpecType extends AggregateSpec, AppModelTyp
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     isEqual(other: firestore.AggregateQuery<AggregateSpecType, AppModelType, DbModelType>): boolean;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // @internal (undocumented)
+    _pipeline(): Pipeline;
     get query(): Query<AppModelType, DbModelType>;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
@@ -110,6 +169,300 @@ export interface AggregateSpec {
 
 // @public
 export type AggregateType = 'count' | 'avg' | 'sum';
+
+// @beta
+class AliasedAggregate implements AliasedAggregate, HasUserData {
+    constructor(_aggregate: AggregateFunction, _alias: string);
+    // (undocumented)
+    readonly _aggregate: AggregateFunction;
+    // (undocumented)
+    readonly _alias: string;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    _createdFromLiteral: boolean;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // (undocumented)
+    _validateUserData(ignoreUndefinedProperties: boolean): void;
+}
+
+// @beta
+class AliasedExpression implements firestore.Pipelines.Selectable, HasUserData {
+    constructor(_expr: Expression, _alias: string);
+    // (undocumented)
+    readonly _alias: string;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    _createdFromLiteral: boolean;
+    // (undocumented)
+    readonly _expr: Expression;
+    // (undocumented)
+    expressionType: firestore.Pipelines.ExpressionType;
+    // (undocumented)
+    selectable: true;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // (undocumented)
+    _validateUserData(ignoreUndefinedProperties: boolean): void;
+}
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function and(first: BooleanExpression, second: BooleanExpression, ...more: BooleanExpression[]): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function array(elements: unknown[]): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayConcat(firstArray: Expression, secondArray: Expression | unknown[], ...otherArrays: Array<Expression | unknown[]>): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayConcat(firstArrayField: string, secondArray: Expression | unknown[], ...otherArrays: Array<Expression | unknown[]>): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayContains(array: Expression, element: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayContains(array: Expression, element: unknown): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayContains(fieldName: string, element: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayContains(fieldName: string, element: unknown): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayContainsAll(array: Expression, values: Array<Expression | unknown>): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayContainsAll(fieldName: string, values: Array<Expression | unknown>): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayContainsAll(array: Expression, arrayExpression: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayContainsAll(fieldName: string, arrayExpression: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayContainsAny(array: Expression, values: Array<Expression | unknown>): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayContainsAny(fieldName: string, values: Array<Expression | unknown>): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayContainsAny(array: Expression, values: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayContainsAny(fieldName: string, values: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function arrayGet(arrayField: string, index: number): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function arrayGet(arrayField: string, indexExpr: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function arrayGet(arrayExpression: Expression, index: number): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function arrayGet(arrayExpression: Expression, indexExpr: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayLength(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayLength(array: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayReverse(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function arrayReverse(arrayExpression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function arraySum(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function arraySum(expression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function ascending(expr: Expression): Ordering;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function ascending(fieldName: string): Ordering;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function average(expression: Expression): AggregateFunction;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function average(fieldName: string): AggregateFunction;
+
+// @beta
+abstract class BooleanExpression extends Expression implements firestore.Pipelines.BooleanExpression {
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    conditional(thenExpr: Expression, elseExpr: Expression): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    countIf(): AggregateFunction;
+    // (undocumented)
+    abstract get _expr(): Expression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    ifError(catchValue: BooleanExpression): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    ifError(catchValue: boolean): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    ifError(catchValue: Expression): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    ifError(catchValue: unknown): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    not(): BooleanExpression;
+    // (undocumented)
+    _toProto(serializer: Serializer): api.IValue;
+    // (undocumented)
+    _validateUserData(ignoreUndefinedProperties: boolean): void;
+}
 
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
 //
@@ -229,6 +582,48 @@ export class BundleBuilder {
     readonly bundleId: string;
 }
 
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function byteLength(expr: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function byteLength(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function ceil(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function ceil(expression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function charLength(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function charLength(stringExpression: Expression): FunctionExpression;
+
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
 //
 // @public
@@ -246,10 +641,22 @@ export class CollectionGroup<AppModelType = firestore.DocumentData, DbModelType 
     // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
     // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
-    withConverter(converter: null): CollectionGroup;
-    // (undocumented)
-    withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData = firestore.DocumentData>(converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>): CollectionGroup<NewAppModelType, NewDbModelType>;
+    withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData = firestore.DocumentData>(converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType> | null): CollectionGroup<NewAppModelType, NewDbModelType>;
 }
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function collectionId(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function collectionId(expression: Expression): FunctionExpression;
 
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@extends" is not defined in this configuration
@@ -302,10 +709,196 @@ export class CollectionReference<AppModelType = firestore.DocumentData, DbModelT
     // @internal
     get _resourcePath(): ResourcePath;
     // (undocumented)
-    withConverter(converter: null): CollectionReference;
-    // (undocumented)
     withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData = firestore.DocumentData>(converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>): CollectionReference<NewAppModelType, NewDbModelType>;
+    // (undocumented)
+    withConverter(converter: null): CollectionReference<firestore.DocumentData, firestore.DocumentData>;
 }
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function concat(first: Expression, second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function concat(fieldName: string, second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function conditional(condition: BooleanExpression, thenExpr: Expression, elseExpr: Expression): FunctionExpression;
+
+// @beta
+class Constant extends Expression {
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@hideconstructor" is not defined in this configuration
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    constructor(value: unknown);
+    // (undocumented)
+    readonly expressionType: firestore.Pipelines.ExpressionType;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // (undocumented)
+    static _fromProto(value: api.IValue): Constant;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // (undocumented)
+    _toProto(serializer: Serializer): api.IValue;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // (undocumented)
+    _validateUserData(ignoreUndefinedProperties: boolean): void;
+}
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function constant(value: number): Expression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function constant(value: string): Expression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function constant(value: boolean): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function constant(value: null): Expression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function constant(value: firestore.GeoPoint): Expression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function constant(value: firestore.Timestamp): Expression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function constant(value: Date): Expression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function constant(value: Buffer | Uint8Array): Expression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function constant(value: firestore.DocumentReference): Expression;
+
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function constant(value: api.IValue): Expression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function constant(value: firestore.VectorValue): Expression;
+
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+//
+// @beta (undocumented)
+function constant(value: unknown): Expression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function cosineDistance(fieldName: string, vector: number[] | VectorValue): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function cosineDistance(fieldName: string, vectorExpression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function cosineDistance(vectorExpression: Expression, vector: number[] | VectorValue): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function cosineDistance(vectorExpression: Expression, otherVectorExpression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function count(expression: Expression): AggregateFunction;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function count(fieldName: string): AggregateFunction;
+
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function countAll(): AggregateFunction;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function countDistinct(expr: Expression | string): AggregateFunction;
+
+// @beta
+function countIf(booleanExpr: BooleanExpression): AggregateFunction;
+
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function currentTimestamp(): FunctionExpression;
 
 // @public (undocumented)
 export const DEFAULT_MAX_IDLE_CHANNELS = 1;
@@ -314,6 +907,50 @@ export const DEFAULT_MAX_IDLE_CHANNELS = 1;
 //
 // @public
 export const DEFAULT_MAX_TRANSACTION_ATTEMPTS = 5;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function descending(expr: Expression): Ordering;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function descending(fieldName: string): Ordering;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function divide(dividend: Expression, divisort: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function divide(dividend: Expression, divisor: unknown): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function divide(dividend: string, divisor: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function divide(dividend: string, divisor: unknown): FunctionExpression;
 
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
 //
@@ -357,6 +994,18 @@ export class DocumentChange<AppModelType = firestore.DocumentData, DbModelType e
 
 // @public (undocumented)
 export type DocumentChangeType = 'added' | 'removed' | 'modified';
+
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function documentId(documentPath: string | firestore.DocumentReference): FunctionExpression;
+
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function documentId(documentPathExpr: Expression): FunctionExpression;
 
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
 // Warning: (ae-forgotten-export) The symbol "Serializable" needs to be exported by the entry point index.d.ts
@@ -474,9 +1123,7 @@ export class DocumentReference<AppModelType = firestore.DocumentData, DbModelTyp
     // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
     update(dataOrField: firestore.UpdateData<DbModelType> | string | firestore.FieldPath, ...preconditionOrValues: Array<unknown | string | firestore.FieldPath | firestore.Precondition>): Promise<WriteResult>;
     // (undocumented)
-    withConverter(converter: null): DocumentReference;
-    // (undocumented)
-    withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData = firestore.DocumentData>(converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>): DocumentReference<NewAppModelType, NewDbModelType>;
+    withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData = firestore.DocumentData>(converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType> | null): DocumentReference<NewAppModelType, NewDbModelType>;
 }
 
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
@@ -578,6 +1225,162 @@ export class DocumentSnapshot<AppModelType = firestore.DocumentData, DbModelType
     get updateTime(): Timestamp | undefined;
 }
 
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function dotProduct(fieldName: string, vector: number[] | VectorValue): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function dotProduct(fieldName: string, vectorExpression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function dotProduct(vectorExpression: Expression, vector: number[] | VectorValue): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function dotProduct(vectorExpression: Expression, otherVectorExpression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function endsWith(fieldName: string, suffix: string): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function endsWith(fieldName: string, suffix: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function endsWith(stringExpression: Expression, suffix: string): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function endsWith(stringExpression: Expression, suffix: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function equal(left: Expression, right: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function equal(expression: Expression, value: unknown): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function equal(fieldName: string, expression: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function equal(fieldName: string, value: unknown): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function equalAny(expression: Expression, values: Array<Expression | unknown>): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function equalAny(expression: Expression, arrayExpression: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function equalAny(fieldName: string, values: Array<Expression | unknown>): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function equalAny(fieldName: string, arrayExpression: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function euclideanDistance(fieldName: string, vector: number[] | VectorValue): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function euclideanDistance(fieldName: string, vectorExpression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function euclideanDistance(vectorExpression: Expression, vector: number[] | VectorValue): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function euclideanDistance(vectorExpression: Expression, otherVectorExpression: Expression): FunctionExpression;
+
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
 //
 // @public
@@ -591,7 +1394,6 @@ export class ExecutionStats implements firestore.ExecutionStats {
     // (undocumented)
     readonly executionDuration: firestore.Duration;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-    // Warning: (ae-forgotten-export) The symbol "Serializer" needs to be exported by the entry point index.d.ts
     //
     // @internal (undocumented)
     static _fromProto(stats: IExecutionStats | null | undefined, serializer: Serializer): ExecutionStats | null;
@@ -600,6 +1402,32 @@ export class ExecutionStats implements firestore.ExecutionStats {
     // (undocumented)
     readonly resultsReturned: number;
 }
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function exists(value: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function exists(fieldName: string): BooleanExpression;
+
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function exp(expression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function exp(fieldName: string): FunctionExpression;
 
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
 //
@@ -633,6 +1461,432 @@ export class ExplainResults<T> implements firestore.ExplainResults<T> {
     readonly snapshot: T | null;
 }
 
+// @beta
+abstract class Expression implements firestore.Pipelines.Expression, HasUserData {
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    abs(): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    add(second: firestore.Pipelines.Expression | unknown, ...others: Array<firestore.Pipelines.Expression | unknown>): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    arrayConcat(secondArray: Expression | unknown[], ...otherArrays: Array<Expression | unknown[]>): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    arrayContains(expression: Expression): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    arrayContains(value: unknown): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    arrayContainsAll(values: Array<Expression | unknown>): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    arrayContainsAll(arrayExpression: Expression): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    arrayContainsAny(values: Array<Expression | unknown>): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    arrayContainsAny(arrayExpression: Expression): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    arrayGet(index: number): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    arrayGet(indexExpr: Expression): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    arrayLength(): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    arrayReverse(): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    arraySum(): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    as(name: string): AliasedExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    asBoolean(): BooleanExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    ascending(): Ordering;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    average(): AggregateFunction;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    byteLength(): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    ceil(): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    charLength(): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    collectionId(): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    concat(second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    cosineDistance(vectorExpression: Expression): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    cosineDistance(vector: firestore.VectorValue | number[]): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    count(): AggregateFunction;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    countDistinct(): AggregateFunction;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    _createdFromLiteral: boolean;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    descending(): Ordering;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    divide(divisor: Expression): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    divide(divisor: number): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    documentId(): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    dotProduct(vectorExpression: Expression): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    dotProduct(vector: firestore.VectorValue | number[]): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    endsWith(suffix: string): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    endsWith(suffix: Expression): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    equal(expression: Expression): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    equal(value: unknown): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    equalAny(values: Array<Expression | unknown>): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    equalAny(arrayExpression: Expression): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    euclideanDistance(vectorExpression: Expression): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    euclideanDistance(vector: firestore.VectorValue | number[]): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    exists(): BooleanExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    exp(): FunctionExpression;
+    // (undocumented)
+    abstract expressionType: firestore.Pipelines.ExpressionType;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    floor(): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    greaterThan(expression: Expression): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    greaterThan(value: unknown): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    greaterThanOrEqual(expression: Expression): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    greaterThanOrEqual(value: unknown): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    ifAbsent(elseValue: unknown): Expression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    ifAbsent(elseExpression: unknown): Expression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    ifError(catchExpr: Expression): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    ifError(catchValue: unknown): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    isAbsent(): BooleanExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    isError(): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    join(delimiterExpression: Expression): Expression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    join(delimiter: string): Expression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    length(): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    lessThan(experession: Expression): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    lessThan(value: unknown): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    lessThanOrEqual(expression: Expression): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    lessThanOrEqual(value: unknown): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    like(pattern: string): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    like(pattern: Expression): BooleanExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    ln(): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    log10(): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    logicalMaximum(second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    logicalMinimum(second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    mapGet(subfield: string): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    mapMerge(secondMap: Record<string, unknown> | Expression, ...otherMaps: Array<Record<string, unknown> | Expression>): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    mapRemove(key: string): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    mapRemove(keyExpr: Expression): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    maximum(): AggregateFunction;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    minimum(): AggregateFunction;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    mod(expression: Expression): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    mod(value: number): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    multiply(second: Expression | number, ...others: Array<Expression | number>): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    notEqual(expression: Expression): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    notEqual(value: unknown): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    notEqualAny(values: Array<Expression | unknown>): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    notEqualAny(arrayExpression: Expression): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    pow(exponent: Expression): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    pow(exponent: number): FunctionExpression;
+    // (undocumented)
+    _protoValueType: "ProtoValue";
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    regexContains(pattern: string): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    regexContains(pattern: Expression): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    regexMatch(pattern: string): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    regexMatch(pattern: Expression): BooleanExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    reverse(): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    round(): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    round(decimalPlaces: number): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    round(decimalPlaces: Expression): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    split(delimiter: string): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    split(delimiter: Expression): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    sqrt(): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    startsWith(prefix: string): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    startsWith(prefix: Expression): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    stringConcat(secondString: Expression | string, ...otherStrings: Array<Expression | string>): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    stringContains(substring: string): BooleanExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    stringContains(expr: Expression): BooleanExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    stringReverse(): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    substring(position: number, length?: number): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    substring(position: Expression, length?: Expression): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    subtract(subtrahend: firestore.Pipelines.Expression): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    subtract(subtrahend: number): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    sum(): AggregateFunction;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    timestampAdd(unit: Expression, amount: Expression): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    timestampAdd(unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day', amount: number): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    timestampSubtract(unit: Expression, amount: Expression): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    timestampSubtract(unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day', amount: number): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    timestampToUnixMicros(): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    timestampToUnixMillis(): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    timestampToUnixSeconds(): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+    // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    timestampTruncate(granularity: firestore.Pipelines.TimeGranularity, timezone?: string | Expression): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+    // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    timestampTruncate(granularity: Expression, timezone?: string | Expression): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    toLower(): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // (undocumented)
+    abstract _toProto(serializer: Serializer): api.IValue;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    toUpper(): FunctionExpression;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    trim(valueToTrim?: string | Expression | Uint8Array | Buffer): FunctionExpression;
+    // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+    // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    type(): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    unixMicrosToTimestamp(): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    unixMillisToTimestamp(): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    unixSecondsToTimestamp(): FunctionExpression;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // (undocumented)
+    abstract _validateUserData(ignoreUndefinedProperties: boolean): void;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    vectorLength(): FunctionExpression;
+}
+
+// @beta
+class Field extends Expression implements firestore.Pipelines.Selectable {
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@hideconstructor" is not defined in this configuration
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    constructor(fieldPath: FieldPath);
+    // (undocumented)
+    get _alias(): string;
+    // (undocumented)
+    get _expr(): Expression;
+    // (undocumented)
+    readonly expressionType: firestore.Pipelines.ExpressionType;
+    // (undocumented)
+    get fieldName(): string;
+    // (undocumented)
+    selectable: true;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // (undocumented)
+    _toProto(_: Serializer): api.IValue;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // (undocumented)
+    _validateUserData(_: boolean): void;
+}
+
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function field(field: string | firestore.FieldPath): Field;
+
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
 // Warning: (ae-forgotten-export) The symbol "Path" needs to be exported by the entry point index.d.ts
 //
@@ -653,6 +1907,12 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
     // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
     // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
     //
+    // @internal
+    static _emptyPath(): FieldPath;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+    // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+    //
     // @internal @override
     get formattedName(): string;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
@@ -669,6 +1929,10 @@ export class FieldPath extends Path<FieldPath> implements firestore.FieldPath {
     // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     isEqual(other: FieldPath): boolean;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // @internal
+    get _minNumSegments(): number;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
@@ -841,6 +2105,8 @@ class Firestore implements firestore.Firestore {
     // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
     // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
     listCollections(): Promise<CollectionReference[]>;
+    // @beta
+    pipeline(): PipelineSource;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     //
     // @internal
@@ -930,6 +2196,37 @@ class Firestore implements firestore.Firestore {
 export { Firestore }
 export default Firestore;
 
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function floor(expr: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function floor(fieldName: string): FunctionExpression;
+
+// @beta
+class FunctionExpression extends Expression {
+    constructor(_methodName: string, params: Expression[]);
+    // (undocumented)
+    readonly expressionType: firestore.Pipelines.ExpressionType;
+    // (undocumented)
+    _methodName: string;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // (undocumented)
+    _toProto(serializer: Serializer): api.IValue;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // (undocumented)
+    _validateUserData(ignoreUndefinedProperties: boolean): void;
+}
+
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
 //
 // @public
@@ -965,10 +2262,903 @@ export class GeoPoint implements Serializable, firestore.GeoPoint {
     toProto(): api.IValue;
 }
 
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function greaterThan(left: Expression, right: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function greaterThan(expression: Expression, value: unknown): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function greaterThan(fieldName: string, expression: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function greaterThan(fieldName: string, value: unknown): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function greaterThanOrEqual(left: Expression, right: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function greaterThanOrEqual(expression: Expression, value: unknown): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function greaterThanOrEqual(fieldName: string, value: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function greaterThanOrEqual(fieldName: string, value: unknown): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function ifAbsent(ifExpr: Expression, elseExpr: Expression): Expression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function ifAbsent(ifExpr: Expression, elseValue: unknown): Expression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function ifAbsent(ifFieldName: string, elseExpr: Expression): Expression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function ifAbsent(ifFieldName: string | Expression, elseValue: Expression | unknown): Expression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function ifError(tryExpr: BooleanExpression, catchExpr: BooleanExpression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function ifError(tryExpr: Expression, catchExpr: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function ifError(tryExpr: Expression, catchValue: unknown): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function isAbsent(value: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function isAbsent(field: string): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function isError(value: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function join(arrayFieldName: string, delimiter: string): Expression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function join(arrayExpression: Expression, delimiterExpression: Expression): Expression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function join(arrayExpression: Expression, delimiter: string): Expression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function join(arrayFieldName: string, delimiterExpression: Expression): Expression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function length_2(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function length_2(expression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function lessThan(left: Expression, right: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function lessThan(expression: Expression, value: unknown): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function lessThan(fieldName: string, expression: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function lessThan(fieldName: string, value: unknown): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function lessThanOrEqual(left: Expression, right: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function lessThanOrEqual(expression: Expression, value: unknown): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function lessThanOrEqual(fieldName: string, expression: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function lessThanOrEqual(fieldName: string, value: unknown): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function like(fieldName: string, pattern: string): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function like(fieldName: string, pattern: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function like(stringExpression: Expression, pattern: string): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function like(stringExpression: Expression, pattern: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function ln(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function ln(expression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function log10(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function log10(expression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function logicalMaximum(first: Expression, second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function logicalMaximum(fieldName: string, second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function logicalMinimum(first: Expression, second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function logicalMinimum(fieldName: string, second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function map(elements: Record<string, unknown>): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function mapGet(fieldName: string, subField: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function mapGet(mapExpression: Expression, subField: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+//
+// @beta
+function mapMerge(mapField: string, secondMap: Record<string, unknown> | Expression, ...otherMaps: Array<Record<string, unknown> | Expression>): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+//
+// @beta
+function mapMerge(firstMap: Record<string, unknown> | Expression, secondMap: Record<string, unknown> | Expression, ...otherMaps: Array<Record<string, unknown> | Expression>): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+//
+// @beta
+function mapRemove(mapField: string, key: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+//
+// @beta
+function mapRemove(mapExpr: Expression, key: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+//
+// @beta
+function mapRemove(mapField: string, keyExpr: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+//
+// @beta
+function mapRemove(mapExpr: Expression, keyExpr: Expression): FunctionExpression;
+
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 //
 // @public
 export const MAX_REQUEST_RETRIES = 5;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function maximum(expression: Expression): AggregateFunction;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function maximum(fieldName: string): AggregateFunction;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function minimum(expression: Expression): AggregateFunction;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function minimum(fieldName: string): AggregateFunction;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function mod(left: Expression, right: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function mod(expression: Expression, value: unknown): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function mod(fieldName: string, expression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function mod(fieldName: string, value: unknown): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function multiply(first: Expression, second: Expression | unknown): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function multiply(fieldName: string, second: Expression | unknown): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function not(booleanExpr: BooleanExpression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function notEqual(left: Expression, right: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function notEqual(expression: Expression, value: unknown): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function notEqual(fieldName: string, expression: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function notEqual(fieldName: string, value: unknown): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function notEqualAny(element: Expression, values: Array<Expression | unknown>): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function notEqualAny(fieldName: string, values: Array<Expression | unknown>): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function notEqualAny(element: Expression, arrayExpression: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function notEqualAny(fieldName: string, arrayExpression: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function or(first: BooleanExpression, second: BooleanExpression, ...more: BooleanExpression[]): BooleanExpression;
+
+// @beta
+class Ordering implements HasUserData {
+    constructor(expr: Expression, direction: 'ascending' | 'descending');
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    _createdFromLiteral: boolean;
+    // (undocumented)
+    readonly direction: 'ascending' | 'descending';
+    // (undocumented)
+    readonly expr: Expression;
+    // (undocumented)
+    _protoValueType: 'ProtoValue';
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // (undocumented)
+    _toProto(serializer: Serializer): api.IValue;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // (undocumented)
+    _validateUserData(ignoreUndefinedProperties: boolean): void;
+}
+
+// @beta
+class Pipeline implements firestore.Pipelines.Pipeline {
+    // Warning: (ae-forgotten-export) The symbol "Stage" needs to be exported by the entry point index.d.ts
+    constructor(db: Firestore, stages: Stage[]);
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@FunctionExpression" is not defined in this configuration
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    addFields(field: firestore.Pipelines.Selectable, ...additionalFields: firestore.Pipelines.Selectable[]): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@FunctionExpression" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    addFields(options: firestore.Pipelines.AddFieldsStageOptions): Pipeline;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    aggregate(accumulator: firestore.Pipelines.AliasedAggregate, ...additionalAccumulators: firestore.Pipelines.AliasedAggregate[]): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    aggregate(options: firestore.Pipelines.AggregateStageOptions): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    distinct(group: string | firestore.Pipelines.Selectable, ...additionalGroups: Array<string | firestore.Pipelines.Selectable>): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    distinct(options: firestore.Pipelines.DistinctStageOptions): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    execute(pipelineExecuteOptions?: firestore.Pipelines.PipelineExecuteOptions): Promise<PipelineSnapshot>;
+    // Warning: (ae-forgotten-export) The symbol "PipelineResponse" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    _execute(transactionOrReadTime?: Uint8Array | Timestamp | api.ITransactionOptions, pipelineExecuteOptions?: firestore.Pipelines.PipelineExecuteOptions): Promise<PipelineResponse>;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    findNearest(options: firestore.Pipelines.FindNearestStageOptions): Pipeline;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    limit(limit: number): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    limit(options: firestore.Pipelines.LimitStageOptions): Pipeline;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    offset(offset: number): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    offset(options: firestore.Pipelines.OffsetStageOptions): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    rawStage(name: string, params: unknown[], options?: {
+        [key: string]: Expression | unknown;
+    }): Pipeline;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    removeFields(fieldValue: firestore.Pipelines.Field | string, ...additionalFields: Array<firestore.Pipelines.Field | string>): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    removeFields(options: firestore.Pipelines.RemoveFieldsStageOptions): Pipeline;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    replaceWith(fieldName: string): Pipeline;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    replaceWith(expr: firestore.Pipelines.Expression): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    replaceWith(options: firestore.Pipelines.ReplaceWithStageOptions): Pipeline;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    sample(documents: number): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+    // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+    // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+    // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    sample(options: firestore.Pipelines.SampleStageOptions): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    select(selection: firestore.Pipelines.Selectable | string, ...additionalSelections: Array<firestore.Pipelines.Selectable | string>): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    select(options: firestore.Pipelines.SelectStageOptions): Pipeline;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    sort(ordering: firestore.Pipelines.Ordering, ...additionalOrderings: firestore.Pipelines.Ordering[]): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    sort(options: firestore.Pipelines.SortStageOptions): Pipeline;
+    // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+    // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+    stream(): NodeJS.ReadableStream;
+    // (undocumented)
+    _toProto(): api.IPipeline;
+    // Warning: (ae-forgotten-export) The symbol "StructuredPipeline" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    _toStructuredPipeline(pipelineExecuteOptions?: firestore.Pipelines.PipelineExecuteOptions): StructuredPipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    union(other: firestore.Pipelines.Pipeline): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    union(options: firestore.Pipelines.UnionStageOptions): Pipeline;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    unnest(selectable: firestore.Pipelines.Selectable, indexField?: string): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+    unnest(options: firestore.Pipelines.UnnestStageOptions): Pipeline;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    _validateUserData<T extends Map<string, HasUserData> | HasUserData[] | HasUserData>(_: string, val: T): T;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    where(condition: firestore.Pipelines.BooleanExpression): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    where(options: firestore.Pipelines.WhereStageOptions): Pipeline;
+}
+
+// @beta
+class PipelineResult implements firestore.Pipelines.PipelineResult {
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    constructor(serializer: Serializer,
+    _fieldsProto: ApiMapValue, ref?: DocumentReference, readTime?: Timestamp, createTime?: Timestamp, updateTime?: Timestamp);
+    // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+    // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@type" is not defined in this configuration
+    get createTime(): Timestamp | undefined;
+    // (undocumented)
+    readonly _createTime: Timestamp | undefined;
+    // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+    // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+    data(): firestore.DocumentData;
+    // (undocumented)
+    readonly _executionTime: Timestamp | undefined;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // (undocumented)
+    readonly _fieldsProto: ApiMapValue;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
+    // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+    // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+    get(fieldPath: string | FieldPath): any;
+    // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+    // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@type" is not defined in this configuration
+    get id(): string | undefined;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
+    // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+    // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    isEqual(other: PipelineResult): boolean;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    protoField(field: string | FieldPath): api.IValue | undefined;
+    get ref(): DocumentReference | undefined;
+    // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+    // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@type" is not defined in this configuration
+    get updateTime(): Timestamp | undefined;
+    // (undocumented)
+    readonly _updateTime: Timestamp | undefined;
+}
+
+declare namespace Pipelines {
+    export {
+        Pipeline,
+        PipelineResult,
+        PipelineSnapshot,
+        PipelineSource,
+        and,
+        arrayContains,
+        arrayContainsAny,
+        arrayReverse,
+        average,
+        equal,
+        ceil,
+        exp,
+        floor,
+        greaterThan,
+        like,
+        lessThan,
+        notEqual,
+        ascending,
+        not,
+        or,
+        regexContains,
+        regexMatch,
+        startsWith,
+        stringConcat,
+        subtract,
+        cosineDistance,
+        countDistinct,
+        dotProduct,
+        euclideanDistance,
+        mapGet,
+        lessThanOrEqual,
+        equalAny,
+        map,
+        array,
+        field,
+        xor,
+        AggregateFunction,
+        arrayGet,
+        add,
+        BooleanExpression,
+        Expression,
+        FunctionExpression,
+        minimum,
+        count,
+        countIf,
+        arrayLength,
+        stringContains,
+        charLength,
+        divide,
+        mod,
+        reverse,
+        trim,
+        toUpper,
+        toLower,
+        vectorLength,
+        exists,
+        isAbsent,
+        ifError,
+        isError,
+        substring,
+        documentId,
+        arrayContainsAll,
+        constant,
+        Field,
+        Constant,
+        sum,
+        maximum,
+        descending,
+        greaterThanOrEqual,
+        multiply,
+        conditional,
+        Ordering,
+        AliasedAggregate,
+        endsWith,
+        AliasedExpression,
+        mapMerge,
+        mapRemove,
+        byteLength,
+        logicalMaximum,
+        logicalMinimum,
+        notEqualAny,
+        countAll,
+        timestampAdd,
+        timestampSubtract,
+        timestampToUnixMicros,
+        timestampToUnixSeconds,
+        unixMicrosToTimestamp,
+        timestampToUnixMillis,
+        unixSecondsToTimestamp,
+        unixMillisToTimestamp,
+        pow,
+        collectionId,
+        length_2 as length,
+        ln,
+        round,
+        sqrt,
+        stringReverse,
+        abs,
+        arraySum,
+        ifAbsent,
+        log10,
+        concat,
+        join,
+        currentTimestamp,
+        arrayConcat,
+        type,
+        timestampTruncate,
+        split
+    }
+}
+export { Pipelines }
+
+// @beta
+class PipelineSnapshot implements firestore.Pipelines.PipelineSnapshot {
+    // Warning: (ae-forgotten-export) The symbol "ExplainStats" needs to be exported by the entry point index.d.ts
+    constructor(pipeline: Pipeline, results: PipelineResult[], executionTime?: Timestamp, explainStats?: ExplainStats);
+    // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+    // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@type" is not defined in this configuration
+    get executionTime(): Timestamp;
+    get explainStats(): ExplainStats | undefined;
+    get pipeline(): Pipeline;
+    get results(): PipelineResult[];
+}
+
+// @beta
+class PipelineSource implements firestore.Pipelines.PipelineSource {
+    constructor(db: Firestore);
+    collection(collection: string | firestore.CollectionReference): Pipeline;
+    collection(options: firestore.Pipelines.CollectionStageOptions): Pipeline;
+    collectionGroup(collectionId: string): Pipeline;
+    collectionGroup(options: firestore.Pipelines.CollectionGroupStageOptions): Pipeline;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@FirestoreError" is not defined in this configuration
+    createFrom(query: firestore.VectorQuery): Pipeline;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@FirestoreError" is not defined in this configuration
+    createFrom(query: firestore.Query): Pipeline;
+    database(): Pipeline;
+    database(options: firestore.Pipelines.DatabaseStageOptions): Pipeline;
+    // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@FirestoreError" is not defined in this configuration
+    documents(docs: Array<string | DocumentReference>): Pipeline;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@FirestoreError" is not defined in this configuration
+    documents(options: firestore.Pipelines.DocumentsStageOptions): Pipeline;
+    // (undocumented)
+    _validateReference(reference: firestore.CollectionReference | firestore.DocumentReference): reference is CollectionReference | DocumentReference;
+}
 
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
 //
@@ -985,6 +3175,34 @@ export class PlanSummary implements firestore.PlanSummary {
     // (undocumented)
     readonly indexesUsed: Record<string, unknown>[];
 }
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function pow(base: Expression, exponent: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function pow(base: Expression, exponent: number): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function pow(base: string, exponent: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function pow(base: string, exponent: number): FunctionExpression;
 
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
 //
@@ -1072,6 +3290,7 @@ export class Query<AppModelType = firestore.DocumentData, DbModelType extends fi
     //
     // @internal
     _hasRetryTimedOut(methodName: string, startTime: number): boolean;
+    _isCollectionGroupQuery(): boolean;
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
     // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
@@ -1125,6 +3344,10 @@ export class Query<AppModelType = firestore.DocumentData, DbModelType extends fi
     //
     // @internal (undocumented)
     _parseFilter(filter: Filter): FilterInternal;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // @internal (undocumented)
+    _pipeline(): Pipeline;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     // Warning: (ae-forgotten-export) The symbol "QueryOptions" needs to be exported by the entry point index.d.ts
     //
@@ -1188,9 +3411,7 @@ export class Query<AppModelType = firestore.DocumentData, DbModelType extends fi
     // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
     where(filter: Filter): Query<AppModelType, DbModelType>;
     // (undocumented)
-    withConverter(converter: null): Query;
-    // (undocumented)
-    withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData = firestore.DocumentData>(converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType>): Query<NewAppModelType, NewDbModelType>;
+    withConverter<NewAppModelType, NewDbModelType extends firestore.DocumentData = firestore.DocumentData>(converter: firestore.FirestoreDataConverter<NewAppModelType, NewDbModelType> | null): Query<NewAppModelType, NewDbModelType>;
 }
 
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
@@ -1299,9 +3520,329 @@ export class QuerySnapshot<AppModelType = firestore.DocumentData, DbModelType ex
 }
 
 // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function regexContains(fieldName: string, pattern: string): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function regexContains(fieldName: string, pattern: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function regexContains(stringExpression: Expression, pattern: string): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function regexContains(stringExpression: Expression, pattern: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function regexMatch(fieldName: string, pattern: string): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function regexMatch(fieldName: string, pattern: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function regexMatch(stringExpression: Expression, pattern: string): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function regexMatch(stringExpression: Expression, pattern: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function reverse(stringExpression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function reverse(field: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function round(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function round(expression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function round(fieldName: string, decimalPlaces: number | Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function round(expression: Expression, decimalPlaces: number | Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
 //
 // @public
 export function setLogFunction(logger: ((msg: string) => void) | null): void;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function split(fieldName: string, delimiter: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function split(fieldName: string, delimiter: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function split(expression: Expression, delimiter: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function split(expression: Expression, delimiter: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function sqrt(expression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function sqrt(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function startsWith(fieldName: string, prefix: string): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function startsWith(fieldName: string, prefix: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function startsWith(stringExpression: Expression, prefix: string): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function startsWith(stringExpression: Expression, prefix: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function stringConcat(fieldName: string, secondString: Expression | string, ...otherStrings: Array<Expression | string>): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function stringConcat(firstString: Expression, secondString: Expression | string, ...otherStrings: Array<Expression | string>): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function stringContains(fieldName: string, substring: string): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function stringContains(fieldName: string, substring: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function stringContains(stringExpression: Expression, substring: string): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function stringContains(stringExpression: Expression, substring: Expression): BooleanExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function stringReverse(stringExpression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function stringReverse(field: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+//
+// @beta
+function substring(field: string, position: number, length?: number): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+//
+// @beta
+function substring(input: Expression, position: number, length?: number): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+//
+// @beta
+function substring(field: string, position: Expression, length?: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+//
+// @beta
+function substring(input: Expression, position: Expression, length?: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function subtract(minuend: Expression, subtrahend: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function subtract(minuend: Expression, subtrahend: unknown): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function subtract(minuendFieldName: string, subtrahend: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function subtract(minuendFieldName: string, subtrahend: unknown): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function sum(expression: Expression): AggregateFunction;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function sum(fieldName: string): AggregateFunction;
 
 // @public
 export class Timestamp implements firestore.Timestamp {
@@ -1366,6 +3907,186 @@ export class Timestamp implements firestore.Timestamp {
     valueOf(): string;
 }
 
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function timestampAdd(timestamp: Expression, unit: Expression, amount: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function timestampAdd(timestamp: Expression, unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day', amount: number): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function timestampAdd(fieldName: string, unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day', amount: number): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function timestampSubtract(timestamp: Expression, unit: Expression, amount: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function timestampSubtract(timestamp: Expression, unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day', amount: number): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function timestampSubtract(fieldName: string, unit: 'microsecond' | 'millisecond' | 'second' | 'minute' | 'hour' | 'day', amount: number): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function timestampToUnixMicros(expr: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function timestampToUnixMicros(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function timestampToUnixMillis(expr: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function timestampToUnixMillis(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function timestampToUnixSeconds(expr: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function timestampToUnixSeconds(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (ae-incompatible-release-tags) The symbol "timestampTruncate" is marked as @public, but its signature references "Expression" which is marked as @beta
+// Warning: (ae-incompatible-release-tags) The symbol "timestampTruncate" is marked as @public, but its signature references "FunctionExpression" which is marked as @beta
+// Warning: (ae-incompatible-release-tags) The symbol "timestampTruncate" is marked as @public, but its signature references "Expression" which is marked as @beta
+// Warning: (ae-incompatible-release-tags) The symbol "timestampTruncate" is marked as @public, but its signature references "FunctionExpression" which is marked as @beta
+//
+// @public
+function timestampTruncate(fieldName: string, granularity: firestore.Pipelines.TimeGranularity, timezone?: string | Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (ae-incompatible-release-tags) The symbol "timestampTruncate" is marked as @public, but its signature references "Expression" which is marked as @beta
+// Warning: (ae-incompatible-release-tags) The symbol "timestampTruncate" is marked as @public, but its signature references "FunctionExpression" which is marked as @beta
+// Warning: (ae-incompatible-release-tags) The symbol "timestampTruncate" is marked as @public, but its signature references "Expression" which is marked as @beta
+// Warning: (ae-incompatible-release-tags) The symbol "timestampTruncate" is marked as @public, but its signature references "FunctionExpression" which is marked as @beta
+//
+// @public
+function timestampTruncate(fieldName: string, granularity: Expression, timezone?: string | Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (ae-incompatible-release-tags) The symbol "timestampTruncate" is marked as @public, but its signature references "Expression" which is marked as @beta
+// Warning: (ae-incompatible-release-tags) The symbol "timestampTruncate" is marked as @public, but its signature references "FunctionExpression" which is marked as @beta
+// Warning: (ae-incompatible-release-tags) The symbol "timestampTruncate" is marked as @public, but its signature references "Expression" which is marked as @beta
+// Warning: (ae-incompatible-release-tags) The symbol "timestampTruncate" is marked as @public, but its signature references "FunctionExpression" which is marked as @beta
+//
+// @public
+function timestampTruncate(timestampExpression: Expression, granularity: firestore.Pipelines.TimeGranularity, timezone?: string | Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (ae-incompatible-release-tags) The symbol "timestampTruncate" is marked as @public, but its signature references "Expression" which is marked as @beta
+// Warning: (ae-incompatible-release-tags) The symbol "timestampTruncate" is marked as @public, but its signature references "FunctionExpression" which is marked as @beta
+// Warning: (ae-incompatible-release-tags) The symbol "timestampTruncate" is marked as @public, but its signature references "Expression" which is marked as @beta
+// Warning: (ae-incompatible-release-tags) The symbol "timestampTruncate" is marked as @public, but its signature references "FunctionExpression" which is marked as @beta
+//
+// @public
+function timestampTruncate(timestampExpression: Expression, granularity: Expression, timezone?: string | Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function toLower(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function toLower(stringExpression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function toUpper(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function toUpper(stringExpression: Expression): FunctionExpression;
+
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
 //
 // @public
@@ -1401,6 +4122,10 @@ export class Transaction implements firestore.Transaction {
     // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
     // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
     delete(documentRef: DocumentReference<any, any>, precondition?: firestore.Precondition): this;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+    // Warning: (ae-incompatible-release-tags) The symbol "execute" is marked as @public, but its signature references "Pipeline" which is marked as @beta
+    // Warning: (ae-incompatible-release-tags) The symbol "execute" is marked as @public, but its signature references "PipelineSnapshot" which is marked as @beta
+    execute(pipeline: Pipeline): Promise<PipelineSnapshot>;
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
     // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
@@ -1451,6 +4176,92 @@ export class Transaction implements firestore.Transaction {
     update<AppModelType, DbModelType extends firestore.DocumentData>(documentRef: firestore.DocumentReference<AppModelType, DbModelType>, dataOrField: firestore.UpdateData<DbModelType> | string | firestore.FieldPath, ...preconditionOrValues: Array<firestore.Precondition | unknown | string | firestore.FieldPath>): Transaction;
 }
 
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function trim(fieldName: string, valueToTrim?: string | Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function trim(stringExpression: Expression, valueToTrim?: string | Expression): FunctionExpression;
+
+// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function type(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+//
+// @beta
+function type(expression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function unixMicrosToTimestamp(expr: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function unixMicrosToTimestamp(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function unixMillisToTimestamp(expr: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function unixMillisToTimestamp(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function unixSecondsToTimestamp(expr: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function unixSecondsToTimestamp(fieldName: string): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function vectorLength(vectorExpression: Expression): FunctionExpression;
+
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function vectorLength(fieldName: string): FunctionExpression;
+
 // @public
 export class VectorQuery<AppModelType = firestore.DocumentData, DbModelType extends firestore.DocumentData = firestore.DocumentData> implements firestore.VectorQuery<AppModelType, DbModelType> {
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
@@ -1467,6 +4278,10 @@ export class VectorQuery<AppModelType = firestore.DocumentData, DbModelType exte
     // (undocumented)
     _getResponse(explainOptions?: firestore.ExplainOptions): Promise<QueryResponse<VectorQuerySnapshot<AppModelType, DbModelType>>>;
     isEqual(other: firestore.VectorQuery<AppModelType, DbModelType>): boolean;
+    // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+    //
+    // @internal (undocumented)
+    _pipeline(): Pipeline;
     get query(): Query<AppModelType, DbModelType>;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
     //
@@ -1627,6 +4442,15 @@ export class WriteResult implements firestore.WriteResult {
     get writeTime(): Timestamp;
 }
 
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
+//
+// @beta
+function xor(first: BooleanExpression, second: BooleanExpression, ...additionalConditions: BooleanExpression[]): BooleanExpression;
+
 // Warnings were encountered during analysis:
 //
 // build/types/src/aggregate.d.ts:48:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
@@ -1652,57 +4476,57 @@ export class WriteResult implements firestore.WriteResult {
 // build/types/src/bundle.d.ts:19:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/filter.d.ts:120:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/filter.d.ts:155:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/index.d.ts:296:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/index.d.ts:316:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/index.d.ts:323:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/index.d.ts:344:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/index.d.ts:351:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/index.d.ts:360:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/index.d.ts:368:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/index.d.ts:375:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/index.d.ts:384:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/index.d.ts:868:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/index.d.ts:887:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/index.d.ts:889:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/types/src/index.d.ts:891:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/types/src/index.d.ts:892:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/types/src/index.d.ts:902:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:299:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:319:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:326:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:347:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:354:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:363:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:371:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:378:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:387:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:881:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:900:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:902:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
 // build/types/src/index.d.ts:904:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
 // build/types/src/index.d.ts:905:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/types/src/index.d.ts:907:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/types/src/index.d.ts:908:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/index.d.ts:915:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/index.d.ts:917:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/index.d.ts:918:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/index.d.ts:920:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/index.d.ts:921:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
 // build/types/src/path.d.ts:29:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/path.d.ts:31:4 - (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
-// build/types/src/path.d.ts:127:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/path.d.ts:319:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/path.d.ts:146:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/path.d.ts:338:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/rate-limiter.d.ts:13:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/reference/aggregate-query.d.ts:85:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/aggregate-query.d.ts:86:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/reference/field-filter-internal.d.ts:24:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/reference/field-filter-internal.d.ts:26:4 - (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
 // build/types/src/reference/field-order.d.ts:22:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/reference/field-order.d.ts:24:4 - (tsdoc-undefined-tag) The TSDoc tag "@class" is not defined in this configuration
 // build/types/src/reference/query-options.d.ts:27:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/reference/query.d.ts:425:8 - (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
-// build/types/src/reference/query.d.ts:431:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/reference/query.d.ts:433:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/reference/query.d.ts:435:8 - (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
 // build/types/src/reference/query.d.ts:441:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/reference/query.d.ts:443:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/types/src/reference/query.d.ts:443:15 - (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
-// build/types/src/reference/query.d.ts:445:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/types/src/reference/query.d.ts:445:15 - (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
-// build/types/src/reference/query.d.ts:447:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/types/src/reference/query.d.ts:449:24 - (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// build/types/src/reference/query.d.ts:449:17 - (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+// build/types/src/reference/query.d.ts:452:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/query.d.ts:454:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/reference/query.d.ts:454:15 - (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
+// build/types/src/reference/query.d.ts:456:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/reference/query.d.ts:456:15 - (tsdoc-param-tag-with-invalid-type) The @param block should not include a JSDoc-style '{type}'
 // build/types/src/reference/query.d.ts:458:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/types/src/reference/query.d.ts:460:8 - (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
-// build/types/src/reference/query.d.ts:462:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/reference/query.d.ts:648:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
-// build/types/src/reference/query.d.ts:649:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/reference/vector-query.d.ts:50:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/reference/vector-query.d.ts:55:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/reference/vector-query.d.ts:60:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/serializer.d.ts:25:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/serializer.d.ts:35:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/query.d.ts:460:24 - (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
+// build/types/src/reference/query.d.ts:460:17 - (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
+// build/types/src/reference/query.d.ts:469:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/reference/query.d.ts:471:8 - (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
+// build/types/src/reference/query.d.ts:473:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/query.d.ts:659:8 - (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
+// build/types/src/reference/query.d.ts:660:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/vector-query.d.ts:51:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/vector-query.d.ts:56:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/reference/vector-query.d.ts:61:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/serializer.d.ts:30:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/serializer.d.ts:40:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/telemetry/trace-util.d.ts:66:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/write-batch.d.ts:85:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/write-batch.d.ts:108:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration

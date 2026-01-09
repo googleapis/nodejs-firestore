@@ -24,6 +24,7 @@ import {
 } from '@google-cloud/firestore';
 
 import {afterEach, before, beforeEach, describe, it} from 'mocha';
+import '../test/util/mocha_extensions';
 import {expect, use} from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as extend from 'extend';
@@ -48,6 +49,7 @@ import {autoId, Deferred} from '../src/util';
 import {TEST_BUNDLE_ID, verifyMetadata} from '../test/bundle';
 import {
   bundleToElementArray,
+  isEnterprise,
   Post,
   postConverter,
   postConverterMerge,
@@ -65,7 +67,7 @@ use(chaiAsPromised);
 
 const version = require('../../package.json').version;
 
-class DeferredPromise<T> {
+export class DeferredPromise<T> {
   resolve: Function;
   reject: Function;
   promise: Promise<T> | null;
@@ -101,17 +103,39 @@ if (process.env.NODE_ENV === 'DEBUG') {
   setLogFunction(console.log);
 }
 
-function getTestRoot(settings: Settings = {}): CollectionReference {
+export function getTestDb(settings: Settings = {}): Firestore {
   const internalSettings: Settings = {};
   if (process.env.FIRESTORE_NAMED_DATABASE) {
     internalSettings.databaseId = process.env.FIRESTORE_NAMED_DATABASE;
   }
 
-  const firestore = new Firestore({
+  if (process.env.FIRESTORE_TARGET_BACKEND) {
+    switch (process.env.FIRESTORE_TARGET_BACKEND.toUpperCase()) {
+      case 'PROD': {
+        break;
+      }
+      case 'QA': {
+        internalSettings.host = 'staging-firestore.sandbox.googleapis.com';
+        break;
+      }
+      case 'NIGHTLY': {
+        internalSettings.host = 'test-firestore.sandbox.googleapis.com';
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  }
+
+  return new Firestore({
     ...internalSettings,
     ...settings, // caller settings take precedent over internal settings
   });
-  return firestore.collection(`node_${version}_${autoId()}`);
+}
+
+export function getTestRoot(settings: Settings = {}): CollectionReference {
+  return getTestDb(settings).collection(`node_${version}_${autoId()}`);
 }
 
 describe('Firestore class', () => {
@@ -147,7 +171,7 @@ describe('Firestore class', () => {
       });
   });
 
-  it('can plan a query using default options', async () => {
+  it.skipEnterprise('can plan a query using default options', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
@@ -167,7 +191,7 @@ describe('Firestore class', () => {
     expect(explainResults.snapshot).to.be.null;
   });
 
-  it('can plan a query', async () => {
+  it.skipEnterprise('can plan a query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
@@ -189,7 +213,7 @@ describe('Firestore class', () => {
     expect(explainResults.snapshot).to.be.null;
   });
 
-  it('can profile a query', async () => {
+  it.skipEnterprise('can profile a query', async () => {
     await randomCol.doc('doc1').set({foo: 1, bar: 0});
     await randomCol.doc('doc2').set({foo: 2, bar: 1});
     await randomCol.doc('doc3').set({foo: 1, bar: 2});
@@ -219,77 +243,83 @@ describe('Firestore class', () => {
     expect(explainResults.snapshot!.size).to.equal(2);
   });
 
-  it('can profile a query that does not match any docs', async () => {
-    await randomCol.doc('doc1').set({foo: 1, bar: 0});
-    await randomCol.doc('doc2').set({foo: 2, bar: 1});
-    await randomCol.doc('doc3').set({foo: 1, bar: 2});
-    const results = await randomCol.where('foo', '==', 12345).get();
-    expect(results.empty).to.be.true;
-    expect(results.docs.length).to.equal(0);
-    expect(results.readTime.toMillis()).to.be.greaterThan(0);
+  it.skipEnterprise(
+    'can profile a query that does not match any docs',
+    async () => {
+      await randomCol.doc('doc1').set({foo: 1, bar: 0});
+      await randomCol.doc('doc2').set({foo: 2, bar: 1});
+      await randomCol.doc('doc3').set({foo: 1, bar: 2});
+      const results = await randomCol.where('foo', '==', 12345).get();
+      expect(results.empty).to.be.true;
+      expect(results.docs.length).to.equal(0);
+      expect(results.readTime.toMillis()).to.be.greaterThan(0);
 
-    const explainResults = await randomCol
-      .where('foo', '==', 12345)
-      .explain({analyze: true});
+      const explainResults = await randomCol
+        .where('foo', '==', 12345)
+        .explain({analyze: true});
 
-    const metrics = explainResults.metrics;
+      const metrics = explainResults.metrics;
 
-    expect(metrics.planSummary).to.not.be.null;
-    expect(metrics.executionStats).to.not.be.null;
-    expect(explainResults.snapshot).to.not.be.null;
+      expect(metrics.planSummary).to.not.be.null;
+      expect(metrics.executionStats).to.not.be.null;
+      expect(explainResults.snapshot).to.not.be.null;
 
-    expect(
-      Object.keys(metrics.planSummary.indexesUsed).length,
-    ).to.be.greaterThan(0);
+      expect(
+        Object.keys(metrics.planSummary.indexesUsed).length,
+      ).to.be.greaterThan(0);
 
-    const stats = metrics.executionStats!;
-    expect(stats.readOperations).to.be.greaterThan(0);
-    expect(stats.resultsReturned).to.be.equal(0);
-    expect(
-      stats.executionDuration.nanoseconds > 0 ||
-        stats.executionDuration.seconds > 0,
-    ).to.be.true;
-    expect(Object.keys(stats.debugStats).length).to.be.greaterThan(0);
+      const stats = metrics.executionStats!;
+      expect(stats.readOperations).to.be.greaterThan(0);
+      expect(stats.resultsReturned).to.be.equal(0);
+      expect(
+        stats.executionDuration.nanoseconds > 0 ||
+          stats.executionDuration.seconds > 0,
+      ).to.be.true;
+      expect(Object.keys(stats.debugStats).length).to.be.greaterThan(0);
 
-    expect(explainResults.snapshot!.size).to.equal(0);
-  });
+      expect(explainResults.snapshot!.size).to.equal(0);
+    },
+  );
 
-  it('can stream explain results with default options', async () => {
-    await randomCol.doc('doc1').set({foo: 1, bar: 0});
-    await randomCol.doc('doc2').set({foo: 2, bar: 1});
-    await randomCol.doc('doc3').set({foo: 1, bar: 2});
-    let totalResponses = 0;
-    let totalDocuments = 0;
-    let metrics: ExplainMetrics | null = null;
-    const stream = randomCol.explainStream();
-    const promise = new Promise<boolean>((resolve, reject) => {
-      stream.on('data', data => {
-        ++totalResponses;
-        if (data.document) {
-          ++totalDocuments;
-        }
-        if (data.metrics) {
-          metrics = data.metrics;
-        }
+  it.skipEnterprise(
+    'can stream explain results with default options',
+    async () => {
+      await randomCol.doc('doc1').set({foo: 1, bar: 0});
+      await randomCol.doc('doc2').set({foo: 2, bar: 1});
+      await randomCol.doc('doc3').set({foo: 1, bar: 2});
+      let totalResponses = 0;
+      let totalDocuments = 0;
+      let metrics: ExplainMetrics | null = null;
+      const stream = randomCol.explainStream();
+      const promise = new Promise<boolean>((resolve, reject) => {
+        stream.on('data', data => {
+          ++totalResponses;
+          if (data.document) {
+            ++totalDocuments;
+          }
+          if (data.metrics) {
+            metrics = data.metrics;
+          }
+        });
+        stream.on('end', () => {
+          expect(totalResponses).to.equal(1);
+          expect(totalDocuments).to.equal(0);
+          expect(metrics).to.not.be.null;
+          expect(metrics!.planSummary.indexesUsed.length).to.be.greaterThan(0);
+          expect(metrics!.executionStats).to.be.null;
+          resolve(true);
+        });
+        stream.on('error', (error: Error) => {
+          reject(error);
+        });
       });
-      stream.on('end', () => {
-        expect(totalResponses).to.equal(1);
-        expect(totalDocuments).to.equal(0);
-        expect(metrics).to.not.be.null;
-        expect(metrics!.planSummary.indexesUsed.length).to.be.greaterThan(0);
-        expect(metrics!.executionStats).to.be.null;
-        resolve(true);
-      });
-      stream.on('error', (error: Error) => {
-        reject(error);
-      });
-    });
 
-    const success: boolean = await promise;
-    expect(success).to.be.true;
-  });
+      const success: boolean = await promise;
+      expect(success).to.be.true;
+    },
+  );
 
-  it('can stream explain results without analyze', async () => {
+  it.skipEnterprise('can stream explain results without analyze', async () => {
     await randomCol.doc('doc1').set({foo: 1, bar: 0});
     await randomCol.doc('doc2').set({foo: 2, bar: 1});
     await randomCol.doc('doc3').set({foo: 1, bar: 2});
@@ -324,7 +354,7 @@ describe('Firestore class', () => {
     expect(success).to.be.true;
   });
 
-  it('can stream explain results with analyze', async () => {
+  it.skipEnterprise('can stream explain results with analyze', async () => {
     await randomCol.doc('doc1').set({foo: 1, bar: 0});
     await randomCol.doc('doc2').set({foo: 2, bar: 1});
     await randomCol.doc('doc3').set({foo: 1, bar: 2});
@@ -362,26 +392,29 @@ describe('Firestore class', () => {
     expect(success).to.be.true;
   });
 
-  it('can plan an aggregate query using default options', async () => {
-    await randomCol.doc('doc1').set({foo: 1});
-    await randomCol.doc('doc2').set({foo: 2});
-    await randomCol.doc('doc3').set({foo: 1});
-    const explainResults = await randomCol
-      .where('foo', '>', 0)
-      .count()
-      .explain();
+  it.skipEnterprise(
+    'can plan an aggregate query using default options',
+    async () => {
+      await randomCol.doc('doc1').set({foo: 1});
+      await randomCol.doc('doc2').set({foo: 2});
+      await randomCol.doc('doc3').set({foo: 1});
+      const explainResults = await randomCol
+        .where('foo', '>', 0)
+        .count()
+        .explain();
 
-    const metrics = explainResults.metrics;
+      const metrics = explainResults.metrics;
 
-    const plan = metrics.planSummary;
-    expect(plan).to.not.be.null;
-    expect(Object.keys(plan.indexesUsed).length).to.be.greaterThan(0);
+      const plan = metrics.planSummary;
+      expect(plan).to.not.be.null;
+      expect(Object.keys(plan.indexesUsed).length).to.be.greaterThan(0);
 
-    expect(metrics.executionStats).to.be.null;
-    expect(explainResults.snapshot).to.be.null;
-  });
+      expect(metrics.executionStats).to.be.null;
+      expect(explainResults.snapshot).to.be.null;
+    },
+  );
 
-  it('can plan an aggregate query', async () => {
+  it.skipEnterprise('can plan an aggregate query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
@@ -400,7 +433,7 @@ describe('Firestore class', () => {
     expect(explainResults.snapshot).to.be.null;
   });
 
-  it('can profile an aggregate query', async () => {
+  it.skipEnterprise('can profile an aggregate query', async () => {
     await randomCol.doc('doc1').set({foo: 1});
     await randomCol.doc('doc2').set({foo: 2});
     await randomCol.doc('doc3').set({foo: 1});
@@ -429,7 +462,7 @@ describe('Firestore class', () => {
     expect(explainResults.snapshot!.data().count).to.equal(3);
   });
 
-  it('can plan a vector query', async () => {
+  it.skipEnterprise('can plan a vector query', async () => {
     const indexTestHelper = new IndexTestHelper(firestore);
 
     const collectionReference = await indexTestHelper.createTestDocs([
@@ -461,7 +494,7 @@ describe('Firestore class', () => {
     expect(explainResults.snapshot).to.be.null;
   });
 
-  it('can profile a vector query', async () => {
+  it.skipEnterprise('can profile a vector query', async () => {
     const indexTestHelper = new IndexTestHelper(firestore);
 
     const collectionReference = await indexTestHelper.createTestDocs([
@@ -588,128 +621,125 @@ describe('Firestore class', () => {
 
 // Skip partition query tests when running against the emulator because
 // partition queries are not supported by the emulator.
-(process.env.FIRESTORE_EMULATOR_HOST === undefined ? describe : describe.skip)(
-  'CollectionGroup class',
-  () => {
+describe.skipEmulator.skipEnterprise('CollectionGroup class', () => {
+  const desiredPartitionCount = 3;
+  const documentCount = 2 * 128 + 127; // Minimum partition size is 128.
+
+  let firestore: Firestore;
+  let randomColl: CollectionReference;
+  let collectionGroup: CollectionGroup;
+
+  before(async () => {
+    randomColl = getTestRoot();
+    firestore = randomColl.firestore;
+    collectionGroup = firestore.collectionGroup(randomColl.id);
+
+    const batch = firestore.batch();
+    for (let i = 0; i < documentCount; ++i) {
+      batch.create(randomColl.doc(), {title: 'post', author: 'author'});
+    }
+    await batch.commit();
+  });
+
+  async function getPartitions<T>(
+    collectionGroup: CollectionGroup<T>,
+    desiredPartitionsCount: number,
+  ): Promise<QueryPartition<T>[]> {
+    const partitions: QueryPartition<T>[] = [];
+    for await (const partition of collectionGroup.getPartitions(
+      desiredPartitionsCount,
+    )) {
+      partitions.push(partition);
+    }
+    return partitions;
+  }
+
+  async function verifyPartitions<T>(
+    partitions: QueryPartition<T>[],
+  ): Promise<QueryDocumentSnapshot<T>[]> {
+    expect(partitions.length).to.not.be.greaterThan(desiredPartitionCount);
+
+    expect(partitions[0].startAt).to.be.undefined;
+    for (let i = 0; i < partitions.length - 1; ++i) {
+      // The cursor value is a single DocumentReference
+      expect(
+        (partitions[i].endBefore![0] as DocumentReference<T>).isEqual(
+          partitions[i + 1].startAt![0] as DocumentReference<T>,
+        ),
+      ).to.be.true;
+    }
+    expect(partitions[partitions.length - 1].endBefore).to.be.undefined;
+
+    // Validate that we can use the partitions to read the original documents.
+    const documents: QueryDocumentSnapshot<T>[] = [];
+    for (const partition of partitions) {
+      documents.push(...(await partition.toQuery().get()).docs);
+    }
+    expect(documents.length).to.equal(documentCount);
+
+    return documents;
+  }
+
+  it('partition query', async () => {
+    const partitions = await getPartitions(
+      collectionGroup,
+      desiredPartitionCount,
+    );
+    await verifyPartitions(partitions);
+  });
+
+  it('partition query with manual cursors', async () => {
+    const partitions = await getPartitions(
+      collectionGroup,
+      desiredPartitionCount,
+    );
+
+    const documents: QueryDocumentSnapshot<DocumentData>[] = [];
+    for (const partition of partitions) {
+      let partitionedQuery: Query = collectionGroup.orderBy(
+        FieldPath.documentId(),
+      );
+      if (partition.startAt) {
+        partitionedQuery = partitionedQuery.startAt(...partition.startAt);
+      }
+      if (partition.endBefore) {
+        partitionedQuery = partitionedQuery.endBefore(...partition.endBefore);
+      }
+      documents.push(...(await partitionedQuery.get()).docs);
+    }
+
+    expect(documents.length).to.equal(documentCount);
+  });
+
+  it('partition query with converter', async () => {
+    const collectionGroupWithConverter =
+      collectionGroup.withConverter(postConverter);
+    const partitions = await getPartitions(
+      collectionGroupWithConverter,
+      desiredPartitionCount,
+    );
+    const documents = await verifyPartitions(partitions);
+
+    for (const document of documents) {
+      expect(document.data()).to.be.an.instanceOf(Post);
+    }
+  });
+
+  it('empty partition query', async () => {
     const desiredPartitionCount = 3;
-    const documentCount = 2 * 128 + 127; // Minimum partition size is 128.
 
-    let firestore: Firestore;
-    let randomColl: CollectionReference;
-    let collectionGroup: CollectionGroup;
+    const collectionGroupId = randomColl.doc().id;
+    const collectionGroup = firestore.collectionGroup(collectionGroupId);
+    const partitions = await getPartitions(
+      collectionGroup,
+      desiredPartitionCount,
+    );
 
-    before(async () => {
-      randomColl = getTestRoot();
-      firestore = randomColl.firestore;
-      collectionGroup = firestore.collectionGroup(randomColl.id);
-
-      const batch = firestore.batch();
-      for (let i = 0; i < documentCount; ++i) {
-        batch.create(randomColl.doc(), {title: 'post', author: 'author'});
-      }
-      await batch.commit();
-    });
-
-    async function getPartitions<T>(
-      collectionGroup: CollectionGroup<T>,
-      desiredPartitionsCount: number,
-    ): Promise<QueryPartition<T>[]> {
-      const partitions: QueryPartition<T>[] = [];
-      for await (const partition of collectionGroup.getPartitions(
-        desiredPartitionsCount,
-      )) {
-        partitions.push(partition);
-      }
-      return partitions;
-    }
-
-    async function verifyPartitions<T>(
-      partitions: QueryPartition<T>[],
-    ): Promise<QueryDocumentSnapshot<T>[]> {
-      expect(partitions.length).to.not.be.greaterThan(desiredPartitionCount);
-
-      expect(partitions[0].startAt).to.be.undefined;
-      for (let i = 0; i < partitions.length - 1; ++i) {
-        // The cursor value is a single DocumentReference
-        expect(
-          (partitions[i].endBefore![0] as DocumentReference<T>).isEqual(
-            partitions[i + 1].startAt![0] as DocumentReference<T>,
-          ),
-        ).to.be.true;
-      }
-      expect(partitions[partitions.length - 1].endBefore).to.be.undefined;
-
-      // Validate that we can use the partitions to read the original documents.
-      const documents: QueryDocumentSnapshot<T>[] = [];
-      for (const partition of partitions) {
-        documents.push(...(await partition.toQuery().get()).docs);
-      }
-      expect(documents.length).to.equal(documentCount);
-
-      return documents;
-    }
-
-    it('partition query', async () => {
-      const partitions = await getPartitions(
-        collectionGroup,
-        desiredPartitionCount,
-      );
-      await verifyPartitions(partitions);
-    });
-
-    it('partition query with manual cursors', async () => {
-      const partitions = await getPartitions(
-        collectionGroup,
-        desiredPartitionCount,
-      );
-
-      const documents: QueryDocumentSnapshot<DocumentData>[] = [];
-      for (const partition of partitions) {
-        let partitionedQuery: Query = collectionGroup.orderBy(
-          FieldPath.documentId(),
-        );
-        if (partition.startAt) {
-          partitionedQuery = partitionedQuery.startAt(...partition.startAt);
-        }
-        if (partition.endBefore) {
-          partitionedQuery = partitionedQuery.endBefore(...partition.endBefore);
-        }
-        documents.push(...(await partitionedQuery.get()).docs);
-      }
-
-      expect(documents.length).to.equal(documentCount);
-    });
-
-    it('partition query with converter', async () => {
-      const collectionGroupWithConverter =
-        collectionGroup.withConverter(postConverter);
-      const partitions = await getPartitions(
-        collectionGroupWithConverter,
-        desiredPartitionCount,
-      );
-      const documents = await verifyPartitions(partitions);
-
-      for (const document of documents) {
-        expect(document.data()).to.be.an.instanceOf(Post);
-      }
-    });
-
-    it('empty partition query', async () => {
-      const desiredPartitionCount = 3;
-
-      const collectionGroupId = randomColl.doc().id;
-      const collectionGroup = firestore.collectionGroup(collectionGroupId);
-      const partitions = await getPartitions(
-        collectionGroup,
-        desiredPartitionCount,
-      );
-
-      expect(partitions.length).to.equal(1);
-      expect(partitions[0].startAt).to.be.undefined;
-      expect(partitions[0].endBefore).to.be.undefined;
-    });
-  },
-);
+    expect(partitions.length).to.equal(1);
+    expect(partitions[0].startAt).to.be.undefined;
+    expect(partitions[0].endBefore).to.be.undefined;
+  });
+});
 
 describe('CollectionReference class', () => {
   let firestore: Firestore;
@@ -760,7 +790,8 @@ describe('CollectionReference class', () => {
       });
   });
 
-  it('lists missing documents', async () => {
+  // showMissing is not supported in Enterprise
+  it.skipEnterprise('lists missing documents', async () => {
     const batch = firestore.batch();
 
     batch.set(randomCol.doc('a'), {});
@@ -778,24 +809,28 @@ describe('CollectionReference class', () => {
     expect(missingDocs.map(doc => doc.id)).to.have.members(['b']);
   });
 
-  it('lists documents (more than the max page size)', async () => {
-    const batch = firestore.batch();
-    const expectedResults = [];
-    for (let i = 0; i < 400; i++) {
-      const docRef = randomCol.doc(`${i}`.padStart(3, '0'));
-      batch.set(docRef, {id: i});
-      expectedResults.push(docRef.id);
-    }
-    await batch.commit();
+  // showMissing is not supported in Enterprise
+  it.skipEnterprise(
+    'lists documents (more than the max page size)',
+    async () => {
+      const batch = firestore.batch();
+      const expectedResults = [];
+      for (let i = 0; i < 400; i++) {
+        const docRef = randomCol.doc(`${i}`.padStart(3, '0'));
+        batch.set(docRef, {id: i});
+        expectedResults.push(docRef.id);
+      }
+      await batch.commit();
 
-    const documentRefs = await randomCol.listDocuments();
+      const documentRefs = await randomCol.listDocuments();
 
-    const actualDocIds = documentRefs
-      .map(dr => dr.id)
-      .sort((a, b) => a.localeCompare(b));
+      const actualDocIds = documentRefs
+        .map(dr => dr.id)
+        .sort((a, b) => a.localeCompare(b));
 
-    expect(actualDocIds).to.deep.equal(expectedResults);
-  });
+      expect(actualDocIds).to.deep.equal(expectedResults);
+    },
+  );
 
   it('supports withConverter()', async () => {
     const ref = await firestore
@@ -1191,7 +1226,10 @@ describe('DocumentReference class', () => {
       });
   });
 
-  it('has listCollections() method', () => {
+  // TODO this test times out in the RPC because there is no index in the backend
+  // to support the query. The latency scales with the total number of collection
+  // groups in the database, regardless of which collection / parent is being listed.
+  it.skipEnterprise('has listCollections() method', () => {
     const collections: string[] = [];
     const promises: Array<Promise<{}>> = [];
 
@@ -1835,7 +1873,7 @@ describe('runs query on a large collection', () => {
   });
 });
 
-describe('Query class', () => {
+describe.skipEnterprise('Query class - Standard DB', () => {
   interface PaginatedResults {
     pages: number;
     docs: QueryDocumentSnapshot[];
@@ -2061,7 +2099,7 @@ describe('Query class', () => {
 
       expect(
         res.docs[2].get('embedding').isEqual(FieldValue.vector([20, 0])) ||
-          res.docs[2].get('embedding').isEqual(FieldValue.vector([20, 0])),
+          res.docs[2].get('embedding').isEqual(FieldValue.vector([10, 0])),
       ).to.be.true;
     });
 
@@ -2783,7 +2821,11 @@ describe('Query class', () => {
       {zip: null},
     );
 
-    let res = await randomCol.where('zip', '!=', 98101).get();
+    let res = await randomCol
+      .where('zip', '!=', 98101)
+      .orderBy('zip')
+      .orderBy(FieldPath.documentId())
+      .get();
     expectDocs(
       res,
       {zip: NaN},
@@ -2822,6 +2864,7 @@ describe('Query class', () => {
     const refs = await addDocs({count: 1}, {count: 2}, {count: 3});
     const res = await randomCol
       .where(FieldPath.documentId(), '!=', refs[0].id)
+      .orderBy(FieldPath.documentId())
       .get();
     expectDocs(res, {count: 2}, {count: 3});
   });
@@ -2845,6 +2888,7 @@ describe('Query class', () => {
     );
 
     res = await randomCol.where('zip', 'not-in', [NaN]).get();
+
     expectDocs(
       res,
       {zip: 91102},
@@ -2856,6 +2900,7 @@ describe('Query class', () => {
     );
 
     res = await randomCol.where('zip', 'not-in', [null]).get();
+
     expect(res.size).to.equal(0);
   });
 
@@ -2876,7 +2921,10 @@ describe('Query class', () => {
       {zip: ['98101', {zip: 98101}]},
       {zip: {zip: 98101}},
     );
-    const res = await randomCol.where('zip', 'in', [98101, 98103]).get();
+    const res = await randomCol
+      .where('zip', 'in', [98101, 98103])
+      .orderBy('zip')
+      .get();
     expectDocs(res, {zip: 98101}, {zip: 98103});
   });
 
@@ -3212,6 +3260,7 @@ describe('Query class', () => {
 
     const querySnapshot = await firestore
       .collectionGroup(collectionGroup)
+      .orderBy(FieldPath.documentId())
       .get();
     expect(querySnapshot.docs.map(d => d.id)).to.deep.equal([
       'cg-doc1',
@@ -3287,6 +3336,7 @@ describe('Query class', () => {
       .collectionGroup(collectionGroup)
       .where(FieldPath.documentId(), '>=', 'a/b')
       .where(FieldPath.documentId(), '<=', 'a/b0')
+      .orderBy(FieldPath.documentId())
       .get();
     expect(querySnapshot.docs.map(d => d.id)).to.deep.equal([
       'cg-doc2',
@@ -3330,6 +3380,7 @@ describe('Query class', () => {
         .where(
           Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1)),
         )
+        .orderBy(FieldPath.documentId())
         .get(),
       'doc1',
       'doc2',
@@ -3346,6 +3397,7 @@ describe('Query class', () => {
             Filter.and(Filter.where('a', '==', 3), Filter.where('b', '==', 2)),
           ),
         )
+        .orderBy(FieldPath.documentId())
         .get(),
       'doc1',
       'doc3',
@@ -3360,6 +3412,7 @@ describe('Query class', () => {
             Filter.or(Filter.where('b', '==', 0), Filter.where('b', '==', 3)),
           ),
         )
+        .orderBy(FieldPath.documentId())
         .get(),
       'doc1',
       'doc4',
@@ -3374,6 +3427,7 @@ describe('Query class', () => {
             Filter.or(Filter.where('a', '==', 3), Filter.where('b', '==', 3)),
           ),
         )
+        .orderBy(FieldPath.documentId())
         .get(),
       'doc3',
     );
@@ -3385,87 +3439,84 @@ describe('Query class', () => {
           Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1)),
         )
         .limit(1)
+        .orderBy(FieldPath.documentId())
         .get(),
       'doc2',
     );
   });
 
-  // Skip this test if running against production because it results in a 'missing index' error.
-  // The Firestore Emulator, however, does serve these queries.
-  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it.skip : it)(
-    'supports OR queries with composite indexes',
-    async () => {
-      const collection = await testCollectionWithDocs({
-        doc1: {a: 1, b: 0},
-        doc2: {a: 2, b: 1},
-        doc3: {a: 3, b: 2},
-        doc4: {a: 1, b: 3},
-        doc5: {a: 1, b: 1},
-      });
+  // TODO Enterprise - wait for implicit sort order decision
+  // Skip this test if running against standard production because it results in a 'missing index' error.
+  it.skipClassic('supports OR queries with composite indexes', async () => {
+    const collection = await testCollectionWithDocs({
+      doc1: {a: 1, b: 0},
+      doc2: {a: 2, b: 1},
+      doc3: {a: 3, b: 2},
+      doc4: {a: 1, b: 3},
+      doc5: {a: 1, b: 1},
+    });
 
-      // with one inequality: a>2 || b==1.
-      expectDocs(
-        await collection
-          .where(
-            Filter.or(Filter.where('a', '>', 2), Filter.where('b', '==', 1)),
-          )
-          .get(),
-        'doc5',
-        'doc2',
-        'doc3',
-      );
+    // with one inequality: a>2 || b==1.
+    expectDocs(
+      await collection
+        .where(Filter.or(Filter.where('a', '>', 2), Filter.where('b', '==', 1)))
+        .orderBy(FieldPath.documentId())
+        .get(),
+      'doc2',
+      'doc3',
+      'doc5',
+    );
 
-      // Test with limits (implicit order by ASC): (a==1) || (b > 0) LIMIT 2
-      expectDocs(
-        await collection
-          .where(
-            Filter.or(Filter.where('a', '==', 1), Filter.where('b', '>', 0)),
-          )
-          .limit(2)
-          .get(),
-        'doc1',
-        'doc2',
-      );
+    // Test with limits (implicit order by ASC): (a==1) || (b > 0) LIMIT 2
+    expectDocs(
+      await collection
+        .where(Filter.or(Filter.where('a', '==', 1), Filter.where('b', '>', 0)))
+        .limit(2)
+        .orderBy(FieldPath.documentId())
+        .get(),
+      'doc1',
+      'doc2',
+    );
 
-      // Test with limits (explicit order by): (a==1) || (b > 0) LIMIT_TO_LAST 2
-      // Note: The public query API does not allow implicit ordering when limitToLast is used.
-      expectDocs(
-        await collection
-          .where(
-            Filter.or(Filter.where('a', '==', 1), Filter.where('b', '>', 0)),
-          )
-          .limitToLast(2)
-          .orderBy('b')
-          .get(),
-        'doc3',
-        'doc4',
-      );
+    // Test with limits (explicit order by): (a==1) || (b > 0) LIMIT_TO_LAST 2
+    // Note: The public query API does not allow implicit ordering when limitToLast is used.
+    expectDocs(
+      await collection
+        .where(Filter.or(Filter.where('a', '==', 1), Filter.where('b', '>', 0)))
+        .limitToLast(2)
+        .orderBy('b')
+        .orderBy(FieldPath.documentId())
+        .get(),
+      'doc3',
+      'doc4',
+    );
 
-      // Test with limits (explicit order by ASC): (a==2) || (b == 1) ORDER BY a LIMIT 1
-      expectDocs(
-        await collection
-          .where(
-            Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1)),
-          )
-          .limit(1)
-          .orderBy('a')
-          .get(),
-        'doc5',
-      );
+    // Test with limits (explicit order by ASC): (a==2) || (b == 1) ORDER BY a LIMIT 1
+    expectDocs(
+      await collection
+        .where(
+          Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1)),
+        )
+        .limit(1)
+        .orderBy('a')
+        .orderBy(FieldPath.documentId())
+        .get(),
+      'doc5',
+    );
 
-      // Test with limits (explicit order by DESC): (a==2) || (b == 1) ORDER BY a LIMIT 1
-      expectDocs(
-        await collection
-          .where(
-            Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1)),
-          )
-          .limit(1)
-          .orderBy('a', 'desc')
-          .get(),
-        'doc2',
-      );
-    },
-  );
+    // Test with limits (explicit order by DESC): (a==2) || (b == 1) ORDER BY a LIMIT 1
+    expectDocs(
+      await collection
+        .where(
+          Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1)),
+        )
+        .limit(1)
+        .orderBy('a', 'desc')
+        .orderBy(FieldPath.documentId())
+        .get(),
+      'doc2',
+    );
+  });
 
   it('supports OR queries on documents with missing fields', async () => {
     const collection = await testCollectionWithDocs({
@@ -3485,6 +3536,7 @@ describe('Query class', () => {
         .where(
           Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1)),
         )
+        .orderBy(FieldPath.documentId())
         .get(),
       'doc1',
       'doc2',
@@ -3493,9 +3545,9 @@ describe('Query class', () => {
     );
   });
 
-  // Skip this test if running against production because it results in a 'missing index' error.
-  // The Firestore Emulator, however, does serve these queries.
-  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it.skip : it)(
+  // Skip this test if running against production standard DB because it results in a 'missing index' error.
+  // The Firestore Emulator and Enterprise-editions, however, do serve these queries.
+  it.skipClassic(
     'supports OR queries on documents with missing fields',
     async () => {
       const collection = await testCollectionWithDocs({
@@ -3515,6 +3567,7 @@ describe('Query class', () => {
             Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1)),
           )
           .orderBy('a')
+          .orderBy(FieldPath.documentId())
           .get(),
         'doc1',
         'doc4',
@@ -3529,6 +3582,7 @@ describe('Query class', () => {
             Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1)),
           )
           .orderBy('b')
+          .orderBy(FieldPath.documentId())
           .get(),
         'doc1',
         'doc2',
@@ -3537,7 +3591,7 @@ describe('Query class', () => {
 
       // Query: a>2 || b==1.
       // This query has an implicit 'order by a'.
-      // doc2 should not be included because it's missing the field 'a'.
+      // Standard Ed: doc2 should not be included because it's missing the field 'a'.
       expectDocs(
         await collection
           .where(
@@ -3582,6 +3636,7 @@ describe('Query class', () => {
             Filter.where('b', 'in', [2, 3]),
           ),
         )
+        .orderBy(FieldPath.documentId())
         .get(),
       'doc3',
       'doc4',
@@ -3590,35 +3645,30 @@ describe('Query class', () => {
   });
 
   // Skip this test if running against production because it results in a 'missing index' error.
-  // The Firestore Emulator, however, does serve these queries.
-  (process.env.FIRESTORE_EMULATOR_HOST === undefined ? it.skip : it)(
-    'supports OR queries with not-in',
-    async () => {
-      const collection = await testCollectionWithDocs({
-        doc1: {a: 1, b: 0},
-        doc2: {b: 1},
-        doc3: {a: 3, b: 2},
-        doc4: {a: 1, b: 3},
-        doc5: {a: 1},
-        doc6: {a: 2},
-      });
-
-      // a==2 || (b != 2 && b != 3)
-      // Has implicit "orderBy b"
-      expectDocs(
-        await collection
-          .where(
-            Filter.or(
-              Filter.where('a', '==', 2),
-              Filter.where('b', 'not-in', [2, 3]),
-            ),
-          )
-          .get(),
-        'doc1',
-        'doc2',
-      );
-    },
-  );
+  it.skipClassic('supports OR queries with not-in', async () => {
+    const collection = await testCollectionWithDocs({
+      doc1: {a: 1, b: 0},
+      doc2: {b: 1},
+      doc3: {a: 3, b: 2},
+      doc4: {a: 1, b: 3},
+      doc5: {a: 1},
+      doc6: {a: 2},
+    });
+    // a==2 || (b != 2 && b != 3)
+    // Has implicit "orderBy b"
+    expectDocs(
+      await collection
+        .where(
+          Filter.or(
+            Filter.where('a', '==', 2),
+            Filter.where('b', 'not-in', [2, 3]),
+          ),
+        )
+        .get(),
+      'doc1',
+      'doc2',
+    );
+  });
 
   it('supports OR queries with array membership', async () => {
     const collection = await testCollectionWithDocs({
@@ -3639,6 +3689,7 @@ describe('Query class', () => {
             Filter.where('b', 'array-contains', 7),
           ),
         )
+        .orderBy(FieldPath.documentId())
         .get(),
       'doc3',
       'doc4',
@@ -3655,6 +3706,7 @@ describe('Query class', () => {
             Filter.where('b', 'array-contains-any', [0, 3]),
           ),
         )
+        .orderBy(FieldPath.documentId())
         .get(),
       'doc1',
       'doc4',
@@ -3936,111 +3988,135 @@ describe('Query class', () => {
       unsubscribe();
     });
 
-    it('snapshot listener sorts query by DocumentId same way as server', async () => {
-      const batch = firestore.batch();
-      batch.set(randomCol.doc('A'), {a: 1});
-      batch.set(randomCol.doc('a'), {a: 1});
-      batch.set(randomCol.doc('Aa'), {a: 1});
-      batch.set(randomCol.doc('7'), {a: 1});
-      batch.set(randomCol.doc('12'), {a: 1});
-      batch.set(randomCol.doc('__id7__'), {a: 1});
-      batch.set(randomCol.doc('__id12__'), {a: 1});
-      batch.set(randomCol.doc('__id-2__'), {a: 1});
-      batch.set(randomCol.doc('__id1_'), {a: 1});
-      batch.set(randomCol.doc('_id1__'), {a: 1});
-      batch.set(randomCol.doc('__id'), {a: 1});
-      // largest long number
-      batch.set(randomCol.doc('__id9223372036854775807__'), {a: 1});
-      batch.set(randomCol.doc('__id9223372036854775806__'), {a: 1});
-      // smallest long number
-      batch.set(randomCol.doc('__id-9223372036854775808__'), {a: 1});
-      batch.set(randomCol.doc('__id-9223372036854775807__'), {a: 1});
-      await batch.commit();
+    it.skipEnterprise(
+      'snapshot listener sorts query by DocumentId same way as server',
+      async () => {
+        const batch = firestore.batch();
+        batch.set(randomCol.doc('A'), {a: 1});
+        batch.set(randomCol.doc('a'), {a: 1});
+        batch.set(randomCol.doc('Aa'), {a: 1});
+        batch.set(randomCol.doc('7'), {a: 1});
+        batch.set(randomCol.doc('12'), {a: 1});
+        batch.set(randomCol.doc('__id7__'), {a: 1});
+        batch.set(randomCol.doc('__id12__'), {a: 1});
+        batch.set(randomCol.doc('__id-2__'), {a: 1});
+        batch.set(randomCol.doc('__id1_'), {a: 1});
+        batch.set(randomCol.doc('_id1__'), {a: 1});
+        batch.set(randomCol.doc('__id'), {a: 1});
+        // largest long number
+        batch.set(randomCol.doc('__id9223372036854775807__'), {a: 1});
+        batch.set(randomCol.doc('__id9223372036854775806__'), {a: 1});
+        // smallest long number
+        batch.set(randomCol.doc('__id-9223372036854775808__'), {a: 1});
+        batch.set(randomCol.doc('__id-9223372036854775807__'), {a: 1});
+        await batch.commit();
 
-      const query = randomCol.orderBy(FieldPath.documentId());
-      const expectedDocs = [
-        '__id-9223372036854775808__',
-        '__id-9223372036854775807__',
-        '__id-2__',
-        '__id7__',
-        '__id12__',
-        '__id9223372036854775806__',
-        '__id9223372036854775807__',
-        '12',
-        '7',
-        'A',
-        'Aa',
-        '__id',
-        '__id1_',
-        '_id1__',
-        'a',
-      ];
+        const query = randomCol.orderBy(FieldPath.documentId());
+        const expectedDocs = isEnterprise()
+          ? [
+              '12',
+              '7',
+              'A',
+              'Aa',
+              '__id',
+              '__id-2__',
+              '__id-9223372036854775807__',
+              '__id-9223372036854775808__',
+              '__id12__',
+              '__id1_',
+              '__id7__',
+              '__id9223372036854775806__',
+              '__id9223372036854775807__',
+              '_id1__',
+              'a',
+            ]
+          : [
+              '__id-9223372036854775808__',
+              '__id-9223372036854775807__',
+              '__id-2__',
+              '__id7__',
+              '__id12__',
+              '__id9223372036854775806__',
+              '__id9223372036854775807__',
+              '12',
+              '7',
+              'A',
+              'Aa',
+              '__id',
+              '__id1_',
+              '_id1__',
+              'a',
+            ];
 
-      const getSnapshot = await query.get();
-      expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
+        const getSnapshot = await query.get();
+        expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
 
-      const unsubscribe = query.onSnapshot(snapshot =>
-        currentDeferred.resolve(snapshot),
-      );
+        const unsubscribe = query.onSnapshot(snapshot =>
+          currentDeferred.resolve(snapshot),
+        );
 
-      const watchSnapshot = await waitForSnapshot();
-      // Compare the snapshot (including sort order) of a snapshot
-      snapshotsEqual(watchSnapshot, {
-        docs: getSnapshot.docs,
-        docChanges: getSnapshot.docChanges(),
-      });
-      unsubscribe();
-    });
+        const watchSnapshot = await waitForSnapshot();
+        // Compare the snapshot (including sort order) of a snapshot
+        snapshotsEqual(watchSnapshot, {
+          docs: getSnapshot.docs,
+          docChanges: getSnapshot.docChanges(),
+        });
+        unsubscribe();
+      },
+    );
 
-    it('snapshot listener sorts filtered query by DocumentId same way as server', async () => {
-      const batch = firestore.batch();
-      batch.set(randomCol.doc('A'), {a: 1});
-      batch.set(randomCol.doc('a'), {a: 1});
-      batch.set(randomCol.doc('Aa'), {a: 1});
-      batch.set(randomCol.doc('7'), {a: 1});
-      batch.set(randomCol.doc('12'), {a: 1});
-      batch.set(randomCol.doc('__id7__'), {a: 1});
-      batch.set(randomCol.doc('__id12__'), {a: 1});
-      batch.set(randomCol.doc('__id-2__'), {a: 1});
-      batch.set(randomCol.doc('__id1_'), {a: 1});
-      batch.set(randomCol.doc('_id1__'), {a: 1});
-      batch.set(randomCol.doc('__id'), {a: 1});
-      // largest long number
-      batch.set(randomCol.doc('__id9223372036854775807__'), {a: 1});
-      batch.set(randomCol.doc('__id9223372036854775806__'), {a: 1});
-      // smallest long number
-      batch.set(randomCol.doc('__id-9223372036854775808__'), {a: 1});
-      batch.set(randomCol.doc('__id-9223372036854775807__'), {a: 1});
-      await batch.commit();
+    it.skipEnterprise(
+      'snapshot listener sorts filtered query by DocumentId same way as server',
+      async () => {
+        const batch = firestore.batch();
+        batch.set(randomCol.doc('A'), {a: 1});
+        batch.set(randomCol.doc('a'), {a: 1});
+        batch.set(randomCol.doc('Aa'), {a: 1});
+        batch.set(randomCol.doc('7'), {a: 1});
+        batch.set(randomCol.doc('12'), {a: 1});
+        batch.set(randomCol.doc('__id7__'), {a: 1});
+        batch.set(randomCol.doc('__id12__'), {a: 1});
+        batch.set(randomCol.doc('__id-2__'), {a: 1});
+        batch.set(randomCol.doc('__id1_'), {a: 1});
+        batch.set(randomCol.doc('_id1__'), {a: 1});
+        batch.set(randomCol.doc('__id'), {a: 1});
+        // largest long number
+        batch.set(randomCol.doc('__id9223372036854775807__'), {a: 1});
+        batch.set(randomCol.doc('__id9223372036854775806__'), {a: 1});
+        // smallest long number
+        batch.set(randomCol.doc('__id-9223372036854775808__'), {a: 1});
+        batch.set(randomCol.doc('__id-9223372036854775807__'), {a: 1});
+        await batch.commit();
 
-      const query = randomCol
-        .where(FieldPath.documentId(), '>', '__id7__')
-        .where(FieldPath.documentId(), '<=', 'A')
-        .orderBy(FieldPath.documentId());
-      const expectedDocs = [
-        '__id12__',
-        '__id9223372036854775806__',
-        '__id9223372036854775807__',
-        '12',
-        '7',
-        'A',
-      ];
+        const query = randomCol
+          .where(FieldPath.documentId(), '>', '__id7__')
+          .where(FieldPath.documentId(), '<=', 'A')
+          .orderBy(FieldPath.documentId());
+        const expectedDocs = [
+          '__id12__',
+          '__id9223372036854775806__',
+          '__id9223372036854775807__',
+          '12',
+          '7',
+          'A',
+        ];
 
-      const getSnapshot = await query.get();
-      expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
+        const getSnapshot = await query.get();
+        expect(getSnapshot.docs.map(d => d.id)).to.deep.equal(expectedDocs);
 
-      const unsubscribe = query.onSnapshot(snapshot =>
-        currentDeferred.resolve(snapshot),
-      );
+        const unsubscribe = query.onSnapshot(snapshot =>
+          currentDeferred.resolve(snapshot),
+        );
 
-      const watchSnapshot = await waitForSnapshot();
-      // Compare the snapshot (including sort order) of a snapshot
-      snapshotsEqual(watchSnapshot, {
-        docs: getSnapshot.docs,
-        docChanges: getSnapshot.docChanges(),
-      });
-      unsubscribe();
-    });
+        const watchSnapshot = await waitForSnapshot();
+        // Compare the snapshot (including sort order) of a snapshot
+        snapshotsEqual(watchSnapshot, {
+          docs: getSnapshot.docs,
+          docChanges: getSnapshot.docChanges(),
+        });
+        unsubscribe();
+      },
+    );
 
     it('SDK orders vector field same way as backend', async () => {
       // We validate that the SDK orders the vector field the same way as the backend
@@ -5787,7 +5863,11 @@ describe('Aggregation queries', () => {
           totalRating: AggregateField.sum('rating'),
         })
         .get();
-      expect(snapshot.data().totalRating).to.equal(0);
+      if (isEnterprise()) {
+        expect(snapshot.data().totalRating).to.equal(null);
+      } else {
+        expect(snapshot.data().totalRating).to.equal(0);
+      }
     });
 
     it('performs sum only on numeric fields', async () => {
@@ -7319,12 +7399,12 @@ describe('BulkWriter class', () => {
       await batch.commit();
     });
 
-    it('on top-level collection', async () => {
+    it.skipEnterprise('on top-level collection', async () => {
       await firestore.recursiveDelete(randomCol);
       expect(await countCollectionChildren(randomCol)).to.equal(0);
     });
 
-    it('on nested collection', async () => {
+    it.skipEnterprise('on nested collection', async () => {
       const coll = randomCol.doc('bob').collection('parentsCol');
       await firestore.recursiveDelete(coll);
 
@@ -7332,7 +7412,8 @@ describe('BulkWriter class', () => {
       expect(await countCollectionChildren(randomCol)).to.equal(2);
     });
 
-    it('on nested document', async () => {
+    // TODO enterprise waiting on b/469490062
+    it.skip('on nested document', async () => {
       const doc = randomCol.doc('bob/parentsCol/daniel');
       await firestore.recursiveDelete(doc);
 
@@ -7342,7 +7423,8 @@ describe('BulkWriter class', () => {
       expect(await countCollectionChildren(randomCol)).to.equal(3);
     });
 
-    it('on leaf document', async () => {
+    // TODO enterprise b/469490062
+    it.skipEnterprise('on leaf document', async () => {
       const doc = randomCol.doc('bob/parentsCol/daniel/childCol/ernie');
       await firestore.recursiveDelete(doc);
 
@@ -7351,7 +7433,8 @@ describe('BulkWriter class', () => {
       expect(await countCollectionChildren(randomCol)).to.equal(5);
     });
 
-    it('does not affect other collections', async () => {
+    // TODO enterprise b/469490062
+    it.skipEnterprise('does not affect other collections', async () => {
       // Add other nested collection that shouldn't be deleted.
       const collB = firestore.collection('doggos');
       await collB.doc('doggo').set({name: 'goodboi'});
@@ -7418,7 +7501,11 @@ describe('Client initialization', () => {
     ],
     [
       'CollectionReference.listDocuments()',
-      randomColl => randomColl.listDocuments(),
+
+      randomColl => {
+        if (process.env.RUN_ENTERPRISE_TESTS) return Promise.resolve();
+        return randomColl.listDocuments();
+      },
     ],
     [
       'CollectionReference.onSnapshot()',
@@ -7455,7 +7542,11 @@ describe('Client initialization', () => {
     ['DocumentReference.delete()', randomColl => randomColl.doc().delete()],
     [
       'DocumentReference.listCollections()',
-      randomColl => randomColl.doc().listCollections(),
+      randomColl => {
+        // TODO enterprise waiting on b/469490062, skip for now
+        if (isEnterprise()) return Promise.resolve();
+        return randomColl.doc().listCollections();
+      },
     ],
     [
       'DocumentReference.onSnapshot()',
@@ -7471,6 +7562,9 @@ describe('Client initialization', () => {
     [
       'CollectionGroup.getPartitions()',
       async randomColl => {
+        // Requires PartitionQuery support
+        if (process.env.RUN_ENTERPRISE_TESTS) return;
+
         const partitions = randomColl.firestore
           .collectionGroup('id')
           .getPartitions(2);

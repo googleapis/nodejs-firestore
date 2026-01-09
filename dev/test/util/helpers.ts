@@ -467,3 +467,10 @@ export function isPreferRest(): boolean {
     process.env.FIRESTORE_PREFER_REST === 'true'
   );
 }
+
+/**
+ * Returns a value indicating whether the tests are running against an Enterprise edition DB
+ */
+export function isEnterprise(): boolean {
+  return !!process.env.RUN_ENTERPRISE_TESTS;
+}

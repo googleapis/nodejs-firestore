@@ -94,9 +94,11 @@ const REST_TEST_SUITE_TITLE = 'REST';
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 
 // Enable Firestore debug messages for local debugging.
-setLogFunction((msg: string) => {
-  console.log(`LOG: ${msg}`);
-});
+if (process.env.NODE_ENV === 'DEBUG') {
+  setLogFunction((msg: string) => {
+    console.log(`LOG: ${msg}`);
+  });
+}
 
 interface TestConfig {
   // In-Memory tests check trace correctness by inspecting traces in memory by
@@ -155,7 +157,7 @@ class SpanData {
   }
 }
 
-describe('Tracing Tests', () => {
+describe.skipEnterprise('Tracing Tests', () => {
   let firestore: Firestore;
   let tracerProvider: NodeTracerProvider;
   let inMemorySpanExporter: InMemorySpanExporter;
@@ -898,7 +900,8 @@ describe('Tracing Tests', () => {
       });
     });
 
-    it('collection reference list documents', async () => {
+    // Enterprise: field mask is not supported
+    it.skipEnterprise('collection reference list documents', async () => {
       await runFirestoreOperationInRootSpan(() =>
         firestore.collection('foo').listDocuments(),
       );
@@ -1026,7 +1029,8 @@ describe('Tracing Tests', () => {
       expectSpanHierarchy(SPAN_NAME_TEST_ROOT, SPAN_NAME_BATCH_COMMIT);
     });
 
-    it('partition query', async () => {
+    // Service not implemented for Enterprise DB: PartitionQuery
+    it.skipEnterprise('partition query', async () => {
       await runFirestoreOperationInRootSpan(async () => {
         const query = firestore.collectionGroup('foo');
         let numPartitions = 0;

@@ -3,7 +3,11 @@
   "overrides": [
     {
       "files": [
-        "dev/src/*.ts"
+        "dev/src/**/*.ts"
+      ],
+      "excludedFiles": [
+        "dev/src/v1/*.ts",
+        "dev/src/v1beta1/*.ts"
       ],
       "parser": "@typescript-eslint/parser",
       "rules": {
@@ -14,7 +18,14 @@
             "allowTypedFunctionExpressions": true
           }
         ],
-        "no-console": ["error", {"allow": ["error"]}]
+        "no-console": ["error", {"allow": ["error"]}],
+        "@typescript-eslint/no-unused-vars": [
+          "warn",
+          {
+            // Ignore args that are underscore only
+            "argsIgnorePattern": "^_$"
+          }
+        ]
       }
     },
     {
@@ -35,7 +46,27 @@
             "property": "only"
           }
         ],
+        "@typescript-eslint/no-unused-vars": [
+          "warn",
+          {
+            // Ignore args that are underscore only
+            "argsIgnorePattern": "^_$"
+          }
+        ],
         "@typescript-eslint/no-floating-promises": "warn"
+      }
+    },
+    {
+      "files": [
+        "dev/src/v1/**/*.ts",
+        "dev/src/v1beta1/**/*.ts",
+        "dev/test/gapic_firestore_v1.ts",
+        "dev/test/gapic_firestore_admin_v1.ts",
+        "dev/test/gapic_firestore_admin_v1.ts"
+      ],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": ["off"],
+        "@typescript-eslint/no-floating-promises": ["off"]
       }
     }
   ]

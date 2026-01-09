@@ -40,6 +40,14 @@ export class CompositeFilterInternal extends FilterInternal {
     return this.operator === 'AND';
   }
 
+  /**
+   * @private
+   * @internal
+   */
+  public _getOperator(): api.StructuredQuery.CompositeFilter.Operator {
+    return this.operator;
+  }
+
   public getFlattenedFilters(): FieldFilterInternal[] {
     if (this.memoizedFlattenedFilters !== null) {
       return this.memoizedFlattenedFilters;
