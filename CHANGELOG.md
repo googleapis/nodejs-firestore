@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [8.2.0](https://github.com/googleapis/nodejs-firestore/compare/v8.1.0...v8.2.0) (2026-01-09)
+
+
+### Features
+
+* Pipelines preview ([#2450](https://github.com/googleapis/nodejs-firestore/issues/2450)) ([c80e618](https://github.com/googleapis/nodejs-firestore/commit/c80e6181709b72c943a445eb0a5a2fa63d2776dd))
+
 ## [8.1.0](https://github.com/googleapis/nodejs-firestore/compare/v8.0.0...v8.1.0) (2025-12-22)
 
 
