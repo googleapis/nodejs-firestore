@@ -194,7 +194,7 @@ export class QuerySnapshot<
    * this is the first snapshot, all documents will be in the list as added
    * changes.
    *
-   * @return {Array.<DocumentChange>}
+   * @returns {Array.<DocumentChange>}
    *
    * @example
    * ```
@@ -256,7 +256,7 @@ export class QuerySnapshot<
    * provided value.
    *
    * @param {*} other The value to compare against.
-   * @return {boolean} true if this `QuerySnapshot` is equal to the provided
+   * @returns {boolean} true if this `QuerySnapshot` is equal to the provided
    * value.
    */
   isEqual(other: firestore.QuerySnapshot<AppModelType, DbModelType>): boolean {
