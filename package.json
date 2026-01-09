@@ -100,7 +100,7 @@
     "gts": "^6.0.2",
     "jsdoc": "^4.0.4",
     "jsdoc-fresh": "^4.0.0",
-    "jsdoc-region-tag": "^3.0.0",
+    "jsdoc-region-tag": "^4.0.0",
     "length-prefixed-json-stream": "^1.0.1",
     "linkinator": "^6.1.4",
     "mkdirp": "^3.0.1",
