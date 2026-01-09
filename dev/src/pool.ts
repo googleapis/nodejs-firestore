@@ -289,7 +289,7 @@ export class ClientPool<T extends object> {
   /**
    * The number of currently registered clients.
    *
-   * @return Number of currently registered clients.
+   * @returns Number of currently registered clients.
    * @private
    * @internal
    */
@@ -301,7 +301,7 @@ export class ClientPool<T extends object> {
   /**
    * The number of currently active operations.
    *
-   * @return Number of currently active operations.
+   * @returns Number of currently active operations.
    * @private
    * @internal
    */
@@ -317,7 +317,7 @@ export class ClientPool<T extends object> {
   /**
    * The currently active clients.
    *
-   * @return The currently active clients.
+   * @returns The currently active clients.
    * @private
    * @internal
    */
@@ -337,7 +337,7 @@ export class ClientPool<T extends object> {
    * @param requestTag A unique client-assigned identifier for this operation.
    * @param op A callback function that returns a Promise. The client T will
    * be returned to the pool when callback finishes.
-   * @return A Promise that resolves with the result of `op`.
+   * @returns A Promise that resolves with the result of `op`.
    * @private
    * @internal
    */

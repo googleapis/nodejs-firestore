@@ -950,7 +950,7 @@ export class Firestore implements firestore.Firestore {
 
   /**
    * @beta
-   * Creates and returns a new PipelineSource, which allows specifying the source stage of a {@link Pipeline}.
+   * Creates and returns a new PipelineSource, which allows specifying the source stage of a `Pipeline`.
    *
    * @example
    * ```
@@ -991,7 +991,7 @@ export class Firestore implements firestore.Firestore {
    * multiple writes in parallel. Gradually ramps up writes as specified
    * by the 500/50/5 rule.
    *
-   * If you pass [BulkWriterOptions]{@link BulkWriterOptions}, you can
+   * If you pass `BulkWriterOptions`, you can
    * configure the throttling rates for the created BulkWriter.
    *
    * @see [500/50/5 Documentation]{@link https://firebase.google.com/docs/firestore/best-practices#ramping_up_traffic}
@@ -1436,7 +1436,7 @@ export class Firestore implements firestore.Firestore {
    * @param ref The reference of a document or collection to delete.
    * @param bulkWriter A custom BulkWriter instance used to perform the
    * deletes.
-   * @return A promise that resolves when all deletes have been performed.
+   * @returns A promise that resolves when all deletes have been performed.
    * The promise is rejected if any of the deletes fail.
    *
    * @example
@@ -1502,7 +1502,7 @@ export class Firestore implements firestore.Firestore {
   /**
    * Terminates the Firestore client and closes all open streams.
    *
-   * @return A Promise that resolves when the client is terminated.
+   * @returns A Promise that resolves when the client is terminated.
    */
   async terminate(): Promise<void> {
     if (this._bulkWriter) {
@@ -1524,7 +1524,7 @@ export class Firestore implements firestore.Firestore {
    * Returns the Project ID to serve as the JSON representation of this
    * Firestore instance.
    *
-   * @return An object that contains the project ID (or `undefined` if not yet
+   * @returns An object that contains the project ID (or `undefined` if not yet
    * available).
    */
   toJSON(): object {
@@ -1538,7 +1538,7 @@ export class Firestore implements firestore.Firestore {
    * @internal
    * @param requestTag A unique client-assigned identifier that caused this
    * initialization.
-   * @return A Promise that resolves when the client is initialized.
+   * @returns A Promise that resolves when the client is initialized.
    */
   async initializeIfNeeded(requestTag: string): Promise<void> {
     this._settingsFrozen = true;
@@ -1573,10 +1573,7 @@ export class Firestore implements firestore.Firestore {
 
         // If the project ID was undefined when the TraceUtil was set up, we
         // need to record it.
-        this._traceUtil.recordProjectIdAndResourceName(
-          this.projectId,
-          this.databaseId,
-        );
+        this._traceUtil.recordProjectId(this.projectId);
       } catch (err) {
         logger(
           'Firestore.initializeIfNeeded',

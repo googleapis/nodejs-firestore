@@ -158,7 +158,7 @@ export class DocumentSnapshot<
    * @internal
    * @param ref The reference to the document.
    * @param obj The object to store in the DocumentSnapshot.
-   * @return The created DocumentSnapshot.
+   * @returns The created DocumentSnapshot.
    */
   static fromObject<AppModelType, DbModelType extends firestore.DocumentData>(
     ref: DocumentReference<AppModelType, DbModelType>,
@@ -177,7 +177,7 @@ export class DocumentSnapshot<
    * @internal
    * @param ref The reference to the document.
    * @param data The field/value map to expand.
-   * @return The created DocumentSnapshot.
+   * @returns The created DocumentSnapshot.
    */
   static fromUpdateMap<
     AppModelType,
@@ -552,7 +552,7 @@ export class DocumentSnapshot<
    * equal to the provided value.
    *
    * @param {*} other The value to compare against.
-   * @return {boolean} true if this `DocumentSnapshot` is equal to the provided
+   * @returns {boolean} true if this `DocumentSnapshot` is equal to the provided
    * value.
    */
   isEqual(
@@ -783,7 +783,7 @@ export class DocumentMask {
    *
    * @private
    * @internal
-   * @return {boolean} Whether this document mask is empty.
+   * @returns {boolean} Whether this document mask is empty.
    */
   get isEmpty(): boolean {
     return this._sortedPaths.length === 0;
@@ -835,7 +835,7 @@ export class DocumentMask {
    * @private
    * @internal
    * @param fieldPath The field path to test.
-   * @return Whether this document mask contains 'fieldPath'.
+   * @returns Whether this document mask contains 'fieldPath'.
    */
   contains(fieldPath: FieldPath): boolean {
     for (const sortedPath of this._sortedPaths) {
@@ -858,7 +858,7 @@ export class DocumentMask {
    * @private
    * @internal
    * @param data An object to filter.
-   * @return A shallow copy of the object filtered by this document mask.
+   * @returns A shallow copy of the object filtered by this document mask.
    */
   applyTo(data: firestore.DocumentData): firestore.DocumentData {
     /*!
