@@ -1835,6 +1835,14 @@ describe('DocumentReference class', () => {
 
     unlisten();
   });
+
+  it('will error on create if document already exists', async () => {
+    const ref = randomCol.doc();
+    await ref.create({});
+    return expect(ref.create({})).to.be.eventually.rejectedWith(
+      /already exists/
+    );
+  });
 });
 
 describe('runs query on a large collection', () => {
