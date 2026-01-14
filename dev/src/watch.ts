@@ -825,7 +825,7 @@ abstract class Watch<
    * @private
    * @internal
    * @param error An error object.
-   * @return Whether the error is permanent.
+   * @returns Whether the error is permanent.
    */
   private isPermanentWatchError(error: GoogleError): boolean {
     if (error.code === undefined) {
@@ -860,7 +860,7 @@ abstract class Watch<
    * @private
    * @internal
    * @param error A GRPC Error object that exposes an error code.
-   * @return Whether we need to back off our retries.
+   * @returns Whether we need to back off our retries.
    */
   private isResourceExhaustedError(error: GoogleError): boolean {
     return error.code === Status.RESOURCE_EXHAUSTED;

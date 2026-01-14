@@ -82,7 +82,7 @@ export class AggregateQuery<
   /**
    * Executes this query.
    *
-   * @return A promise that will be resolved with the results of the query.
+   * @returns A promise that will be resolved with the results of the query.
    */
   async get(): Promise<
     AggregateQuerySnapshot<AggregateSpecType, AppModelType, DbModelType>
@@ -392,7 +392,7 @@ export class AggregateQuery<
    * using `Query.isEqual()`.
    *
    * @param other The object to compare to this object for equality.
-   * @return `true` if this object is "equal" to the given object, as
+   * @returns `true` if this object is "equal" to the given object, as
    * defined above, or `false` otherwise.
    */
   isEqual(
@@ -419,7 +419,7 @@ export class AggregateQuery<
    * resolved with the planner information, statistics from the query
    * execution (if any), and the query results (if any).
    *
-   * @return A Promise that will be resolved with the planner information,
+   * @returns A Promise that will be resolved with the planner information,
    * statistics from the query execution (if any), and the query results (if any).
    */
   async explain(

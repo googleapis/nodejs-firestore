@@ -540,7 +540,7 @@ export class DocumentReference<
    * Returns true if this `DocumentReference` is equal to the provided value.
    *
    * @param {*} other The value to compare against.
-   * @return {boolean} true if this `DocumentReference` is equal to the provided
+   * @returns {boolean} true if this `DocumentReference` is equal to the provided
    * value.
    */
   isEqual(
@@ -623,7 +623,7 @@ export class DocumentReference<
    * ```
    * @param {FirestoreDataConverter | null} converter Converts objects to and
    * from Firestore. Passing in `null` removes the current converter.
-   * @return A DocumentReference that uses the provided converter.
+   * @returns A DocumentReference that uses the provided converter.
    */
   withConverter<
     NewAppModelType,

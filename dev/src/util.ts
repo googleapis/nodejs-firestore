@@ -246,7 +246,7 @@ export function wrapError(err: Error, stack: string): Error {
  * This function will warn to the console if the environment variable is set
  * to an unsupported value.
  *
- * @return `true` if the environment variable enables `preferRest`,
+ * @returns `true` if the environment variable enables `preferRest`,
  * `false` if the environment variable disables `preferRest`, or `undefined`
  * if the environment variable is not set or is set to an unsupported value.
  *
@@ -297,7 +297,7 @@ export function mapToArray<V, R>(
  * @internal
  * @param left Array of objects supporting `isEqual`.
  * @param right Array of objects supporting `isEqual`.
- * @return True if arrays are equal.
+ * @returns True if arrays are equal.
  */
 export function isArrayEqual<T extends {isEqual: (t: T) => boolean}>(
   left: T[],
@@ -323,7 +323,7 @@ export function isArrayEqual<T extends {isEqual: (t: T) => boolean}>(
  * @internal
  * @param left Optional object supporting `isEqual`.
  * @param right Optional object supporting `isEqual`.
- * @return True if equal.
+ * @returns True if equal.
  */
 export function isOptionalEqual<T extends {isEqual: (t: T) => boolean}>(
   left: T | undefined,
@@ -347,7 +347,7 @@ export function isOptionalEqual<T extends {isEqual: (t: T) => boolean}>(
  * @internal
  * @param left Array of primitives.
  * @param right Array of primitives.
- * @return True if arrays are equal.
+ * @returns True if arrays are equal.
  */
 export function isPrimitiveArrayEqual<T extends number | string>(
   left: T[],

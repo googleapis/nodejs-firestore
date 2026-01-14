@@ -332,7 +332,7 @@ export function invalidArgumentMessage(
  * @internal
  * @param value The input to validate.
  * @param options Whether the function can be omitted.
- * @return Whether the object is omitted and is allowed to be omitted.
+ * @returns Whether the object is omitted and is allowed to be omitted.
  */
 export function validateOptional(
   value: unknown,
@@ -361,7 +361,7 @@ function formatPlural(num: number, str: string): string {
  * @private
  * @internal
  * @param arg The argument name or argument index (for varargs methods).
- * @return Either the argument name or its index description.
+ * @returns Either the argument name or its index description.
  */
 function formatArgumentName(arg: string | number): string {
   return typeof arg === 'string'

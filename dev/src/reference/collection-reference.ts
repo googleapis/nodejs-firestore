@@ -145,7 +145,7 @@ export class CollectionReference<
    * document reference (e.g. via `.get()` or `.onSnapshot()`) will return a
    * `DocumentSnapshot` whose `.exists` property is false.
    *
-   * @return {Promise<DocumentReference[]>} The list of documents in this
+   * @returns {Promise<DocumentReference[]>} The list of documents in this
    * collection.
    *
    * @example
@@ -291,7 +291,7 @@ export class CollectionReference<
    * Returns true if this `CollectionReference` is equal to the provided value.
    *
    * @param {*} other The value to compare against.
-   * @return {boolean} true if this `CollectionReference` is equal to the
+   * @returns {boolean} true if this `CollectionReference` is equal to the
    * provided value.
    */
   isEqual(
@@ -364,7 +364,7 @@ export class CollectionReference<
    * ```
    * @param {FirestoreDataConverter | null} converter Converts objects to and
    * from Firestore. Passing in `null` removes the current converter.
-   * @return A CollectionReference that uses the provided converter.
+   * @returns A CollectionReference that uses the provided converter.
    */
   withConverter<
     NewAppModelType,

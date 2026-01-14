@@ -1971,7 +1971,7 @@ export declare class FirestoreAdminClient {
    *
    *   The second parameter to the callback is an object representing
    *   {@link google.longrunning.Operation | google.longrunning.Operation}.
-   * @return {Promise} - The promise which resolves to an array.
+   * @returns {Promise} - The promise which resolves to an array.
    *   The first element of the array is an object representing
    * {@link google.longrunning.Operation | google.longrunning.Operation}.
    * The promise has a method named "cancel" which cancels the ongoing API call.
@@ -2054,7 +2054,7 @@ export declare class FirestoreAdminClient {
    * details.
    * @param {function(?Error)=} callback
    *   The function which will be called with the result of the API call.
-   * @return {Promise} - The promise which resolves when API call finishes.
+   * @returns {Promise} - The promise which resolves when API call finishes.
    *   The promise has a method named "cancel" which cancels the ongoing API
    * call.
    *
@@ -2094,7 +2094,7 @@ export declare class FirestoreAdminClient {
    * for the details.
    * @param {function(?Error)=} callback
    *   The function which will be called with the result of the API call.
-   * @return {Promise} - The promise which resolves when API call finishes.
+   * @returns {Promise} - The promise which resolves when API call finishes.
    *   The promise has a method named "cancel" which cancels the ongoing API
    * call.
    *
