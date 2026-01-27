@@ -1720,6 +1720,10 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     regexContains(pattern: Expression): BooleanExpression;
+    regexFind(pattern: string): FunctionExpression;
+    regexFind(pattern: Expression): FunctionExpression;
+    regexFindAll(pattern: string): FunctionExpression;
+    regexFindAll(pattern: Expression): FunctionExpression;
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     regexMatch(pattern: string): BooleanExpression;
@@ -4527,7 +4531,7 @@ function xor(first: BooleanExpression, second: BooleanExpression, ...additionalC
 // build/types/src/reference/vector-query.d.ts:61:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/serializer.d.ts:30:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/serializer.d.ts:40:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/telemetry/trace-util.d.ts:66:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/telemetry/trace-util.d.ts:67:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/write-batch.d.ts:85:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/write-batch.d.ts:108:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 
