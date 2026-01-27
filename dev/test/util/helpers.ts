@@ -468,9 +468,19 @@ export function isPreferRest(): boolean {
   );
 }
 
+export type FirestoreEdition = 'STANDARD' | 'ENTERPRISE';
+
+export function getFirestoreEdition(): FirestoreEdition {
+  const edition = process.env.FIRESTORE_EDITION;
+  if (edition && edition.toUpperCase() === 'ENTERPRISE') {
+    return 'ENTERPRISE';
+  }
+  return 'STANDARD';
+}
+
 /**
  * Returns a value indicating whether the tests are running against an Enterprise edition DB
  */
 export function isEnterprise(): boolean {
-  return !!process.env.RUN_ENTERPRISE_TESTS;
+  return getFirestoreEdition() === 'ENTERPRISE';
 }
