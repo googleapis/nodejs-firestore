@@ -35,7 +35,7 @@ import {QueryResponse} from './types';
 
 /**
  * A query that finds the documents whose vector fields are closest to a certain query vector.
- * Create an instance of `VectorQuery` with {@link Query.findNearest}.
+ * Create an instance of `VectorQuery` with {@link Query.findNearest:VectorQueryOptions}.
  */
 export class VectorQuery<
   AppModelType = firestore.DocumentData,
@@ -111,7 +111,7 @@ export class VectorQuery<
    * resolved with the planner information, statistics from the query execution (if any),
    * and the query results (if any).
    *
-   * @return A Promise that will be resolved with the planner information, statistics
+   * @returns A Promise that will be resolved with the planner information, statistics
    *  from the query execution (if any), and the query results (if any).
    */
   async explain(

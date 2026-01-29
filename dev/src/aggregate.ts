@@ -101,7 +101,7 @@ export class AggregateField<T> implements firestore.AggregateField<T> {
    * `other` performs the same kind of aggregation on the same field (if any).
    *
    * @param other The object to compare to this object for equality.
-   * @return `true` if this object is "equal" to the given object, as
+   * @returns `true` if this object is "equal" to the given object, as
    * defined above, or `false` otherwise.
    */
   isEqual(other: AggregateField<T>): boolean {

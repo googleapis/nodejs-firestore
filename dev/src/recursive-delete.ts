@@ -223,7 +223,7 @@ export class RecursiveDelete {
    * @param ref The reference to fetch all descendants for.
    * @private
    * @internal
-   * @return {Stream<QueryDocumentSnapshot>} Stream of descendant documents.
+   * @returns {Stream<QueryDocumentSnapshot>} Stream of descendant documents.
    */
   private getAllDescendants(
     ref: CollectionReference<unknown> | DocumentReference<unknown>,

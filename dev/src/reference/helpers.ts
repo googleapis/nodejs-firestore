@@ -28,7 +28,7 @@ import {comparisonOperators, directionOperators} from './constants';
  * @param arg The argument name or argument index (for varargs methods).
  * @param op Order direction to validate.
  * @throws when the direction is invalid
- * @return a validated input value, which may be different from the provided
+ * @returns a validated input value, which may be different from the provided
  * value.
  */
 export function validateQueryOrder(
@@ -50,7 +50,7 @@ export function validateQueryOrder(
  * @param op Field comparison operator to validate.
  * @param fieldValue Value that is used in the filter.
  * @throws when the comparison operation is invalid
- * @return a validated input value, which may be different from the provided
+ * @returns a validated input value, which may be different from the provided
  * value.
  */
 export function validateQueryOperator(
@@ -92,7 +92,7 @@ export function validateQueryOperator(
  * @internal
  * @param arg The argument name or argument index (for varargs methods).
  * @param value The argument to validate.
- * @return the DocumentReference if valid
+ * @returns the DocumentReference if valid
  */
 export function validateDocumentReference<
   AppModelType,

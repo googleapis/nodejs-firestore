@@ -370,7 +370,7 @@ class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
    * Creates a watch, starts a listen, and asserts that the request got
    * processed.
    *
-   * @return The unsubscribe handler for the listener.
+   * @returns The unsubscribe handler for the listener.
    */
   startWatch(): () => void {
     this.unsubscribe = this.reference.onSnapshot(
@@ -387,7 +387,7 @@ class WatchHelper<T = QuerySnapshot | DocumentSnapshot> {
   /**
    * Ends the listen stream.
    *
-   * @return A Promise that will be fulfilled when the backend saw the end.
+   * @returns A Promise that will be fulfilled when the backend saw the end.
    */
   async endWatch(): Promise<void> {
     this.unsubscribe!();

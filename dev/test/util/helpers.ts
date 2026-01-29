@@ -58,7 +58,7 @@ export type ApiOverride = Partial<GapicClient>;
  *
  * @param apiOverrides An object with request handlers to override.
  * @param firestoreSettings Firestore Settings to configure the client.
- * @return A Promise that resolves with the new Firestore client.
+ * @returns A Promise that resolves with the new Firestore client.
  */
 export function createInstance(
   apiOverrides?: ApiOverride,
@@ -437,7 +437,7 @@ export async function bundleToElementArray(
  * });
  *
  * @param iterator the iterator whose elements over which to iterate.
- * @return a Promise that is fulfilled with the elements that were produced, or
+ * @returns a Promise that is fulfilled with the elements that were produced, or
  * is rejected with the cause of the first failed iteration.
  */
 export async function collect<T, TReturn, TNext>(
@@ -459,7 +459,7 @@ export async function collect<T, TReturn, TNext>(
  * Returns a value indicating whether preferRest is enabled
  * via the environment variable `FIRESTORE_PREFER_REST`.
  *
- * @return `true` if preferRest is enabled via the environment variable `FIRESTORE_PREFER_REST`.
+ * @returns `true` if preferRest is enabled via the environment variable `FIRESTORE_PREFER_REST`.
  */
 export function isPreferRest(): boolean {
   return (

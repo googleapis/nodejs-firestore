@@ -84,7 +84,7 @@ export class GeoPoint implements Serializable, firestore.GeoPoint {
    * Returns true if this `GeoPoint` is equal to the provided value.
    *
    * @param {*} other The value to compare against.
-   * @return {boolean} true if this `GeoPoint` is equal to the provided value.
+   * @returns {boolean} true if this `GeoPoint` is equal to the provided value.
    */
   isEqual(other: firestore.GeoPoint): boolean {
     return (

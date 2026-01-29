@@ -146,7 +146,7 @@ export class Query<
    * @param documentSnapshot The document to extract the fields from.
    * @param fieldOrders The field order that defines what fields we should
    * extract.
-   * @return {Array.<*>} The field values to use.
+   * @returns {Array.<*>} The field values to use.
    */
   static _extractFieldValues(
     documentSnapshot: DocumentSnapshot,
@@ -498,7 +498,7 @@ export class Query<
    * Results for limitToLast queries cannot be streamed via the `stream()` API.
    *
    * @param limit The maximum number of items to return.
-   * @return The created Query.
+   * @returns The created Query.
    *
    * @example
    * ```
@@ -558,7 +558,7 @@ export class Query<
    * query can count the documents in cases where the result set is
    * prohibitively large to download entirely (thousands of documents).
    *
-   * @return a query that counts the documents in the result set of this
+   * @returns a query that counts the documents in the result set of this
    * query. The count can be retrieved from `snapshot.data().count`, where
    * `snapshot` is the `AggregateQuerySnapshot` resulting from running the
    * returned query.
@@ -637,7 +637,7 @@ export class Query<
    * be a positive integer with a maximum value of 1000. `distanceMeasure` specifies what type of distance is calculated
    * when performing the query.
    *
-   * @deprecated Use the new {@link findNearest} implementation
+   * @deprecated Use the new {@link Query.(findNearest:VectorQueryOptions)} implementation
    * accepting a single `options` param.
    */
   findNearest(
@@ -875,7 +875,7 @@ export class Query<
    * Returns true if this `Query` is equal to the provided value.
    *
    * @param {*} other The value to compare against.
-   * @return {boolean} true if this `Query` is equal to the provided value.
+   * @returns {boolean} true if this `Query` is equal to the provided value.
    */
   isEqual(other: firestore.Query<AppModelType, DbModelType>): boolean {
     if (this === other) {
@@ -890,7 +890,7 @@ export class Query<
   /**
    * Returns the sorted array of inequality filter fields used in this query.
    *
-   * @return An array of inequality filter fields sorted lexicographically by FieldPath.
+   * @returns An array of inequality filter fields sorted lexicographically by FieldPath.
    */
   private getInequalityFilterFields(): FieldPath[] {
     const inequalityFields: FieldPath[] = [];
@@ -1034,7 +1034,7 @@ export class Query<
    *
    * @param val The value to validate.
    * @throws If the value cannot be used for this query.
-   * @return If valid, returns a DocumentReference that can be used with the
+   * @returns If valid, returns a DocumentReference that can be used with the
    * query.
    * @private
    * @internal
@@ -1305,7 +1305,7 @@ export class Query<
    * resolved with the planner information, statistics from the query execution (if any),
    * and the query results (if any).
    *
-   * @return A Promise that will be resolved with the planner information, statistics
+   * @returns A Promise that will be resolved with the planner information, statistics
    *  from the query execution (if any), and the query results (if any).
    */
   async explain(
@@ -1798,7 +1798,7 @@ export class Query<
    * ```
    * @param {FirestoreDataConverter | null} converter Converts objects to and
    * from Firestore. Passing in `null` removes the current converter.
-   * @return A Query that uses the provided converter.
+   * @returns A Query that uses the provided converter.
    */
   withConverter<
     NewAppModelType,
