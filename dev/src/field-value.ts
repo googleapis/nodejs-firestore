@@ -130,7 +130,7 @@ export class FieldValue implements firestore.FieldValue {
    * Returns a sentinel used with set(), create() or update() to include a
    * server-generated timestamp in the written data.
    *
-   * @return {FieldValue} The FieldValue sentinel for use in a call to set(),
+   * @returns {FieldValue} The FieldValue sentinel for use in a call to set(),
    * create() or update().
    *
    * @example
@@ -164,7 +164,7 @@ export class FieldValue implements firestore.FieldValue {
    * not yet exist, the transformation will set the field to the given value.
    *
    * @param {number} n The value to increment by.
-   * @return {FieldValue} The FieldValue sentinel for use in a call to set(),
+   * @returns {FieldValue} The FieldValue sentinel for use in a call to set(),
    * create() or update().
    *
    * @example
@@ -195,7 +195,7 @@ export class FieldValue implements firestore.FieldValue {
    * exactly the specified elements.
    *
    * @param {...*} elements The elements to union into the array.
-   * @return {FieldValue} The FieldValue sentinel for use in a call to set(),
+   * @returns {FieldValue} The FieldValue sentinel for use in a call to set(),
    * create() or update().
    *
    * @example
@@ -224,7 +224,7 @@ export class FieldValue implements firestore.FieldValue {
    * an array it will be overwritten with an empty array.
    *
    * @param {...*} elements The elements to remove from the array.
-   * @return {FieldValue} The FieldValue sentinel for use in a call to set(),
+   * @returns {FieldValue} The FieldValue sentinel for use in a call to set(),
    * create() or update().
    *
    * @example
@@ -249,7 +249,7 @@ export class FieldValue implements firestore.FieldValue {
    * Returns true if this `FieldValue` is equal to the provided value.
    *
    * @param {*} other The value to compare against.
-   * @return {boolean} true if this `FieldValue` is equal to the provided value.
+   * @returns {boolean} true if this `FieldValue` is equal to the provided value.
    *
    * @example
    * ```
@@ -316,7 +316,7 @@ export abstract class FieldTransform extends FieldValue {
    *
    * @param serializer The Firestore serializer.
    * @param fieldPath The field path to apply this transformation to.
-   * @return The 'FieldTransform' proto message.
+   * @returns The 'FieldTransform' proto message.
    */
   abstract toProto(
     serializer: Serializer,

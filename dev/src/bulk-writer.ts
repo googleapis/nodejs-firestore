@@ -865,7 +865,7 @@ export class BulkWriter {
    * for writes that were added after the method is called. If you want to wait
    * for additional writes, call `flush()` again.
    *
-   * @return {Promise<void>} A promise that resolves when all enqueued writes
+   * @returns {Promise<void>} A promise that resolves when all enqueued writes
    * up to this point have been committed.
    *
    * @example
@@ -906,7 +906,7 @@ export class BulkWriter {
    * Promise will never be rejected. Calling this method will send all requests.
    * The promise resolves immediately if there are no pending writes.
    *
-   * @return {Promise<void>} A promise that resolves when all enqueued writes
+   * @returns {Promise<void>} A promise that resolves when all enqueued writes
    * up to this point have been committed.
    *
    * @example
