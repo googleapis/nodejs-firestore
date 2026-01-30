@@ -7565,7 +7565,10 @@ declare namespace FirebaseFirestore {
      * @param pattern - The regular expression to search for.
      * @returns A new {@link Expression} representing the regular expression find function.
      */
-    export function regexFind(fieldName: string, pattern: string): FunctionExpression;
+    export function regexFind(
+      fieldName: string,
+      pattern: string,
+    ): FunctionExpression;
     /**
      * @beta
      *
@@ -7584,7 +7587,10 @@ declare namespace FirebaseFirestore {
      * @param pattern - The regular expression to search for.
      * @returns A new {@link Expression} representing the regular expression find function.
      */
-    export function regexFind(fieldName: string, pattern: Expression): FunctionExpression;
+    export function regexFind(
+      fieldName: string,
+      pattern: Expression,
+    ): FunctionExpression;
     /**
      * @beta
      *
@@ -7603,7 +7609,10 @@ declare namespace FirebaseFirestore {
      * @param pattern - The regular expression to search for.
      * @returns A new {@link Expression} representing the regular expression find function.
      */
-    export function regexFind(stringExpression: Expression, pattern: string): FunctionExpression;
+    export function regexFind(
+      stringExpression: Expression,
+      pattern: string,
+    ): FunctionExpression;
     /**
      * @beta
      *
@@ -7622,7 +7631,10 @@ declare namespace FirebaseFirestore {
      * @param pattern - The regular expression to search for.
      * @returns A new {@link Expression} representing the regular expression find function.
      */
-    export function regexFind(stringExpression: Expression, pattern: Expression): FunctionExpression;
+    export function regexFind(
+      stringExpression: Expression,
+      pattern: Expression,
+    ): FunctionExpression;
     /**
      * @beta
      *
@@ -7641,7 +7653,10 @@ declare namespace FirebaseFirestore {
      * @param pattern - The regular expression to search for.
      * @returns A new {@link Expression} that evaluates to an array of matched substrings.
      */
-    export function regexFindAll(fieldName: string, pattern: string): FunctionExpression;
+    export function regexFindAll(
+      fieldName: string,
+      pattern: string,
+    ): FunctionExpression;
     /**
      * @beta
      *
@@ -7660,7 +7675,10 @@ declare namespace FirebaseFirestore {
      * @param pattern - The regular expression to search for.
      * @returns A new {@link Expression} that evaluates to an array of matched substrings.
      */
-    export function regexFindAll(fieldName: string, pattern: Expression): FunctionExpression;
+    export function regexFindAll(
+      fieldName: string,
+      pattern: Expression,
+    ): FunctionExpression;
     /**
      * @beta
      *
@@ -7679,7 +7697,10 @@ declare namespace FirebaseFirestore {
      * @param pattern - The regular expression to search for.
      * @returns A new {@link Expression} that evaluates to an array of matched substrings.
      */
-    export function regexFindAll(stringExpression: Expression, pattern: string): FunctionExpression;
+    export function regexFindAll(
+      stringExpression: Expression,
+      pattern: string,
+    ): FunctionExpression;
     /**
      * @beta
      *
@@ -7698,8 +7719,10 @@ declare namespace FirebaseFirestore {
      * @param pattern - The regular expression to search for.
      * @returns A new {@link Expression} that evaluates to an array of matched substrings.
      */
-    export function regexFindAll(stringExpression: Expression, pattern: Expression): FunctionExpression;
-
+    export function regexFindAll(
+      stringExpression: Expression,
+      pattern: Expression,
+    ): FunctionExpression;
 
     /**
      * @beta
