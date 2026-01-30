@@ -3741,6 +3741,78 @@ declare namespace FirebaseFirestore {
        * @return A new {@link BooleanExpression} representing the 'contains' comparison.
        */
       regexContains(pattern: Expression): BooleanExpression;
+
+      /**
+       * @beta
+       * Creates an expression that returns the first substring of a string expression that matches
+       * a specified regular expression.
+       *
+       * This expression uses the {@link https://github.com/google/re2/wiki/Syntax | RE2} regular expression syntax.
+       *
+       * @example
+       * ```typescript
+       * // Extract the domain from an email address
+       * field("email").regexFind("@.+")
+       * ```
+       *
+       * @param pattern - The regular expression to search for.
+       * @returns A new {@link Expression} representing the regular expression find function.
+       */
+      regexFind(pattern: string): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that returns the first substring of a string expression that matches
+       * a specified regular expression.
+       *
+       * This expression uses the {@link https://github.com/google/re2/wiki/Syntax | RE2} regular expression syntax.
+       *
+       * @example
+       * ```typescript
+       * // Extract the domain from an email address
+       * field("email").regexFind(field("domain"))
+       * ```
+       *
+       * @param pattern - The regular expression to search for.
+       * @returns A new {@link Expression} representing the regular expression find function.
+       */
+      regexFind(pattern: Expression): FunctionExpression;
+      /**
+       * @beta
+       *
+       * Creates an expression that evaluates to a list of all substrings in this string expression that
+       * match a specified regular expression.
+       *
+       * This expression uses the {@link https://github.com/google/re2/wiki/Syntax | RE2} regular expression syntax.
+       *
+       * @example
+       * ```typescript
+       * // Extract all hashtags from a post content field
+       * field("content").regexFindAll("#[A-Za-z0-9_]+")
+       * ```
+       *
+       * @param pattern - The regular expression to search for.
+       * @returns A new {@link Expression} that evaluates to an array of matched substrings.
+       */
+      regexFindAll(pattern: string): FunctionExpression;
+      /**
+       * @beta
+       *
+       * Creates an expression that evaluates to a list of all substrings in this string expression that
+       * match a specified regular expression.
+       *
+       * This expression uses the {@link https://github.com/google/re2/wiki/Syntax | RE2} regular expression syntax.
+       *
+       * @example
+       * ```typescript
+       * // Extract all names from a post content field
+       * field("content").regexFindAll(field("names"))
+       * ```
+       *
+       * @param pattern - The regular expression to search for.
+       * @returns A new {@link Expression} that evaluates to an array of matched substrings.
+       */
+      regexFindAll(pattern: Expression): FunctionExpression;
+
       /**
        * @beta
        * Creates an expression that checks if a string matches a specified regular expression.
@@ -7474,6 +7546,161 @@ declare namespace FirebaseFirestore {
       stringExpression: Expression,
       pattern: Expression,
     ): BooleanExpression;
+
+    /**
+     * @beta
+     *
+     * Creates an expression that returns the first substring of a string field that matches a
+     * specified regular expression.
+     *
+     * This expression uses the {@link https://github.com/google/re2/wiki/Syntax | RE2} regular expression syntax.
+     *
+     * @example
+     * ```typescript
+     * // Extract the domain name from an email field
+     * regexFind("email", "@[A-Za-z0-9.-]+");
+     * ```
+     *
+     * @param fieldName - The name of the field containing the string to search.
+     * @param pattern - The regular expression to search for.
+     * @returns A new {@link Expression} representing the regular expression find function.
+     */
+    export function regexFind(fieldName: string, pattern: string): FunctionExpression;
+    /**
+     * @beta
+     *
+     * Creates an expression that returns the first substring of a string field that matches a
+     * specified regular expression.
+     *
+     * This expression uses the {@link https://github.com/google/re2/wiki/Syntax | RE2} regular expression syntax.
+     *
+     * @example
+     * ```typescript
+     * // Extract a substring from 'email' based on a pattern stored in another field
+     * regexFind("email", field("pattern"));
+     * ```
+     *
+     * @param fieldName - The name of the field containing the string to search.
+     * @param pattern - The regular expression to search for.
+     * @returns A new {@link Expression} representing the regular expression find function.
+     */
+    export function regexFind(fieldName: string, pattern: Expression): FunctionExpression;
+    /**
+     * @beta
+     *
+     * Creates an expression that returns the first substring of a string expression that matches
+     * a specified regular expression.
+     *
+     * This expression uses the {@link https://github.com/google/re2/wiki/Syntax | RE2} regular expression syntax.
+     *
+     * @example
+     * ```typescript
+     * // Extract the domain from a lower-cased email address
+     * regexFind(field("email"), "@[A-Za-z0-9.-]+");
+     * ```
+     *
+     * @param stringExpression - The expression representing the string to search.
+     * @param pattern - The regular expression to search for.
+     * @returns A new {@link Expression} representing the regular expression find function.
+     */
+    export function regexFind(stringExpression: Expression, pattern: string): FunctionExpression;
+    /**
+     * @beta
+     *
+     * Creates an expression that returns the first substring of a string expression that matches
+     * a specified regular expression.
+     *
+     * This expression uses the {@link https://github.com/google/re2/wiki/Syntax | RE2} regular expression syntax.
+     *
+     * @example
+     * ```typescript
+     * // Extract a substring based on a dynamic pattern field
+     * regexFind(field("email"), field("pattern"));
+     * ```
+     *
+     * @param stringExpression - The expression representing the string to search.
+     * @param pattern - The regular expression to search for.
+     * @returns A new {@link Expression} representing the regular expression find function.
+     */
+    export function regexFind(stringExpression: Expression, pattern: Expression): FunctionExpression;
+    /**
+     * @beta
+     *
+     * Creates an expression that evaluates to a list of all substrings in a string field that
+     * match a specified regular expression.
+     *
+     * This expression uses the {@link https://github.com/google/re2/wiki/Syntax | RE2} regular expression syntax.
+     *
+     * @example
+     * ```typescript
+     * // Extract all hashtags from a post content field
+     * regexFindAll("content", "#[A-Za-z0-9_]+");
+     * ```
+     *
+     * @param fieldName - The name of the field containing the string to search.
+     * @param pattern - The regular expression to search for.
+     * @returns A new {@link Expression} that evaluates to an array of matched substrings.
+     */
+    export function regexFindAll(fieldName: string, pattern: string): FunctionExpression;
+    /**
+     * @beta
+     *
+     * Creates an expression that evaluates to a list of all substrings in a string field that
+     * match a specified regular expression.
+     *
+     * This expression uses the {@link https://github.com/google/re2/wiki/Syntax | RE2} regular expression syntax.
+     *
+     * @example
+     * ```typescript
+     * // Extract all matches from 'content' based on a pattern stored in another field
+     * regexFindAll("content", field("pattern"));
+     * ```
+     *
+     * @param fieldName - The name of the field containing the string to search.
+     * @param pattern - The regular expression to search for.
+     * @returns A new {@link Expression} that evaluates to an array of matched substrings.
+     */
+    export function regexFindAll(fieldName: string, pattern: Expression): FunctionExpression;
+    /**
+     * @beta
+     *
+     * Creates an expression that evaluates to a list of all substrings in a string expression
+     * that match a specified regular expression.
+     *
+     * This expression uses the {@link https://github.com/google/re2/wiki/Syntax | RE2} regular expression syntax.
+     *
+     * @example
+     * ```typescript
+     * // Extract all mentions from a lower-cased comment
+     * regexFindAll(field("comment"), "@[A-Za-z0-9_]+");
+     * ```
+     *
+     * @param stringExpression - The expression representing the string to search.
+     * @param pattern - The regular expression to search for.
+     * @returns A new {@link Expression} that evaluates to an array of matched substrings.
+     */
+    export function regexFindAll(stringExpression: Expression, pattern: string): FunctionExpression;
+    /**
+     * @beta
+     *
+     * Creates an expression that evaluates to a list of all substrings in a string expression
+     * that match a specified regular expression.
+     *
+     * This expression uses the {@link https://github.com/google/re2/wiki/Syntax | RE2} regular expression syntax.
+     *
+     * @example
+     * ```typescript
+     * // Extract all matches based on a dynamic pattern expression
+     * regexFindAll(field("comment"), field("pattern"));
+     * ```
+     *
+     * @param stringExpression - The expression representing the string to search.
+     * @param pattern - The regular expression to search for.
+     * @returns A new {@link Expression} that evaluates to an array of matched substrings.
+     */
+    export function regexFindAll(stringExpression: Expression, pattern: Expression): FunctionExpression;
+
+
     /**
      * @beta
      * Creates an expression that checks if a string field matches a specified regular expression.
