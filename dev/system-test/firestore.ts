@@ -22,6 +22,7 @@ import {
   VectorValue,
   WithFieldValue,
 } from '@google-cloud/firestore';
+import {getTestData} from './testdata';
 
 import {afterEach, before, beforeEach, describe, it} from 'mocha';
 import '../test/util/mocha_extensions';
@@ -148,6 +149,38 @@ describe('Firestore class', () => {
   });
 
   afterEach(() => verifyInstance(firestore));
+
+  it.only('nodejs-firestore/issues/1834', async () => {
+    const docRef = randomCol.doc();
+    {
+      const docData = getTestData();
+      console.log(`Writing test data to document: ${docRef.path}`);
+      await docRef.set(docData);
+    }
+
+    console.log('Transaction race started');
+    const promises: Promise<void>[] = [];
+    for (let i = 0; i < 10; i++) {
+      const promise = firestore.runTransaction(async tx => {
+        console.log(`Transaction started`);
+        const snapshot = await tx.get(docRef);
+        const docData = snapshot.data() as DocumentData;
+        docData.createTime += 1;
+        tx.set(docRef, docData);
+      });
+      promises.push(promise);
+      promise.then(() => {
+        console.log(`Transaction completed successfully`);
+      });
+      promise.catch(err => {
+        console.log(`Transaction FAILED:`, err);
+      });
+    }
+
+    console.log(`Transaction race: ${promises.length} transaction started`);
+    await Promise.all(promises);
+    console.log('Transaction race completed');
+  });
 
   it('has collection() method', () => {
     const ref = firestore.collection('col');
