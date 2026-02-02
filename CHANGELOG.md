@@ -4,6 +4,13 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [8.3.0](https://github.com/googleapis/nodejs-firestore/compare/v8.2.0...v8.3.0) (2026-02-02)
+
+
+### Features
+
+* Add support for `regexFind` and `regexFindAll` ([#2474](https://github.com/googleapis/nodejs-firestore/issues/2474)) ([52800a2](https://github.com/googleapis/nodejs-firestore/commit/52800a2c6af9079277eba19f776880c85ae52380))
+
 ## [8.2.0](https://github.com/googleapis/nodejs-firestore/compare/v8.1.0...v8.2.0) (2026-01-09)
 
 
