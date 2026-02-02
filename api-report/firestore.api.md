@@ -1046,6 +1046,10 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     _protoValueType: "ProtoValue";
     regexContains(pattern: string): BooleanExpression;
     regexContains(pattern: Expression): BooleanExpression;
+    regexFind(pattern: string): FunctionExpression;
+    regexFind(pattern: Expression): FunctionExpression;
+    regexFindAll(pattern: string): FunctionExpression;
+    regexFindAll(pattern: Expression): FunctionExpression;
     regexMatch(pattern: string): BooleanExpression;
     regexMatch(pattern: Expression): BooleanExpression;
     reverse(): FunctionExpression;
@@ -2844,7 +2848,7 @@ function xor(first: BooleanExpression, second: BooleanExpression, ...additionalC
 // build/types/src/reference/vector-query.d.ts:61:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/serializer.d.ts:30:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/serializer.d.ts:40:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/telemetry/trace-util.d.ts:66:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/telemetry/trace-util.d.ts:67:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/write-batch.d.ts:85:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/write-batch.d.ts:108:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 
