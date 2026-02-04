@@ -658,6 +658,7 @@ export class Firestore implements firestore.Firestore {
             {
               ...this._settings,
               fallback: useFallback,
+              minifyJson: true,
             },
             gax,
           );
