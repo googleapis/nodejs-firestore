@@ -27,25 +27,29 @@ declare module 'mocha' {
   interface TestFunction {
     skipEnterprise: tOrSkipT<TestFunction>;
     skipEmulator: tOrSkipT<TestFunction>;
-    skipClassic: tOrSkipT<TestFunction>;
+    skipStandard: tOrSkipT<TestFunction>;
+    skipRestConnection: tOrSkipT<TestFunction>;
   }
 
   interface PendingTestFunction {
     skipEnterprise: tOrSkipT<PendingTestFunction>;
     skipEmulator: tOrSkipT<PendingTestFunction>;
-    skipClassic: tOrSkipT<PendingTestFunction>;
+    skipStandard: tOrSkipT<PendingTestFunction>;
+    skipRestConnection: tOrSkipT<PendingTestFunction>;
   }
 
   interface SuiteFunction {
     skipEnterprise: tOrSkipT<SuiteFunction>;
     skipEmulator: tOrSkipT<SuiteFunction>;
-    skipClassic: tOrSkipT<SuiteFunction>;
+    skipStandard: tOrSkipT<SuiteFunction>;
+    skipRestConnection: tOrSkipT<SuiteFunction>;
   }
 
   interface PendingSuiteFunction {
     skipEnterprise: tOrSkipT<PendingSuiteFunction>;
     skipEmulator: tOrSkipT<PendingSuiteFunction>;
-    skipClassic: tOrSkipT<PendingSuiteFunction>;
+    skipStandard: tOrSkipT<PendingSuiteFunction>;
+    skipRestConnection: tOrSkipT<PendingSuiteFunction>;
   }
 }
 
@@ -59,7 +63,7 @@ export function mixinSkipImplementations(obj: unknown): void {
       if (this === describe.skip) {
         return this;
       }
-      if (process.env.RUN_ENTERPRISE_TESTS) {
+      if (process.env.FIRESTORE_EDITION?.toUpperCase() === 'ENTERPRISE') {
         return this.skip;
       }
       return this;
@@ -81,7 +85,7 @@ export function mixinSkipImplementations(obj: unknown): void {
     },
   });
 
-  Object.defineProperty(obj, 'skipClassic', {
+  Object.defineProperty(obj, 'skipStandard', {
     get(): unknown {
       if (this === it.skip) {
         return this;
@@ -89,7 +93,25 @@ export function mixinSkipImplementations(obj: unknown): void {
       if (this === describe.skip) {
         return this;
       }
-      if (!process.env.RUN_ENTERPRISE_TESTS) {
+      if (process.env.FIRESTORE_EDITION?.toUpperCase() !== 'ENTERPRISE') {
+        return this.skip;
+      }
+      return this;
+    },
+  });
+
+  Object.defineProperty(obj, 'skipRestConnection', {
+    get(): unknown {
+      if (this === it.skip) {
+        return this;
+      }
+      if (this === describe.skip) {
+        return this;
+      }
+      if (
+        process.env.FIRESTORE_PREFER_REST === '1' ||
+        process.env.FIRESTORE_PREFER_REST === 'true'
+      ) {
         return this.skip;
       }
       return this;

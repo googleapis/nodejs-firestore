@@ -3447,7 +3447,7 @@ describe.skipEnterprise('Query class - Standard DB', () => {
 
   // TODO Enterprise - wait for implicit sort order decision
   // Skip this test if running against standard production because it results in a 'missing index' error.
-  it.skipClassic('supports OR queries with composite indexes', async () => {
+  it.skipStandard('supports OR queries with composite indexes', async () => {
     const collection = await testCollectionWithDocs({
       doc1: {a: 1, b: 0},
       doc2: {a: 2, b: 1},
@@ -3547,7 +3547,7 @@ describe.skipEnterprise('Query class - Standard DB', () => {
 
   // Skip this test if running against production standard DB because it results in a 'missing index' error.
   // The Firestore Emulator and Enterprise-editions, however, do serve these queries.
-  it.skipClassic(
+  it.skipStandard(
     'supports OR queries on documents with missing fields',
     async () => {
       const collection = await testCollectionWithDocs({
@@ -3645,7 +3645,7 @@ describe.skipEnterprise('Query class - Standard DB', () => {
   });
 
   // Skip this test if running against production because it results in a 'missing index' error.
-  it.skipClassic('supports OR queries with not-in', async () => {
+  it.skipStandard('supports OR queries with not-in', async () => {
     const collection = await testCollectionWithDocs({
       doc1: {a: 1, b: 0},
       doc2: {b: 1},
@@ -7503,7 +7503,7 @@ describe('Client initialization', () => {
       'CollectionReference.listDocuments()',
 
       randomColl => {
-        if (process.env.RUN_ENTERPRISE_TESTS) return Promise.resolve();
+        if (isEnterprise()) return Promise.resolve();
         return randomColl.listDocuments();
       },
     ],
@@ -7563,7 +7563,7 @@ describe('Client initialization', () => {
       'CollectionGroup.getPartitions()',
       async randomColl => {
         // Requires PartitionQuery support
-        if (process.env.RUN_ENTERPRISE_TESTS) return;
+        if (isEnterprise()) return;
 
         const partitions = randomColl.firestore
           .collectionGroup('id')
