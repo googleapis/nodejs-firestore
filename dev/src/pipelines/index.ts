@@ -124,5 +124,11 @@ export {
   type,
   timestampTruncate,
   split,
+  ltrim,
+  rtrim,
+  stringIndexOf,
+  stringRepeat,
+  stringReplaceAll,
+  stringReplaceOne,
   // TODO(new-expression): Add new expression exports above this line
 } from './expression';

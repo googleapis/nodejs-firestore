@@ -50,6 +50,12 @@ import {
   mod,
   reverse,
   trim,
+  ltrim,
+  rtrim,
+  stringIndexOf,
+  stringRepeat,
+  stringReplaceAll,
+  stringReplaceOne,
   toUpper,
   toLower,
   vectorLength,
@@ -3851,6 +3857,146 @@ describe.skipClassic('Pipeline class', () => {
         trimmedTitle: "The Hitchhiker's Guide to the Galaxy",
         userName: 'alice',
         bytes: Uint8Array.from([0x01, 0x02]),
+      });
+    });
+
+    it('test ltrim', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .replaceWith(
+          map({
+            spacedTitle: " The Hitchhiker's Guide to the Galaxy ",
+            userNameWithQuotes: '"alice"',
+            bytes: Uint8Array.from([0x00, 0x01, 0x02, 0x00, 0x00]),
+          }),
+        )
+        .select(
+          ltrim('spacedTitle').as('ltrimmedTitle'),
+          field('userNameWithQuotes').ltrim('"').as('userName'),
+          field('bytes')
+            .ltrim(Uint8Array.from([0x00]))
+            .as('bytes'),
+        )
+        .limit(1)
+        .execute();
+      expectResults(snapshot, {
+        ltrimmedTitle: "The Hitchhiker's Guide to the Galaxy ",
+        userName: 'alice"',
+        bytes: Uint8Array.from([0x01, 0x02, 0x00, 0x00]),
+      });
+    });
+
+    it('test rtrim', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .replaceWith(
+          map({
+            spacedTitle: " The Hitchhiker's Guide to the Galaxy ",
+            userNameWithQuotes: '"alice"',
+            bytes: Uint8Array.from([0x00, 0x01, 0x02, 0x00, 0x00]),
+          }),
+        )
+        .select(
+          rtrim('spacedTitle').as('rtrimmedTitle'),
+          field('userNameWithQuotes').rtrim('"').as('userName'),
+          field('bytes')
+            .rtrim(Uint8Array.from([0x00]))
+            .as('bytes'),
+        )
+        .limit(1)
+        .execute();
+      expectResults(snapshot, {
+        rtrimmedTitle: " The Hitchhiker's Guide to the Galaxy",
+        userName: '"alice',
+        bytes: Uint8Array.from([0x00, 0x01, 0x02]),
+      });
+    });
+
+    it('test stringRepeat', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .replaceWith(
+          map({
+            title: "The Hitchhiker's Guide to the Galaxy",
+            bytes: Uint8Array.from([0x01, 0x02, 0x03]),
+          }),
+        )
+        .select(
+          stringRepeat(field('title'), 2).as('repeatedTitle'),
+          stringRepeat(field('bytes'), 2).as('repeatedBytes'),
+        )
+        .limit(1)
+        .execute();
+      expectResults(snapshot, {
+        repeatedTitle:
+          "The Hitchhiker's Guide to the GalaxyThe Hitchhiker's Guide to the Galaxy",
+        repeatedBytes: Uint8Array.from([0x01, 0x02, 0x03, 0x01, 0x02, 0x03]),
+      });
+    });
+
+    it('test stringReplaceAll', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .replaceWith(
+          map({
+            title: "The Hitchhiker's Guide to the Galaxy",
+          }),
+        )
+        .select(
+          stringReplaceAll(field('title'), 'Galaxy', 'Universe').as(
+            'replacedAll',
+          ),
+        )
+        .limit(1)
+        .execute();
+      expectResults(snapshot, {
+        replacedAll: "The Hitchhiker's Guide to the Universe",
+      });
+    });
+
+    it('test stringReplaceOne', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .replaceWith(
+          map({
+            title: "The Hitchhiker's Guide to the Galaxy",
+          }),
+        )
+        .select(stringReplaceOne(field('title'), 'e', 'X').as('replacedOne'))
+        .limit(1)
+        .execute();
+      expectResults(snapshot, {
+        replacedOne: "ThX Hitchhiker's Guide to the Galaxy",
+      });
+    });
+
+    it('test stringIndexOf', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .replaceWith(
+          map({
+            title: "The Hitchhiker's Guide to the Galaxy",
+            bytes: Uint8Array.from([0x01, 0x02, 0x03]),
+          }),
+        )
+        .select(
+          stringIndexOf(field('title'), 'Guide').as('indexOfGuide'),
+          stringIndexOf(
+            field('bytes'),
+            constant(Uint8Array.from([0x02])),
+          ).as('indexOfByte'),
+        )
+        .limit(1)
+        .execute();
+      expectResults(snapshot, {
+        indexOfGuide: 17,
+        indexOfByte: 1,
       });
     });
 
