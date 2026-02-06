@@ -3987,10 +3987,9 @@ describe.skipClassic('Pipeline class', () => {
         )
         .select(
           stringIndexOf(field('title'), 'Guide').as('indexOfGuide'),
-          stringIndexOf(
-            field('bytes'),
-            constant(Uint8Array.from([0x02])),
-          ).as('indexOfByte'),
+          stringIndexOf(field('bytes'), constant(Uint8Array.from([0x02]))).as(
+            'indexOfByte',
+          ),
         )
         .limit(1)
         .execute();
