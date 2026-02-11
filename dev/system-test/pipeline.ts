@@ -3874,6 +3874,7 @@ describe.skipClassic('Pipeline class', () => {
         .select(
           ltrim('spacedTitle').as('ltrimmedTitle'),
           field('userNameWithQuotes').ltrim('"').as('userName'),
+          ltrim(toLower('spacedTitle')).as('ltrimmedTitleLower'),
           field('bytes')
             .ltrim(Uint8Array.from([0x00]))
             .as('bytes'),
@@ -3882,6 +3883,7 @@ describe.skipClassic('Pipeline class', () => {
         .execute();
       expectResults(snapshot, {
         ltrimmedTitle: "The Hitchhiker's Guide to the Galaxy ",
+        ltrimmedTitleLower: "the hitchhiker's guide to the galaxy ",
         userName: 'alice"',
         bytes: Uint8Array.from([0x01, 0x02, 0x00, 0x00]),
       });
@@ -3901,6 +3903,7 @@ describe.skipClassic('Pipeline class', () => {
         .select(
           rtrim('spacedTitle').as('rtrimmedTitle'),
           field('userNameWithQuotes').rtrim('"').as('userName'),
+          rtrim(toLower('spacedTitle')).as('rtrimmedTitleLower'),
           field('bytes')
             .rtrim(Uint8Array.from([0x00]))
             .as('bytes'),
@@ -3909,6 +3912,7 @@ describe.skipClassic('Pipeline class', () => {
         .execute();
       expectResults(snapshot, {
         rtrimmedTitle: " The Hitchhiker's Guide to the Galaxy",
+        rtrimmedTitleLower: " the hitchhiker's guide to the galaxy",
         userName: '"alice',
         bytes: Uint8Array.from([0x00, 0x01, 0x02]),
       });
@@ -3944,17 +3948,30 @@ describe.skipClassic('Pipeline class', () => {
         .replaceWith(
           map({
             title: "The Hitchhiker's Guide to the Galaxy",
+            bytes: Uint8Array.from([0x01, 0x02, 0x02]),
           }),
         )
         .select(
-          stringReplaceAll(field('title'), 'Galaxy', 'Universe').as(
-            'replacedAll',
-          ),
+          stringReplaceAll(field('title'), 'the', 'a').as('replacedAll'),
+          stringReplaceAll(toLower('title'), 'the', 'a').as('replacedAllLower'),
+          stringReplaceAll(
+            field('bytes'),
+            Uint8Array.from([0x01, 0x02, 0x02]),
+            Uint8Array.from([0x03, 0x03, 0x03]),
+          ).as('replacedEntireByteArray'),
+          stringReplaceAll(
+            field('bytes'),
+            Uint8Array.from([0x02]),
+            Uint8Array.from([0x03]),
+          ).as('replacedMultipleBytes'),
         )
         .limit(1)
         .execute();
       expectResults(snapshot, {
-        replacedAll: "The Hitchhiker's Guide to the Universe",
+        replacedAll: "The Hitchhiker's Guide to a Galaxy",
+        replacedAllLower: "a hitchhiker's guide to a galaxy",
+        replacedEntireByteArray: Uint8Array.from([0x03, 0x03, 0x03]),
+        replacedMultipleBytes: Uint8Array.from([0x01, 0x03, 0x03]),
       });
     });
 
@@ -3965,13 +3982,22 @@ describe.skipClassic('Pipeline class', () => {
         .replaceWith(
           map({
             title: "The Hitchhiker's Guide to the Galaxy",
+            bytes: Uint8Array.from([0x01, 0x02, 0x02]),
           }),
         )
-        .select(stringReplaceOne(field('title'), 'e', 'X').as('replacedOne'))
+        .select(
+          stringReplaceOne(field('title'), 'e', 'X').as('replacedOne'),
+          stringReplaceOne(
+            field('bytes'),
+            Uint8Array.from([0x02]),
+            Uint8Array.from([0x03]),
+          ).as('replacedOneByte'),
+        )
         .limit(1)
         .execute();
       expectResults(snapshot, {
         replacedOne: "ThX Hitchhiker's Guide to the Galaxy",
+        replacedOneByte: new Uint8Array([0x01, 0x03, 0x02]),
       });
     });
 
