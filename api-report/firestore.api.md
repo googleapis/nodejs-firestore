@@ -1014,6 +1014,7 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     ifError(catchValue: unknown): FunctionExpression;
     isAbsent(): BooleanExpression;
     isError(): BooleanExpression;
+    isType(type: Type): BooleanExpression;
     join(delimiterExpression: Expression): Expression;
     join(delimiter: string): Expression;
     length(): FunctionExpression;
@@ -1502,6 +1503,12 @@ function isAbsent(field: string): BooleanExpression;
 function isError(value: Expression): BooleanExpression;
 
 // @beta
+function isType(fieldName: string, type: Type): BooleanExpression;
+
+// @beta
+function isType(expression: Expression, type: Type): BooleanExpression;
+
+// @beta
 function join(arrayFieldName: string, delimiter: string): Expression;
 
 // @beta
@@ -1901,6 +1908,8 @@ declare namespace Pipelines {
         currentTimestamp,
         arrayConcat,
         type,
+        isType,
+        Type,
         timestampTruncate,
         split
     }
@@ -2581,6 +2590,9 @@ function trim(fieldName: string, valueToTrim?: string | Expression): FunctionExp
 
 // @beta
 function trim(stringExpression: Expression, valueToTrim?: string | Expression): FunctionExpression;
+
+// @beta
+type Type = 'null' | 'array' | 'boolean' | 'bytes' | 'timestamp' | 'geo_point' | 'number' | 'int32' | 'int64' | 'float64' | 'decimal128' | 'map' | 'reference' | 'string' | 'vector' | 'max_key' | 'min_key' | 'object_id' | 'regex' | 'request_timestamp';
 
 // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
 // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
