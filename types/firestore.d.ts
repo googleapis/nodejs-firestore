@@ -4134,6 +4134,78 @@ declare namespace FirebaseFirestore {
       mapGet(subfield: string): FunctionExpression;
       /**
        * @beta
+       * Creates an expression that returns a new map with the specified entries added or updated.
+       *
+       * @remarks
+       * Note that `mapSet` only performs shallow updates to the map. Setting a value to `null`
+       * will retain the key with a `null` value. To remove a key entirely, use
+       * {@link @firebase/firestore/pipelines#mapRemove | mapRemove}.
+       *
+       * @example
+       * ```typescript
+       * // Set the 'city' to "San Francisco" in the 'address' map
+       * field("address").mapSet("city", "San Francisco");
+       * ```
+       *
+       * @param key - The key to set. Must be a string or a constant string expression.
+       * @param value - The value to set.
+       * @param moreKeyValues - Additional key-value pairs to set.
+       * @returns A new `Expression` representing the map with the entries set.
+       */
+      mapSet(
+        key: string | Expression,
+        value: unknown,
+        ...moreKeyValues: unknown[]
+      ): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that returns the keys of a map.
+       *
+       * Note: While the backend generally preserves insertion order, relying on the
+       * order of the output array is not guaranteed and should be avoided.
+       *
+       * @example
+       * ```typescript
+       * // Get the keys of the 'address' map
+       * field("address").mapKeys();
+       * ```
+       *
+       * @returns A new `Expression` representing the keys of the map.
+       */
+      mapKeys(): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that returns the values of a map.
+       *
+       * Note: While the backend generally preserves insertion order, relying on the
+       * order of the output array is not guaranteed and should be avoided.
+       *
+       * @example
+       * ```typescript
+       * // Get the values of the 'address' map
+       * field("address").mapValues();
+       * ```
+       *
+       * @returns A new `Expression` representing the values of the map.
+       */
+      mapValues(): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that returns the entries of a map as an array of maps,
+       * where each map contains a `"k"` property for the key and a `"v"` property for the value.
+       * For example: `[{ k: "key1", v: "value1" }, ...]`.
+       *
+       * @example
+       * ```typescript
+       * // Get the entries of the 'address' map
+       * field("address").mapEntries();
+       * ```
+       *
+       * @returns A new `Expression` representing the entries of the map.
+       */
+      mapEntries(): FunctionExpression;
+      /**
+       * @beta
        * Creates an aggregation that counts the number of stage inputs with valid evaluations of the
        * expression or field.
        *
@@ -8378,6 +8450,86 @@ declare namespace FirebaseFirestore {
       mapExpression: Expression,
       subField: string,
     ): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that returns a new map with the specified entries added or updated.
+     *
+     * Note that `mapSet` only performs shallow updates to the map. Setting a value to `null`
+     * will retain the key with a `null` value. To remove a key entirely, use `mapRemove`.
+     *
+     * @example
+     * ```typescript
+     * // Set the 'city' to "San Francisco" in the 'address' map field
+     * mapSet("address", "city", "San Francisco");
+     * ```
+     *
+     * @param map - The map to set entries in.
+     * @param key - The key to set. Must be a string or a constant string expression.
+     * @param value - The value to set.
+     * @param moreKeyValues - Additional key-value pairs to set.
+     * @returns A new `Expression` representing the map with the entries set.
+     */
+    export function mapSet(
+      map: unknown,
+      key: string | Expression,
+      value: unknown,
+      ...moreKeyValues: unknown[]
+    ): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that returns the keys of a map.
+     *
+     * Note: While the backend generally preserves insertion order, relying on the
+     * order of the output array is not guaranteed and should be avoided.
+     *
+     * @example
+     * ```typescript
+     * // Get the keys of the 'address' map field
+     * mapKeys("address");
+     * ```
+     *
+     * @param map - The map to get the keys of.
+     * @returns A new `Expression` representing the keys of the map.
+     */
+    export function mapKeys(map: unknown): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that returns the values of a map.
+     *
+     * Note: While the backend generally preserves insertion order, relying on the
+     * order of the output array is not guaranteed and should be avoided.
+     *
+     * @example
+     * ```typescript
+     * // Get the values of the 'address' map field
+     * mapValues("address");
+     * ```
+     *
+     * @param map - The map to get the values of.
+     * @returns A new `Expression` representing the values of the map.
+     */
+    export function mapValues(map: unknown): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that returns the entries of a map as an array of maps,
+     * where each map contains a `"k"` property for the key and a `"v"` property for the value.
+     * For example: `[{ k: "key1", v: "value1" }, ...]`.
+     *
+     * @example
+     * ```typescript
+     * // Get the entries of the 'address' map field
+     * mapEntries("address");
+     * ```
+     *
+     * @param map - The map to get the entries of.
+     * @returns A new `Expression` representing the entries of the map.
+     */
+    export function mapEntries(map: unknown): FunctionExpression;
+
     /**
      * @beta
      * Creates an aggregation that counts the total number of stage inputs.
