@@ -39,7 +39,7 @@ import {verifyInstance} from '../test/util/helpers';
 import {DeferredPromise, getTestRoot} from './firestore';
 import {IndexTestHelper} from './index_test_helper';
 
-describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
+describe.skipStandard('Query and Pipeline Compare - Enterprise DB', () => {
   interface PaginatedResults {
     pages: number;
     docs: QueryDocumentSnapshot[];
@@ -544,8 +544,7 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
     ).to.deep.equal(embeddingVector);
   });
 
-  // TODO waiting on implicit sort order decision
-  it.skipEnterprise('supports !=', async () => {
+  it('supports !=', async () => {
     await addDocs(
       {zip: NaN},
       {zip: 91102},
@@ -558,10 +557,11 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
     );
 
     let res = await compareQueryAndPipeline(
-      randomCol.where('zip', '!=', 98101),
+      randomCol.where('zip', '!=', 98101).orderBy('zip'),
     );
     expectDocs(
       res,
+      {zip: null},
       {zip: NaN},
       {zip: 91102},
       {zip: 98103},
@@ -570,9 +570,12 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
       {zip: {zip: 98101}},
     );
 
-    res = await compareQueryAndPipeline(randomCol.where('zip', '!=', NaN));
+    res = await compareQueryAndPipeline(
+      randomCol.where('zip', '!=', NaN).orderBy('zip'),
+    );
     expectDocs(
       res,
+      {zip: null},
       {zip: 91102},
       {zip: 98101},
       {zip: 98103},
@@ -581,7 +584,9 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
       {zip: {zip: 98101}},
     );
 
-    res = await compareQueryAndPipeline(randomCol.where('zip', '!=', null));
+    res = await compareQueryAndPipeline(
+      randomCol.where('zip', '!=', null).orderBy('zip'),
+    );
     expectDocs(
       res,
       {zip: NaN},
@@ -594,11 +599,12 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
     );
   });
 
-  // TODO waiting on implicit sort order decision
-  it.skipEnterprise('supports != with document ID', async () => {
+  it('supports != with document ID', async () => {
     const refs = await addDocs({count: 1}, {count: 2}, {count: 3});
     const res = await compareQueryAndPipeline(
-      randomCol.where(FieldPath.documentId(), '!=', refs[0].id),
+      randomCol
+        .where(FieldPath.documentId(), '!=', refs[0].id)
+        .orderBy(FieldPath.documentId()),
     );
     expectDocs(res, {count: 2}, {count: 3});
   });
@@ -663,8 +669,7 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
     expectDocs(res, {count: 3});
   });
 
-  // TODO waiting on implicit sort order decision
-  it.skipEnterprise('supports "in"', async () => {
+  it('supports "in"', async () => {
     await addDocs(
       {zip: 98101},
       {zip: 91102},
@@ -674,7 +679,7 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
       {zip: {zip: 98101}},
     );
     const res = await compareQueryAndPipeline(
-      randomCol.where('zip', 'in', [98101, 98103]),
+      randomCol.where('zip', 'in', [98101, 98103]).orderBy('zip'),
     );
     expectDocs(res, {zip: 98101}, {zip: 98103});
   });
@@ -1005,8 +1010,7 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
     expect(received).to.equal(2);
   });
 
-  // TODO (enterprise) waiting on implicit sor order decision
-  it.skipEnterprise('can query collection groups', async () => {
+  it('can query collection groups', async () => {
     // Use `randomCol` to get a random collection group name to use but ensure
     // it starts with 'b' for predictable ordering.
     const collectionGroup = 'b' + randomCol.id;
@@ -1031,7 +1035,9 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
     await batch.commit();
 
     const querySnapshot = await compareQueryAndPipeline(
-      firestore.collectionGroup(collectionGroup),
+      firestore
+        .collectionGroup(collectionGroup)
+        .orderBy(FieldPath.documentId()),
     );
     expect(querySnapshot.docs.map(d => d.id)).to.deep.equal([
       'cg-doc1',
@@ -1042,95 +1048,89 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
     ]);
   });
 
-  // TODO (enterprise) wait for implicit sort order support
-  it.skipEnterprise(
-    'can query collection groups with startAt / endAt by arbitrary documentId',
-    async () => {
-      // Use `randomCol` to get a random collection group name to use but
-      // ensure it starts with 'b' for predictable ordering.
-      const collectionGroup = 'b' + randomCol.id;
+  it('can query collection groups with startAt / endAt by arbitrary documentId', async () => {
+    // Use `randomCol` to get a random collection group name to use but
+    // ensure it starts with 'b' for predictable ordering.
+    const collectionGroup = 'b' + randomCol.id;
 
-      const docPaths = [
-        `a/a/${collectionGroup}/cg-doc1`,
-        `a/b/a/b/${collectionGroup}/cg-doc2`,
-        `a/b/${collectionGroup}/cg-doc3`,
-        `a/b/c/d/${collectionGroup}/cg-doc4`,
-        `a/c/${collectionGroup}/cg-doc5`,
-        `${collectionGroup}/cg-doc6`,
-        'a/b/nope/nope',
-      ];
-      const batch = firestore.batch();
-      for (const docPath of docPaths) {
-        batch.set(firestore.doc(docPath), {x: 1});
-      }
-      await batch.commit();
+    const docPaths = [
+      `a/a/${collectionGroup}/cg-doc1`,
+      `a/b/a/b/${collectionGroup}/cg-doc2`,
+      `a/b/${collectionGroup}/cg-doc3`,
+      `a/b/c/d/${collectionGroup}/cg-doc4`,
+      `a/c/${collectionGroup}/cg-doc5`,
+      `${collectionGroup}/cg-doc6`,
+      'a/b/nope/nope',
+    ];
+    const batch = firestore.batch();
+    for (const docPath of docPaths) {
+      batch.set(firestore.doc(docPath), {x: 1});
+    }
+    await batch.commit();
 
-      let querySnapshot = await firestore
+    let querySnapshot = await firestore
+      .collectionGroup(collectionGroup)
+      .orderBy(FieldPath.documentId())
+      .startAt('a/b')
+      .endAt('a/b0')
+      .get();
+    expect(querySnapshot.docs.map(d => d.id)).to.deep.equal([
+      'cg-doc2',
+      'cg-doc3',
+      'cg-doc4',
+    ]);
+
+    querySnapshot = await firestore
+      .collectionGroup(collectionGroup)
+      .orderBy(FieldPath.documentId())
+      .startAfter('a/b')
+      .endBefore(`a/b/${collectionGroup}/cg-doc3`)
+      .get();
+    expect(querySnapshot.docs.map(d => d.id)).to.deep.equal(['cg-doc2']);
+  });
+
+  it('can query collection groups with where filters on arbitrary documentId', async () => {
+    // Use `randomCol` to get a random collection group name to use but
+    // ensure it starts with 'b' for predictable ordering.
+    const collectionGroup = 'b' + randomCol.id;
+
+    const docPaths = [
+      `a/a/${collectionGroup}/cg-doc1`,
+      `a/b/a/b/${collectionGroup}/cg-doc2`,
+      `a/b/${collectionGroup}/cg-doc3`,
+      `a/b/c/d/${collectionGroup}/cg-doc4`,
+      `a/c/${collectionGroup}/cg-doc5`,
+      `${collectionGroup}/cg-doc6`,
+      'a/b/nope/nope',
+    ];
+    const batch = firestore.batch();
+    for (const docPath of docPaths) {
+      batch.set(firestore.doc(docPath), {x: 1});
+    }
+    await batch.commit();
+
+    let querySnapshot = await compareQueryAndPipeline(
+      firestore
         .collectionGroup(collectionGroup)
-        .orderBy(FieldPath.documentId())
-        .startAt('a/b')
-        .endAt('a/b0')
-        .get();
-      expect(querySnapshot.docs.map(d => d.id)).to.deep.equal([
-        'cg-doc2',
-        'cg-doc3',
-        'cg-doc4',
-      ]);
+        .where(FieldPath.documentId(), '>=', 'a/b')
+        .where(FieldPath.documentId(), '<=', 'a/b0')
+        .orderBy(FieldPath.documentId()),
+    );
+    expect(querySnapshot.docs.map(d => d.id)).to.deep.equal([
+      'cg-doc2',
+      'cg-doc3',
+      'cg-doc4',
+    ]);
 
-      querySnapshot = await firestore
+    querySnapshot = await compareQueryAndPipeline(
+      firestore
         .collectionGroup(collectionGroup)
-        .orderBy(FieldPath.documentId())
-        .startAfter('a/b')
-        .endBefore(`a/b/${collectionGroup}/cg-doc3`)
-        .get();
-      expect(querySnapshot.docs.map(d => d.id)).to.deep.equal(['cg-doc2']);
-    },
-  );
-
-  // TODO (enterprise) wait for implicit sort order support
-  it.skipEnterprise(
-    'can query collection groups with where filters on arbitrary documentId',
-    async () => {
-      // Use `randomCol` to get a random collection group name to use but
-      // ensure it starts with 'b' for predictable ordering.
-      const collectionGroup = 'b' + randomCol.id;
-
-      const docPaths = [
-        `a/a/${collectionGroup}/cg-doc1`,
-        `a/b/a/b/${collectionGroup}/cg-doc2`,
-        `a/b/${collectionGroup}/cg-doc3`,
-        `a/b/c/d/${collectionGroup}/cg-doc4`,
-        `a/c/${collectionGroup}/cg-doc5`,
-        `${collectionGroup}/cg-doc6`,
-        'a/b/nope/nope',
-      ];
-      const batch = firestore.batch();
-      for (const docPath of docPaths) {
-        batch.set(firestore.doc(docPath), {x: 1});
-      }
-      await batch.commit();
-
-      let querySnapshot = await compareQueryAndPipeline(
-        firestore
-          .collectionGroup(collectionGroup)
-          .where(FieldPath.documentId(), '>=', 'a/b')
-          .where(FieldPath.documentId(), '<=', 'a/b0'),
-      );
-      expect(querySnapshot.docs.map(d => d.id)).to.deep.equal([
-        'cg-doc2',
-        'cg-doc3',
-        'cg-doc4',
-      ]);
-
-      querySnapshot = await compareQueryAndPipeline(
-        firestore
-          .collectionGroup(collectionGroup)
-          .where(FieldPath.documentId(), '>', 'a/b')
-          .where(FieldPath.documentId(), '<', `a/b/${collectionGroup}/cg-doc3`),
-      );
-      expect(querySnapshot.docs.map(d => d.id)).to.deep.equal(['cg-doc2']);
-    },
-  );
+        .where(FieldPath.documentId(), '>', 'a/b')
+        .where(FieldPath.documentId(), '<', `a/b/${collectionGroup}/cg-doc3`)
+        .orderBy(FieldPath.documentId()),
+    );
+    expect(querySnapshot.docs.map(d => d.id)).to.deep.equal(['cg-doc2']);
+  });
 
   it('can query large collections', async () => {
     // @grpc/grpc-js v0.4.1 failed to deliver the full set of query results for
@@ -1145,8 +1145,7 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
     expect(snapshot.size).to.equal(100);
   });
 
-  // TODO (enterprise) wait for implicit sort order support
-  it.skipEnterprise('supports OR queries', async () => {
+  it('supports OR queries', async () => {
     const collection = await testCollectionWithDocs({
       doc1: {a: 1, b: 0},
       doc2: {a: 2, b: 1},
@@ -1158,9 +1157,11 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
     // Two equalities: a==1 || b==1.
     expectDocs(
       await compareQueryAndPipeline(
-        collection.where(
-          Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1)),
-        ),
+        collection
+          .where(
+            Filter.or(Filter.where('a', '==', 1), Filter.where('b', '==', 1)),
+          )
+          .orderBy(FieldPath.documentId()),
       ),
       'doc1',
       'doc2',
@@ -1171,12 +1172,20 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
     // (a==1 && b==0) || (a==3 && b==2)
     expectDocs(
       await compareQueryAndPipeline(
-        collection.where(
-          Filter.or(
-            Filter.and(Filter.where('a', '==', 1), Filter.where('b', '==', 0)),
-            Filter.and(Filter.where('a', '==', 3), Filter.where('b', '==', 2)),
-          ),
-        ),
+        collection
+          .where(
+            Filter.or(
+              Filter.and(
+                Filter.where('a', '==', 1),
+                Filter.where('b', '==', 0),
+              ),
+              Filter.and(
+                Filter.where('a', '==', 3),
+                Filter.where('b', '==', 2),
+              ),
+            ),
+          )
+          .orderBy(FieldPath.documentId()),
       ),
       'doc1',
       'doc3',
@@ -1185,12 +1194,14 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
     // a==1 && (b==0 || b==3).
     expectDocs(
       await compareQueryAndPipeline(
-        collection.where(
-          Filter.and(
-            Filter.where('a', '==', 1),
-            Filter.or(Filter.where('b', '==', 0), Filter.where('b', '==', 3)),
-          ),
-        ),
+        collection
+          .where(
+            Filter.and(
+              Filter.where('a', '==', 1),
+              Filter.or(Filter.where('b', '==', 0), Filter.where('b', '==', 3)),
+            ),
+          )
+          .orderBy(FieldPath.documentId()),
       ),
       'doc1',
       'doc4',
@@ -1199,12 +1210,14 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
     // (a==2 || b==2) && (a==3 || b==3)
     expectDocs(
       await compareQueryAndPipeline(
-        collection.where(
-          Filter.and(
-            Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 2)),
-            Filter.or(Filter.where('a', '==', 3), Filter.where('b', '==', 3)),
-          ),
-        ),
+        collection
+          .where(
+            Filter.and(
+              Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 2)),
+              Filter.or(Filter.where('a', '==', 3), Filter.where('b', '==', 3)),
+            ),
+          )
+          .orderBy(FieldPath.documentId()),
       ),
       'doc3',
     );
@@ -1216,6 +1229,7 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
           .where(
             Filter.or(Filter.where('a', '==', 2), Filter.where('b', '==', 1)),
           )
+          .orderBy(FieldPath.documentId())
           .limit(1),
       ),
       'doc2',
@@ -1224,8 +1238,7 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
 
   // Skip this test if running against production because it results in a 'missing index' error.
   // The Firestore Emulator, however, does serve these queries.
-  // TODO (enterprise) wait for implicit sort order support
-  it.skipEnterprise('supports OR queries with composite indexes', async () => {
+  it('supports OR queries with composite indexes', async () => {
     const collection = await testCollectionWithDocs({
       doc1: {a: 1, b: 0},
       doc2: {a: 2, b: 1},
@@ -1237,9 +1250,11 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
     // with one inequality: a>2 || b==1.
     expectDocs(
       await compareQueryAndPipeline(
-        collection.where(
-          Filter.or(Filter.where('a', '>', 2), Filter.where('b', '==', 1)),
-        ),
+        collection
+          .where(
+            Filter.or(Filter.where('a', '>', 2), Filter.where('b', '==', 1)),
+          )
+          .orderBy('a'),
       ),
       'doc5',
       'doc2',
@@ -1253,6 +1268,7 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
           .where(
             Filter.or(Filter.where('a', '==', 1), Filter.where('b', '>', 0)),
           )
+          .orderBy(FieldPath.documentId())
           .limit(2),
       ),
       'doc1',
@@ -1459,8 +1475,7 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
     );
   });
 
-  // TODO (enterprise) wait for implicit sort order support
-  it.skipEnterprise('supports OR queries with array membership', async () => {
+  it('supports OR queries with array membership', async () => {
     const collection = await testCollectionWithDocs({
       doc1: {a: 1, b: [0]},
       doc2: {b: [1]},
@@ -1473,12 +1488,14 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
     // Query: a==2 || b array-contains 7
     expectDocs(
       await compareQueryAndPipeline(
-        collection.where(
-          Filter.or(
-            Filter.where('a', '==', 2),
-            Filter.where('b', 'array-contains', 7),
-          ),
-        ),
+        collection
+          .where(
+            Filter.or(
+              Filter.where('a', '==', 2),
+              Filter.where('b', 'array-contains', 7),
+            ),
+          )
+          .orderBy(FieldPath.documentId()),
       ),
       'doc3',
       'doc4',
@@ -1489,12 +1506,14 @@ describe.skipClassic('Query and Pipeline Compare - Enterprise DB', () => {
     // Has implicit "orderBy b"
     expectDocs(
       await compareQueryAndPipeline(
-        collection.where(
-          Filter.or(
-            Filter.where('a', '==', 2),
-            Filter.where('b', 'array-contains-any', [0, 3]),
-          ),
-        ),
+        collection
+          .where(
+            Filter.or(
+              Filter.where('a', '==', 2),
+              Filter.where('b', 'array-contains-any', [0, 3]),
+            ),
+          )
+          .orderBy(FieldPath.documentId()),
       ),
       'doc1',
       'doc4',

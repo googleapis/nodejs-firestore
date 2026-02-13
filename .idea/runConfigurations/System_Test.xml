@@ -7,6 +7,9 @@
     <pass-parent-env>true</pass-parent-env>
     <envs>
       <env name="TS_NODE_FILES" value="true" />
+      <env name="FIRESTORE_NAMED_DATABASE" value="enterprise" />
+      <env name="FIRESTORE_EDITION" value="ENTERPRISE" />
+      <env name="FIRESTORE_PREFER_REST" value="true" />
     </envs>
     <ui>bdd</ui>
     <extra-mocha-options>--require ts-node/register/type-check --no-cache --timeout 60000</extra-mocha-options>
