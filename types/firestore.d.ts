@@ -8476,7 +8476,12 @@ declare namespace FirebaseFirestore {
      * @param moreKeyValues - Additional key-value pairs to set.
      * @returns A new `Expression` representing the map with the entries set.
      */
-    export function mapSet(mapField: string, key: string | Expression, value: unknown, ...moreKeyValues: unknown[]): FunctionExpression;
+    export function mapSet(
+      mapField: string,
+      key: string | Expression,
+      value: unknown,
+      ...moreKeyValues: unknown[]
+    ): FunctionExpression;
     /**
      * @beta
      * Creates an expression that returns a new map with the specified entries added or updated.
@@ -8497,7 +8502,12 @@ declare namespace FirebaseFirestore {
      * @param moreKeyValues - Additional key-value pairs to set.
      * @returns A new `Expression` representing the map with the entries set.
      */
-    export function mapSet(mapExpression: Expression, key: string | Expression, value: unknown, ...moreKeyValues: unknown[]): FunctionExpression;
+    export function mapSet(
+      mapExpression: Expression,
+      key: string | Expression,
+      value: unknown,
+      ...moreKeyValues: unknown[]
+    ): FunctionExpression;
 
     /**
      * @beta
