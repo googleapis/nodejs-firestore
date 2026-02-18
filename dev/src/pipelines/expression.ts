@@ -1311,7 +1311,8 @@ export abstract class Expression
    * @beta
    * Creates an expression that returns the keys of a map.
    *
-   * Note: While the backend generally preserves insertion order, relying on the
+   * @remarks
+   * While the backend generally preserves insertion order, relying on the
    * order of the output array is not guaranteed and should be avoided.
    *
    * @example
@@ -1330,7 +1331,8 @@ export abstract class Expression
    * @beta
    * Creates an expression that returns the values of a map.
    *
-   * Note: While the backend generally preserves insertion order, relying on the
+   * @remarks
+   * While the backend generally preserves insertion order, relying on the
    * order of the output array is not guaranteed and should be avoided.
    *
    * @example
@@ -1350,6 +1352,10 @@ export abstract class Expression
    * Creates an expression that returns the entries of a map as an array of maps,
    * where each map contains a `"k"` property for the key and a `"v"` property for the value.
    * For example: `[{ k: "key1", v: "value1" }, ...]`.
+   *
+   * @remarks
+   * While the backend generally preserves insertion order, relying on the
+   * order of the output array is not guaranteed and should be avoided.
    *
    * @example
    * ```typescript
@@ -6435,35 +6441,70 @@ export function mapGet(
  * @beta
  * Creates an expression that returns a new map with the specified entries added or updated.
  *
- * Note that `mapSet` only performs shallow updates to the map. Setting a value to `null`
+ * @remarks
+ * This only performs shallow updates to the map. Setting a value to `null`
  * will retain the key with a `null` value. To remove a key entirely, use `mapRemove`.
  *
  * @example
  * ```typescript
- * // Set the 'city' to "San Francisco" in the 'address' map field
+ * // Set the 'city' to 'San Francisco' in the 'address' map field
  * mapSet("address", "city", "San Francisco");
  * ```
  *
- * @param map - The map to set entries in.
+ * @param mapField - The map field to set entries in.
  * @param key - The key to set. Must be a string or a constant string expression.
  * @param value - The value to set.
  * @param moreKeyValues - Additional key-value pairs to set.
  * @returns A new `Expression` representing the map with the entries set.
  */
 export function mapSet(
-  map: unknown,
+  mapField: string,
+  key: string | Expression,
+  value: unknown,
+  ...moreKeyValues: unknown[]
+): FunctionExpression;
+
+/**
+ * @beta
+ * Creates an expression that returns a new map with the specified entries added or updated.
+ *
+ * @remarks
+ * This only performs shallow updates to the map. Setting a value to `null`
+ * will retain the key with a `null` value. To remove a key entirely, use `mapRemove`.
+ *
+ * @example
+ * ```typescript
+ * // Set the 'city' to "San Francisco"
+ * mapSet(map({"state": "California"}), "city", "San Francisco");
+ * ```
+ *
+ * @param mapExpression - The expression representing the map.
+ * @param key - The key to set. Must be a string or a constant string expression.
+ * @param value - The value to set.
+ * @param moreKeyValues - Additional key-value pairs to set.
+ * @returns A new `Expression` representing the map with the entries set.
+ */
+export function mapSet(
+  mapExpression: Expression,
+  key: string | Expression,
+  value: unknown,
+  ...moreKeyValues: unknown[]
+): FunctionExpression;
+export function mapSet(
+  fieldOrExpr: string | Expression,
   key: string | Expression,
   value: unknown,
   ...moreKeyValues: unknown[]
 ): FunctionExpression {
-  return fieldOrExpression(map).mapSet(key, value, ...moreKeyValues);
+  return fieldOrExpression(fieldOrExpr).mapSet(key, value, ...moreKeyValues);
 }
 
 /**
  * @beta
  * Creates an expression that returns the keys of a map.
  *
- * Note: While the backend generally preserves insertion order, relying on the
+ * @remarks
+ * While the backend generally preserves insertion order, relying on the
  * order of the output array is not guaranteed and should be avoided.
  *
  * @example
@@ -6472,18 +6513,39 @@ export function mapSet(
  * mapKeys("address");
  * ```
  *
- * @param map - The map to get the keys of.
+ * @param mapField - The map field to get the keys of.
  * @returns A new `Expression` representing the keys of the map.
  */
-export function mapKeys(map: unknown): FunctionExpression {
-  return fieldOrExpression(map).mapKeys();
+export function mapKeys(mapField: string): FunctionExpression;
+
+/**
+ * @beta
+ * Creates an expression that returns the keys of a map.
+ *
+ * @remarks
+ * While the backend generally preserves insertion order, relying on the
+ * order of the output array is not guaranteed and should be avoided.
+ *
+ * @example
+ * ```typescript
+ * // Get the keys of the map expression
+ * mapKeys(map({"city": "San Francisco"}));
+ * ```
+ *
+ * @param mapExpression - The expression representing the map to get the keys of.
+ * @returns A new `Expression` representing the keys of the map.
+ */
+export function mapKeys(mapExpression: Expression): FunctionExpression;
+export function mapKeys(fieldOrExpr: string | Expression): FunctionExpression {
+  return fieldOrExpression(fieldOrExpr).mapKeys();
 }
 
 /**
  * @beta
  * Creates an expression that returns the values of a map.
  *
- * Note: While the backend generally preserves insertion order, relying on the
+ * @remarks
+ * While the backend generally preserves insertion order, relying on the
  * order of the output array is not guaranteed and should be avoided.
  *
  * @example
@@ -6492,11 +6554,33 @@ export function mapKeys(map: unknown): FunctionExpression {
  * mapValues("address");
  * ```
  *
- * @param map - The map to get the values of.
+ * @param mapField - The map field to get the values of.
  * @returns A new `Expression` representing the values of the map.
  */
-export function mapValues(map: unknown): FunctionExpression {
-  return fieldOrExpression(map).mapValues();
+export function mapValues(mapField: string): FunctionExpression;
+
+/**
+ * @beta
+ * Creates an expression that returns the values of a map.
+ *
+ * @remarks
+ * While the backend generally preserves insertion order, relying on the
+ * order of the output array is not guaranteed and should be avoided.
+ *
+ * @example
+ * ```typescript
+ * // Get the values of the map expression
+ * mapValues(map({"city": "San Francisco"}));
+ * ```
+ *
+ * @param mapExpression - The expression representing the map to get the values of.
+ * @returns A new `Expression` representing the values of the map.
+ */
+export function mapValues(mapExpression: Expression): FunctionExpression;
+export function mapValues(
+  fieldOrExpr: string | Expression,
+): FunctionExpression {
+  return fieldOrExpression(fieldOrExpr).mapValues();
 }
 
 /**
@@ -6505,17 +6589,45 @@ export function mapValues(map: unknown): FunctionExpression {
  * where each map contains a `"k"` property for the key and a `"v"` property for the value.
  * For example: `[{ k: "key1", v: "value1" }, ...]`.
  *
+ * @remarks
+ * While the backend generally preserves insertion order, relying on the
+ * order of the output array is not guaranteed and should be avoided.
+ *
  * @example
  * ```typescript
  * // Get the entries of the 'address' map field
  * mapEntries("address");
  * ```
  *
- * @param map - The map to get the entries of.
+ * @param mapField - The map field to get the entries of.
  * @returns A new `Expression` representing the entries of the map.
  */
-export function mapEntries(map: unknown): FunctionExpression {
-  return fieldOrExpression(map).mapEntries();
+export function mapEntries(mapField: string): FunctionExpression;
+
+/**
+ * @beta
+ * Creates an expression that returns the entries of a map as an array of maps,
+ * where each map contains a `"k"` property for the key and a `"v"` property for the value.
+ * For example: `[{ k: "key1", v: "value1" }, ...]`.
+ *
+ * @remarks
+ * While the backend generally preserves insertion order, relying on the
+ * order of the output array is not guaranteed and should be avoided.
+ *
+ * @example
+ * ```typescript
+ * // Get the entries of the map expression
+ * mapEntries(map({"city": "San Francisco"}));
+ * ```
+ *
+ * @param mapExpression - The expression representing the map to get the entries of.
+ * @returns A new `Expression` representing the entries of the map.
+ */
+export function mapEntries(mapExpression: Expression): FunctionExpression;
+export function mapEntries(
+  fieldOrExpr: string | Expression,
+): FunctionExpression {
+  return fieldOrExpression(fieldOrExpr).mapEntries();
 }
 
 /**

@@ -4138,8 +4138,7 @@ declare namespace FirebaseFirestore {
        *
        * @remarks
        * Note that `mapSet` only performs shallow updates to the map. Setting a value to `null`
-       * will retain the key with a `null` value. To remove a key entirely, use
-       * {@link @firebase/firestore/pipelines#mapRemove | mapRemove}.
+       * will retain the key with a `null` value. To remove a key entirely, use `mapRemove`.
        *
        * @example
        * ```typescript
@@ -4161,7 +4160,8 @@ declare namespace FirebaseFirestore {
        * @beta
        * Creates an expression that returns the keys of a map.
        *
-       * Note: While the backend generally preserves insertion order, relying on the
+       * @remarks
+       * While the backend generally preserves insertion order, relying on the
        * order of the output array is not guaranteed and should be avoided.
        *
        * @example
@@ -4177,7 +4177,8 @@ declare namespace FirebaseFirestore {
        * @beta
        * Creates an expression that returns the values of a map.
        *
-       * Note: While the backend generally preserves insertion order, relying on the
+       * @remarks
+       * While the backend generally preserves insertion order, relying on the
        * order of the output array is not guaranteed and should be avoided.
        *
        * @example
@@ -4194,6 +4195,10 @@ declare namespace FirebaseFirestore {
        * Creates an expression that returns the entries of a map as an array of maps,
        * where each map contains a `"k"` property for the key and a `"v"` property for the value.
        * For example: `[{ k: "key1", v: "value1" }, ...]`.
+       *
+       * @remarks
+       * While the backend generally preserves insertion order, relying on the
+       * order of the output array is not guaranteed and should be avoided.
        *
        * @example
        * ```typescript
@@ -8455,33 +8460,51 @@ declare namespace FirebaseFirestore {
      * @beta
      * Creates an expression that returns a new map with the specified entries added or updated.
      *
-     * Note that `mapSet` only performs shallow updates to the map. Setting a value to `null`
+     * @remarks
+     * This only performs shallow updates to the map. Setting a value to `null`
      * will retain the key with a `null` value. To remove a key entirely, use `mapRemove`.
      *
      * @example
      * ```typescript
-     * // Set the 'city' to "San Francisco" in the 'address' map field
+     * // Set the 'city' to 'San Francisco' in the 'address' map field
      * mapSet("address", "city", "San Francisco");
      * ```
      *
-     * @param map - The map to set entries in.
+     * @param mapField - The map field to set entries in.
      * @param key - The key to set. Must be a string or a constant string expression.
      * @param value - The value to set.
      * @param moreKeyValues - Additional key-value pairs to set.
      * @returns A new `Expression` representing the map with the entries set.
      */
-    export function mapSet(
-      map: unknown,
-      key: string | Expression,
-      value: unknown,
-      ...moreKeyValues: unknown[]
-    ): FunctionExpression;
+    export function mapSet(mapField: string, key: string | Expression, value: unknown, ...moreKeyValues: unknown[]): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that returns a new map with the specified entries added or updated.
+     *
+     * @remarks
+     * This only performs shallow updates to the map. Setting a value to `null`
+     * will retain the key with a `null` value. To remove a key entirely, use `mapRemove`.
+     *
+     * @example
+     * ```typescript
+     * // Set the 'city' to "San Francisco"
+     * mapSet(map({"state": "California"}), "city", "San Francisco");
+     * ```
+     *
+     * @param mapExpression - The expression representing the map.
+     * @param key - The key to set. Must be a string or a constant string expression.
+     * @param value - The value to set.
+     * @param moreKeyValues - Additional key-value pairs to set.
+     * @returns A new `Expression` representing the map with the entries set.
+     */
+    export function mapSet(mapExpression: Expression, key: string | Expression, value: unknown, ...moreKeyValues: unknown[]): FunctionExpression;
 
     /**
      * @beta
      * Creates an expression that returns the keys of a map.
      *
-     * Note: While the backend generally preserves insertion order, relying on the
+     * @remarks
+     * While the backend generally preserves insertion order, relying on the
      * order of the output array is not guaranteed and should be avoided.
      *
      * @example
@@ -8490,16 +8513,35 @@ declare namespace FirebaseFirestore {
      * mapKeys("address");
      * ```
      *
-     * @param map - The map to get the keys of.
+     * @param mapField - The map field to get the keys of.
      * @returns A new `Expression` representing the keys of the map.
      */
-    export function mapKeys(map: unknown): FunctionExpression;
+    export function mapKeys(mapField: string): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that returns the keys of a map.
+     *
+     * @remarks
+     * While the backend generally preserves insertion order, relying on the
+     * order of the output array is not guaranteed and should be avoided.
+     *
+     * @example
+     * ```typescript
+     * // Get the keys of the map expression
+     * mapKeys(map({"city": "San Francisco"}));
+     * ```
+     *
+     * @param mapExpression - The expression representing the map to get the keys of.
+     * @returns A new `Expression` representing the keys of the map.
+     */
+    export function mapKeys(mapExpression: Expression): FunctionExpression;
 
     /**
      * @beta
      * Creates an expression that returns the values of a map.
      *
-     * Note: While the backend generally preserves insertion order, relying on the
+     * @remarks
+     * While the backend generally preserves insertion order, relying on the
      * order of the output array is not guaranteed and should be avoided.
      *
      * @example
@@ -8508,10 +8550,28 @@ declare namespace FirebaseFirestore {
      * mapValues("address");
      * ```
      *
-     * @param map - The map to get the values of.
+     * @param mapField - The map field to get the values of.
      * @returns A new `Expression` representing the values of the map.
      */
-    export function mapValues(map: unknown): FunctionExpression;
+    export function mapValues(mapField: string): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that returns the values of a map.
+     *
+     * @remarks
+     * While the backend generally preserves insertion order, relying on the
+     * order of the output array is not guaranteed and should be avoided.
+     *
+     * @example
+     * ```typescript
+     * // Get the values of the map expression
+     * mapValues(map({"city": "San Francisco"}));
+     * ```
+     *
+     * @param mapExpression - The expression representing the map to get the values of.
+     * @returns A new `Expression` representing the values of the map.
+     */
+    export function mapValues(mapExpression: Expression): FunctionExpression;
 
     /**
      * @beta
@@ -8519,16 +8579,40 @@ declare namespace FirebaseFirestore {
      * where each map contains a `"k"` property for the key and a `"v"` property for the value.
      * For example: `[{ k: "key1", v: "value1" }, ...]`.
      *
+     * @remarks
+     * While the backend generally preserves insertion order, relying on the
+     * order of the output array is not guaranteed and should be avoided.
+     *
      * @example
      * ```typescript
      * // Get the entries of the 'address' map field
      * mapEntries("address");
      * ```
      *
-     * @param map - The map to get the entries of.
+     * @param mapField - The map field to get the entries of.
      * @returns A new `Expression` representing the entries of the map.
      */
-    export function mapEntries(map: unknown): FunctionExpression;
+    export function mapEntries(mapField: string): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that returns the entries of a map as an array of maps,
+     * where each map contains a `"k"` property for the key and a `"v"` property for the value.
+     * For example: `[{ k: "key1", v: "value1" }, ...]`.
+     *
+     * @remarks
+     * While the backend generally preserves insertion order, relying on the
+     * order of the output array is not guaranteed and should be avoided.
+     *
+     * @example
+     * ```typescript
+     * // Get the entries of the map expression
+     * mapEntries(map({"city": "San Francisco"}));
+     * ```
+     *
+     * @param mapExpression - The expression representing the map to get the entries of.
+     * @returns A new `Expression` representing the entries of the map.
+     */
+    export function mapEntries(mapExpression: Expression): FunctionExpression;
 
     /**
      * @beta
