@@ -328,6 +328,26 @@ describe.skipClassic('Pipeline class', () => {
         expect(docSnap.exists).to.be.false;
       });
 
+      it('can execute delete stage with returns document id', async () => {
+        const docRef = randomCol.doc('testDelete');
+        await docRef.set({foo: 'bar'});
+
+        const ppl = firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .where(equal(field('__name__'), 'testDelete'))
+          .delete({
+            returns: 'DOCUMENT_ID',
+          });
+
+        const res = await ppl.execute();
+        expect(res.results.length).to.equal(0);
+
+        // verify document was deleted
+        const docSnap = await docRef.get();
+        expect(docSnap.exists).to.be.false;
+      });
+
       it('can execute upsert stage', async () => {
         const docRef = randomCol.doc('testUpsert');
 

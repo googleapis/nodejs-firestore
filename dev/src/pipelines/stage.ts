@@ -678,11 +678,13 @@ export class RawStage implements Stage {
   }
 }
 
+/**
+ * Delete stage.
+ */
 export class DeleteStage implements Stage {
   name = 'delete';
   readonly optionsUtil = new OptionsUtil({
     returns: {serverName: 'returns'},
-    transactional: {serverName: 'transactional'},
   });
 
   constructor(
@@ -708,6 +710,9 @@ export class DeleteStage implements Stage {
   }
 }
 
+/**
+ * Upsert stage.
+ */
 export class UpsertStage implements Stage {
   name = 'upsert';
   readonly optionsUtil = new OptionsUtil({
@@ -740,6 +745,9 @@ export class UpsertStage implements Stage {
   }
 }
 
+/**
+ * Insert stage.
+ */
 export class InsertStage implements Stage {
   name = 'insert';
   readonly optionsUtil = new OptionsUtil({

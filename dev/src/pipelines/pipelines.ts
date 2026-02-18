@@ -1507,12 +1507,21 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
    * @beta
    * Performs a delete operation on documents from previous stages.
    *
+   * @example
+   * ```typescript
+   * // Deletes all documents in the "books" collection.
+   * firestore.pipeline().collection("books")
+   *    .delete();
+   * ```
+   *
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
    */
   delete(): Pipeline;
   /**
    * @beta
    * Performs a delete operation on documents from previous stages.
+   *
+   * TODO(dlarocque): Verify we want this function.
    *
    * @param collectionNameOrRef - The collection to delete from.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.
@@ -1521,6 +1530,15 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
   /**
    * @beta
    * Performs a delete operation on documents from previous stages.
+   *
+   * @example
+   * ```typescript
+   * // Deletes all documents in the books collection and returns their IDs.
+   * firestore.pipeline().collection("books")
+   *    .delete({
+   *        returns: "DOCUMENT_ID",
+   *    });
+   * ```
    *
    * @param options - The {@code DeleteStageOptions} to apply to the stage.
    * @return A new {@code Pipeline} object with this stage appended to the stage list.

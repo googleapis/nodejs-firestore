@@ -10700,7 +10700,6 @@ declare namespace FirebaseFirestore {
      */
     export type DeleteStageOptions = StageOptions & {
       returns?: DeleteReturn;
-      transactional?: boolean;
     };
 
     /**
@@ -10723,7 +10722,6 @@ declare namespace FirebaseFirestore {
       returns?: UpsertReturn;
       conflict_resolution?: ConflictResolution;
       transformations?: Record<string, unknown>;
-      transactional?: boolean;
     };
 
     /**
@@ -10739,7 +10737,6 @@ declare namespace FirebaseFirestore {
     export type InsertStageOptions = StageOptions & {
       returns?: InsertReturn;
       transformations?: Record<string, unknown>;
-      transactional?: boolean;
     };
     /**
      * @beta
