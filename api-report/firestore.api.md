@@ -1027,10 +1027,14 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     log10(): FunctionExpression;
     logicalMaximum(second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
     logicalMinimum(second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
+    mapEntries(): FunctionExpression;
     mapGet(subfield: string): FunctionExpression;
+    mapKeys(): FunctionExpression;
     mapMerge(secondMap: Record<string, unknown> | Expression, ...otherMaps: Array<Record<string, unknown> | Expression>): FunctionExpression;
     mapRemove(key: string): FunctionExpression;
     mapRemove(keyExpr: Expression): FunctionExpression;
+    mapSet(key: string | Expression, value: unknown, ...moreKeyValues: unknown[]): FunctionExpression;
+    mapValues(): FunctionExpression;
     maximum(): AggregateFunction;
     minimum(): AggregateFunction;
     mod(expression: Expression): FunctionExpression;
@@ -1583,10 +1587,22 @@ function logicalMinimum(fieldName: string, second: Expression | unknown, ...othe
 function map(elements: Record<string, unknown>): FunctionExpression;
 
 // @beta
+function mapEntries(mapField: string): FunctionExpression;
+
+// @beta
+function mapEntries(mapExpression: Expression): FunctionExpression;
+
+// @beta
 function mapGet(fieldName: string, subField: string): FunctionExpression;
 
 // @beta
 function mapGet(mapExpression: Expression, subField: string): FunctionExpression;
+
+// @beta
+function mapKeys(mapField: string): FunctionExpression;
+
+// @beta
+function mapKeys(mapExpression: Expression): FunctionExpression;
 
 // @beta
 function mapMerge(mapField: string, secondMap: Record<string, unknown> | Expression, ...otherMaps: Array<Record<string, unknown> | Expression>): FunctionExpression;
@@ -1605,6 +1621,18 @@ function mapRemove(mapField: string, keyExpr: Expression): FunctionExpression;
 
 // @beta
 function mapRemove(mapExpr: Expression, keyExpr: Expression): FunctionExpression;
+
+// @beta
+function mapSet(mapField: string, key: string | Expression, value: unknown, ...moreKeyValues: unknown[]): FunctionExpression;
+
+// @beta
+function mapSet(mapExpression: Expression, key: string | Expression, value: unknown, ...moreKeyValues: unknown[]): FunctionExpression;
+
+// @beta
+function mapValues(mapField: string): FunctionExpression;
+
+// @beta
+function mapValues(mapExpression: Expression): FunctionExpression;
 
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 //
@@ -1825,6 +1853,10 @@ declare namespace Pipelines {
         dotProduct,
         euclideanDistance,
         mapGet,
+        mapEntries,
+        mapKeys,
+        mapSet,
+        mapValues,
         lessThanOrEqual,
         equalAny,
         map,
