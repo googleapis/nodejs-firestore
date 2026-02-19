@@ -1006,8 +1006,8 @@ export abstract class Expression
    * field("scores").arrayFilter("score", field("score").greaterThan(50));
    * ```
    *
-   * @param variable The variable name to bind to each element in the array. This variable name
-   * can be used in the `predicate` expression to refer to the current element.
+   * @param variable The variable name to bind to each element in the array. This variable
+   * name can be used in the `predicate` expression to refer to the current element.
    * @param predicate The predicate boolean expression to filter by.
    * @returns A new `Expression` representing the filtered array.
    */
@@ -8413,8 +8413,8 @@ export function type(
  * arrayFirst("tags");
  * ```
  *
- * @param fieldName - The name of the field containing the array.
- * @returns A new {Expression} representing the first element.
+ * @param fieldName The name of the field containing the array.
+ * @returns A new `Expression` representing the first element.
  */
 export function arrayFirst(fieldName: string): FunctionExpression;
 
@@ -8429,8 +8429,8 @@ export function arrayFirst(fieldName: string): FunctionExpression;
  * arrayFirst(field("tags"));
  * ```
  *
- * @param arrayExpression - The expression representing the array.
- * @returns A new {Expression} representing the first element.
+ * @param arrayExpression The expression representing the array.
+ * @returns A new `Expression` representing the first element.
  */
 export function arrayFirst(arrayExpression: Expression): FunctionExpression;
 export function arrayFirst(array: Expression | string): FunctionExpression {
@@ -8448,9 +8448,9 @@ export function arrayFirst(array: Expression | string): FunctionExpression {
  * arrayFirstN("tags", 3);
  * ```
  *
- * @param fieldName - The name of the field containing the array.
- * @param n - The number of elements to return.
- * @returns A new {Expression} representing the first `n` elements.
+ * @param fieldName The name of the field containing the array.
+ * @param n The number of elements to return.
+ * @returns A new `Expression` representing the first `n` elements.
  */
 export function arrayFirstN(fieldName: string, n: number): FunctionExpression;
 
@@ -8465,9 +8465,9 @@ export function arrayFirstN(fieldName: string, n: number): FunctionExpression;
  * arrayFirstN("tags", field("count"));
  * ```
  *
- * @param fieldName - The name of the field containing the array.
- * @param n - An expression evaluating to the number of elements to return.
- * @returns A new {Expression} representing the first `n` elements.
+ * @param fieldName The name of the field containing the array.
+ * @param n An expression evaluating to the number of elements to return.
+ * @returns A new `Expression` representing the first `n` elements.
  */
 export function arrayFirstN(
   fieldName: string,
@@ -8485,9 +8485,9 @@ export function arrayFirstN(
  * arrayFirstN(field("tags"), 3);
  * ```
  *
- * @param arrayExpression - The expression representing the array.
- * @param n - The number of elements to return.
- * @returns A new {Expression} representing the first `n` elements.
+ * @param arrayExpression The expression representing the array.
+ * @param n The number of elements to return.
+ * @returns A new `Expression` representing the first `n` elements.
  */
 export function arrayFirstN(
   arrayExpression: Expression,
@@ -8505,9 +8505,9 @@ export function arrayFirstN(
  * arrayFirstN(field("tags"), field("count"));
  * ```
  *
- * @param arrayExpression - The expression representing the array.
- * @param n - An expression evaluating to the number of elements to return.
- * @returns A new {Expression} representing the first `n` elements.
+ * @param arrayExpression The expression representing the array.
+ * @param n An expression evaluating to the number of elements to return.
+ * @returns A new `Expression` representing the first `n` elements.
  */
 export function arrayFirstN(
   arrayExpression: Expression,
@@ -8531,8 +8531,8 @@ export function arrayFirstN(
  * arrayLast("tags");
  * ```
  *
- * @param fieldName - The name of the field containing the array.
- * @returns A new {Expression} representing the last element.
+ * @param fieldName The name of the field containing the array.
+ * @returns A new `Expression` representing the last element.
  */
 export function arrayLast(fieldName: string): FunctionExpression;
 
@@ -8547,8 +8547,8 @@ export function arrayLast(fieldName: string): FunctionExpression;
  * arrayLast(field("tags"));
  * ```
  *
- * @param arrayExpression - The expression representing the array.
- * @returns A new {Expression} representing the last element.
+ * @param arrayExpression The expression representing the array.
+ * @returns A new `Expression` representing the last element.
  */
 export function arrayLast(arrayExpression: Expression): FunctionExpression;
 export function arrayLast(array: Expression | string): FunctionExpression {
@@ -8566,9 +8566,9 @@ export function arrayLast(array: Expression | string): FunctionExpression {
  * arrayLastN("tags", 3);
  * ```
  *
- * @param fieldName - The name of the field containing the array.
- * @param n - The number of elements to return.
- * @returns A new {Expression} representing the last `n` elements.
+ * @param fieldName The name of the field containing the array.
+ * @param n The number of elements to return.
+ * @returns A new `Expression` representing the last `n` elements.
  */
 export function arrayLastN(fieldName: string, n: number): FunctionExpression;
 
@@ -8583,9 +8583,9 @@ export function arrayLastN(fieldName: string, n: number): FunctionExpression;
  * arrayLastN("tags", field("count"));
  * ```
  *
- * @param fieldName - The name of the field containing the array.
- * @param n - An expression evaluating to the number of elements to return.
- * @returns A new {Expression} representing the last `n` elements.
+ * @param fieldName The name of the field containing the array.
+ * @param n An expression evaluating to the number of elements to return.
+ * @returns A new `Expression` representing the last `n` elements.
  */
 export function arrayLastN(
   fieldName: string,
@@ -8603,9 +8603,9 @@ export function arrayLastN(
  * arrayLastN(field("tags"), 3);
  * ```
  *
- * @param arrayExpression - The expression representing the array.
- * @param n - The number of elements to return.
- * @returns A new {Expression} representing the last `n` elements.
+ * @param arrayExpression The expression representing the array.
+ * @param n The number of elements to return.
+ * @returns A new `Expression` representing the last `n` elements.
  */
 export function arrayLastN(
   arrayExpression: Expression,
@@ -8623,9 +8623,9 @@ export function arrayLastN(
  * arrayLastN(field("tags"), field("count"));
  * ```
  *
- * @param arrayExpression - The expression representing the array.
- * @param n - An expression evaluating to the number of elements to return.
- * @returns A new {Expression} representing the last `n` elements.
+ * @param arrayExpression The expression representing the array.
+ * @param n An expression evaluating to the number of elements to return.
+ * @returns A new `Expression` representing the last `n` elements.
  */
 export function arrayLastN(
   arrayExpression: Expression,
@@ -8649,8 +8649,8 @@ export function arrayLastN(
  * arrayMaximum("scores");
  * ```
  *
- * @param fieldName - The name of the field containing the array.
- * @returns A new {Expression} representing the maximum value.
+ * @param fieldName The name of the field containing the array.
+ * @returns A new `Expression` representing the maximum value.
  */
 export function arrayMaximum(fieldName: string): FunctionExpression;
 
@@ -8665,8 +8665,8 @@ export function arrayMaximum(fieldName: string): FunctionExpression;
  * arrayMaximum(field("scores"));
  * ```
  *
- * @param arrayExpression - The expression representing the array.
- * @returns A new {Expression} representing the maximum value.
+ * @param arrayExpression The expression representing the array.
+ * @returns A new `Expression` representing the maximum value.
  */
 export function arrayMaximum(arrayExpression: Expression): FunctionExpression;
 export function arrayMaximum(array: Expression | string): FunctionExpression {
@@ -8684,9 +8684,9 @@ export function arrayMaximum(array: Expression | string): FunctionExpression {
  * arrayMaximumN("scores", 3);
  * ```
  *
- * @param fieldName - The name of the field containing the array.
- * @param n - The number of elements to return.
- * @returns A new {Expression} representing the largest `n` elements.
+ * @param fieldName The name of the field containing the array.
+ * @param n The number of elements to return.
+ * @returns A new `Expression` representing the largest `n` elements.
  */
 export function arrayMaximumN(fieldName: string, n: number): FunctionExpression;
 
@@ -8701,9 +8701,9 @@ export function arrayMaximumN(fieldName: string, n: number): FunctionExpression;
  * arrayMaximumN("scores", field("count"));
  * ```
  *
- * @param fieldName - The name of the field containing the array.
- * @param n - An expression evaluating to the number of elements to return.
- * @returns A new {Expression} representing the largest `n` elements.
+ * @param fieldName The name of the field containing the array.
+ * @param n An expression evaluating to the number of elements to return.
+ * @returns A new `Expression` representing the largest `n` elements.
  */
 export function arrayMaximumN(
   fieldName: string,
@@ -8721,9 +8721,9 @@ export function arrayMaximumN(
  * arrayMaximumN(field("scores"), 3);
  * ```
  *
- * @param arrayExpression - The expression representing the array.
- * @param n - The number of elements to return.
- * @returns A new {Expression} representing the largest `n` elements.
+ * @param arrayExpression The expression representing the array.
+ * @param n The number of elements to return.
+ * @returns A new `Expression` representing the largest `n` elements.
  */
 export function arrayMaximumN(
   arrayExpression: Expression,
@@ -8741,9 +8741,9 @@ export function arrayMaximumN(
  * arrayMaximumN(field("scores"), field("count"));
  * ```
  *
- * @param arrayExpression - The expression representing the array.
- * @param n - An expression evaluating to the number of elements to return.
- * @returns A new {Expression} representing the largest `n` elements.
+ * @param arrayExpression The expression representing the array.
+ * @param n An expression evaluating to the number of elements to return.
+ * @returns A new `Expression` representing the largest `n` elements.
  */
 export function arrayMaximumN(
   arrayExpression: Expression,
@@ -8767,8 +8767,8 @@ export function arrayMaximumN(
  * arrayMinimum("scores");
  * ```
  *
- * @param fieldName - The name of the field containing the array.
- * @returns A new {Expression} representing the minimum value.
+ * @param fieldName The name of the field containing the array.
+ * @returns A new `Expression` representing the minimum value.
  */
 export function arrayMinimum(fieldName: string): FunctionExpression;
 
@@ -8783,8 +8783,8 @@ export function arrayMinimum(fieldName: string): FunctionExpression;
  * arrayMinimum(field("scores"));
  * ```
  *
- * @param arrayExpression - The expression representing the array.
- * @returns A new {Expression} representing the minimum value.
+ * @param arrayExpression The expression representing the array.
+ * @returns A new `Expression` representing the minimum value.
  */
 export function arrayMinimum(arrayExpression: Expression): FunctionExpression;
 export function arrayMinimum(array: Expression | string): FunctionExpression {
@@ -8802,9 +8802,9 @@ export function arrayMinimum(array: Expression | string): FunctionExpression {
  * arrayMinimumN("scores", 3);
  * ```
  *
- * @param fieldName - The name of the field containing the array.
- * @param n - The number of elements to return.
- * @returns A new {Expression} representing the smallest `n` elements.
+ * @param fieldName The name of the field containing the array.
+ * @param n The number of elements to return.
+ * @returns A new `Expression` representing the smallest `n` elements.
  */
 export function arrayMinimumN(fieldName: string, n: number): FunctionExpression;
 
@@ -8819,9 +8819,9 @@ export function arrayMinimumN(fieldName: string, n: number): FunctionExpression;
  * arrayMinimumN(field("scores"), field("count"));
  * ```
  *
- * @param fieldName - The name of the field containing the array.
- * @param n - An expression evaluating to the number of elements to return.
- * @returns A new {Expression} representing the smallest `n` elements.
+ * @param fieldName The name of the field containing the array.
+ * @param n An expression evaluating to the number of elements to return.
+ * @returns A new `Expression` representing the smallest `n` elements.
  */
 export function arrayMinimumN(
   fieldName: string,
@@ -8839,9 +8839,9 @@ export function arrayMinimumN(
  * arrayMinimumN(field("scores"), 3);
  * ```
  *
- * @param arrayExpression - The expression representing the array.
- * @param n - The number of elements to return.
- * @returns A new {Expression} representing the smallest `n` elements.
+ * @param arrayExpression The expression representing the array.
+ * @param n The number of elements to return.
+ * @returns A new `Expression` representing the smallest `n` elements.
  */
 export function arrayMinimumN(
   arrayExpression: Expression,
@@ -8859,9 +8859,9 @@ export function arrayMinimumN(
  * arrayMinimumN(field("scores"), field("count"));
  * ```
  *
- * @param arrayExpression - The expression representing the array.
- * @param n - An expression evaluating to the number of elements to return.
- * @returns A new {Expression} representing the smallest `n` elements.
+ * @param arrayExpression The expression representing the array.
+ * @param n An expression evaluating to the number of elements to return.
+ * @returns A new `Expression` representing the smallest `n` elements.
  */
 export function arrayMinimumN(
   arrayExpression: Expression,
@@ -8885,10 +8885,10 @@ export function arrayMinimumN(
  * arraySlice("tags", 0, 3);
  * ```
  *
- * @param fieldName - The name of the field containing the array to slice.
- * @param start - The index to start the slice.
- * @param end - The index to end the slice (inclusive).
- * @returns A new {Expression} representing the slice.
+ * @param fieldName The name of the field containing the array to slice.
+ * @param start The index to start the slice.
+ * @param end The index to end the slice (inclusive).
+ * @returns A new `Expression` representing the slice.
  */
 export function arraySlice(
   fieldName: string,
@@ -8907,10 +8907,10 @@ export function arraySlice(
  * arraySlice(field("tags"), 0, 3);
  * ```
  *
- * @param arrayExpression - The expression representing the array to slice.
- * @param start - The index to start the slice.
- * @param end - The index to end the slice (inclusive).
- * @returns A new {Expression} representing the slice.
+ * @param arrayExpression The expression representing the array to slice.
+ * @param start The index to start the slice.
+ * @param end The index to end the slice (inclusive).
+ * @returns A new `Expression` representing the slice.
  */
 export function arraySlice(
   arrayExpression: Expression,
@@ -8940,9 +8940,9 @@ export function arraySlice(
  * arrayIndexOf("tags", "politics");
  * ```
  *
- * @param fieldName - The name of the field containing the array to search.
- * @param search - The value to search for.
- * @returns A new {Expression} representing the index.
+ * @param fieldName The name of the field containing the array to search.
+ * @param search The value to search for.
+ * @returns A new `Expression` representing the index.
  */
 export function arrayIndexOf(
   fieldName: string,
@@ -8961,9 +8961,9 @@ export function arrayIndexOf(
  * arrayIndexOf(field("tags"), "politics");
  * ```
  *
- * @param arrayExpression - The expression representing the array to search.
- * @param search - The value to search for.
- * @returns A new {Expression} representing the index.
+ * @param arrayExpression The expression representing the array to search.
+ * @param search The value to search for.
+ * @returns A new `Expression` representing the index.
  */
 export function arrayIndexOf(
   arrayExpression: Expression,
@@ -8988,9 +8988,9 @@ export function arrayIndexOf(
  * arrayLastIndexOf("tags", "politics");
  * ```
  *
- * @param fieldName - The name of the field containing the array to search.
- * @param search - The value to search for.
- * @returns A new {Expression} representing the index.
+ * @param fieldName The name of the field containing the array to search.
+ * @param search The value to search for.
+ * @returns A new `Expression` representing the index.
  */
 export function arrayLastIndexOf(
   fieldName: string,
@@ -9009,9 +9009,9 @@ export function arrayLastIndexOf(
  * arrayLastIndexOf(field("tags"), "politics");
  * ```
  *
- * @param arrayExpression - The expression representing the array to search.
- * @param search - The value to search for.
- * @returns A new {Expression} representing the index.
+ * @param arrayExpression The expression representing the array to search.
+ * @param search The value to search for.
+ * @returns A new `Expression` representing the index.
  */
 export function arrayLastIndexOf(
   arrayExpression: Expression,
@@ -9035,9 +9035,9 @@ export function arrayLastIndexOf(
  * arrayIndexOfAll("scores", 5);
  * ```
  *
- * @param fieldName - The name of the field containing the array to search.
- * @param search - The value to search for.
- * @returns A new {Expression} representing the indices.
+ * @param fieldName The name of the field containing the array to search.
+ * @param search The value to search for.
+ * @returns A new `Expression` representing the indices.
  */
 export function arrayIndexOfAll(
   fieldName: string,
@@ -9055,9 +9055,9 @@ export function arrayIndexOfAll(
  * arrayIndexOfAll(field("scores"), 5);
  * ```
  *
- * @param arrayExpression - The expression representing the array to search.
- * @param search - The value to search for.
- * @returns A new {Expression} representing the indices.
+ * @param arrayExpression The expression representing the array to search.
+ * @param search The value to search for.
+ * @returns A new `Expression` representing the indices.
  */
 export function arrayIndexOfAll(
   arrayExpression: Expression,
@@ -9081,11 +9081,11 @@ export function arrayIndexOfAll(
  * arrayFilter("scores", "score", field("score").greaterThan(50));
  * ```
  *
- * @param fieldName - The name of the field containing the array to filter.
- * @param variable - The variable name to bind to each element in the array. This variable name
+ * @param fieldName The name of the field containing the array to filter.
+ * @param variable The variable name to bind to each element in the array. This variable name
  * can be used in the `predicate` expression to refer to the current element.
- * @param predicate - The predicate boolean expression to filter by.
- * @returns A new {Expression} representing the filtered array.
+ * @param predicate The predicate boolean expression to filter by.
+ * @returns A new `Expression` representing the filtered array.
  */
 export function arrayFilter(
   fieldName: string,
@@ -9104,11 +9104,11 @@ export function arrayFilter(
  * arrayFilter(field("scores"), "score", field("score").greaterThan(50));
  * ```
  *
- * @param arrayExpression - The expression representing the array to filter.
- * @param variable - The variable name to bind to each element in the array. This variable name
- * can be used in the `predicate` expression to refer to the current element.
- * @param predicate - The predicate boolean expression to filter by.
- * @returns A new {Expression} representing the filtered array.
+ * @param arrayExpression The expression representing the array to filter.
+ * @param variable The variable name to bind to each element in the array. This variable
+ * name can be used in the `predicate` expression to refer to the current element.
+ * @param predicate The predicate boolean expression to filter by.
+ * @returns A new `Expression` representing the filtered array.
  */
 export function arrayFilter(
   arrayExpression: Expression,

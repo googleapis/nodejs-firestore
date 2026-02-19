@@ -211,51 +211,27 @@ function arrayContainsAny(array: Expression, values: Expression): BooleanExpress
 // @beta
 function arrayContainsAny(fieldName: string, values: Expression): BooleanExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayFilter(fieldName: string, variable: string, predicate: BooleanExpression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayFilter(arrayExpression: Expression, variable: string, predicate: BooleanExpression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayFirst(fieldName: string): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayFirst(arrayExpression: Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayFirstN(fieldName: string, n: number): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayFirstN(fieldName: string, n: Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayFirstN(arrayExpression: Expression, n: number): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayFirstN(arrayExpression: Expression, n: Expression): FunctionExpression;
 
@@ -271,75 +247,39 @@ function arrayGet(arrayExpression: Expression, index: number): FunctionExpressio
 // @beta
 function arrayGet(arrayExpression: Expression, indexExpr: Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayIndexOf(fieldName: string, search: unknown | Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayIndexOf(arrayExpression: Expression, search: unknown | Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayIndexOfAll(fieldName: string, search: unknown | Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayIndexOfAll(arrayExpression: Expression, search: unknown | Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayLast(fieldName: string): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayLast(arrayExpression: Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayLastIndexOf(fieldName: string, search: unknown | Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayLastIndexOf(arrayExpression: Expression, search: unknown | Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayLastN(fieldName: string, n: number): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayLastN(fieldName: string, n: Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayLastN(arrayExpression: Expression, n: number): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayLastN(arrayExpression: Expression, n: Expression): FunctionExpression;
 
@@ -349,75 +289,39 @@ function arrayLength(fieldName: string): FunctionExpression;
 // @beta
 function arrayLength(array: Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayMaximum(fieldName: string): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayMaximum(arrayExpression: Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayMaximumN(fieldName: string, n: number): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayMaximumN(fieldName: string, n: Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayMaximumN(arrayExpression: Expression, n: number): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayMaximumN(arrayExpression: Expression, n: Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayMinimum(fieldName: string): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayMinimum(arrayExpression: Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayMinimumN(fieldName: string, n: number): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayMinimumN(fieldName: string, n: Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayMinimumN(arrayExpression: Expression, n: number): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arrayMinimumN(arrayExpression: Expression, n: Expression): FunctionExpression;
 
@@ -427,15 +331,9 @@ function arrayReverse(fieldName: string): FunctionExpression;
 // @beta
 function arrayReverse(arrayExpression: Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arraySlice(fieldName: string, start: number | Expression, end?: number | Expression): FunctionExpression;
 
-// Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
-// Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
-//
 // @beta
 function arraySlice(arrayExpression: Expression, start: number | Expression, end?: number | Expression): FunctionExpression;
 

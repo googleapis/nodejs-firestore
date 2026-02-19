@@ -3177,6 +3177,30 @@ describe.skipClassic('Pipeline class', () => {
         .select(field('tags').arrayFirstN(2).as('firstTwoTags'))
         .execute();
       expectResults(snapshot, ...expectedResults);
+
+      // Test with empty/null/non-existent
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            empty: [],
+            nullVal: null,
+          }),
+        )
+        .select(
+          arrayFirstN('empty', 1).as('emptyResult'),
+          arrayFirstN('nullVal', 1).as('nullResult'),
+          arrayFirstN('nonExistent', 1).as('absentResult'),
+        )
+        .execute();
+
+      expectResults(snapshot, {
+        emptyResult: [],
+        nullResult: null,
+        absentResult: null,
+      });
     });
 
     it('supports arrayLast', async () => {
@@ -3239,6 +3263,30 @@ describe.skipClassic('Pipeline class', () => {
         .select(field('tags').arrayLastN(2).as('lastTwoTags'))
         .execute();
       expectResults(snapshot, ...expectedResults);
+
+      // Test with empty/null/non-existent
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            empty: [],
+            nullVal: null,
+          }),
+        )
+        .select(
+          arrayLastN('empty', 1).as('emptyResult'),
+          arrayLastN('nullVal', 1).as('nullResult'),
+          arrayLastN('nonExistent', 1).as('absentResult'),
+        )
+        .execute();
+
+      expectResults(snapshot, {
+        emptyResult: [],
+        nullResult: null,
+        absentResult: null,
+      });
     });
 
     it('supports arrayMaximum', async () => {
@@ -3264,6 +3312,33 @@ describe.skipClassic('Pipeline class', () => {
         .select(field('tags').arrayMaximum().as('maxTag'))
         .execute();
       expectResults(snapshot, ...expectedResults);
+
+      // Test with empty/null/non-existent and mixed types
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            empty: [],
+            nullVal: null,
+            mixed: [1, '2', 3, '10'], // string > number in Firestore
+          }),
+        )
+        .select(
+          arrayMaximum('empty').as('emptyResult'),
+          arrayMaximum('nullVal').as('nullResult'),
+          arrayMaximum('nonExistent').as('absentResult'),
+          arrayMaximum('mixed').as('mixedResult'),
+        )
+        .execute();
+
+      expectResults(snapshot, {
+        emptyResult: null,
+        nullResult: null,
+        absentResult: null,
+        mixedResult: '2', // "2" > "10" > 3 > 1
+      });
     });
 
     it('supports arrayMaximumN', async () => {
@@ -3314,6 +3389,33 @@ describe.skipClassic('Pipeline class', () => {
         .select(field('tags').arrayMinimum().as('minTag'))
         .execute();
       expectResults(snapshot, ...expectedResults);
+
+      // Test with empty/null/non-existent and mixed types
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            empty: [],
+            nullVal: null,
+            mixed: [1, '2', 3, '10'], // Strings > Numbers in Firestore
+          }),
+        )
+        .select(
+          arrayMinimum('empty').as('emptyResult'),
+          arrayMinimum('nullVal').as('nullResult'),
+          arrayMinimum('nonExistent').as('absentResult'),
+          arrayMinimum('mixed').as('mixedResult'),
+        )
+        .execute();
+
+      expectResults(snapshot, {
+        emptyResult: null,
+        nullResult: null,
+        absentResult: null,
+        mixedResult: 1, // 1 < 2 < 3 < "10"
+      });
     });
 
     it('supports arrayMinimumN', async () => {

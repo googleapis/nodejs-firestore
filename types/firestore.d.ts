@@ -7429,11 +7429,11 @@ declare namespace FirebaseFirestore {
      * arrayFilter("scores", "score", field("score").greaterThan(50));
      * ```
      *
-     * @param fieldName - The name of the field containing the array to filter.
-     * @param variable - The variable name to bind to each element in the array. This variable name
+     * @param fieldName The name of the field containing the array to filter.
+     * @param variable The variable name to bind to each element in the array. This variable name
      * can be used in the `predicate` expression to refer to the current element.
-     * @param predicate - The predicate boolean expression to filter by.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the filtered array.
+     * @param predicate The predicate boolean expression to filter by.
+     * @returns A new {@code Expression} representing the filtered array.
      */
     export function arrayFilter(
       fieldName: string,
@@ -7451,11 +7451,11 @@ declare namespace FirebaseFirestore {
      * arrayFilter(field("scores"), "score", field("score").greaterThan(50));
      * ```
      *
-     * @param arrayExpression - The expression representing the array to filter.
-     * @param variable - The variable name to bind to each element in the array. This variable name
+     * @param arrayExpression The expression representing the array to filter.
+     * @param variable The variable name to bind to each element in the array. This variable name
      * can be used in the `predicate` expression to refer to the current element.
-     * @param predicate - The predicate boolean expression to filter by.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the filtered array.
+     * @param predicate The predicate boolean expression to filter by.
+     * @returns A new {@code Expression} representing the filtered array.
      */
     export function arrayFilter(
       arrayExpression: Expression,
@@ -7473,8 +7473,8 @@ declare namespace FirebaseFirestore {
      * arrayFirst("tags");
      * ```
      *
-     * @param fieldName - The name of the field containing the array.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the first element.
+     * @param fieldName The name of the field containing the array.
+     * @returns A new {@code Expression} representing the first element.
      */
     export function arrayFirst(fieldName: string): FunctionExpression;
     /**
@@ -7488,8 +7488,8 @@ declare namespace FirebaseFirestore {
      * arrayFirst(field("tags"));
      * ```
      *
-     * @param arrayExpression - The expression representing the array.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the first element.
+     * @param arrayExpression The expression representing the array.
+     * @returns A new {@code Expression} representing the first element.
      */
     export function arrayFirst(arrayExpression: Expression): FunctionExpression;
     /**
@@ -7503,9 +7503,9 @@ declare namespace FirebaseFirestore {
      * arrayFirstN("tags", 3);
      * ```
      *
-     * @param fieldName - The name of the field containing the array.
-     * @param n - The number of elements to return.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the first `n` elements.
+     * @param fieldName The name of the field containing the array.
+     * @param n The number of elements to return.
+     * @returns A new {@code Expression} representing the first `n` elements.
      */
     export function arrayFirstN(
       fieldName: string,
@@ -7522,9 +7522,9 @@ declare namespace FirebaseFirestore {
      * arrayFirstN("tags", field("count"));
      * ```
      *
-     * @param fieldName - The name of the field containing the array.
-     * @param n - An expression evaluating to the number of elements to return.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the first `n` elements.
+     * @param fieldName The name of the field containing the array.
+     * @param n An expression evaluating to the number of elements to return.
+     * @returns A new {@code Expression} representing the first `n` elements.
      */
     export function arrayFirstN(
       fieldName: string,
@@ -7541,9 +7541,9 @@ declare namespace FirebaseFirestore {
      * arrayFirstN(field("tags"), 3);
      * ```
      *
-     * @param arrayExpression - The expression representing the array.
-     * @param n - The number of elements to return.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the first `n` elements.
+     * @param arrayExpression The expression representing the array.
+     * @param n The number of elements to return.
+     * @returns A new {@code Expression} representing the first `n` elements.
      */
     export function arrayFirstN(
       arrayExpression: Expression,
@@ -7560,9 +7560,9 @@ declare namespace FirebaseFirestore {
      * arrayFirstN(field("tags"), field("count"));
      * ```
      *
-     * @param arrayExpression - The expression representing the array.
-     * @param n - An expression evaluating to the number of elements to return.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the first `n` elements.
+     * @param arrayExpression The expression representing the array.
+     * @param n An expression evaluating to the number of elements to return.
+     * @returns A new {@code Expression} representing the first `n` elements.
      */
     export function arrayFirstN(
       arrayExpression: Expression,
@@ -7580,8 +7580,8 @@ declare namespace FirebaseFirestore {
      * arrayGet(field('tags'), 1);
      * ```
      *
-     * @param arrayExpression - An `Expression` evaluating to an array.
-     * @param offset - The index of the element to return.
+     * @param arrayExpression An `Expression` evaluating to an array.
+     * @param offset The index of the element to return.
      * @returns A new `Expression` representing the 'arrayGet' operation.
      */
     export function arrayIndexOf(
@@ -7600,9 +7600,9 @@ declare namespace FirebaseFirestore {
      * arrayIndexOf(field("tags"), "politics");
      * ```
      *
-     * @param arrayExpression - The expression representing the array to search.
-     * @param search - The value to search for.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the index.
+     * @param arrayExpression The expression representing the array to search.
+     * @param search The value to search for.
+     * @returns A new {@code Expression} representing the index.
      */
     export function arrayIndexOf(
       arrayExpression: Expression,
@@ -7619,9 +7619,9 @@ declare namespace FirebaseFirestore {
      * arrayIndexOfAll("scores", 5);
      * ```
      *
-     * @param fieldName - The name of the field containing the array to search.
-     * @param search - The value to search for.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the indices.
+     * @param fieldName The name of the field containing the array to search.
+     * @param search The value to search for.
+     * @returns A new {@code Expression} representing the indices.
      */
     export function arrayIndexOfAll(
       fieldName: string,
@@ -7638,9 +7638,9 @@ declare namespace FirebaseFirestore {
      * arrayIndexOfAll(field("scores"), 5);
      * ```
      *
-     * @param arrayExpression - The expression representing the array to search.
-     * @param search - The value to search for.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the indices.
+     * @param arrayExpression The expression representing the array to search.
+     * @param search The value to search for.
+     * @returns A new {@code Expression} representing the indices.
      */
     export function arrayIndexOfAll(
       arrayExpression: Expression,
@@ -7657,8 +7657,8 @@ declare namespace FirebaseFirestore {
      * arrayLast("tags");
      * ```
      *
-     * @param fieldName - The name of the field containing the array.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the last element.
+     * @param fieldName The name of the field containing the array.
+     * @returns A new {@code Expression} representing the last element.
      */
     export function arrayLast(fieldName: string): FunctionExpression;
     /**
@@ -7672,8 +7672,8 @@ declare namespace FirebaseFirestore {
      * arrayLast(field("tags"));
      * ```
      *
-     * @param arrayExpression - The expression representing the array.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the last element.
+     * @param arrayExpression The expression representing the array.
+     * @returns A new {@code Expression} representing the last element.
      */
     export function arrayLast(arrayExpression: Expression): FunctionExpression;
     /**
@@ -7688,9 +7688,9 @@ declare namespace FirebaseFirestore {
      * arrayLastIndexOf("tags", "politics");
      * ```
      *
-     * @param fieldName - The name of the field containing the array to search.
-     * @param search - The value to search for.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the index.
+     * @param fieldName The name of the field containing the array to search.
+     * @param search The value to search for.
+     * @returns A new {@code Expression} representing the index.
      */
     export function arrayLastIndexOf(
       fieldName: string,
@@ -7708,9 +7708,9 @@ declare namespace FirebaseFirestore {
      * arrayLastIndexOf(field("tags"), "politics");
      * ```
      *
-     * @param arrayExpression - The expression representing the array to search.
-     * @param search - The value to search for.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the index.
+     * @param arrayExpression The expression representing the array to search.
+     * @param search The value to search for.
+     * @returns A new {@code Expression} representing the index.
      */
     export function arrayLastIndexOf(
       arrayExpression: Expression,
@@ -7727,9 +7727,9 @@ declare namespace FirebaseFirestore {
      * arrayLastN("tags", 3);
      * ```
      *
-     * @param fieldName - The name of the field containing the array.
-     * @param n - The number of elements to return.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the last `n` elements.
+     * @param fieldName The name of the field containing the array.
+     * @param n The number of elements to return.
+     * @returns A new {@code Expression} representing the last `n` elements.
      */
     export function arrayLastN(
       fieldName: string,
@@ -7746,9 +7746,9 @@ declare namespace FirebaseFirestore {
      * arrayLastN("tags", field("count"));
      * ```
      *
-     * @param fieldName - The name of the field containing the array.
-     * @param n - An expression evaluating to the number of elements to return.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the last `n` elements.
+     * @param fieldName The name of the field containing the array.
+     * @param n An expression evaluating to the number of elements to return.
+     * @returns A new {@code Expression} representing the last `n` elements.
      */
     export function arrayLastN(
       fieldName: string,
@@ -7765,9 +7765,9 @@ declare namespace FirebaseFirestore {
      * arrayLastN(field("tags"), 3);
      * ```
      *
-     * @param arrayExpression - The expression representing the array.
-     * @param n - The number of elements to return.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the last `n` elements.
+     * @param arrayExpression The expression representing the array.
+     * @param n The number of elements to return.
+     * @returns A new {@code Expression} representing the last `n` elements.
      */
     export function arrayLastN(
       arrayExpression: Expression,
@@ -7784,9 +7784,9 @@ declare namespace FirebaseFirestore {
      * arrayLastN(field("tags"), field("count"));
      * ```
      *
-     * @param arrayExpression - The expression representing the array.
-     * @param n - An expression evaluating to the number of elements to return.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the last `n` elements.
+     * @param arrayExpression The expression representing the array.
+     * @param n An expression evaluating to the number of elements to return.
+     * @returns A new {@code Expression} representing the last `n` elements.
      */
     export function arrayLastN(
       arrayExpression: Expression,
@@ -7803,8 +7803,8 @@ declare namespace FirebaseFirestore {
      * arrayMaximum("scores");
      * ```
      *
-     * @param fieldName - The name of the field containing the array.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the maximum value.
+     * @param fieldName The name of the field containing the array.
+     * @returns A new {@code Expression} representing the maximum value.
      */
     export function arrayMaximum(fieldName: string): FunctionExpression;
     /**
@@ -7818,8 +7818,8 @@ declare namespace FirebaseFirestore {
      * arrayMaximum(field("scores"));
      * ```
      *
-     * @param arrayExpression - The expression representing the array.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the maximum value.
+     * @param arrayExpression The expression representing the array.
+     * @returns A new {@code Expression} representing the maximum value.
      */
     export function arrayMaximum(
       arrayExpression: Expression,
@@ -7835,9 +7835,9 @@ declare namespace FirebaseFirestore {
      * arrayMaximumN("scores", 3);
      * ```
      *
-     * @param fieldName - The name of the field containing the array.
-     * @param n - The number of elements to return.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the largest `n` elements.
+     * @param fieldName The name of the field containing the array.
+     * @param n The number of elements to return.
+     * @returns A new {@code Expression} representing the largest `n` elements.
      */
     export function arrayMaximumN(
       fieldName: string,
@@ -7854,9 +7854,9 @@ declare namespace FirebaseFirestore {
      * arrayMaximumN("scores", field("count"));
      * ```
      *
-     * @param fieldName - The name of the field containing the array.
-     * @param n - An expression evaluating to the number of elements to return.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the largest `n` elements.
+     * @param fieldName The name of the field containing the array.
+     * @param n An expression evaluating to the number of elements to return.
+     * @returns A new {@code Expression} representing the largest `n` elements.
      */
     export function arrayMaximumN(
       fieldName: string,
@@ -7873,9 +7873,9 @@ declare namespace FirebaseFirestore {
      * arrayMaximumN(field("scores"), 3);
      * ```
      *
-     * @param arrayExpression - The expression representing the array.
-     * @param n - The number of elements to return.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the largest `n` elements.
+     * @param arrayExpression The expression representing the array.
+     * @param n The number of elements to return.
+     * @returns A new {@code Expression} representing the largest `n` elements.
      */
     export function arrayMaximumN(
       arrayExpression: Expression,
@@ -7892,9 +7892,9 @@ declare namespace FirebaseFirestore {
      * arrayMaximumN(field("scores"), field("count"));
      * ```
      *
-     * @param arrayExpression - The expression representing the array.
-     * @param n - An expression evaluating to the number of elements to return.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the largest `n` elements.
+     * @param arrayExpression The expression representing the array.
+     * @param n An expression evaluating to the number of elements to return.
+     * @returns A new {@code Expression} representing the largest `n` elements.
      */
     export function arrayMaximumN(
       arrayExpression: Expression,
@@ -7911,8 +7911,8 @@ declare namespace FirebaseFirestore {
      * arrayMinimum("scores");
      * ```
      *
-     * @param fieldName - The name of the field containing the array.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the minimum value.
+     * @param fieldName The name of the field containing the array.
+     * @returns A new {@code Expression} representing the minimum value.
      */
     export function arrayMinimum(fieldName: string): FunctionExpression;
     /**
@@ -7926,8 +7926,8 @@ declare namespace FirebaseFirestore {
      * arrayMinimum(field("scores"));
      * ```
      *
-     * @param arrayExpression - The expression representing the array.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the minimum value.
+     * @param arrayExpression The expression representing the array.
+     * @returns A new {@code Expression} representing the minimum value.
      */
     export function arrayMinimum(
       arrayExpression: Expression,
@@ -7943,9 +7943,9 @@ declare namespace FirebaseFirestore {
      * arrayMinimumN("scores", 3);
      * ```
      *
-     * @param fieldName - The name of the field containing the array.
-     * @param n - The number of elements to return.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the smallest `n` elements.
+     * @param fieldName The name of the field containing the array.
+     * @param n The number of elements to return.
+     * @returns A new {@code Expression} representing the smallest `n` elements.
      */
     export function arrayMinimumN(
       fieldName: string,
@@ -7962,9 +7962,9 @@ declare namespace FirebaseFirestore {
      * arrayMinimumN(field("scores"), field("count"));
      * ```
      *
-     * @param fieldName - The name of the field containing the array.
-     * @param n - An expression evaluating to the number of elements to return.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the smallest `n` elements.
+     * @param fieldName The name of the field containing the array.
+     * @param n An expression evaluating to the number of elements to return.
+     * @returns A new {@code Expression} representing the smallest `n` elements.
      */
     export function arrayMinimumN(
       fieldName: string,
@@ -7981,9 +7981,9 @@ declare namespace FirebaseFirestore {
      * arrayMinimumN(field("scores"), 3);
      * ```
      *
-     * @param arrayExpression - The expression representing the array.
-     * @param n - The number of elements to return.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the smallest `n` elements.
+     * @param arrayExpression The expression representing the array.
+     * @param n The number of elements to return.
+     * @returns A new {@code Expression} representing the smallest `n` elements.
      */
     export function arrayMinimumN(
       arrayExpression: Expression,
@@ -8000,9 +8000,9 @@ declare namespace FirebaseFirestore {
      * arrayMinimumN(field("scores"), field("count"));
      * ```
      *
-     * @param arrayExpression - The expression representing the array.
-     * @param n - An expression evaluating to the number of elements to return.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the smallest `n` elements.
+     * @param arrayExpression The expression representing the array.
+     * @param n An expression evaluating to the number of elements to return.
+     * @returns A new {@code Expression} representing the smallest `n` elements.
      */
     export function arrayMinimumN(
       arrayExpression: Expression,
@@ -8019,10 +8019,10 @@ declare namespace FirebaseFirestore {
      * arraySlice("tags", 0, 3);
      * ```
      *
-     * @param fieldName - The name of the field containing the array to slice.
-     * @param start - The index to start the slice.
-     * @param end - The index to end the slice (inclusive).
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the slice.
+     * @param fieldName The name of the field containing the array to slice.
+     * @param start The index to start the slice.
+     * @param end The index to end the slice (inclusive).
+     * @returns A new {@code Expression} representing the slice.
      */
     export function arraySlice(
       fieldName: string,
@@ -8040,10 +8040,10 @@ declare namespace FirebaseFirestore {
      * arraySlice(field("tags"), 0, 3);
      * ```
      *
-     * @param arrayExpression - The expression representing the array to slice.
-     * @param start - The index to start the slice.
-     * @param end - The index to end the slice (inclusive).
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the slice.
+     * @param arrayExpression The expression representing the array to slice.
+     * @param start The index to start the slice.
+     * @param end The index to end the slice (inclusive).
+     * @returns A new {@code Expression} representing the slice.
      */
     export function arraySlice(
       arrayExpression: Expression,
