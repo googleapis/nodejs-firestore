@@ -7584,47 +7584,6 @@ declare namespace FirebaseFirestore {
      * @param offset - The index of the element to return.
      * @returns A new `Expression` representing the 'arrayGet' operation.
      */
-    export function arrayGet(
-      arrayExpression: Expression,
-      offset: number,
-    ): FunctionExpression;
-    /**
-     * @beta
-     * Creates an expression that indexes into an array from the beginning or end
-     * and return the element. If the offset exceeds the array length, an error is
-     * returned. A negative offset, starts from the end.
-     *
-     * @example
-     * ```typescript
-     * // Return the value in the tags field array at index specified by field
-     * // 'favoriteTag'.
-     * arrayGet(field('tags'), field('favoriteTag'));
-     * ```
-     *
-     * @param arrayExpression - An `Expression` evaluating to an array.
-     * @param offsetExpr - An `Expression` evaluating to the index of the element to return.
-     * @returns A new `Expression` representing the 'arrayGet' operation.
-     */
-    export function arrayGet(
-      arrayExpression: Expression,
-      offsetExpr: Expression,
-    ): FunctionExpression;
-    /**
-     * @beta
-     *
-     * Creates an expression that returns the first index of the search value in an array.
-     * Returns -1 if the value is not found.
-     *
-     * @example
-     * ```typescript
-     * // Get the index of "politics" in the 'tags' array field
-     * arrayIndexOf("tags", "politics");
-     * ```
-     *
-     * @param fieldName - The name of the field containing the array to search.
-     * @param search - The value to search for.
-     * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the index.
-     */
     export function arrayIndexOf(
       fieldName: string,
       search: unknown | Expression,
