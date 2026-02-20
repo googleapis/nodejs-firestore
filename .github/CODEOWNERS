@@ -5,6 +5,6 @@
 # https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners#codeowners-syntax
 
 
-# The yoshi-nodejs team is the default owner for nodejs repositories.
-*     @googleapis/yoshi-nodejs @googleapis/firestore-dpe @googleapis/api-firestore
+# The cloud-sdk-nodejs-team team is the default owner for nodejs repositories.
+* @googleapis/cloud-sdk-nodejs-team @googleapis/firestore-team
 .github/auto-approve.yml @googleapis/github-automation/
