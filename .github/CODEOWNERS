@@ -7,4 +7,4 @@
 
 # The cloud-sdk-nodejs-team team is the default owner for nodejs repositories.
 * @googleapis/cloud-sdk-nodejs-team @googleapis/firestore-team
-.github/auto-approve.yml @googleapis/github-automation/
+.github/auto-approve.yml @googleapis/cloud-sdk-platform-team
