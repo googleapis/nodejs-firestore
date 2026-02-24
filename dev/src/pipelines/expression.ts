@@ -993,7 +993,7 @@ export abstract class Expression
    * field("userInput").ltrim('"');
    * ```
    *
-   * @param valueToTrim - Optional. A string or byte array containing the characters/bytes to trim.
+   * @param valueToTrim Optional. A string or byte array containing the characters/bytes to trim.
    * If not specified, whitespace will be trimmed.
    * @returns A new `Expression` representing the trimmed string.
    */
@@ -1020,7 +1020,7 @@ export abstract class Expression
    * field("userInput").rtrim('"');
    * ```
    *
-   * @param valueToTrim - Optional. A string or byte array containing the characters/bytes to trim.
+   * @param valueToTrim Optional. A string or byte array containing the characters/bytes to trim.
    * If not specified, whitespace will be trimmed.
    * @returns A new `Expression` representing the trimmed string or byte array.
    */
@@ -1066,7 +1066,7 @@ export abstract class Expression
    * field("text").stringIndexOf("foo");
    * ```
    *
-   * @param search - The substring or byte sequence to search for.
+   * @param search The substring or byte sequence to search for.
    * @returns A new `Expression` representing the index of the first occurrence.
    */
   stringIndexOf(
@@ -1088,7 +1088,7 @@ export abstract class Expression
    * field("label").stringRepeat(3);
    * ```
    *
-   * @param repetitions - The number of times to repeat the string or byte array.
+   * @param repetitions The number of times to repeat the string or byte array.
    * @returns A new `Expression` representing the repeated string or byte array.
    */
   stringRepeat(repetitions: number | Expression): FunctionExpression {
@@ -1108,8 +1108,8 @@ export abstract class Expression
    * field("text").stringReplaceAll("foo", "bar");
    * ```
    *
-   * @param find - The substring or byte sequence to search for.
-   * @param replacement - The replacement string or byte sequence.
+   * @param find The substring or byte sequence to search for.
+   * @param replacement The replacement string or byte sequence.
    * @returns A new `Expression` representing the string or byte array with replacements.
    */
   stringReplaceAll(
@@ -1133,8 +1133,8 @@ export abstract class Expression
    * field("text").stringReplaceOne("foo", "bar");
    * ```
    *
-   * @param find - The substring or byte sequence to search for.
-   * @param replacement - The replacement string or byte sequence.
+   * @param find The substring or byte sequence to search for.
+   * @param replacement The replacement string or byte sequence.
    * @returns A new `Expression` representing the string or byte array with the replacement.
    */
   stringReplaceOne(
@@ -6038,8 +6038,8 @@ export function trim(
  * ltrim(field("userInput"), '"');
  * ```
  *
- * @param fieldName - The name of the field containing the string or byte array.
- * @param valueToTrim - Optional. A string or byte array containing the characters/bytes to trim.
+ * @param fieldName The name of the field containing the string or byte array.
+ * @param valueToTrim- Optional. A string or byte array containing the characters/bytes to trim.
  * If not specified, whitespace will be trimmed.
  * @returns A new `Expression` representing the trimmed string or byte array.
  */
@@ -6061,8 +6061,8 @@ export function ltrim(
  * ltrim(field("userInput"), '"');
  * ```
  *
- * @param expression - The expression representing the string or byte array.
- * @param valueToTrim - Optional. A string or byte array containing the characters/bytes to trim.
+ * @param expression The expression representing the string or byte array.
+ * @param valueToTrim Optional. A string or byte array containing the characters/bytes to trim.
  * If not specified, whitespace will be trimmed.
  * @returns A new `Expression` representing the trimmed string or byte array.
  */
@@ -6090,8 +6090,8 @@ export function ltrim(
  * rtrim(field("userInput"), '"');
  * ```
  *
- * @param fieldName - The name of the field containing the string or byte array.
- * @param valueToTrim - Optional. A string or byte array containing the characters/bytes to trim.
+ * @param fieldName The name of the field containing the string or byte array.
+ * @param valueToTrim Optional. A string or byte array containing the characters/bytes to trim.
  * If not specified, whitespace will be trimmed.
  * @returns A new `Expression` representing the trimmed string or byte array.
  */
@@ -6113,8 +6113,8 @@ export function rtrim(
  * rtrim(field("userInput"), '"');
  * ```
  *
- * @param expression - The expression representing the string or byte array.
- * @param valueToTrim - Optional. A string or byte array containing the characters/bytes to trim.
+ * @param expression The expression representing the string or byte array.
+ * @param valueToTrim Optional. A string or byte array containing the characters/bytes to trim.
  * If not specified, whitespace will be trimmed.
  * @returns A new `Expression` representing the trimmed string or byte array.
  */
@@ -6189,8 +6189,8 @@ export function stringConcat(
  * stringIndexOf("text", "foo");
  * ```
  *
- * @param fieldName - The name of the field containing the string or byte array.
- * @param search - The substring or byte sequence to search for.
+ * @param fieldName The name of the field containing the string or byte array.
+ * @param search The substring or byte sequence to search for.
  * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the index of the first occurrence.
  */
 export function stringIndexOf(
@@ -6208,8 +6208,8 @@ export function stringIndexOf(
  * stringIndexOf(field("text"), "foo");
  * ```
  *
- * @param expression - The expression representing the string or byte array.
- * @param search - The substring or byte sequence to search for.
+ * @param expression The expression representing the string or byte array.
+ * @param search The substring or byte sequence to search for.
  * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the index of the first occurrence.
  */
 export function stringIndexOf(
@@ -6233,8 +6233,8 @@ export function stringIndexOf(
  * stringRepeat("label", 3);
  * ```
  *
- * @param fieldName - The name of the field containing the string or byte array.
- * @param repetitions - The number of times to repeat the string or byte array.
+ * @param fieldName The name of the field containing the string or byte array.
+ * @param repetitions The number of times to repeat the string or byte array.
  * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the repeated string or byte array.
  */
 export function stringRepeat(
@@ -6252,8 +6252,8 @@ export function stringRepeat(
  * stringRepeat(field("label"), 3);
  * ```
  *
- * @param expression - The expression representing the string or byte array.
- * @param repetitions - The number of times to repeat the string or byte array.
+ * @param expression The expression representing the string or byte array.
+ * @param repetitions The number of times to repeat the string or byte array.
  * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the repeated string or byte array.
  */
 export function stringRepeat(
@@ -6277,9 +6277,9 @@ export function stringRepeat(
  * stringReplaceAll("text", "foo", "bar");
  * ```
  *
- * @param fieldName - The name of the field containing the string or byte array.
- * @param find - The substring or byte sequence to search for.
- * @param replacement - The replacement string or byte sequence.
+ * @param fieldName The name of the field containing the string or byte array.
+ * @param find The substring or byte sequence to search for.
+ * @param replacement The replacement string or byte sequence.
  * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the string or byte array with replacements.
  */
 export function stringReplaceAll(
@@ -6298,9 +6298,9 @@ export function stringReplaceAll(
  * stringReplaceAll(field("text"), "foo", "bar");
  * ```
  *
- * @param expression - The expression representing the string or byte array.
- * @param find - The substring or byte sequence to search for.
- * @param replacement - The replacement string or byte sequence.
+ * @param expression The expression representing the string or byte array.
+ * @param find The substring or byte sequence to search for.
+ * @param replacement The replacement string or byte sequence.
  * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the string or byte array with replacements.
  */
 export function stringReplaceAll(
@@ -6326,9 +6326,9 @@ export function stringReplaceAll(
  * stringReplaceOne("text", "foo", "bar");
  * ```
  *
- * @param fieldName - The name of the field containing the string or byte array.
- * @param find - The substring or byte sequence to search for.
- * @param replacement - The replacement string or byte sequence.
+ * @param fieldName The name of the field containing the string or byte array.
+ * @param find The substring or byte sequence to search for.
+ * @param replacement The replacement string or byte sequence.
  * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the string or byte array with the replacement.
  */
 export function stringReplaceOne(
@@ -6347,9 +6347,9 @@ export function stringReplaceOne(
  * stringReplaceOne(field("text"), "foo", "bar");
  * ```
  *
- * @param expression - The expression representing the string or byte array.
- * @param find - The substring or byte sequence to search for.
- * @param replacement - The replacement string or byte sequence.
+ * @param expression The expression representing the string or byte array.
+ * @param find The substring or byte sequence to search for.
+ * @param replacement The replacement string or byte sequence.
  * @returns A new {@link @firebase/firestore/pipelines#Expression} representing the string or byte array with the replacement.
  */
 export function stringReplaceOne(

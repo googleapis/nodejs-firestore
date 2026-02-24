@@ -3905,7 +3905,7 @@ declare namespace FirebaseFirestore {
        * field("userInput").ltrim('"');
        * ```
        *
-       * @param valueToTrim - Optional. A string or byte array containing the characters/bytes to trim.
+       * @param valueToTrim Optional. A string or byte array containing the characters/bytes to trim.
        * If not specified, whitespace will be trimmed.
        * @returns A new `Expression` representing the trimmed string.
        */
@@ -3925,7 +3925,7 @@ declare namespace FirebaseFirestore {
        * field("userInput").rtrim('"');
        * ```
        *
-       * @param valueToTrim - Optional. A string or byte array containing the characters/bytes to trim.
+       * @param valueToTrim Optional. A string or byte array containing the characters/bytes to trim.
        * If not specified, whitespace will be trimmed.
        * @returns A new `Expression` representing the trimmed string or byte array.
        */
@@ -3959,7 +3959,7 @@ declare namespace FirebaseFirestore {
        * field("text").stringIndexOf("foo");
        * ```
        *
-       * @param search - The substring or byte sequence to search for.
+       * @param search The substring or byte sequence to search for.
        * @returns A new `Expression` representing the index of the first occurrence.
        */
       stringIndexOf(
@@ -3975,7 +3975,7 @@ declare namespace FirebaseFirestore {
        * field("label").stringRepeat(3);
        * ```
        *
-       * @param repetitions - The number of times to repeat the string or byte array.
+       * @param repetitions The number of times to repeat the string or byte array.
        * @returns A new `Expression` representing the repeated string or byte array.
        */
       stringRepeat(repetitions: number | Expression): FunctionExpression;
@@ -3989,8 +3989,8 @@ declare namespace FirebaseFirestore {
        * field("text").stringReplaceAll("foo", "bar");
        * ```
        *
-       * @param find - The substring or byte sequence to search for.
-       * @param replacement - The replacement string or byte sequence.
+       * @param find The substring or byte sequence to search for.
+       * @param replacement The replacement string or byte sequence.
        * @returns A new `Expression` representing the string or byte array with replacements.
        */
       stringReplaceAll(
@@ -4007,8 +4007,8 @@ declare namespace FirebaseFirestore {
        * field("text").stringReplaceOne("foo", "bar");
        * ```
        *
-       * @param find - The substring or byte sequence to search for.
-       * @param replacement - The replacement string or byte sequence.
+       * @param find The substring or byte sequence to search for.
+       * @param replacement The replacement string or byte sequence.
        * @returns A new `Expression` representing the string or byte array with the replacement.
        */
       stringReplaceOne(

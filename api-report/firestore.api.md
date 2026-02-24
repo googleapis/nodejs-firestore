@@ -1667,6 +1667,7 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
     logicalMinimum(second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
+    ltrim(valueToTrim?: string | Expression | Uint8Array | Buffer): FunctionExpression;
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     mapGet(subfield: string): FunctionExpression;
@@ -1737,6 +1738,7 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     round(decimalPlaces: Expression): FunctionExpression;
+    rtrim(valueToTrim?: string | Expression | Uint8Array | Buffer): FunctionExpression;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
     split(delimiter: string): FunctionExpression;
@@ -1762,6 +1764,10 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     stringContains(expr: Expression): BooleanExpression;
+    stringIndexOf(search: string | Expression | Uint8Array | Buffer): FunctionExpression;
+    stringRepeat(repetitions: number | Expression): FunctionExpression;
+    stringReplaceAll(find: string | Expression | Uint8Array | Buffer, replacement: string | Expression | Uint8Array | Buffer): FunctionExpression;
+    stringReplaceOne(find: string | Expression | Uint8Array | Buffer, replacement: string | Expression | Uint8Array | Buffer): FunctionExpression;
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
     stringReverse(): FunctionExpression;
@@ -2579,6 +2585,12 @@ function logicalMinimum(first: Expression, second: Expression | unknown, ...othe
 // @beta
 function logicalMinimum(fieldName: string, second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
 
+// @beta
+function ltrim(fieldName: string, valueToTrim?: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
+// @beta
+function ltrim(expression: Expression, valueToTrim?: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
 // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@code" is not defined in this configuration
@@ -3118,7 +3130,13 @@ declare namespace Pipelines {
         arrayConcat,
         type,
         timestampTruncate,
-        split
+        split,
+        ltrim,
+        rtrim,
+        stringIndexOf,
+        stringRepeat,
+        stringReplaceAll,
+        stringReplaceOne
     }
 }
 export { Pipelines }
@@ -3623,6 +3641,12 @@ function round(fieldName: string, decimalPlaces: number | Expression): FunctionE
 // @beta
 function round(expression: Expression, decimalPlaces: number | Expression): FunctionExpression;
 
+// @beta
+function rtrim(fieldName: string, valueToTrim?: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
+// @beta
+function rtrim(expression: Expression, valueToTrim?: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
 // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
 //
 // @public
@@ -3755,6 +3779,30 @@ function stringContains(stringExpression: Expression, substring: string): Boolea
 //
 // @beta
 function stringContains(stringExpression: Expression, substring: Expression): BooleanExpression;
+
+// @beta
+function stringIndexOf(fieldName: string, search: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
+// @beta
+function stringIndexOf(expression: Expression, search: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
+// @beta
+function stringRepeat(fieldName: string, repetitions: number | Expression): FunctionExpression;
+
+// @beta
+function stringRepeat(expression: Expression, repetitions: number | Expression): FunctionExpression;
+
+// @beta
+function stringReplaceAll(fieldName: string, find: string | Expression | Uint8Array | Buffer, replacement: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
+// @beta
+function stringReplaceAll(expression: Expression, find: string | Expression | Uint8Array | Buffer, replacement: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
+// @beta
+function stringReplaceOne(fieldName: string, find: string | Expression | Uint8Array | Buffer, replacement: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
+// @beta
+function stringReplaceOne(expression: Expression, find: string | Expression | Uint8Array | Buffer, replacement: string | Expression | Uint8Array | Buffer): FunctionExpression;
 
 // Warning: (tsdoc-param-tag-missing-hyphen) The @param block should be followed by a parameter name and then a hyphen
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@return" is not defined in this configuration
@@ -4527,7 +4575,7 @@ function xor(first: BooleanExpression, second: BooleanExpression, ...additionalC
 // build/types/src/reference/vector-query.d.ts:61:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/serializer.d.ts:30:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/serializer.d.ts:40:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
-// build/types/src/telemetry/trace-util.d.ts:66:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
+// build/types/src/telemetry/trace-util.d.ts:67:4 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/write-batch.d.ts:85:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 // build/types/src/write-batch.d.ts:108:8 - (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 
