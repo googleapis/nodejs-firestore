@@ -1039,7 +1039,7 @@ describe.skipClassic('Pipeline class', () => {
         });
       });
 
-      it.only('returns first and last accumulations', async () => {
+      it('returns first and last accumulations', async () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
@@ -1059,7 +1059,7 @@ describe.skipClassic('Pipeline class', () => {
         });
       });
 
-      it.only('returns arrayAgg accumulations', async () => {
+      it('returns arrayAgg accumulations', async () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
@@ -1071,7 +1071,7 @@ describe.skipClassic('Pipeline class', () => {
         });
       });
 
-      it.only('returns arrayAggDistinct accumulations', async () => {
+      it('returns arrayAggDistinct accumulations', async () => {
         const snapshot = await firestore
           .pipeline()
           .collection(randomCol.path)
