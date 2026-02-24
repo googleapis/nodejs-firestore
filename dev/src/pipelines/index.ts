@@ -116,6 +116,8 @@ export {
   ln,
   round,
   sqrt,
+  rand,
+  trunc,
   stringReverse,
   abs,
   arraySum,
