@@ -43,7 +43,7 @@ import {RESERVED_MAP_KEY, RESERVED_MAP_KEY_VECTOR_VALUE} from './map-type';
  * @param timestampValue The value to convert.
  * @param argumentName The argument name to use in the error message if the
  * conversion fails. If omitted, 'timestampValue' is used.
- * @return The value as expected by Protobuf JS or undefined if no input was
+ * @returns The value as expected by Protobuf JS or undefined if no input was
  * provided.
  */
 export function timestampFromJson(
@@ -94,7 +94,7 @@ export function timestampFromJson(
  * @private
  * @internal
  * @param bytesValue The value to convert.
- * @return The value as expected by Protobuf JS.
+ * @returns The value as expected by Protobuf JS.
  */
 function bytesFromJson(bytesValue: string | Uint8Array): Uint8Array {
   if (typeof bytesValue === 'string') {
@@ -110,7 +110,7 @@ function bytesFromJson(bytesValue: string | Uint8Array): Uint8Array {
  * @private
  * @internal
  * @param proto The `firestore.v1.Value` proto.
- * @return The string value for 'valueType'.
+ * @returns The string value for 'valueType'.
  */
 export function detectValueType(proto: ProtobufJsValue): string {
   let valueType: string | undefined;
@@ -187,7 +187,7 @@ export function detectValueType(proto: ProtobufJsValue): string {
  * @private
  * @internal
  * @param proto The `firestore.v1.Value` proto.
- * @return The string value for 'valueType'.
+ * @returns The string value for 'valueType'.
  */
 export function detectGoogleProtobufValueType(
   proto: google.protobuf.IValue,
@@ -229,7 +229,7 @@ export function detectGoogleProtobufValueType(
  * @private
  * @internal
  * @param fieldValue The `firestore.v1.Value` in Proto3 JSON format.
- * @return The `firestore.v1.Value` in Protobuf JS format.
+ * @returns The `firestore.v1.Value` in Protobuf JS format.
  */
 export function valueFromJson(fieldValue: api.IValue): api.IValue {
   const valueType = detectValueType(fieldValue);
@@ -288,7 +288,7 @@ export function valueFromJson(fieldValue: api.IValue): api.IValue {
  * @private
  * @internal
  * @param document An object with IValues in Proto3 JSON format.
- * @return The object in Protobuf JS format.
+ * @returns The object in Protobuf JS format.
  */
 export function fieldsFromJson(document: ApiMapValue): ApiMapValue {
   const result: ApiMapValue = {};

@@ -88,6 +88,8 @@ import {
   or,
   regexContains,
   regexMatch,
+  regexFind,
+  regexFindAll,
   startsWith,
   stringConcat,
   subtract,
@@ -95,6 +97,10 @@ import {
   dotProduct,
   euclideanDistance,
   mapGet,
+  mapEntries,
+  mapKeys,
+  mapSet,
+  mapValues,
   lessThanOrEqual,
   equalAny,
   notEqualAny,
@@ -2623,6 +2629,40 @@ describe.skipClassic('Pipeline class', () => {
       expect(snapshot.results.length).to.equal(5);
     });
 
+    it('testRegexFind', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .select(regexFind('title', '^\\w+').as('firstWordInTitle'))
+        .select('firstWordInTitle')
+        .sort(field('firstWordInTitle').ascending())
+        .limit(3)
+        .execute();
+      expectResults(
+        snapshot,
+        {firstWordInTitle: '1984'},
+        {firstWordInTitle: 'Crime'},
+        {firstWordInTitle: 'Dune'},
+      );
+    });
+
+    it('testRegexFindAll', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .select(regexFindAll('title', '\\w+').as('wordsInTitle'))
+        .select('wordsInTitle')
+        .sort(field('wordsInTitle').ascending())
+        .limit(3)
+        .execute();
+      expectResults(
+        snapshot,
+        {wordsInTitle: ['1984']},
+        {wordsInTitle: ['Crime', 'and', 'Punishment']},
+        {wordsInTitle: ['Dune']},
+      );
+    });
+
     it('testRegexMatches', async () => {
       const snapshot = await firestore
         .pipeline()
@@ -2799,6 +2839,112 @@ describe.skipClassic('Pipeline class', () => {
         },
         {hugoAward: true, title: 'Dune'},
       );
+    });
+
+    it('test mapSet', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(map({existingField: map({foo: 1})}))
+        .addFields(
+          mapSet('existingField', 'bar', 2).as('modifiedField'),
+          mapSet(map({}), 'a', 1).as('simple'),
+          mapSet(map({a: 1}), 'b', 2).as('add'),
+          mapSet(map({a: 1}), 'a', 2).as('overwrite'),
+          mapSet(map({a: 1, b: 2}), 'a', 3, 'c', 4).as('multi'),
+          mapSet(map({a: 1}), 'a', field('non_existent')).as('remove'),
+          mapSet(map({a: 1}), 'b', null).as('setNull'),
+          mapSet(map({a: {b: 1}}), 'a.b', 2).as('setDotted'),
+          mapSet(map({}), '', 'empty').as('setEmptyKey'),
+          mapSet(map({a: 1}), 'b', add(constant(1), constant(2))).as(
+            'setExprVal',
+          ),
+          mapSet(map({}), 'obj', map({hidden: true})).as('setNestedMap'),
+          mapSet(map({}), '~!@#$%^&*()_+', 'special').as('setSpecialChars'),
+        )
+        .execute();
+      expectResults(snapshot, {
+        existingField: {foo: 1},
+        modifiedField: {foo: 1, bar: 2},
+        simple: {a: 1},
+        add: {a: 1, b: 2},
+        overwrite: {a: 2},
+        multi: {a: 3, b: 2, c: 4},
+        remove: {},
+        setNull: {a: 1, b: null},
+        setDotted: {a: {b: 1}, 'a.b': 2},
+        setEmptyKey: {'': 'empty'},
+        setExprVal: {a: 1, b: 3},
+        setNestedMap: {obj: {hidden: true}},
+        setSpecialChars: {'~!@#$%^&*()_+': 'special'},
+      });
+    });
+
+    it('test mapKeys', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(map({existingField: map({foo: 1})}))
+        .addFields(
+          mapKeys('existingField').as('existingKeys'),
+          mapKeys(map({a: 1, b: 2})).as('keys'),
+          mapKeys(map({})).as('empty_keys'),
+          mapKeys(map({a: {nested: true}})).as('nested_keys'),
+        )
+        .execute();
+
+      const res = snapshot.results[0].data();
+      expect(res.existingKeys).to.have.members(['foo']);
+      expect(res.keys).to.have.members(['a', 'b']);
+      expect(res.empty_keys).to.deep.equal([]);
+      expect(res.nested_keys).to.have.members(['a']);
+    });
+
+    it('test mapValues', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(map({existingField: map({foo: 1})}))
+        .addFields(
+          mapValues('existingField').as('existingValues'),
+          mapValues(map({a: 1, b: 2})).as('values'),
+          mapValues(map({})).as('empty_values'),
+          mapValues(map({a: {nested: true}})).as('nested_values'),
+        )
+        .execute();
+      const res = snapshot.results[0].data();
+      expect(res.existingValues).to.have.members([1]);
+      expect(res.values).to.have.members([1, 2]);
+      expect(res.empty_values).to.deep.equal([]);
+      expect(res.nested_values).to.deep.include.members([{nested: true}]);
+    });
+
+    it('test mapEntries', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(map({existingField: map({foo: 1})}))
+        .addFields(
+          mapEntries('existingField').as('existingEntries'),
+          mapEntries(map({a: 1, b: 2})).as('entries'),
+          mapEntries(map({})).as('empty_entries'),
+          mapEntries(map({a: {nested: true}})).as('nested_entries'),
+        )
+        .execute();
+      const res = snapshot.results[0].data();
+      expect(res.existingEntries).to.deep.include.members([{k: 'foo', v: 1}]);
+      expect(res.entries).to.deep.include.members([
+        {k: 'a', v: 1},
+        {k: 'b', v: 2},
+      ]);
+      expect(res.empty_entries).to.deep.equal([]);
+      expect(res.nested_entries).to.deep.include.members([
+        {k: 'a', v: {nested: true}},
+      ]);
     });
 
     it('testDistanceFunctions', async () => {
