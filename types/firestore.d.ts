@@ -4278,6 +4278,68 @@ declare namespace FirebaseFirestore {
       maximum(): AggregateFunction;
       /**
        * @beta
+       * Creates an aggregation that finds the first value of an expression across multiple stage inputs.
+       *
+       * @example
+       * ```typescript
+       * // Find the first value of the 'rating' field
+       * field("rating").first().as("firstRating");
+       * ```
+       *
+       * @returns A new `AggregateFunction` representing the 'first' aggregation.
+       */
+      first(): AggregateFunction;
+      /**
+       * @beta
+       * Creates an aggregation that finds the last value of an expression across multiple stage inputs.
+       *
+       * @example
+       * ```typescript
+       * // Find the last value of the 'rating' field
+       * field("rating").last().as("lastRating");
+       * ```
+       *
+       * @returns A new `AggregateFunction` representing the 'last' aggregation.
+       */
+      last(): AggregateFunction;
+      /**
+       * @beta
+       * Creates an aggregation that collects all values of an expression across multiple stage inputs
+       * into an array.
+       *
+       * @remarks
+       * If the expression resolves to an absent value, it is converted to `null`.
+       * The order of elements in the output array is not stable and shouldn't be relied upon.
+       *
+       * @example
+       * ```typescript
+       * // Collect all tags from books into an array
+       * field("tags").arrayAgg().as("allTags");
+       * ```
+       *
+       * @returns A new `AggregateFunction` representing the 'array_agg' aggregation.
+       */
+      arrayAgg(): AggregateFunction;
+      /**
+       * @beta
+       * Creates an aggregation that collects all distinct values of an expression across multiple stage
+       * inputs into an array.
+       *
+       * @remarks
+       * If the expression resolves to an absent value, it is converted to `null`.
+       * The order of elements in the output array is not stable and shouldn't be relied upon.
+       *
+       * @example
+       * ```typescript
+       * // Collect all distinct tags from books into an array
+       * field("tags").arrayAggDistinct().as("allDistinctTags");
+       * ```
+       *
+       * @returns A new `AggregateFunction` representing the 'array_agg_distinct' aggregation.
+       */
+      arrayAggDistinct(): AggregateFunction;
+      /**
+       * @beta
        * Creates an expression that returns the larger value between this expression and another expression, based on Firestore's value type ordering.
        *
        * @example
@@ -8773,6 +8835,138 @@ declare namespace FirebaseFirestore {
      * @returns A new {@code AggregateFunction} representing the 'max' aggregation.
      */
     export function maximum(fieldName: string): AggregateFunction;
+    /**
+     * @beta
+     * Creates an aggregation that finds the first value of an expression across multiple stage
+     * inputs.
+     *
+     * @example
+     * ```typescript
+     * // Find the first value of the 'rating' field
+     * first(field("rating")).as("firstRating");
+     * ```
+     *
+     * @param expression The expression to find the first value of.
+     * @returns A new {@code AggregateFunction} representing the 'first' aggregation.
+     */
+    export function first(expression: Expression): AggregateFunction;
+    /**
+     * @beta
+     * Creates an aggregation that finds the first value of a field across multiple stage inputs.
+     *
+     * @example
+     * ```typescript
+     * // Find the first value of the 'rating' field
+     * first("rating").as("firstRating");
+     * ```
+     *
+     * @param fieldName The name of the field to find the first value of.
+     * @returns A new {@code AggregateFunction} representing the 'first' aggregation.
+     */
+    export function first(fieldName: string): AggregateFunction;
+    /**
+     * @beta
+     * Creates an aggregation that finds the last value of an expression across multiple stage
+     * inputs.
+     *
+     * @example
+     * ```typescript
+     * // Find the last value of the 'rating' field
+     * last(field("rating")).as("lastRating");
+     * ```
+     *
+     * @param expression The expression to find the last value of.
+     * @returns A new {@code AggregateFunction} representing the 'last' aggregation.
+     */
+    export function last(expression: Expression): AggregateFunction;
+    /**
+     * @beta
+     * Creates an aggregation that finds the last value of a field across multiple stage inputs.
+     *
+     * @example
+     * ```typescript
+     * // Find the last value of the 'rating' field
+     * last("rating").as("lastRating");
+     * ```
+     *
+     * @param fieldName The name of the field to find the last value of.
+     * @returns A new {@code AggregateFunction} representing the 'last' aggregation.
+     */
+    export function last(fieldName: string): AggregateFunction;
+    /**
+     * @beta
+     * Creates an aggregation that collects all values of an expression across multiple stage
+     * inputs into an array.
+     *
+     * @remarks
+     * If the expression resolves to an absent value, it is converted to `null`.
+     * The order of elements in the output array is not stable and shouldn't be relied upon.
+     *
+     * @example
+     * ```typescript
+     * // Collect all tags from books into an array
+     * arrayAgg(field("tags")).as("allTags");
+     * ```
+     *
+     * @param expression The expression to collect values from.
+     * @returns A new {@code AggregateFunction} representing the 'array_agg' aggregation.
+     */
+    export function arrayAgg(expression: Expression): AggregateFunction;
+    /**
+     * @beta
+     * Creates an aggregation that collects all values of a field across multiple stage inputs
+     * into an array.
+     *
+     * @remarks
+     * If the expression resolves to an absent value, it is converted to `null`.
+     * The order of elements in the output array is not stable and shouldn't be relied upon.
+     *
+     * @example
+     * ```typescript
+     * // Collect all tags from books into an array
+     * arrayAgg("tags").as("allTags");
+     * ```
+     *
+     * @param fieldName The name of the field to collect values from.
+     * @returns A new {@code AggregateFunction} representing the 'array_agg' aggregation.
+     */
+    export function arrayAgg(fieldName: string): AggregateFunction;
+    /**
+     * @beta
+     * Creates an aggregation that collects all distinct values of an expression across multiple stage
+     * inputs into an array.
+     *
+     * @remarks
+     * If the expression resolves to an absent value, it is converted to `null`.
+     * The order of elements in the output array is not stable and shouldn't be relied upon.
+     *
+     * @example
+     * ```typescript
+     * // Collect all distinct tags from books into an array
+     * arrayAggDistinct(field("tags")).as("allDistinctTags");
+     * ```
+     * @param expression The expression to collect values from.
+     * @returns A new {@code AggregateFunction} representing the 'array_agg_distinct' aggregation.
+     */
+    export function arrayAggDistinct(expression: Expression): AggregateFunction;
+    /**
+     * @beta
+     * Creates an aggregation that collects all distinct values of a field across multiple stage inputs
+     * into an array.
+     *
+     * @remarks
+     * If the expression resolves to an absent value, it is converted to `null`.
+     * The order of elements in the output array is not stable and shouldn't be relied upon.
+     *
+     * @example
+     * ```typescript
+     * // Collect all distinct tags from books into an array
+     * arrayAggDistinct("tags").as("allDistinctTags");
+     * ```
+     * @param fieldName The name of the field to collect values from.
+     * @returns A new {@code AggregateFunction} representing the 'array_agg_distinct' aggregation.
+     */
+    export function arrayAggDistinct(fieldName: string): AggregateFunction;
     /**
      * @beta
      * Calculates the Cosine distance between a field's vector value and a literal vector value.
