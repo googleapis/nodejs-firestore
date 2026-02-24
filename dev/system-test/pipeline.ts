@@ -80,8 +80,6 @@ import {
   arrayMaximumN,
   arrayMinimum,
   arrayMinimumN,
-  regexFind,
-  regexFindAll,
   average,
   countAll,
   endsWith,
