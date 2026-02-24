@@ -69,6 +69,19 @@ import {
   arrayContains,
   arrayContainsAny,
   arrayReverse,
+  arrayFirst,
+  arrayFirstN,
+  arrayIndexOf,
+  arrayIndexOfAll,
+  arrayLast,
+  arrayLastIndexOf,
+  arrayLastN,
+  arrayMaximum,
+  arrayMaximumN,
+  arrayMinimum,
+  arrayMinimumN,
+  regexFind,
+  regexFindAll,
   average,
   countAll,
   endsWith,
@@ -82,6 +95,8 @@ import {
   or,
   regexContains,
   regexMatch,
+  regexFind,
+  regexFindAll,
   startsWith,
   stringConcat,
   subtract,
@@ -145,21 +160,6 @@ import {getTestDb, getTestRoot} from './firestore';
 
 import {Firestore as InternalFirestore} from '../src';
 import {ServiceError} from 'google-gax';
-import {
-  arrayFirst,
-  arrayFirstN,
-  arrayIndexOf,
-  arrayIndexOfAll,
-  arrayLast,
-  arrayLastIndexOf,
-  arrayLastN,
-  arrayMaximum,
-  arrayMaximumN,
-  arrayMinimum,
-  arrayMinimumN,
-  regexFind,
-  regexFindAll,
-} from '../src/pipelines/expression';
 
 use(chaiAsPromised);
 
