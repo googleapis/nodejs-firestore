@@ -212,12 +212,6 @@ function arrayContainsAny(array: Expression, values: Expression): BooleanExpress
 function arrayContainsAny(fieldName: string, values: Expression): BooleanExpression;
 
 // @beta
-function arrayFilter(fieldName: string, variable: string, predicate: BooleanExpression): FunctionExpression;
-
-// @beta
-function arrayFilter(arrayExpression: Expression, variable: string, predicate: BooleanExpression): FunctionExpression;
-
-// @beta
 function arrayFirst(fieldName: string): FunctionExpression;
 
 // @beta
@@ -330,12 +324,6 @@ function arrayReverse(fieldName: string): FunctionExpression;
 
 // @beta
 function arrayReverse(arrayExpression: Expression): FunctionExpression;
-
-// @beta
-function arraySlice(fieldName: string, start: number | Expression, end?: number | Expression): FunctionExpression;
-
-// @beta
-function arraySlice(arrayExpression: Expression, start: number | Expression, end?: number | Expression): FunctionExpression;
 
 // @beta
 function arraySum(fieldName: string): FunctionExpression;
@@ -1067,7 +1055,6 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     arrayContainsAll(arrayExpression: Expression): BooleanExpression;
     arrayContainsAny(values: Array<Expression | unknown>): BooleanExpression;
     arrayContainsAny(arrayExpression: Expression): BooleanExpression;
-    arrayFilter(variable: string, predicate: BooleanExpression): FunctionExpression;
     arrayFirst(): FunctionExpression;
     arrayFirstN(n: number): FunctionExpression;
     arrayFirstN(n: Expression): FunctionExpression;
@@ -1090,8 +1077,6 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     arrayMinimumN(n: number): FunctionExpression;
     arrayMinimumN(n: Expression): FunctionExpression;
     arrayReverse(): FunctionExpression;
-    arraySlice(start: number, end?: number): FunctionExpression;
-    arraySlice(start: Expression, end?: Expression): FunctionExpression;
     arraySum(): FunctionExpression;
     as(name: string): AliasedExpression;
     asBoolean(): BooleanExpression;
@@ -1984,7 +1969,6 @@ declare namespace Pipelines {
         equalAny,
         map,
         array,
-        arrayFilter,
         arrayFirst,
         arrayLast,
         arrayFirstN,
@@ -1996,7 +1980,6 @@ declare namespace Pipelines {
         arrayMinimum,
         arrayMaximumN,
         arrayMinimumN,
-        arraySlice,
         field,
         xor,
         AggregateFunction,
