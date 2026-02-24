@@ -2394,7 +2394,7 @@ export abstract class Expression
    * field('price').isType('int64');
    * ```
    *
-   * @param type - The type to check for.
+   * @param type The type to check for.
    * @returns A new `BooleanExpression` that evaluates to true if the expression's result is of the given type, false otherwise.
    */
   isType(type: Type): BooleanExpression {
@@ -8088,8 +8088,8 @@ export function type(
  * isType('price', 'float64');
  * ```
  *
- * @param fieldName - The name of the field to check.
- * @param type - The type to check for.
+ * @param fieldName The name of the field to check.
+ * @param type The type to check for.
  * @returns A new `BooleanExpression` that evaluates to true if the field's value is of the given type, false otherwise.
  */
 export function isType(fieldName: string, type: Type): BooleanExpression;
@@ -8106,8 +8106,8 @@ export function isType(fieldName: string, type: Type): BooleanExpression;
  * isType(add('count', 1), 'number')
  * ```
  *
- * @param expression - The expression to check.
- * @param type - The type to check for.
+ * @param expression The expression to check.
+ * @param type The type to check for.
  * @returns A new `BooleanExpression` that evaluates to true if the expression's result is of the given type, false otherwise.
  */
 export function isType(expression: Expression, type: Type): BooleanExpression;
