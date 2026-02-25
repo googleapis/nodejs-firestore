@@ -3252,6 +3252,30 @@ describe.skipClassic('Pipeline class', () => {
         .select(field('tags').arrayFirst().as('firstTag'))
         .execute();
       expectResults(snapshot, ...expectedResults);
+
+      // Test with empty/null/non-existent
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            empty: [],
+            nullVal: null,
+          }),
+        )
+        .select(
+          arrayFirst('empty').as('emptyResult'),
+          arrayFirst('nullVal').as('nullResult'),
+          arrayFirst('nonExistent').as('absentResult'),
+        )
+        .execute();
+
+      expectResults(snapshot, {
+        // no emptyResult because arrayFirst returns UNSET for empty arrays
+        nullResult: null,
+        absentResult: null,
+      });
     });
 
     it('supports arrayFirstN', async () => {
@@ -3338,6 +3362,30 @@ describe.skipClassic('Pipeline class', () => {
         .select(field('tags').arrayLast().as('lastTag'))
         .execute();
       expectResults(snapshot, ...expectedResults);
+
+      // Test with empty/null/non-existent
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            empty: [],
+            nullVal: null,
+          }),
+        )
+        .select(
+          arrayLast('empty').as('emptyResult'),
+          arrayLast('nullVal').as('nullResult'),
+          arrayLast('nonExistent').as('absentResult'),
+        )
+        .execute();
+
+      expectResults(snapshot, {
+        // no emptyResult because arrayLast returns UNSET for empty arrays
+        nullResult: null,
+        absentResult: null,
+      });
     });
 
     it('supports arrayLastN', async () => {
