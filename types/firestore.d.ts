@@ -3737,6 +3737,10 @@ declare namespace FirebaseFirestore {
        * @beta
        * Returns the largest `n` elements of the array.
        *
+       * Returns the n largest non-null elements in the array, in descending order.
+       * This does not use a stable sort, meaning the order of equivalent elements
+       * is undefined.
+       *
        * @example
        * ```typescript
        * // Get the largest 3 elements of the 'myArray' field.
@@ -3751,6 +3755,10 @@ declare namespace FirebaseFirestore {
       /**
        * @beta
        * Returns the largest `n` elements of the array.
+       *
+       * Returns the n largest non-null elements in the array, in descending order.
+       * This does not use a stable sort, meaning the order of equivalent elements
+       * is undefined.
        *
        * @example
        * ```typescript
@@ -3781,6 +3789,10 @@ declare namespace FirebaseFirestore {
        * @beta
        * Returns the smallest `n` elements of the array.
        *
+       * Returns the n smallest non-null elements in the array, in ascending order.
+       * This does not use a stable sort, meaning the order of equivalent elements
+       * is undefined.
+       *
        * @example
        * ```typescript
        * // Get the smallest 3 elements of the 'myArray' field.
@@ -3795,6 +3807,10 @@ declare namespace FirebaseFirestore {
       /**
        * @beta
        * Returns the smallest `n` elements of the array.
+       *
+       * Returns the n smallest non-null elements in the array, in ascending order.
+       * This does not use a stable sort, meaning the order of equivalent elements
+       * is undefined.
        *
        * @example
        * ```typescript
@@ -7444,51 +7460,6 @@ declare namespace FirebaseFirestore {
 
     /**
      * @beta
-     *
-     * Creates an expression that filters an array based on a predicate.
-     *
-     * @example
-     * ```typescript
-     * // Filter "scores" to include only values greater than 50
-     * arrayFilter("scores", "score", field("score").greaterThan(50));
-     * ```
-     *
-     * @param fieldName The name of the field containing the array to filter.
-     * @param variable The variable name to bind to each element in the array. This variable name
-     * can be used in the `predicate` expression to refer to the current element.
-     * @param predicate The predicate boolean expression to filter by.
-     * @returns A new {@code Expression} representing the filtered array.
-     */
-    export function arrayFilter(
-      fieldName: string,
-      variable: string,
-      predicate: BooleanExpression,
-    ): FunctionExpression;
-    /**
-     * @beta
-     *
-     * Creates an expression that filters an array based on a predicate.
-     *
-     * @example
-     * ```typescript
-     * // Filter "scores" to include only values greater than 50
-     * arrayFilter(field("scores"), "score", field("score").greaterThan(50));
-     * ```
-     *
-     * @param arrayExpression The expression representing the array to filter.
-     * @param variable The variable name to bind to each element in the array. This variable name
-     * can be used in the `predicate` expression to refer to the current element.
-     * @param predicate The predicate boolean expression to filter by.
-     * @returns A new {@code Expression} representing the filtered array.
-     */
-    export function arrayFilter(
-      arrayExpression: Expression,
-      variable: string,
-      predicate: BooleanExpression,
-    ): FunctionExpression;
-    /**
-     * @beta
-     *
      * Creates an expression that returns the first element of an array.
      *
      * @example
@@ -7503,7 +7474,6 @@ declare namespace FirebaseFirestore {
     export function arrayFirst(fieldName: string): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the first element of an array.
      *
      * @example
@@ -7518,7 +7488,6 @@ declare namespace FirebaseFirestore {
     export function arrayFirst(arrayExpression: Expression): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the first `n` elements of an array.
      *
      * @example
@@ -7537,7 +7506,6 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the first `n` elements of an array.
      *
      * @example
@@ -7556,7 +7524,6 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the first `n` elements of an array.
      *
      * @example
@@ -7575,7 +7542,6 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the first `n` elements of an array.
      *
      * @example
@@ -7614,7 +7580,6 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the first index of the search value in an array.
      * Returns -1 if the value is not found.
      *
@@ -7634,7 +7599,6 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns all indices of the search value in an array.
      *
      * @example
@@ -7653,7 +7617,6 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns all indices of the search value in an array.
      *
      * @example
@@ -7672,7 +7635,6 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the last element of an array.
      *
      * @example
@@ -7687,7 +7649,6 @@ declare namespace FirebaseFirestore {
     export function arrayLast(fieldName: string): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the last element of an array.
      *
      * @example
@@ -7702,7 +7663,6 @@ declare namespace FirebaseFirestore {
     export function arrayLast(arrayExpression: Expression): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the last index of the search value in an array.
      * Returns -1 if the value is not found.
      *
@@ -7722,7 +7682,6 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the last index of the search value in an array.
      * Returns -1 if the value is not found.
      *
@@ -7742,7 +7701,6 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the last `n` elements of an array.
      *
      * @example
@@ -7761,7 +7719,6 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the last `n` elements of an array.
      *
      * @example
@@ -7780,7 +7737,6 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the last `n` elements of an array.
      *
      * @example
@@ -7799,7 +7755,6 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the last `n` elements of an array.
      *
      * @example
@@ -7818,7 +7773,6 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the maximum value in an array.
      *
      * @example
@@ -7833,7 +7787,6 @@ declare namespace FirebaseFirestore {
     export function arrayMaximum(fieldName: string): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the maximum value in an array.
      *
      * @example
@@ -7850,8 +7803,11 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the largest `n` elements of an array.
+     *
+     * Returns the n largest non-null elements in the array, in descending order.
+     * This does not use a stable sort, meaning the order of equivalent elements
+     * is undefined.
      *
      * @example
      * ```typescript
@@ -7869,8 +7825,11 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the largest `n` elements of an array.
+     *
+     * Returns the n largest non-null elements in the array, in descending order.
+     * This does not use a stable sort, meaning the order of equivalent elements
+     * is undefined.
      *
      * @example
      * ```typescript
@@ -7888,8 +7847,11 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the largest `n` elements of an array.
+     *
+     * Returns the n largest non-null elements in the array, in descending order.
+     * This does not use a stable sort, meaning the order of equivalent elements
+     * is undefined.
      *
      * @example
      * ```typescript
@@ -7907,8 +7869,11 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the largest `n` elements of an array.
+     *
+     * Returns the n largest non-null elements in the array, in descending order.
+     * This does not use a stable sort, meaning the order of equivalent elements
+     * is undefined.
      *
      * @example
      * ```typescript
@@ -7926,7 +7891,6 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the minimum value in an array.
      *
      * @example
@@ -7941,7 +7905,6 @@ declare namespace FirebaseFirestore {
     export function arrayMinimum(fieldName: string): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the minimum value in an array.
      *
      * @example
@@ -7958,8 +7921,11 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the smallest `n` elements of an array.
+     *
+     * Returns the n smallest non-null elements in the array, in ascending order.
+     * This does not use a stable sort, meaning the order of equivalent elements
+     * is undefined.
      *
      * @example
      * ```typescript
@@ -7977,8 +7943,11 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the smallest `n` elements of an array.
+     *
+     * Returns the n smallest non-null elements in the array, in ascending order.
+     * This does not use a stable sort, meaning the order of equivalent elements
+     * is undefined.
      *
      * @example
      * ```typescript
@@ -7996,8 +7965,11 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the smallest `n` elements of an array.
+     *
+     * Returns the n smallest non-null elements in the array, in ascending order.
+     * This does not use a stable sort, meaning the order of equivalent elements
+     * is undefined.
      *
      * @example
      * ```typescript
@@ -8015,8 +7987,11 @@ declare namespace FirebaseFirestore {
     ): FunctionExpression;
     /**
      * @beta
-     *
      * Creates an expression that returns the smallest `n` elements of an array.
+     *
+     * Returns the n smallest non-null elements in the array, in ascending order.
+     * This does not use a stable sort, meaning the order of equivalent elements
+     * is undefined.
      *
      * @example
      * ```typescript
@@ -8031,48 +8006,6 @@ declare namespace FirebaseFirestore {
     export function arrayMinimumN(
       arrayExpression: Expression,
       n: Expression,
-    ): FunctionExpression;
-    /**
-     * @beta
-     *
-     * Creates an expression that returns a slice of an array.
-     *
-     * @example
-     * ```typescript
-     * // Get the first 3 elements of the 'tags' array field
-     * arraySlice("tags", 0, 3);
-     * ```
-     *
-     * @param fieldName The name of the field containing the array to slice.
-     * @param start The index to start the slice.
-     * @param end The index to end the slice (inclusive).
-     * @returns A new {@code Expression} representing the slice.
-     */
-    export function arraySlice(
-      fieldName: string,
-      start: number | Expression,
-      end?: number | Expression,
-    ): FunctionExpression;
-    /**
-     * @beta
-     *
-     * Creates an expression that returns a slice of an array.
-     *
-     * @example
-     * ```typescript
-     * // Get the first 3 elements of the 'tags' array field
-     * arraySlice(field("tags"), 0, 3);
-     * ```
-     *
-     * @param arrayExpression The expression representing the array to slice.
-     * @param start The index to start the slice.
-     * @param end The index to end the slice (inclusive).
-     * @returns A new {@code Expression} representing the slice.
-     */
-    export function arraySlice(
-      arrayExpression: Expression,
-      start: number | Expression,
-      end?: number | Expression,
     ): FunctionExpression;
 
     /**
