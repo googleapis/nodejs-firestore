@@ -1873,6 +1873,8 @@ declare namespace Pipelines {
         or,
         regexContains,
         regexMatch,
+        regexFind,
+        regexFindAll,
         startsWith,
         stringConcat,
         subtract,
@@ -2314,6 +2316,30 @@ function regexContains(stringExpression: Expression, pattern: string): BooleanEx
 
 // @beta
 function regexContains(stringExpression: Expression, pattern: Expression): BooleanExpression;
+
+// @beta
+function regexFind(fieldName: string, pattern: string): FunctionExpression;
+
+// @beta
+function regexFind(fieldName: string, pattern: Expression): FunctionExpression;
+
+// @beta
+function regexFind(stringExpression: Expression, pattern: string): FunctionExpression;
+
+// @beta
+function regexFind(stringExpression: Expression, pattern: Expression): FunctionExpression;
+
+// @beta
+function regexFindAll(fieldName: string, pattern: string): FunctionExpression;
+
+// @beta
+function regexFindAll(fieldName: string, pattern: Expression): FunctionExpression;
+
+// @beta
+function regexFindAll(stringExpression: Expression, pattern: string): FunctionExpression;
+
+// @beta
+function regexFindAll(stringExpression: Expression, pattern: Expression): FunctionExpression;
 
 // @beta
 function regexMatch(fieldName: string, pattern: string): BooleanExpression;

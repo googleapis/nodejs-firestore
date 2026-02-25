@@ -86,6 +86,8 @@ import {
   or,
   regexContains,
   regexMatch,
+  regexFind,
+  regexFindAll,
   startsWith,
   stringConcat,
   subtract,
@@ -149,7 +151,6 @@ import {getTestDb, getTestRoot} from './firestore';
 
 import {Firestore as InternalFirestore} from '../src';
 import {ServiceError} from 'google-gax';
-import {regexFind, regexFindAll} from '../src/pipelines/expression';
 
 use(chaiAsPromised);
 

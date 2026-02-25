@@ -38,6 +38,8 @@ export {
   or,
   regexContains,
   regexMatch,
+  regexFind,
+  regexFindAll,
   startsWith,
   stringConcat,
   subtract,
