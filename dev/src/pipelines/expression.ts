@@ -6893,7 +6893,7 @@ export function maximum(value: Expression | string): AggregateFunction {
  * ```
  *
  * @param expression The expression to find the first value of.
- * @returns A new {@link @firebase/firestore/pipelines#AggregateFunction} representing the 'first' aggregation.
+ * @returns A new `AggregateFunction` representing the 'first' aggregation.
  */
 export function first(expression: Expression): AggregateFunction;
 
@@ -6908,7 +6908,7 @@ export function first(expression: Expression): AggregateFunction;
  * ```
  *
  * @param fieldName The name of the field to find the first value of.
- * @returns A new {@link @firebase/firestore/pipelines#AggregateFunction} representing the 'first' aggregation.
+ * @returns A new `AggregateFunction` representing the 'first' aggregation.
  */
 export function first(fieldName: string): AggregateFunction;
 export function first(value: Expression | string): AggregateFunction {
@@ -6927,7 +6927,7 @@ export function first(value: Expression | string): AggregateFunction {
  * ```
  *
  * @param expression The expression to find the last value of.
- * @returns A new {@link @firebase/firestore/pipelines#AggregateFunction} representing the 'last' aggregation.
+ * @returns A new `AggregateFunction` representing the 'last' aggregation.
  */
 export function last(expression: Expression): AggregateFunction;
 
@@ -6942,7 +6942,7 @@ export function last(expression: Expression): AggregateFunction;
  * ```
  *
  * @param fieldName The name of the field to find the last value of.
- * @returns A new {@link @firebase/firestore/pipelines#AggregateFunction} representing the 'last' aggregation.
+ * @returns A new `AggregateFunction` representing the 'last' aggregation.
  */
 export function last(fieldName: string): AggregateFunction;
 export function last(value: Expression | string): AggregateFunction {
@@ -6965,7 +6965,7 @@ export function last(value: Expression | string): AggregateFunction {
  * ```
  *
  * @param expression The expression to collect values from.
- * @returns A new {@link @firebase/firestore/pipelines#AggregateFunction} representing the 'array_agg' aggregation.
+ * @returns A new `AggregateFunction` representing the 'array_agg' aggregation.
  */
 export function arrayAgg(expression: Expression): AggregateFunction;
 
@@ -6985,7 +6985,7 @@ export function arrayAgg(expression: Expression): AggregateFunction;
  * ```
  *
  * @param fieldName The name of the field to collect values from.
- * @returns A new {@link @firebase/firestore/pipelines#AggregateFunction} representing the 'array_agg' aggregation.
+ * @returns A new `AggregateFunction` representing the 'array_agg' aggregation.
  */
 export function arrayAgg(fieldName: string): AggregateFunction;
 export function arrayAgg(value: Expression | string): AggregateFunction {
@@ -7008,7 +7008,7 @@ export function arrayAgg(value: Expression | string): AggregateFunction {
  * ```
  *
  * @param expression The expression to collect values from.
- * @returns A new {@link @firebase/firestore/pipelines#AggregateFunction} representing the 'array_agg_distinct' aggregation.
+ * @returns A new `AggregateFunction` representing the 'array_agg_distinct' aggregation.
  */
 export function arrayAggDistinct(expression: Expression): AggregateFunction;
 
@@ -7028,7 +7028,7 @@ export function arrayAggDistinct(expression: Expression): AggregateFunction;
  * ```
  *
  * @param fieldName The name of the field to collect values from.
- * @returns A new {@link @firebase/firestore/pipelines#AggregateFunction} representing the 'array_agg_distinct' aggregation.
+ * @returns A new `AggregateFunction` representing the 'array_agg_distinct' aggregation.
  */
 export function arrayAggDistinct(fieldName: string): AggregateFunction;
 export function arrayAggDistinct(
