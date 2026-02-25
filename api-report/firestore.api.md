@@ -1094,6 +1094,9 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     abstract _toProto(serializer: Serializer): api.IValue;
     toUpper(): FunctionExpression;
     trim(valueToTrim?: string | Expression | Uint8Array | Buffer): FunctionExpression;
+    trunc(): FunctionExpression;
+    trunc(decimalPlaces: number): FunctionExpression;
+    trunc(decimalPlaces: Expression): FunctionExpression;
     // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
     // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
     type(): FunctionExpression;
@@ -1925,6 +1928,8 @@ declare namespace Pipelines {
         ln,
         round,
         sqrt,
+        rand,
+        trunc,
         stringReverse,
         abs,
         arraySum,
@@ -2272,6 +2277,9 @@ export class QuerySnapshot<AppModelType = firestore.DocumentData, DbModelType ex
     // Warning: (tsdoc-undefined-tag) The TSDoc tag "@name" is not defined in this configuration
     get size(): number;
 }
+
+// @beta
+function rand(): FunctionExpression;
 
 // @beta
 function regexContains(fieldName: string, pattern: string): BooleanExpression;
@@ -2639,6 +2647,18 @@ function trim(fieldName: string, valueToTrim?: string | Expression): FunctionExp
 
 // @beta
 function trim(stringExpression: Expression, valueToTrim?: string | Expression): FunctionExpression;
+
+// @beta
+function trunc(fieldName: string): FunctionExpression;
+
+// @beta
+function trunc(expression: Expression): FunctionExpression;
+
+// @beta
+function trunc(fieldName: string, decimalPlaces: number | Expression): FunctionExpression;
+
+// @beta
+function trunc(expression: Expression, decimalPlaces: number | Expression): FunctionExpression;
 
 // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
 // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
