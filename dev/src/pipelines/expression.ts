@@ -7032,7 +7032,7 @@ export function arrayAggDistinct(expression: Expression): AggregateFunction;
  */
 export function arrayAggDistinct(fieldName: string): AggregateFunction;
 export function arrayAggDistinct(
-  value: Expression | string
+  value: Expression | string,
 ): AggregateFunction {
   return fieldOrExpression(value).arrayAggDistinct();
 }

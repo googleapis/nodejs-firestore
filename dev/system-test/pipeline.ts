@@ -1048,14 +1048,14 @@ describe.skipClassic('Pipeline class', () => {
             first('rating').as('firstBookRating'),
             first('title').as('firstBookTitle'),
             last('rating').as('lastBookRating'),
-            last('title').as('lastBookTitle')
+            last('title').as('lastBookTitle'),
           )
           .execute();
         expectResults(snapshot, {
           firstBookRating: 4.5,
           firstBookTitle: 'Pride and Prejudice',
           lastBookRating: 4.1,
-          lastBookTitle: "The Handmaid's Tale"
+          lastBookTitle: "The Handmaid's Tale",
         });
       });
 
@@ -1067,7 +1067,7 @@ describe.skipClassic('Pipeline class', () => {
           .aggregate(arrayAgg('rating').as('allRatings'))
           .execute();
         expectResults(snapshot, {
-          allRatings: [4.5, 4.3, 4.0, 4.2, 4.7, 4.2, 4.6, 4.3, 4.2, 4.1]
+          allRatings: [4.5, 4.3, 4.0, 4.2, 4.7, 4.2, 4.6, 4.3, 4.2, 4.1],
         });
       });
 
@@ -1080,7 +1080,7 @@ describe.skipClassic('Pipeline class', () => {
         const data = snapshot.results[0].data();
         data['allDistinctRatings'].sort((a: number, b: number) => a - b);
         expect(data).to.deep.equal({
-          allDistinctRatings: [4.0, 4.1, 4.2, 4.3, 4.5, 4.6, 4.7]
+          allDistinctRatings: [4.0, 4.1, 4.2, 4.3, 4.5, 4.6, 4.7],
         });
       });
 
