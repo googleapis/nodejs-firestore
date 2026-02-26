@@ -9483,10 +9483,11 @@ export function arrayIndexOfAll(
   search: unknown | Expression,
 ): FunctionExpression {
   return fieldOrExpression(array).arrayIndexOfAll(valueToDefaultExpr(search));
-  
- /**
+}
+
+/**
  * @beta
- * 
+ *
  * Creates an expression that checks if the value in the specified field is of the given type.
  *
  * @remarks Null or undefined fields evaluate to skip/error. Use `ifAbsent()` / `isAbsent()` to evaluate missing data.
