@@ -5078,6 +5078,47 @@ declare namespace FirebaseFirestore {
       pow(exponent: number): FunctionExpression;
       /**
        * @beta
+       * Creates an expression that truncates the numeric value to an integer.
+       *
+       * @example
+       * ```typescript
+       * // Truncate the 'rating' field.
+       * field("rating").trunc();
+       * ```
+       *
+       * @returns A new `Expression` representing the truncated value.
+       */
+      trunc(): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that truncates a numeric value to the specified number of decimal places.
+       *
+       * @example
+       * ```typescript
+       * // Truncate the value of the 'rating' field to two decimal places.
+       * field("rating").trunc(2);
+       * ```
+       *
+       * @param decimalPlaces A constant specifying the truncation precision in decimal places.
+       * @returns A new `Expression` representing the truncated value.
+       */
+      trunc(decimalPlaces: number): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that truncates a numeric value to the specified number of decimal places.
+       *
+       * @example
+       * ```typescript
+       * // Truncate the value of the 'rating' field to two decimal places.
+       * field("rating").trunc(constant(2));
+       * ```
+       *
+       * @param decimalPlaces An expression specifying the truncation precision in decimal places.
+       * @returns A new `Expression` representing the truncated value.
+       */
+      trunc(decimalPlaces: Expression): FunctionExpression;
+      /**
+       * @beta
        * Creates an expression that rounds a numeric value to the nearest whole number.
        *
        * @example
@@ -10594,6 +10635,19 @@ declare namespace FirebaseFirestore {
     export function ln(fieldName: string): FunctionExpression;
     /**
      * @beta
+     * Creates an expression that generates a random number between 0.0 and 1.0 but not including 1.0.
+     *
+     * @example
+     * ```typescript
+     * // Generate a random number between 0.0 and 1.0.
+     * rand();
+     * ```
+     *
+     * @returns A new {@code Expression} representing the rand operation.
+     */
+    export function rand(): FunctionExpression;
+    /**
+     * @beta
      * Creates an expression that rounds a numeric value to the nearest whole number.
      *
      * ```typescript
@@ -10650,6 +10704,70 @@ declare namespace FirebaseFirestore {
      * @returns A new `Expr` representing the rounded value.
      */
     export function round(
+      expression: Expression,
+      decimalPlaces: number | Expression,
+    ): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that truncates the numeric value of a field to an integer.
+     *
+     * @example
+     * ```typescript
+     * // Truncate the value of the 'rating' field.
+     * trunc("rating");
+     * ```
+     *
+     * @param fieldName The name of the field containing the number to truncate.
+     * @returns A new {@code Expression} representing the truncated value.
+     */
+    export function trunc(fieldName: string): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that truncates the numeric value of an expression to an integer.
+     *
+     * @example
+     * ```typescript
+     * // Truncate the value of the 'rating' field.
+     * trunc(field("rating"));
+     * ```
+     *
+     * @param expression - An expression evaluating to a numeric value, which will be truncated.
+     * @returns A new {@code Expression} representing the truncated value.
+     */
+    export function trunc(expression: Expression): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that truncates a numeric value to the specified number of decimal places.
+     *
+     * @example
+     * ```typescript
+     * // Truncate the value of the 'rating' field to two decimal places.
+     * trunc("rating", 2);
+     * ```
+     *
+     * @param fieldName The name of the field to truncate.
+     * @param decimalPlaces A constant or expression specifying the truncation precision in decimal places.
+     * @returns A new {@code Expression} representing the truncated value.
+     */
+    export function trunc(
+      fieldName: string,
+      decimalPlaces: number | Expression,
+    ): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that truncates a numeric value to the specified number of decimal places.
+     *
+     * @example
+     * ```typescript
+     * // Truncate the value of the 'rating' field to two decimal places.
+     * trunc(field("rating"), constant(2));
+     * ```
+     *
+     * @param expression - An expression evaluating to a numeric value, which will be truncated.
+     * @param decimalPlaces - A constant or expression specifying the truncation precision in decimal places.
+     * @returns A new {@code Expression} representing the truncated value.
+     */
+    export function trunc(
       expression: Expression,
       decimalPlaces: number | Expression,
     ): FunctionExpression;
