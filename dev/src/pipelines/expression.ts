@@ -838,7 +838,7 @@ export abstract class Expression
    * field("email").regexFind("@.+")
    * ```
    *
-   * @param pattern - The regular expression to search for.
+   * @param pattern The regular expression to search for.
    * @returns A new `Expression` representing the regular expression find function.
    */
   regexFind(pattern: string): FunctionExpression;
@@ -856,7 +856,7 @@ export abstract class Expression
    * field("email").regexFind(field("domain"))
    * ```
    *
-   * @param pattern - The regular expression to search for.
+   * @param pattern The regular expression to search for.
    * @returns A new `Expression` representing the regular expression find function.
    */
   regexFind(pattern: Expression): FunctionExpression;
@@ -881,7 +881,7 @@ export abstract class Expression
    * field("content").regexFindAll("#[A-Za-z0-9_]+")
    * ```
    *
-   * @param pattern - The regular expression to search for.
+   * @param pattern The regular expression to search for.
    * @returns A new `Expression` that evaluates to an array of matched substrings.
    */
   regexFindAll(pattern: string): FunctionExpression;
@@ -900,7 +900,7 @@ export abstract class Expression
    * field("content").regexFindAll(field("names"))
    * ```
    *
-   * @param pattern - The regular expression to search for.
+   * @param pattern The regular expression to search for.
    * @returns A new `Expression` that evaluates to an array of matched substrings.
    */
   regexFindAll(pattern: Expression): FunctionExpression;
@@ -1434,9 +1434,9 @@ export abstract class Expression
    * field("address").mapSet("city", "San Francisco");
    * ```
    *
-   * @param key - The key to set. Must be a string or a constant string expression.
-   * @param value - The value to set.
-   * @param moreKeyValues - Additional key-value pairs to set.
+   * @param key The key to set. Must be a string or a constant string expression.
+   * @param value The value to set.
+   * @param moreKeyValues Additional key-value pairs to set.
    * @returns A new `Expression` representing the map with the entries set.
    */
   mapSet(
@@ -2251,6 +2251,59 @@ export abstract class Expression
   pow(exponent: number): FunctionExpression;
   pow(exponent: number | Expression): FunctionExpression {
     return new FunctionExpression('pow', [this, valueToDefaultExpr(exponent)]);
+  }
+
+  /**
+   * @beta
+   * Creates an expression that truncates the numeric value to an integer.
+   *
+   * @example
+   * ```typescript
+   * // Truncate the 'rating' field.
+   * field("rating").trunc();
+   * ```
+   *
+   * @returns A new `Expression` representing the truncated value.
+   */
+  trunc(): FunctionExpression;
+
+  /**
+   * @beta
+   * Creates an expression that truncates a numeric value to the specified number of decimal places.
+   *
+   * @example
+   * ```typescript
+   * // Truncate the value of the 'rating' field to two decimal places.
+   * field("rating").trunc(2);
+   * ```
+   *
+   * @param decimalPlaces A constant specifying the truncation precision in decimal places.
+   * @returns A new `Expression` representing the truncated value.
+   */
+  trunc(decimalPlaces: number): FunctionExpression;
+
+  /**
+   * @beta
+   * Creates an expression that truncates a numeric value to the specified number of decimal places.
+   *
+   * @example
+   * ```typescript
+   * // Truncate the value of the 'rating' field to two decimal places.
+   * field("rating").trunc(constant(2));
+   * ```
+   *
+   * @param decimalPlaces An expression specifying the truncation precision in decimal places.
+   * @returns A new `Expression` representing the truncated value.
+   */
+  trunc(decimalPlaces: Expression): FunctionExpression;
+  trunc(decimalPlaces?: number | Expression): FunctionExpression {
+    if (decimalPlaces === undefined) {
+      return new FunctionExpression('trunc', [this]);
+    }
+    return new FunctionExpression('trunc', [
+      this,
+      valueToDefaultExpr(decimalPlaces),
+    ]);
   }
 
   /**
@@ -3457,7 +3510,7 @@ export class BooleanField extends BooleanExpression {
  * countIf(field("is_active").equal(true)).as("numActiveDocuments");
  * ```
  *
- * @param booleanExpr - The boolean expression to evaluate on each input.
+ * @param booleanExpr The boolean expression to evaluate on each input.
  * @returns A new `AggregateFunction` representing the 'countIf' aggregation.
  */
 export function countIf(booleanExpr: BooleanExpression): AggregateFunction {
@@ -5879,8 +5932,8 @@ export function regexContains(
  * regexFind("email", "@[A-Za-z0-9.-]+");
  * ```
  *
- * @param fieldName - The name of the field containing the string to search.
- * @param pattern - The regular expression to search for.
+ * @param fieldName The name of the field containing the string to search.
+ * @param pattern The regular expression to search for.
  * @returns A new `Expression` representing the regular expression find function.
  */
 export function regexFind(
@@ -5902,8 +5955,8 @@ export function regexFind(
  * regexFind("email", field("pattern"));
  * ```
  *
- * @param fieldName - The name of the field containing the string to search.
- * @param pattern - The regular expression to search for.
+ * @param fieldName The name of the field containing the string to search.
+ * @param pattern The regular expression to search for.
  * @returns A new `Expression` representing the regular expression find function.
  */
 export function regexFind(
@@ -5925,8 +5978,8 @@ export function regexFind(
  * regexFind(field("email"), "@[A-Za-z0-9.-]+");
  * ```
  *
- * @param stringExpression - The expression representing the string to search.
- * @param pattern - The regular expression to search for.
+ * @param stringExpression The expression representing the string to search.
+ * @param pattern The regular expression to search for.
  * @returns A new `Expression` representing the regular expression find function.
  */
 export function regexFind(
@@ -5948,8 +6001,8 @@ export function regexFind(
  * regexFind(field("email"), field("pattern"));
  * ```
  *
- * @param stringExpression - The expression representing the string to search.
- * @param pattern - The regular expression to search for.
+ * @param stringExpression The expression representing the string to search.
+ * @param pattern The regular expression to search for.
  * @returns A new `Expression` representing the regular expression find function.
  */
 export function regexFind(
@@ -5979,8 +6032,8 @@ export function regexFind(
  * regexFindAll("content", "#[A-Za-z0-9_]+");
  * ```
  *
- * @param fieldName - The name of the field containing the string to search.
- * @param pattern - The regular expression to search for.
+ * @param fieldName The name of the field containing the string to search.
+ * @param pattern The regular expression to search for.
  * @returns A new `Expression` that evaluates to an array of matched substrings.
  */
 export function regexFindAll(
@@ -6002,8 +6055,8 @@ export function regexFindAll(
  * regexFindAll("content", field("pattern"));
  * ```
  *
- * @param fieldName - The name of the field containing the string to search.
- * @param pattern - The regular expression to search for.
+ * @param fieldName The name of the field containing the string to search.
+ * @param pattern The regular expression to search for.
  * @returns A new `Expression` that evaluates to an array of matched substrings.
  */
 export function regexFindAll(
@@ -6025,8 +6078,8 @@ export function regexFindAll(
  * regexFindAll(field("comment"), "@[A-Za-z0-9_]+");
  * ```
  *
- * @param stringExpression - The expression representing the string to search.
- * @param pattern - The regular expression to search for.
+ * @param stringExpression The expression representing the string to search.
+ * @param pattern The regular expression to search for.
  * @returns A new `Expression` that evaluates to an array of matched substrings.
  */
 export function regexFindAll(
@@ -6048,8 +6101,8 @@ export function regexFindAll(
  * regexFindAll(field("comment"), field("pattern"));
  * ```
  *
- * @param stringExpression - The expression representing the string to search.
- * @param pattern - The regular expression to search for.
+ * @param stringExpression The expression representing the string to search.
+ * @param pattern The regular expression to search for.
  * @returns A new `Expression` that evaluates to an array of matched substrings.
  */
 export function regexFindAll(
@@ -6887,10 +6940,10 @@ export function mapGet(
  * mapSet("address", "city", "San Francisco");
  * ```
  *
- * @param mapField - The map field to set entries in.
- * @param key - The key to set. Must be a string or a constant string expression.
- * @param value - The value to set.
- * @param moreKeyValues - Additional key-value pairs to set.
+ * @param mapField The map field to set entries in.
+ * @param key The key to set. Must be a string or a constant string expression.
+ * @param value The value to set.
+ * @param moreKeyValues Additional key-value pairs to set.
  * @returns A new `Expression` representing the map with the entries set.
  */
 export function mapSet(
@@ -6914,10 +6967,10 @@ export function mapSet(
  * mapSet(map({"state": "California"}), "city", "San Francisco");
  * ```
  *
- * @param mapExpression - The expression representing the map.
- * @param key - The key to set. Must be a string or a constant string expression.
- * @param value - The value to set.
- * @param moreKeyValues - Additional key-value pairs to set.
+ * @param mapExpression The expression representing the map.
+ * @param key The key to set. Must be a string or a constant string expression.
+ * @param value The value to set.
+ * @param moreKeyValues Additional key-value pairs to set.
  * @returns A new `Expression` representing the map with the entries set.
  */
 export function mapSet(
@@ -6949,7 +7002,7 @@ export function mapSet(
  * mapKeys("address");
  * ```
  *
- * @param mapField - The map field to get the keys of.
+ * @param mapField The map field to get the keys of.
  * @returns A new `Expression` representing the keys of the map.
  */
 export function mapKeys(mapField: string): FunctionExpression;
@@ -6968,7 +7021,7 @@ export function mapKeys(mapField: string): FunctionExpression;
  * mapKeys(map({"city": "San Francisco"}));
  * ```
  *
- * @param mapExpression - The expression representing the map to get the keys of.
+ * @param mapExpression The expression representing the map to get the keys of.
  * @returns A new `Expression` representing the keys of the map.
  */
 export function mapKeys(mapExpression: Expression): FunctionExpression;
@@ -6990,7 +7043,7 @@ export function mapKeys(fieldOrExpr: string | Expression): FunctionExpression {
  * mapValues("address");
  * ```
  *
- * @param mapField - The map field to get the values of.
+ * @param mapField The map field to get the values of.
  * @returns A new `Expression` representing the values of the map.
  */
 export function mapValues(mapField: string): FunctionExpression;
@@ -7009,7 +7062,7 @@ export function mapValues(mapField: string): FunctionExpression;
  * mapValues(map({"city": "San Francisco"}));
  * ```
  *
- * @param mapExpression - The expression representing the map to get the values of.
+ * @param mapExpression The expression representing the map to get the values of.
  * @returns A new `Expression` representing the values of the map.
  */
 export function mapValues(mapExpression: Expression): FunctionExpression;
@@ -7035,7 +7088,7 @@ export function mapValues(
  * mapEntries("address");
  * ```
  *
- * @param mapField - The map field to get the entries of.
+ * @param mapField The map field to get the entries of.
  * @returns A new `Expression` representing the entries of the map.
  */
 export function mapEntries(mapField: string): FunctionExpression;
@@ -7056,7 +7109,7 @@ export function mapEntries(mapField: string): FunctionExpression;
  * mapEntries(map({"city": "San Francisco"}));
  * ```
  *
- * @param mapExpression - The expression representing the map to get the entries of.
+ * @param mapExpression The expression representing the map to get the entries of.
  * @returns A new `Expression` representing the entries of the map.
  */
 export function mapEntries(mapExpression: Expression): FunctionExpression;
@@ -8010,6 +8063,22 @@ export function pow(
 
 /**
  * @beta
+ * Creates an expression that generates a random number between 0.0 and 1.0 but not including 1.0.
+ *
+ * @example
+ * ```typescript
+ * // Generate a random number between 0.0 and 1.0.
+ * rand();
+ * ```
+ *
+ * @returns A new `Expression` representing the rand operation.
+ */
+export function rand(): FunctionExpression {
+  return new FunctionExpression('rand', []);
+}
+
+/**
+ * @beta
  * Creates an expression that rounds a numeric value to the nearest whole number.
  *
  * ```typescript
@@ -8078,6 +8147,84 @@ export function round(
     return fieldOrExpression(expr).round();
   } else {
     return fieldOrExpression(expr).round(valueToDefaultExpr(decimalPlaces));
+  }
+}
+
+/**
+ * @beta
+ * Creates an expression that truncates the numeric value of a field to an integer.
+ *
+ * @example
+ * ```typescript
+ * // Truncate the value of the 'rating' field.
+ * trunc("rating");
+ * ```
+ *
+ * @param fieldName The name of the field containing the number to truncate.
+ * @returns A new `Expression` representing the truncated value.
+ */
+export function trunc(fieldName: string): FunctionExpression;
+
+/**
+ * @beta
+ * Creates an expression that truncates the numeric value of an expression to an integer.
+ *
+ * @example
+ * ```typescript
+ * // Truncate the value of the 'rating' field.
+ * trunc(field("rating"));
+ * ```
+ *
+ * @param expression An expression evaluating to a numeric value, which will be truncated.
+ * @returns A new `Expression` representing the truncated value.
+ */
+export function trunc(expression: Expression): FunctionExpression;
+
+/**
+ * @beta
+ * Creates an expression that truncates a numeric value to the specified number of decimal places.
+ *
+ * @example
+ * ```typescript
+ * // Truncate the value of the 'rating' field to two decimal places.
+ * trunc("rating", 2);
+ * ```
+ *
+ * @param fieldName The name of the field to truncate.
+ * @param decimalPlaces A constant or expression specifying the truncation precision in decimal places.
+ * @returns A new `Expression` representing the truncated value.
+ */
+export function trunc(
+  fieldName: string,
+  decimalPlaces: number | Expression,
+): FunctionExpression;
+
+/**
+ * @beta
+ * Creates an expression that truncates a numeric value to the specified number of decimal places.
+ *
+ * @example
+ * ```typescript
+ * // Truncate the value of the 'rating' field to two decimal places.
+ * trunc(field("rating"), constant(2));
+ * ```
+ *
+ * @param expression An expression evaluating to a numeric value, which will be truncated.
+ * @param decimalPlaces A constant or expression specifying the truncation precision in decimal places.
+ * @returns A new `Expression` representing the truncated value.
+ */
+export function trunc(
+  expression: Expression,
+  decimalPlaces: number | Expression,
+): FunctionExpression;
+export function trunc(
+  expr: Expression | string,
+  decimalPlaces?: number | Expression,
+): FunctionExpression {
+  if (decimalPlaces === undefined) {
+    return fieldOrExpression(expr).trunc();
+  } else {
+    return fieldOrExpression(expr).trunc(valueToDefaultExpr(decimalPlaces));
   }
 }
 
