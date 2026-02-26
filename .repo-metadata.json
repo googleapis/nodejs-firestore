@@ -1,5 +1,5 @@
 {
-  "codeowner_team": "@googleapis/firestore-dpe",
+  "codeowner_team": "@googleapis/firestore-team @googleapis/cloud-sdk-nodejs-team",
   "language": "nodejs",
   "api_id": "firestore.googleapis.com",
   "name_pretty": "Cloud Firestore",

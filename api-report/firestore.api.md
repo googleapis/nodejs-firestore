@@ -1028,10 +1028,14 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     log10(): FunctionExpression;
     logicalMaximum(second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
     logicalMinimum(second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
+    mapEntries(): FunctionExpression;
     mapGet(subfield: string): FunctionExpression;
+    mapKeys(): FunctionExpression;
     mapMerge(secondMap: Record<string, unknown> | Expression, ...otherMaps: Array<Record<string, unknown> | Expression>): FunctionExpression;
     mapRemove(key: string): FunctionExpression;
     mapRemove(keyExpr: Expression): FunctionExpression;
+    mapSet(key: string | Expression, value: unknown, ...moreKeyValues: unknown[]): FunctionExpression;
+    mapValues(): FunctionExpression;
     maximum(): AggregateFunction;
     minimum(): AggregateFunction;
     mod(expression: Expression): FunctionExpression;
@@ -1091,6 +1095,9 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     abstract _toProto(serializer: Serializer): api.IValue;
     toUpper(): FunctionExpression;
     trim(valueToTrim?: string | Expression | Uint8Array | Buffer): FunctionExpression;
+    trunc(): FunctionExpression;
+    trunc(decimalPlaces: number): FunctionExpression;
+    trunc(decimalPlaces: Expression): FunctionExpression;
     // Warning: (tsdoc-escape-right-brace) The "}" character should be escaped using a backslash to avoid confusion with a TSDoc inline tag
     // Warning: (tsdoc-malformed-inline-tag) Expecting a TSDoc tag starting with "{@"
     type(): FunctionExpression;
@@ -1590,10 +1597,22 @@ function logicalMinimum(fieldName: string, second: Expression | unknown, ...othe
 function map(elements: Record<string, unknown>): FunctionExpression;
 
 // @beta
+function mapEntries(mapField: string): FunctionExpression;
+
+// @beta
+function mapEntries(mapExpression: Expression): FunctionExpression;
+
+// @beta
 function mapGet(fieldName: string, subField: string): FunctionExpression;
 
 // @beta
 function mapGet(mapExpression: Expression, subField: string): FunctionExpression;
+
+// @beta
+function mapKeys(mapField: string): FunctionExpression;
+
+// @beta
+function mapKeys(mapExpression: Expression): FunctionExpression;
 
 // @beta
 function mapMerge(mapField: string, secondMap: Record<string, unknown> | Expression, ...otherMaps: Array<Record<string, unknown> | Expression>): FunctionExpression;
@@ -1612,6 +1631,18 @@ function mapRemove(mapField: string, keyExpr: Expression): FunctionExpression;
 
 // @beta
 function mapRemove(mapExpr: Expression, keyExpr: Expression): FunctionExpression;
+
+// @beta
+function mapSet(mapField: string, key: string | Expression, value: unknown, ...moreKeyValues: unknown[]): FunctionExpression;
+
+// @beta
+function mapSet(mapExpression: Expression, key: string | Expression, value: unknown, ...moreKeyValues: unknown[]): FunctionExpression;
+
+// @beta
+function mapValues(mapField: string): FunctionExpression;
+
+// @beta
+function mapValues(mapExpression: Expression): FunctionExpression;
 
 // Warning: (tsdoc-undefined-tag) The TSDoc tag "@private" is not defined in this configuration
 //
@@ -1824,6 +1855,8 @@ declare namespace Pipelines {
         or,
         regexContains,
         regexMatch,
+        regexFind,
+        regexFindAll,
         startsWith,
         stringConcat,
         subtract,
@@ -1832,6 +1865,10 @@ declare namespace Pipelines {
         dotProduct,
         euclideanDistance,
         mapGet,
+        mapEntries,
+        mapKeys,
+        mapSet,
+        mapValues,
         lessThanOrEqual,
         equalAny,
         map,
@@ -1898,6 +1935,8 @@ declare namespace Pipelines {
         ln,
         round,
         sqrt,
+        rand,
+        trunc,
         stringReverse,
         abs,
         arraySum,
@@ -2249,6 +2288,9 @@ export class QuerySnapshot<AppModelType = firestore.DocumentData, DbModelType ex
 }
 
 // @beta
+function rand(): FunctionExpression;
+
+// @beta
 function regexContains(fieldName: string, pattern: string): BooleanExpression;
 
 // @beta
@@ -2259,6 +2301,30 @@ function regexContains(stringExpression: Expression, pattern: string): BooleanEx
 
 // @beta
 function regexContains(stringExpression: Expression, pattern: Expression): BooleanExpression;
+
+// @beta
+function regexFind(fieldName: string, pattern: string): FunctionExpression;
+
+// @beta
+function regexFind(fieldName: string, pattern: Expression): FunctionExpression;
+
+// @beta
+function regexFind(stringExpression: Expression, pattern: string): FunctionExpression;
+
+// @beta
+function regexFind(stringExpression: Expression, pattern: Expression): FunctionExpression;
+
+// @beta
+function regexFindAll(fieldName: string, pattern: string): FunctionExpression;
+
+// @beta
+function regexFindAll(fieldName: string, pattern: Expression): FunctionExpression;
+
+// @beta
+function regexFindAll(stringExpression: Expression, pattern: string): FunctionExpression;
+
+// @beta
+function regexFindAll(stringExpression: Expression, pattern: Expression): FunctionExpression;
 
 // @beta
 function regexMatch(fieldName: string, pattern: string): BooleanExpression;
@@ -2590,6 +2656,18 @@ function trim(fieldName: string, valueToTrim?: string | Expression): FunctionExp
 
 // @beta
 function trim(stringExpression: Expression, valueToTrim?: string | Expression): FunctionExpression;
+
+// @beta
+function trunc(fieldName: string): FunctionExpression;
+
+// @beta
+function trunc(expression: Expression): FunctionExpression;
+
+// @beta
+function trunc(fieldName: string, decimalPlaces: number | Expression): FunctionExpression;
+
+// @beta
+function trunc(expression: Expression, decimalPlaces: number | Expression): FunctionExpression;
 
 // @beta
 type Type = 'null' | 'array' | 'boolean' | 'bytes' | 'timestamp' | 'geo_point' | 'number' | 'int32' | 'int64' | 'float64' | 'decimal128' | 'map' | 'reference' | 'string' | 'vector' | 'max_key' | 'min_key' | 'object_id' | 'regex' | 'request_timestamp';

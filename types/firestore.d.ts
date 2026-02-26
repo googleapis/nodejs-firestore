@@ -4134,6 +4134,83 @@ declare namespace FirebaseFirestore {
       mapGet(subfield: string): FunctionExpression;
       /**
        * @beta
+       * Creates an expression that returns a new map with the specified entries added or updated.
+       *
+       * @remarks
+       * Note that `mapSet` only performs shallow updates to the map. Setting a value to `null`
+       * will retain the key with a `null` value. To remove a key entirely, use `mapRemove`.
+       *
+       * @example
+       * ```typescript
+       * // Set the 'city' to "San Francisco" in the 'address' map
+       * field("address").mapSet("city", "San Francisco");
+       * ```
+       *
+       * @param key - The key to set. Must be a string or a constant string expression.
+       * @param value - The value to set.
+       * @param moreKeyValues - Additional key-value pairs to set.
+       * @returns A new `Expression` representing the map with the entries set.
+       */
+      mapSet(
+        key: string | Expression,
+        value: unknown,
+        ...moreKeyValues: unknown[]
+      ): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that returns the keys of a map.
+       *
+       * @remarks
+       * While the backend generally preserves insertion order, relying on the
+       * order of the output array is not guaranteed and should be avoided.
+       *
+       * @example
+       * ```typescript
+       * // Get the keys of the 'address' map
+       * field("address").mapKeys();
+       * ```
+       *
+       * @returns A new `Expression` representing the keys of the map.
+       */
+      mapKeys(): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that returns the values of a map.
+       *
+       * @remarks
+       * While the backend generally preserves insertion order, relying on the
+       * order of the output array is not guaranteed and should be avoided.
+       *
+       * @example
+       * ```typescript
+       * // Get the values of the 'address' map
+       * field("address").mapValues();
+       * ```
+       *
+       * @returns A new `Expression` representing the values of the map.
+       */
+      mapValues(): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that returns the entries of a map as an array of maps,
+       * where each map contains a `"k"` property for the key and a `"v"` property for the value.
+       * For example: `[{ k: "key1", v: "value1" }, ...]`.
+       *
+       * @remarks
+       * While the backend generally preserves insertion order, relying on the
+       * order of the output array is not guaranteed and should be avoided.
+       *
+       * @example
+       * ```typescript
+       * // Get the entries of the 'address' map
+       * field("address").mapEntries();
+       * ```
+       *
+       * @returns A new `Expression` representing the entries of the map.
+       */
+      mapEntries(): FunctionExpression;
+      /**
+       * @beta
        * Creates an aggregation that counts the number of stage inputs with valid evaluations of the
        * expression or field.
        *
@@ -4717,6 +4794,47 @@ declare namespace FirebaseFirestore {
        * @returns A new `Expression` representing the power operation.
        */
       pow(exponent: number): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that truncates the numeric value to an integer.
+       *
+       * @example
+       * ```typescript
+       * // Truncate the 'rating' field.
+       * field("rating").trunc();
+       * ```
+       *
+       * @returns A new `Expression` representing the truncated value.
+       */
+      trunc(): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that truncates a numeric value to the specified number of decimal places.
+       *
+       * @example
+       * ```typescript
+       * // Truncate the value of the 'rating' field to two decimal places.
+       * field("rating").trunc(2);
+       * ```
+       *
+       * @param decimalPlaces A constant specifying the truncation precision in decimal places.
+       * @returns A new `Expression` representing the truncated value.
+       */
+      trunc(decimalPlaces: number): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that truncates a numeric value to the specified number of decimal places.
+       *
+       * @example
+       * ```typescript
+       * // Truncate the value of the 'rating' field to two decimal places.
+       * field("rating").trunc(constant(2));
+       * ```
+       *
+       * @param decimalPlaces An expression specifying the truncation precision in decimal places.
+       * @returns A new `Expression` representing the truncated value.
+       */
+      trunc(decimalPlaces: Expression): FunctionExpression;
       /**
        * @beta
        * Creates an expression that rounds a numeric value to the nearest whole number.
@@ -8395,6 +8513,175 @@ declare namespace FirebaseFirestore {
       mapExpression: Expression,
       subField: string,
     ): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that returns a new map with the specified entries added or updated.
+     *
+     * @remarks
+     * This only performs shallow updates to the map. Setting a value to `null`
+     * will retain the key with a `null` value. To remove a key entirely, use `mapRemove`.
+     *
+     * @example
+     * ```typescript
+     * // Set the 'city' to 'San Francisco' in the 'address' map field
+     * mapSet("address", "city", "San Francisco");
+     * ```
+     *
+     * @param mapField - The map field to set entries in.
+     * @param key - The key to set. Must be a string or a constant string expression.
+     * @param value - The value to set.
+     * @param moreKeyValues - Additional key-value pairs to set.
+     * @returns A new `Expression` representing the map with the entries set.
+     */
+    export function mapSet(
+      mapField: string,
+      key: string | Expression,
+      value: unknown,
+      ...moreKeyValues: unknown[]
+    ): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that returns a new map with the specified entries added or updated.
+     *
+     * @remarks
+     * This only performs shallow updates to the map. Setting a value to `null`
+     * will retain the key with a `null` value. To remove a key entirely, use `mapRemove`.
+     *
+     * @example
+     * ```typescript
+     * // Set the 'city' to "San Francisco"
+     * mapSet(map({"state": "California"}), "city", "San Francisco");
+     * ```
+     *
+     * @param mapExpression - The expression representing the map.
+     * @param key - The key to set. Must be a string or a constant string expression.
+     * @param value - The value to set.
+     * @param moreKeyValues - Additional key-value pairs to set.
+     * @returns A new `Expression` representing the map with the entries set.
+     */
+    export function mapSet(
+      mapExpression: Expression,
+      key: string | Expression,
+      value: unknown,
+      ...moreKeyValues: unknown[]
+    ): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that returns the keys of a map.
+     *
+     * @remarks
+     * While the backend generally preserves insertion order, relying on the
+     * order of the output array is not guaranteed and should be avoided.
+     *
+     * @example
+     * ```typescript
+     * // Get the keys of the 'address' map field
+     * mapKeys("address");
+     * ```
+     *
+     * @param mapField - The map field to get the keys of.
+     * @returns A new `Expression` representing the keys of the map.
+     */
+    export function mapKeys(mapField: string): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that returns the keys of a map.
+     *
+     * @remarks
+     * While the backend generally preserves insertion order, relying on the
+     * order of the output array is not guaranteed and should be avoided.
+     *
+     * @example
+     * ```typescript
+     * // Get the keys of the map expression
+     * mapKeys(map({"city": "San Francisco"}));
+     * ```
+     *
+     * @param mapExpression - The expression representing the map to get the keys of.
+     * @returns A new `Expression` representing the keys of the map.
+     */
+    export function mapKeys(mapExpression: Expression): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that returns the values of a map.
+     *
+     * @remarks
+     * While the backend generally preserves insertion order, relying on the
+     * order of the output array is not guaranteed and should be avoided.
+     *
+     * @example
+     * ```typescript
+     * // Get the values of the 'address' map field
+     * mapValues("address");
+     * ```
+     *
+     * @param mapField - The map field to get the values of.
+     * @returns A new `Expression` representing the values of the map.
+     */
+    export function mapValues(mapField: string): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that returns the values of a map.
+     *
+     * @remarks
+     * While the backend generally preserves insertion order, relying on the
+     * order of the output array is not guaranteed and should be avoided.
+     *
+     * @example
+     * ```typescript
+     * // Get the values of the map expression
+     * mapValues(map({"city": "San Francisco"}));
+     * ```
+     *
+     * @param mapExpression - The expression representing the map to get the values of.
+     * @returns A new `Expression` representing the values of the map.
+     */
+    export function mapValues(mapExpression: Expression): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that returns the entries of a map as an array of maps,
+     * where each map contains a `"k"` property for the key and a `"v"` property for the value.
+     * For example: `[{ k: "key1", v: "value1" }, ...]`.
+     *
+     * @remarks
+     * While the backend generally preserves insertion order, relying on the
+     * order of the output array is not guaranteed and should be avoided.
+     *
+     * @example
+     * ```typescript
+     * // Get the entries of the 'address' map field
+     * mapEntries("address");
+     * ```
+     *
+     * @param mapField - The map field to get the entries of.
+     * @returns A new `Expression` representing the entries of the map.
+     */
+    export function mapEntries(mapField: string): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that returns the entries of a map as an array of maps,
+     * where each map contains a `"k"` property for the key and a `"v"` property for the value.
+     * For example: `[{ k: "key1", v: "value1" }, ...]`.
+     *
+     * @remarks
+     * While the backend generally preserves insertion order, relying on the
+     * order of the output array is not guaranteed and should be avoided.
+     *
+     * @example
+     * ```typescript
+     * // Get the entries of the map expression
+     * mapEntries(map({"city": "San Francisco"}));
+     * ```
+     *
+     * @param mapExpression - The expression representing the map to get the entries of.
+     * @returns A new `Expression` representing the entries of the map.
+     */
+    export function mapEntries(mapExpression: Expression): FunctionExpression;
+
     /**
      * @beta
      * Creates an aggregation that counts the total number of stage inputs.
@@ -9532,6 +9819,19 @@ declare namespace FirebaseFirestore {
     export function ln(fieldName: string): FunctionExpression;
     /**
      * @beta
+     * Creates an expression that generates a random number between 0.0 and 1.0 but not including 1.0.
+     *
+     * @example
+     * ```typescript
+     * // Generate a random number between 0.0 and 1.0.
+     * rand();
+     * ```
+     *
+     * @returns A new {@code Expression} representing the rand operation.
+     */
+    export function rand(): FunctionExpression;
+    /**
+     * @beta
      * Creates an expression that rounds a numeric value to the nearest whole number.
      *
      * ```typescript
@@ -9588,6 +9888,70 @@ declare namespace FirebaseFirestore {
      * @returns A new `Expr` representing the rounded value.
      */
     export function round(
+      expression: Expression,
+      decimalPlaces: number | Expression,
+    ): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that truncates the numeric value of a field to an integer.
+     *
+     * @example
+     * ```typescript
+     * // Truncate the value of the 'rating' field.
+     * trunc("rating");
+     * ```
+     *
+     * @param fieldName The name of the field containing the number to truncate.
+     * @returns A new {@code Expression} representing the truncated value.
+     */
+    export function trunc(fieldName: string): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that truncates the numeric value of an expression to an integer.
+     *
+     * @example
+     * ```typescript
+     * // Truncate the value of the 'rating' field.
+     * trunc(field("rating"));
+     * ```
+     *
+     * @param expression - An expression evaluating to a numeric value, which will be truncated.
+     * @returns A new {@code Expression} representing the truncated value.
+     */
+    export function trunc(expression: Expression): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that truncates a numeric value to the specified number of decimal places.
+     *
+     * @example
+     * ```typescript
+     * // Truncate the value of the 'rating' field to two decimal places.
+     * trunc("rating", 2);
+     * ```
+     *
+     * @param fieldName The name of the field to truncate.
+     * @param decimalPlaces A constant or expression specifying the truncation precision in decimal places.
+     * @returns A new {@code Expression} representing the truncated value.
+     */
+    export function trunc(
+      fieldName: string,
+      decimalPlaces: number | Expression,
+    ): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that truncates a numeric value to the specified number of decimal places.
+     *
+     * @example
+     * ```typescript
+     * // Truncate the value of the 'rating' field to two decimal places.
+     * trunc(field("rating"), constant(2));
+     * ```
+     *
+     * @param expression - An expression evaluating to a numeric value, which will be truncated.
+     * @param decimalPlaces - A constant or expression specifying the truncation precision in decimal places.
+     * @returns A new {@code Expression} representing the truncated value.
+     */
+    export function trunc(
       expression: Expression,
       decimalPlaces: number | Expression,
     ): FunctionExpression;
