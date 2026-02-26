@@ -3737,9 +3737,9 @@ declare namespace FirebaseFirestore {
        * @beta
        * Returns the largest `n` elements of the array.
        *
-       * Returns the n largest non-null elements in the array, in descending order.
-       * This does not use a stable sort, meaning the order of equivalent elements
-       * is undefined.
+       * Note: Returns the n largest non-null elements in the array, in descending
+       * order. This does not use a stable sort, meaning the order of equivalent
+       * elements is undefined.
        *
        * @example
        * ```typescript
@@ -3756,9 +3756,9 @@ declare namespace FirebaseFirestore {
        * @beta
        * Returns the largest `n` elements of the array.
        *
-       * Returns the n largest non-null elements in the array, in descending order.
-       * This does not use a stable sort, meaning the order of equivalent elements
-       * is undefined.
+       * Note: Returns the n largest non-null elements in the array, in descending
+       * order. This does not use a stable sort, meaning the order of equivalent
+       * elements is undefined.
        *
        * @example
        * ```typescript
@@ -3789,9 +3789,9 @@ declare namespace FirebaseFirestore {
        * @beta
        * Returns the smallest `n` elements of the array.
        *
-       * Returns the n smallest non-null elements in the array, in ascending order.
-       * This does not use a stable sort, meaning the order of equivalent elements
-       * is undefined.
+       * Note: Returns the n smallest non-null elements in the array, in ascending
+       * order. This does not use a stable sort, meaning the order of equivalent
+       * elements is undefined.
        *
        * @example
        * ```typescript
@@ -3808,9 +3808,9 @@ declare namespace FirebaseFirestore {
        * @beta
        * Returns the smallest `n` elements of the array.
        *
-       * Returns the n smallest non-null elements in the array, in ascending order.
-       * This does not use a stable sort, meaning the order of equivalent elements
-       * is undefined.
+       * Note: Returns the n smallest non-null elements in the array, in ascending
+       * order. This does not use a stable sort, meaning the order of equivalent
+       * elements is undefined.
        *
        * @example
        * ```typescript
@@ -7846,9 +7846,9 @@ declare namespace FirebaseFirestore {
      * @beta
      * Creates an expression that returns the largest `n` elements of an array.
      *
-     * Returns the n largest non-null elements in the array, in descending order.
-     * This does not use a stable sort, meaning the order of equivalent elements
-     * is undefined.
+     * Note: Returns the n largest non-null elements in the array, in descending
+     * order. This does not use a stable sort, meaning the order of equivalent
+     * elements is undefined.
      *
      * @example
      * ```typescript
@@ -7868,9 +7868,9 @@ declare namespace FirebaseFirestore {
      * @beta
      * Creates an expression that returns the largest `n` elements of an array.
      *
-     * Returns the n largest non-null elements in the array, in descending order.
-     * This does not use a stable sort, meaning the order of equivalent elements
-     * is undefined.
+     * Note: Returns the n largest non-null elements in the array, in descending
+     * order. This does not use a stable sort, meaning the order of equivalent
+     * elements is undefined.
      *
      * @example
      * ```typescript
@@ -7890,9 +7890,9 @@ declare namespace FirebaseFirestore {
      * @beta
      * Creates an expression that returns the largest `n` elements of an array.
      *
-     * Returns the n largest non-null elements in the array, in descending order.
-     * This does not use a stable sort, meaning the order of equivalent elements
-     * is undefined.
+     * Note: Returns the n largest non-null elements in the array, in descending
+     * order. This does not use a stable sort, meaning the order of equivalent
+     * elements is undefined.
      *
      * @example
      * ```typescript
@@ -7912,9 +7912,9 @@ declare namespace FirebaseFirestore {
      * @beta
      * Creates an expression that returns the largest `n` elements of an array.
      *
-     * Returns the n largest non-null elements in the array, in descending order.
-     * This does not use a stable sort, meaning the order of equivalent elements
-     * is undefined.
+     * Note: Returns the n largest non-null elements in the array, in descending
+     * order. This does not use a stable sort, meaning the order of equivalent
+     * elements is undefined.
      *
      * @example
      * ```typescript
@@ -7964,9 +7964,9 @@ declare namespace FirebaseFirestore {
      * @beta
      * Creates an expression that returns the smallest `n` elements of an array.
      *
-     * Returns the n smallest non-null elements in the array, in ascending order.
-     * This does not use a stable sort, meaning the order of equivalent elements
-     * is undefined.
+     * Note: Returns the n smallest non-null elements in the array, in ascending
+     * order. This does not use a stable sort, meaning the order of equivalent
+     * elements is undefined.
      *
      * @example
      * ```typescript
@@ -7986,9 +7986,9 @@ declare namespace FirebaseFirestore {
      * @beta
      * Creates an expression that returns the smallest `n` elements of an array.
      *
-     * Returns the n smallest non-null elements in the array, in ascending order.
-     * This does not use a stable sort, meaning the order of equivalent elements
-     * is undefined.
+     * Note: Returns the n smallest non-null elements in the array, in ascending
+     * order. This does not use a stable sort, meaning the order of equivalent
+     * elements is undefined.
      *
      * @example
      * ```typescript
@@ -8008,9 +8008,9 @@ declare namespace FirebaseFirestore {
      * @beta
      * Creates an expression that returns the smallest `n` elements of an array.
      *
-     * Returns the n smallest non-null elements in the array, in ascending order.
-     * This does not use a stable sort, meaning the order of equivalent elements
-     * is undefined.
+     * Note: Returns the n smallest non-null elements in the array, in ascending
+     * order. This does not use a stable sort, meaning the order of equivalent
+     * elements is undefined.
      *
      * @example
      * ```typescript
@@ -8030,9 +8030,9 @@ declare namespace FirebaseFirestore {
      * @beta
      * Creates an expression that returns the smallest `n` elements of an array.
      *
-     * Returns the n smallest non-null elements in the array, in ascending order.
-     * This does not use a stable sort, meaning the order of equivalent elements
-     * is undefined.
+     * Note: Returns the n smallest non-null elements in the array, in ascending
+     * order. This does not use a stable sort, meaning the order of equivalent
+     * elements is undefined.
      *
      * @example
      * ```typescript

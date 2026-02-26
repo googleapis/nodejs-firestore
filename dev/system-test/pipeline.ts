@@ -3634,14 +3634,31 @@ describe.skipClassic('Pipeline class', () => {
             arr: [1, 2, 3, 2, 1],
           }),
         )
-        .select(
-          arrayIndexOf('arr', 2).as('firstIndex'),
-          arrayLastIndexOf('arr', 2).as('lastIndex'),
-        )
+        .select(arrayIndexOf('arr', 2).as('firstIndex'))
         .execute();
       expectResults(snapshotDuplicates, {
         firstIndex: 1,
-        lastIndex: 3,
+      });
+
+      // Test with null values
+      const snapshotNull = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            arr: [1, null, 3, null, 1],
+            nullArr: null,
+          }),
+        )
+        .select(
+          arrayIndexOf('arr', null).as('firstNullIndex'),
+          arrayIndexOf('nullArr', 1).as('nullArrIndex'),
+        )
+        .execute();
+      expectResults(snapshotNull, {
+        firstNullIndex: 1,
+        nullArrIndex: null,
       });
     });
 
@@ -3680,13 +3697,9 @@ describe.skipClassic('Pipeline class', () => {
             arr: [1, 2, 3, 2, 1],
           }),
         )
-        .select(
-          arrayIndexOf('arr', 2).as('firstIndex'),
-          arrayLastIndexOf('arr', 2).as('lastIndex'),
-        )
+        .select(arrayLastIndexOf('arr', 2).as('lastIndex'))
         .execute();
       expectResults(snapshotDuplicates, {
-        firstIndex: 1,
         lastIndex: 3,
       });
     });
@@ -3698,10 +3711,10 @@ describe.skipClassic('Pipeline class', () => {
         .sort(field('rating').descending())
         .limit(1)
         .select(
-          arrayIndexOfAll('tags', 'adventure').as('indicesFirst'), // [0]
-          arrayIndexOfAll(field('tags'), 'epic').as('indicesLast'), // [2]
-          field('tags').arrayIndexOfAll('nonexistent').as('indicesNone'), // []
-          arrayIndexOfAll('empty', 'anything').as('indicesEmpty'), // []
+          arrayIndexOfAll('tags', 'adventure').as('indicesFirst'),
+          arrayIndexOfAll(field('tags'), 'epic').as('indicesLast'),
+          field('tags').arrayIndexOfAll('nonexistent').as('indicesNone'),
+          arrayIndexOfAll('empty', 'anything').as('indicesEmpty'),
         )
         .execute();
       const expectedResults = [
@@ -3732,6 +3745,27 @@ describe.skipClassic('Pipeline class', () => {
       expectResults(snapshotDuplicates, {
         indices1: [0, 4],
         indices2: [1, 3],
+      });
+
+      // Test with null values
+      const snapshotNull = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            arr: [1, null, 3, null, 1],
+            nullArr: null,
+          }),
+        )
+        .select(
+          arrayIndexOfAll('arr', null).as('nullIndices'),
+          arrayIndexOfAll('nullArr', null).as('nullArrIndices'),
+        )
+        .execute();
+      expectResults(snapshotNull, {
+        nullIndices: [1, 3],
+        nullArrIndices: null,
       });
     });
 

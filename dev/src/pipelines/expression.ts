@@ -765,9 +765,9 @@ export abstract class Expression
    * @beta
    * Returns the largest `n` elements of the array.
    *
-   * Returns the n largest non-null elements in the array, in descending order.
-   * This does not use a stable sort, meaning the order of equivalent elements
-   * is undefined.
+   * Note: Returns the n largest non-null elements in the array, in descending
+   * order. This does not use a stable sort, meaning the order of equivalent
+   * elements is undefined.
    *
    * @example
    * ```typescript
@@ -784,9 +784,9 @@ export abstract class Expression
    * @beta
    * Returns the largest `n` elements of the array.
    *
-   * Returns the n largest non-null elements in the array, in descending order.
-   * This does not use a stable sort, meaning the order of equivalent elements
-   * is undefined.
+   * Note: Returns the n largest non-null elements in the array, in descending
+   * order. This does not use a stable sort, meaning the order of equivalent
+   * elements is undefined.
    *
    * @example
    * ```typescript
@@ -9060,9 +9060,9 @@ export function arrayMaximum(array: Expression | string): FunctionExpression {
  *
  * Creates an expression that returns the largest `n` elements of an array.
  *
- * Returns the n largest non-null elements in the array, in descending order.
- * This does not use a stable sort, meaning the order of equivalent elements
- * is undefined.
+ * Note: Returns the n largest non-null elements in the array, in descending
+ * order. This does not use a stable sort, meaning the order of equivalent
+ * elements is undefined.
  *
  * @example
  * ```typescript
@@ -9081,9 +9081,9 @@ export function arrayMaximumN(fieldName: string, n: number): FunctionExpression;
  *
  * Creates an expression that returns the largest `n` elements of an array.
  *
- * Returns the n largest non-null elements in the array, in descending order.
- * This does not use a stable sort, meaning the order of equivalent elements
- * is undefined.
+ * Note: Returns the n largest non-null elements in the array, in descending
+ * order. This does not use a stable sort, meaning the order of equivalent
+ * elements is undefined.
  *
  * @example
  * ```typescript
@@ -9105,9 +9105,9 @@ export function arrayMaximumN(
  *
  * Creates an expression that returns the largest `n` elements of an array.
  *
- * Returns the n largest non-null elements in the array, in descending order.
- * This does not use a stable sort, meaning the order of equivalent elements
- * is undefined.
+ * Note: Returns the n largest non-null elements in the array, in descending
+ * order. This does not use a stable sort, meaning the order of equivalent
+ * elements is undefined.
  *
  * @example
  * ```typescript
@@ -9129,9 +9129,9 @@ export function arrayMaximumN(
  *
  * Creates an expression that returns the largest `n` elements of an array.
  *
- * Returns the n largest non-null elements in the array, in descending order.
- * This does not use a stable sort, meaning the order of equivalent elements
- * is undefined.
+ * Note: Returns the n largest non-null elements in the array, in descending
+ * order. This does not use a stable sort, meaning the order of equivalent
+ * elements is undefined.
  *
  * @example
  * ```typescript
