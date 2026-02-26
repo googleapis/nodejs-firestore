@@ -111,7 +111,9 @@ import {
   Pipeline,
   countDistinct,
   pow,
+  rand,
   round,
+  trunc,
   collectionId,
   length,
   ln,
@@ -126,6 +128,7 @@ import {
   currentTimestamp,
   arrayConcat,
   type,
+  isType,
   timestampTruncate,
   split,
   // TODO(new-expression): add new expression imports above this line
@@ -3587,6 +3590,20 @@ describe.skipClassic('Pipeline class', () => {
       );
     });
 
+    it('testRand', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .select(rand().as('randomNumber'))
+        .limit(1)
+        .execute();
+      expect(snapshot.results.length).to.equal(1);
+      const randomNumber = snapshot.results[0].get('randomNumber') as number;
+      expect(randomNumber).to.be.a('number');
+      expect(randomNumber).to.be.gte(0);
+      expect(randomNumber).to.be.lt(1);
+    });
+
     it('can round a numeric value', async () => {
       const snapshot = await firestore
         .pipeline()
@@ -3663,6 +3680,57 @@ describe.skipClassic('Pipeline class', () => {
         '1': 4.1,
         '2': 4.12,
         '4': 4.1235,
+      });
+    });
+
+    it('can truncate a numeric value', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').equal('Pride and Prejudice'))
+        .limit(1)
+        .select(field('rating').trunc().as('truncatedRating'))
+        .execute();
+      expectResults(snapshot, {
+        truncatedRating: 4,
+      });
+    });
+
+    it('can truncate a numeric value with the top-level function', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .where(field('title').equal('Pride and Prejudice'))
+        .limit(1)
+        .select(trunc('rating').as('truncatedRating'))
+        .execute();
+      expectResults(snapshot, {
+        truncatedRating: 4,
+      });
+    });
+
+    it('can truncate a numeric value to specified precision', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            foo: 4.123456,
+          }),
+        )
+        .select(
+          field('foo').trunc(0).as('0'),
+          trunc('foo', 1).as('1'),
+          trunc('foo', constant(2)).as('2'),
+          trunc(field('foo'), 4).as('4'),
+        )
+        .execute();
+      expectResults(snapshot, {
+        '0': 4,
+        '1': 4.1,
+        '2': 4.12,
+        '4': 4.1234,
       });
     });
 
@@ -4365,6 +4433,74 @@ describe.skipClassic('Pipeline class', () => {
         vector: 'vector',
         map: 'map',
         array: 'array',
+      });
+    });
+
+    it('supports isType', async () => {
+      const result = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .replaceWith(
+          map({
+            int: constant(1),
+            float: constant(1.1),
+            str: constant('a string'),
+            bool: constant(true),
+            null: constant(null),
+            geoPoint: constant(new GeoPoint(0.1, 0.2)),
+            timestamp: constant(new Timestamp(123456, 0)),
+            bytes: constant(new Uint8Array([1, 2, 3])),
+            docRef: constant(firestore.doc(`${randomCol.path}/bar`)),
+            vector: constant(FieldValue.vector([1, 2, 3])),
+            map: map({
+              numberK: 1,
+              stringK: 'a string',
+            }),
+            array: array([1, '2', true]),
+          }),
+        )
+        .select(
+          isType(field('int'), 'int64').as('isInt64'),
+          isType(field('int'), 'number').as('isInt64IsNumber'),
+          isType(field('int'), 'decimal128').as('isInt64IsDecimal128'),
+          field('float').isType('float64').as('isFloat64'),
+          field('float').isType('number').as('isFloat64IsNumber'),
+          field('float').isType('decimal128').as('isFloat64IsDecimal128'),
+          isType('str', 'string').as('isStr'),
+          isType('int', 'string').as('isNumStr'),
+          field('bool').isType('boolean').as('isBool'),
+          isType('null', 'null').as('isNull'),
+          field('geoPoint').isType('geo_point').as('isGeoPoint'),
+          isType('timestamp', 'timestamp').as('isTimestamp'),
+          field('bytes').isType('bytes').as('isBytes'),
+          isType('docRef', 'reference').as('isDocRef'),
+          field('vector').isType('vector').as('isVector'),
+          isType('map', 'map').as('isMap'),
+          field('array').isType('array').as('isArray'),
+          field('str').isType('int64').as('isStrNum'),
+        )
+        .limit(1)
+        .execute();
+
+      expectResults(result, {
+        isInt64: true,
+        isInt64IsNumber: true,
+        isInt64IsDecimal128: false,
+        isFloat64: true,
+        isFloat64IsNumber: true,
+        isFloat64IsDecimal128: false,
+        isStr: true,
+        isNumStr: false,
+        isBool: true,
+        isNull: true,
+        isGeoPoint: true,
+        isTimestamp: true,
+        isBytes: true,
+        isDocRef: true,
+        isVector: true,
+        isMap: true,
+        isArray: true,
+        isStrNum: false,
       });
     });
 

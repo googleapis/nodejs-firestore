@@ -4858,6 +4858,47 @@ declare namespace FirebaseFirestore {
       pow(exponent: number): FunctionExpression;
       /**
        * @beta
+       * Creates an expression that truncates the numeric value to an integer.
+       *
+       * @example
+       * ```typescript
+       * // Truncate the 'rating' field.
+       * field("rating").trunc();
+       * ```
+       *
+       * @returns A new `Expression` representing the truncated value.
+       */
+      trunc(): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that truncates a numeric value to the specified number of decimal places.
+       *
+       * @example
+       * ```typescript
+       * // Truncate the value of the 'rating' field to two decimal places.
+       * field("rating").trunc(2);
+       * ```
+       *
+       * @param decimalPlaces A constant specifying the truncation precision in decimal places.
+       * @returns A new `Expression` representing the truncated value.
+       */
+      trunc(decimalPlaces: number): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that truncates a numeric value to the specified number of decimal places.
+       *
+       * @example
+       * ```typescript
+       * // Truncate the value of the 'rating' field to two decimal places.
+       * field("rating").trunc(constant(2));
+       * ```
+       *
+       * @param decimalPlaces An expression specifying the truncation precision in decimal places.
+       * @returns A new `Expression` representing the truncated value.
+       */
+      trunc(decimalPlaces: Expression): FunctionExpression;
+      /**
+       * @beta
        * Creates an expression that rounds a numeric value to the nearest whole number.
        *
        * @example
@@ -5156,6 +5197,23 @@ declare namespace FirebaseFirestore {
        * @returns A new {Expression} representing the data type.
        */
       type(): FunctionExpression;
+
+      /**
+       * @beta
+       * Creates an expression that checks if the result of this expression is of the given type.
+       *
+       * @remarks Null or undefined fields evaluate to skip/error. Use `ifAbsent()` / `isAbsent()` to evaluate missing data.
+       *
+       * @example
+       * ```typescript
+       * // Check if the 'price' field is specifically an integer (not just 'number')
+       * field('price').isType('int64');
+       * ```
+       *
+       * @param type The type to check for.
+       * @returns A new `BooleanExpression` that evaluates to true if the expression's result is of the given type, false otherwise.
+       */
+      isType(type: Type): BooleanExpression;
 
       // TODO(new-expression): Add new expression method declarations above this line
       /**
@@ -9955,6 +10013,19 @@ declare namespace FirebaseFirestore {
     export function ln(fieldName: string): FunctionExpression;
     /**
      * @beta
+     * Creates an expression that generates a random number between 0.0 and 1.0 but not including 1.0.
+     *
+     * @example
+     * ```typescript
+     * // Generate a random number between 0.0 and 1.0.
+     * rand();
+     * ```
+     *
+     * @returns A new {@code Expression} representing the rand operation.
+     */
+    export function rand(): FunctionExpression;
+    /**
+     * @beta
      * Creates an expression that rounds a numeric value to the nearest whole number.
      *
      * ```typescript
@@ -10011,6 +10082,70 @@ declare namespace FirebaseFirestore {
      * @returns A new `Expr` representing the rounded value.
      */
     export function round(
+      expression: Expression,
+      decimalPlaces: number | Expression,
+    ): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that truncates the numeric value of a field to an integer.
+     *
+     * @example
+     * ```typescript
+     * // Truncate the value of the 'rating' field.
+     * trunc("rating");
+     * ```
+     *
+     * @param fieldName The name of the field containing the number to truncate.
+     * @returns A new {@code Expression} representing the truncated value.
+     */
+    export function trunc(fieldName: string): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that truncates the numeric value of an expression to an integer.
+     *
+     * @example
+     * ```typescript
+     * // Truncate the value of the 'rating' field.
+     * trunc(field("rating"));
+     * ```
+     *
+     * @param expression - An expression evaluating to a numeric value, which will be truncated.
+     * @returns A new {@code Expression} representing the truncated value.
+     */
+    export function trunc(expression: Expression): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that truncates a numeric value to the specified number of decimal places.
+     *
+     * @example
+     * ```typescript
+     * // Truncate the value of the 'rating' field to two decimal places.
+     * trunc("rating", 2);
+     * ```
+     *
+     * @param fieldName The name of the field to truncate.
+     * @param decimalPlaces A constant or expression specifying the truncation precision in decimal places.
+     * @returns A new {@code Expression} representing the truncated value.
+     */
+    export function trunc(
+      fieldName: string,
+      decimalPlaces: number | Expression,
+    ): FunctionExpression;
+    /**
+     * @beta
+     * Creates an expression that truncates a numeric value to the specified number of decimal places.
+     *
+     * @example
+     * ```typescript
+     * // Truncate the value of the 'rating' field to two decimal places.
+     * trunc(field("rating"), constant(2));
+     * ```
+     *
+     * @param expression - An expression evaluating to a numeric value, which will be truncated.
+     * @param decimalPlaces - A constant or expression specifying the truncation precision in decimal places.
+     * @returns A new {@code Expression} representing the truncated value.
+     */
+    export function trunc(
       expression: Expression,
       decimalPlaces: number | Expression,
     ): FunctionExpression;
@@ -10206,6 +10341,39 @@ declare namespace FirebaseFirestore {
 
     /**
      * @beta
+     *
+     * An enumeration of the different types generated by the Firestore backend.
+     *
+     * <ul>
+     *  <li>Numerics evaluate directly to backend representation (`int64` or `float64`), not JS `number`.</li>
+     *  <li>JavaScript `Date` and firestore `Timestamp` objects strictly evaluate to `'timestamp'`.</li>
+     *  <li>Advanced configurations parsing backend types (such as `decimal128`, `max_key` or `min_key` from BSON) are also incorporated in this union string type. Note that `decimal128` is a backend-only numeric type that the JavaScript SDK cannot create natively, but can be evaluated in pipelines.</li>
+     * </ul>
+     */
+    export type Type =
+      | 'null'
+      | 'array'
+      | 'boolean'
+      | 'bytes'
+      | 'timestamp'
+      | 'geo_point'
+      | 'number'
+      | 'int32'
+      | 'int64'
+      | 'float64'
+      | 'decimal128'
+      | 'map'
+      | 'reference'
+      | 'string'
+      | 'vector'
+      | 'max_key'
+      | 'min_key'
+      | 'object_id'
+      | 'regex'
+      | 'request_timestamp';
+
+    /**
+     * @beta
      * Creates an expression that returns the data type of the data in the specified field.
      *
      * @example
@@ -10230,6 +10398,44 @@ declare namespace FirebaseFirestore {
      * @returns A new {Expression} representing the data type.
      */
     export function type(expression: Expression): FunctionExpression;
+
+    /**
+     * @beta
+     * Creates an expression that checks if the value in the specified field is of the given type.
+     *
+     * @remarks Null or undefined fields evaluate to skip/error. Use `ifAbsent()` / `isAbsent()` to evaluate missing data.
+     *
+     * @example
+     * ```typescript
+     * // Check if the 'price' field is a floating point number (evaluating to true inside pipeline conditionals)
+     * isType('price', 'float64');
+     * ```
+     *
+     * @param fieldName The name of the field to check.
+     * @param type The type to check for.
+     * @returns A new `BooleanExpression` that evaluates to true if the field's value is of the given type, false otherwise.
+     */
+    export function isType(fieldName: string, type: Type): BooleanExpression;
+    /**
+     * @beta
+     * Creates an expression that checks if the result of an expression is of the given type.
+     *
+     * @remarks Null or undefined fields evaluate to skip/error. Use `ifAbsent()` / `isAbsent()` to evaluate missing data.
+     *
+     * @example
+     * ```typescript
+     * // Check if the result of a calculation is a number
+     * isType(add('count', 1), 'number')
+     * ```
+     *
+     * @param expression The expression to check.
+     * @param type The type to check for.
+     * @returns A new `BooleanExpression` that evaluates to true if the expression's result is of the given type, false otherwise.
+     */
+    export function isType(
+      expression: Expression,
+      type: Type,
+    ): BooleanExpression;
 
     // TODO(new-expression): Add new top-level expression function declarations above this line
     /**

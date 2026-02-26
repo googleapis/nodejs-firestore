@@ -122,6 +122,8 @@ export {
   ln,
   round,
   sqrt,
+  rand,
+  trunc,
   stringReverse,
   abs,
   arraySum,
@@ -132,6 +134,8 @@ export {
   currentTimestamp,
   arrayConcat,
   type,
+  isType,
+  Type,
   timestampTruncate,
   split,
   // TODO(new-expression): Add new expression exports above this line
