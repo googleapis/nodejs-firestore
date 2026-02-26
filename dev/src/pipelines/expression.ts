@@ -30,6 +30,17 @@ import {HasUserData, Serializer, validateUserInput} from '../serializer';
 import {cast} from '../util';
 
 /**
+ * Direction of array index.
+ *
+ * @private
+ * @internal
+ */
+enum ArrayIndexDirection {
+  FIRST = 'first',
+  LAST = 'last',
+}
+
+/**
  * @beta
  * Represents an expression that can be evaluated to a value within the execution of a `Pipeline`.
  *
@@ -892,7 +903,7 @@ export abstract class Expression
     return new FunctionExpression('array_index_of', [
       this,
       valueToDefaultExpr(search),
-      valueToDefaultExpr('first'),
+      valueToDefaultExpr(ArrayIndexDirection.FIRST),
     ]);
   }
 
@@ -929,7 +940,7 @@ export abstract class Expression
     return new FunctionExpression('array_index_of', [
       this,
       valueToDefaultExpr(search),
-      valueToDefaultExpr('last'),
+      valueToDefaultExpr(ArrayIndexDirection.LAST),
     ]);
   }
 
