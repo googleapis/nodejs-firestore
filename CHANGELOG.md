@@ -4,6 +4,23 @@
 
 [1]: https://www.npmjs.com/package/@google-cloud/firestore?activeTab=versions
 
+## [8.4.0](https://github.com/googleapis/nodejs-firestore/compare/v8.3.0...v8.4.0) (2026-02-27)
+
+
+### Features
+
+* Add `isType` expression ([#2483](https://github.com/googleapis/nodejs-firestore/issues/2483)) ([920c9f7](https://github.com/googleapis/nodejs-firestore/commit/920c9f769dc63d2484c95a2c791dec135a5e3eff))
+* Add first, last, arrayAgg and arrayAggDistinct expressions ([#2494](https://github.com/googleapis/nodejs-firestore/issues/2494)) ([a1c66d1](https://github.com/googleapis/nodejs-firestore/commit/a1c66d125f42093d5b86354221e88ad1b4391c23))
+* Add pipeline string expressions ([#2479](https://github.com/googleapis/nodejs-firestore/issues/2479)) ([1068f5c](https://github.com/googleapis/nodejs-firestore/commit/1068f5cb841ae22c333ecc5ba7b1ab9071d80037))
+* Add rand and trunc expressions ([#2493](https://github.com/googleapis/nodejs-firestore/issues/2493)) ([dd8897e](https://github.com/googleapis/nodejs-firestore/commit/dd8897e5329f40cdffe3f7def7cc8dd2122d633a))
+* Add remaining `map` expressions ([#2485](https://github.com/googleapis/nodejs-firestore/issues/2485)) ([4155a55](https://github.com/googleapis/nodejs-firestore/commit/4155a5526578c146019b03f25c5cf53930acbd92))
+* **firestore:** Add array expressions ([#2489](https://github.com/googleapis/nodejs-firestore/issues/2489)) ([8b5960a](https://github.com/googleapis/nodejs-firestore/commit/8b5960ac57f42506f8d8c82943c97ff8038636dc))
+
+
+### Bug Fixes
+
+* Export `regexFind` and `regexFindAll` functions to public API ([#2492](https://github.com/googleapis/nodejs-firestore/issues/2492)) ([3d61340](https://github.com/googleapis/nodejs-firestore/commit/3d61340a63d33333f1fb97f2ef9036d50740596e))
+
 ## [8.3.0](https://github.com/googleapis/nodejs-firestore/compare/v8.2.0...v8.3.0) (2026-02-02)
 
 
