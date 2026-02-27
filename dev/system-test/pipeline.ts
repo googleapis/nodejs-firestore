@@ -38,6 +38,10 @@ import {
   multiply,
   sum,
   maximum,
+  first,
+  last,
+  arrayAgg,
+  arrayAggDistinct,
   descending,
   FunctionExpression,
   minimum,
@@ -1036,6 +1040,51 @@ describe.skipClassic('Pipeline class', () => {
           avgRating: 4.4,
           maxRating: 4.6,
           sumRating: 8.8,
+        });
+      });
+
+      it('returns first and last accumulations', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .sort(field('published').ascending())
+          .aggregate(
+            first('rating').as('firstBookRating'),
+            first('title').as('firstBookTitle'),
+            last('rating').as('lastBookRating'),
+            last('title').as('lastBookTitle'),
+          )
+          .execute();
+        expectResults(snapshot, {
+          firstBookRating: 4.5,
+          firstBookTitle: 'Pride and Prejudice',
+          lastBookRating: 4.1,
+          lastBookTitle: "The Handmaid's Tale",
+        });
+      });
+
+      it('returns arrayAgg accumulations', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .sort(field('published').ascending())
+          .aggregate(arrayAgg('rating').as('allRatings'))
+          .execute();
+        expectResults(snapshot, {
+          allRatings: [4.5, 4.3, 4.0, 4.2, 4.7, 4.2, 4.6, 4.3, 4.2, 4.1],
+        });
+      });
+
+      it('returns arrayAggDistinct accumulations', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .aggregate(arrayAggDistinct('rating').as('allDistinctRatings'))
+          .execute();
+        const data = snapshot.results[0].data();
+        data['allDistinctRatings'].sort((a: number, b: number) => a - b);
+        expect(data).to.deep.equal({
+          allDistinctRatings: [4.0, 4.1, 4.2, 4.3, 4.5, 4.6, 4.7],
         });
       });
 
