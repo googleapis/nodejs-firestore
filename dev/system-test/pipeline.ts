@@ -149,7 +149,7 @@ import * as chaiAsPromised from 'chai-as-promised';
 
 import {afterEach, describe, it} from 'mocha';
 import '../test/util/mocha_extensions';
-import {verifyInstance} from '../test/util/helpers';
+import {isPreferRest, verifyInstance} from '../test/util/helpers';
 import {getTestDb, getTestRoot} from './firestore';
 
 import {Firestore as InternalFirestore} from '../src';
@@ -159,7 +159,7 @@ use(chaiAsPromised);
 
 const timestampDeltaMS = 3000;
 
-describe.skipClassic('Pipeline class', () => {
+describe.skipStandard('Pipeline class', () => {
   let firestore: Firestore;
   let randomCol: CollectionReference;
   let beginDocCreation = 0;
@@ -471,7 +471,7 @@ describe.skipClassic('Pipeline class', () => {
   });
 
   describe('pipeline explain', () => {
-    it('mode: analyze, format: text', async () => {
+    it.skipRestConnection('mode: analyze, format: text', async () => {
       const ppl = firestore
         .pipeline()
         .collection(randomCol.path)
@@ -511,7 +511,7 @@ describe.skipClassic('Pipeline class', () => {
       );
     });
 
-    it('mode: analyze, format: unspecified', async () => {
+    it.skipRestConnection('mode: analyze, format: unspecified', async () => {
       const ppl = firestore
         .pipeline()
         .collection(randomCol.path)
@@ -1694,17 +1694,24 @@ describe.skipClassic('Pipeline class', () => {
 
           expect.fail('expected pipeline.execute() to throw');
         } catch (e: unknown) {
-          expect(e instanceof Error).to.be.true;
-          const err = e as ServiceError;
-          expect(err['code']).to.equal(3);
-          expect(typeof err['message']).to.equal('string');
-          expect(typeof err['details']).to.equal('string');
-          expect(typeof err['stack']).to.equal('string');
-          expect(err['metadata'] instanceof Object).to.be.true;
+          if (isPreferRest()) {
+            expect(e instanceof Error).to.be.true;
+            const err = e as ServiceError;
+            expect(err['code']).to.equal(400);
+          } else {
+            // grpc
+            expect(e instanceof Error).to.be.true;
+            const err = e as ServiceError;
+            expect(err['code']).to.equal(3);
+            expect(typeof err['message']).to.equal('string');
+            expect(typeof err['details']).to.equal('string');
+            expect(typeof err['stack']).to.equal('string');
+            expect(err['metadata'] instanceof Object).to.be.true;
 
-          expect(err['message']).to.equal(
-            `${err.code} INVALID_ARGUMENT: ${err.details}`,
-          );
+            expect(err['message']).to.equal(
+              `${err.code} INVALID_ARGUMENT: ${err.details}`,
+            );
+          }
         }
       });
 
@@ -1725,32 +1732,39 @@ describe.skipClassic('Pipeline class', () => {
 
           expect.fail('expected pipeline.execute() to throw');
         } catch (e: unknown) {
-          const err = e as {[k: string]: unknown};
-          expect(err instanceof Error).to.be.true;
+          if (isPreferRest()) {
+            const err = e as {[k: string]: unknown};
+            expect(err instanceof Error).to.be.true;
+            expect(err['code']).to.equal(429);
+          } else {
+            // grpc
+            const err = e as {[k: string]: unknown};
+            expect(err instanceof Error).to.be.true;
 
-          expect(err['code']).to.equal(8);
-          expect(typeof err['message']).to.equal('string');
-          expect(typeof err['details']).to.equal('string');
-          expect(typeof err['stack']).to.equal('string');
-          expect(err['metadata'] instanceof Object).to.be.true;
+            expect(err['code']).to.equal(8);
+            expect(typeof err['message']).to.equal('string');
+            expect(typeof err['details']).to.equal('string');
+            expect(typeof err['stack']).to.equal('string');
+            expect(err['metadata'] instanceof Object).to.be.true;
 
-          expect(err['message']).to.equal(
-            `${err.code} RESOURCE_EXHAUSTED: ${err.details}`,
-          );
-
-          expect('statusDetails' in err).to.be.true;
-          expect(Array.isArray(err['statusDetails'])).to.be.true;
-
-          const statusDetails = err['statusDetails'] as Array<object>;
-
-          const foundExplainStats = statusDetails.find(x => {
-            return (
-              'type_url' in x &&
-              x['type_url'] ===
-                'type.googleapis.com/google.firestore.v1.ExplainStats'
+            expect(err['message']).to.equal(
+              `${err.code} RESOURCE_EXHAUSTED: ${err.details}`,
             );
-          });
-          expect(foundExplainStats).to.not.be.undefined;
+
+            expect('statusDetails' in err).to.be.true;
+            expect(Array.isArray(err['statusDetails'])).to.be.true;
+
+            const statusDetails = err['statusDetails'] as Array<object>;
+
+            const foundExplainStats = statusDetails.find(x => {
+              return (
+                'type_url' in x &&
+                x['type_url'] ===
+                  'type.googleapis.com/google.firestore.v1.ExplainStats'
+              );
+            });
+            expect(foundExplainStats).to.not.be.undefined;
+          }
         }
       });
     });
@@ -4780,7 +4794,7 @@ describe.skipClassic('Pipeline class', () => {
 // This is the Query integration tests from the lite API (no cache support)
 // with some additional test cases added for more complete coverage.
 // eslint-disable-next-line no-restricted-properties
-describe.skipClassic('Query to Pipeline', () => {
+describe.skipStandard('Query to Pipeline', () => {
   async function execute(ppl: Pipeline): Promise<PipelineSnapshot> {
     return ppl.execute();
   }
