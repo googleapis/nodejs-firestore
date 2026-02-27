@@ -224,6 +224,24 @@ function arrayContainsAny(array: Expression, values: Expression): BooleanExpress
 function arrayContainsAny(fieldName: string, values: Expression): BooleanExpression;
 
 // @beta
+function arrayFirst(fieldName: string): FunctionExpression;
+
+// @beta
+function arrayFirst(arrayExpression: Expression): FunctionExpression;
+
+// @beta
+function arrayFirstN(fieldName: string, n: number): FunctionExpression;
+
+// @beta
+function arrayFirstN(fieldName: string, n: Expression): FunctionExpression;
+
+// @beta
+function arrayFirstN(arrayExpression: Expression, n: number): FunctionExpression;
+
+// @beta
+function arrayFirstN(arrayExpression: Expression, n: Expression): FunctionExpression;
+
+// @beta
 function arrayGet(arrayField: string, index: number): FunctionExpression;
 
 // @beta
@@ -236,10 +254,82 @@ function arrayGet(arrayExpression: Expression, index: number): FunctionExpressio
 function arrayGet(arrayExpression: Expression, indexExpr: Expression): FunctionExpression;
 
 // @beta
+function arrayIndexOf(fieldName: string, search: unknown | Expression): FunctionExpression;
+
+// @beta
+function arrayIndexOf(arrayExpression: Expression, search: unknown | Expression): FunctionExpression;
+
+// @beta
+function arrayIndexOfAll(fieldName: string, search: unknown | Expression): FunctionExpression;
+
+// @beta
+function arrayIndexOfAll(arrayExpression: Expression, search: unknown | Expression): FunctionExpression;
+
+// @beta
+function arrayLast(fieldName: string): FunctionExpression;
+
+// @beta
+function arrayLast(arrayExpression: Expression): FunctionExpression;
+
+// @beta
+function arrayLastIndexOf(fieldName: string, search: unknown | Expression): FunctionExpression;
+
+// @beta
+function arrayLastIndexOf(arrayExpression: Expression, search: unknown | Expression): FunctionExpression;
+
+// @beta
+function arrayLastN(fieldName: string, n: number): FunctionExpression;
+
+// @beta
+function arrayLastN(fieldName: string, n: Expression): FunctionExpression;
+
+// @beta
+function arrayLastN(arrayExpression: Expression, n: number): FunctionExpression;
+
+// @beta
+function arrayLastN(arrayExpression: Expression, n: Expression): FunctionExpression;
+
+// @beta
 function arrayLength(fieldName: string): FunctionExpression;
 
 // @beta
 function arrayLength(array: Expression): FunctionExpression;
+
+// @beta
+function arrayMaximum(fieldName: string): FunctionExpression;
+
+// @beta
+function arrayMaximum(arrayExpression: Expression): FunctionExpression;
+
+// @beta
+function arrayMaximumN(fieldName: string, n: number): FunctionExpression;
+
+// @beta
+function arrayMaximumN(fieldName: string, n: Expression): FunctionExpression;
+
+// @beta
+function arrayMaximumN(arrayExpression: Expression, n: number): FunctionExpression;
+
+// @beta
+function arrayMaximumN(arrayExpression: Expression, n: Expression): FunctionExpression;
+
+// @beta
+function arrayMinimum(fieldName: string): FunctionExpression;
+
+// @beta
+function arrayMinimum(arrayExpression: Expression): FunctionExpression;
+
+// @beta
+function arrayMinimumN(fieldName: string, n: number): FunctionExpression;
+
+// @beta
+function arrayMinimumN(fieldName: string, n: Expression): FunctionExpression;
+
+// @beta
+function arrayMinimumN(arrayExpression: Expression, n: number): FunctionExpression;
+
+// @beta
+function arrayMinimumN(arrayExpression: Expression, n: Expression): FunctionExpression;
 
 // @beta
 function arrayReverse(fieldName: string): FunctionExpression;
@@ -979,9 +1069,27 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     arrayContainsAll(arrayExpression: Expression): BooleanExpression;
     arrayContainsAny(values: Array<Expression | unknown>): BooleanExpression;
     arrayContainsAny(arrayExpression: Expression): BooleanExpression;
+    arrayFirst(): FunctionExpression;
+    arrayFirstN(n: number): FunctionExpression;
+    arrayFirstN(n: Expression): FunctionExpression;
     arrayGet(index: number): FunctionExpression;
     arrayGet(indexExpr: Expression): FunctionExpression;
+    arrayIndexOf(search: unknown): FunctionExpression;
+    arrayIndexOf(search: Expression): FunctionExpression;
+    arrayIndexOfAll(search: unknown): FunctionExpression;
+    arrayIndexOfAll(search: Expression): FunctionExpression;
+    arrayLast(): FunctionExpression;
+    arrayLastIndexOf(search: unknown): FunctionExpression;
+    arrayLastIndexOf(search: Expression): FunctionExpression;
+    arrayLastN(n: number): FunctionExpression;
+    arrayLastN(n: Expression): FunctionExpression;
     arrayLength(): FunctionExpression;
+    arrayMaximum(): FunctionExpression;
+    arrayMaximumN(n: number): FunctionExpression;
+    arrayMaximumN(n: Expression): FunctionExpression;
+    arrayMinimum(): FunctionExpression;
+    arrayMinimumN(n: number): FunctionExpression;
+    arrayMinimumN(n: Expression): FunctionExpression;
     arrayReverse(): FunctionExpression;
     arraySum(): FunctionExpression;
     as(name: string): AliasedExpression;
@@ -1913,6 +2021,17 @@ declare namespace Pipelines {
         equalAny,
         map,
         array,
+        arrayFirst,
+        arrayLast,
+        arrayFirstN,
+        arrayLastN,
+        arrayIndexOf,
+        arrayIndexOfAll,
+        arrayLastIndexOf,
+        arrayMaximum,
+        arrayMinimum,
+        arrayMaximumN,
+        arrayMinimumN,
         field,
         xor,
         AggregateFunction,

@@ -79,6 +79,17 @@ import {
   arrayContains,
   arrayContainsAny,
   arrayReverse,
+  arrayFirst,
+  arrayFirstN,
+  arrayIndexOf,
+  arrayIndexOfAll,
+  arrayLast,
+  arrayLastIndexOf,
+  arrayLastN,
+  arrayMaximum,
+  arrayMaximumN,
+  arrayMinimum,
+  arrayMinimumN,
   average,
   countAll,
   endsWith,
@@ -3268,6 +3279,550 @@ describe.skipClassic('Pipeline class', () => {
         .select(field('tags').arrayGet(0).as('firstTag'))
         .execute();
       expectResults(snapshot, ...expectedResults);
+    });
+
+    it('supports arrayFirst', async () => {
+      let snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(3)
+        .select(arrayFirst('tags').as('firstTag'))
+        .execute();
+      const expectedResults = [
+        {
+          firstTag: 'adventure',
+        },
+        {
+          firstTag: 'politics',
+        },
+        {
+          firstTag: 'classic',
+        },
+      ];
+      expectResults(snapshot, ...expectedResults);
+
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(3)
+        .select(field('tags').arrayFirst().as('firstTag'))
+        .execute();
+      expectResults(snapshot, ...expectedResults);
+
+      // Test with empty/null/non-existent
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            empty: [],
+            nullVal: null,
+          }),
+        )
+        .select(
+          arrayFirst('empty').as('emptyResult'),
+          arrayFirst('nullVal').as('nullResult'),
+          arrayFirst('nonExistent').as('absentResult'),
+        )
+        .execute();
+
+      expectResults(snapshot, {
+        // no emptyResult because arrayFirst returns UNSET for empty arrays
+        nullResult: null,
+        absentResult: null,
+      });
+    });
+
+    it('supports arrayFirstN', async () => {
+      let snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(3)
+        .select(arrayFirstN('tags', 2).as('firstTwoTags'))
+        .execute();
+      const expectedResults = [
+        {
+          firstTwoTags: ['adventure', 'magic'],
+        },
+        {
+          firstTwoTags: ['politics', 'desert'],
+        },
+        {
+          firstTwoTags: ['classic', 'social commentary'],
+        },
+      ];
+      expectResults(snapshot, ...expectedResults);
+
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(3)
+        .select(field('tags').arrayFirstN(2).as('firstTwoTags'))
+        .execute();
+      expectResults(snapshot, ...expectedResults);
+
+      // Test with empty/null/non-existent
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            empty: [],
+            nullVal: null,
+          }),
+        )
+        .select(
+          arrayFirstN('empty', 1).as('emptyResult'),
+          arrayFirstN('nullVal', 1).as('nullResult'),
+          arrayFirstN('nonExistent', 1).as('absentResult'),
+        )
+        .execute();
+
+      expectResults(snapshot, {
+        emptyResult: [],
+        nullResult: null,
+        absentResult: null,
+      });
+    });
+
+    it('supports arrayLast', async () => {
+      let snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(3)
+        .select(arrayLast('tags').as('lastTag'))
+        .execute();
+      const expectedResults = [
+        {
+          lastTag: 'epic',
+        },
+        {
+          lastTag: 'ecology',
+        },
+        {
+          lastTag: 'love',
+        },
+      ];
+      expectResults(snapshot, ...expectedResults);
+
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(3)
+        .select(field('tags').arrayLast().as('lastTag'))
+        .execute();
+      expectResults(snapshot, ...expectedResults);
+
+      // Test with empty/null/non-existent
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            empty: [],
+            nullVal: null,
+          }),
+        )
+        .select(
+          arrayLast('empty').as('emptyResult'),
+          arrayLast('nullVal').as('nullResult'),
+          arrayLast('nonExistent').as('absentResult'),
+        )
+        .execute();
+
+      expectResults(snapshot, {
+        // no emptyResult because arrayLast returns UNSET for empty arrays
+        nullResult: null,
+        absentResult: null,
+      });
+    });
+
+    it('supports arrayLastN', async () => {
+      let snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(3)
+        .select(arrayLastN('tags', 2).as('lastTwoTags'))
+        .execute();
+      const expectedResults = [
+        {
+          lastTwoTags: ['magic', 'epic'],
+        },
+        {
+          lastTwoTags: ['desert', 'ecology'],
+        },
+        {
+          lastTwoTags: ['social commentary', 'love'],
+        },
+      ];
+      expectResults(snapshot, ...expectedResults);
+
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(3)
+        .select(field('tags').arrayLastN(2).as('lastTwoTags'))
+        .execute();
+      expectResults(snapshot, ...expectedResults);
+
+      // Test with empty/null/non-existent
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            empty: [],
+            nullVal: null,
+          }),
+        )
+        .select(
+          arrayLastN('empty', 1).as('emptyResult'),
+          arrayLastN('nullVal', 1).as('nullResult'),
+          arrayLastN('nonExistent', 1).as('absentResult'),
+        )
+        .execute();
+
+      expectResults(snapshot, {
+        emptyResult: [],
+        nullResult: null,
+        absentResult: null,
+      });
+    });
+
+    it('supports arrayMaximum', async () => {
+      let snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(1)
+        .select(arrayMaximum('tags').as('maxTag'))
+        .execute();
+      const expectedResults = [
+        {
+          maxTag: 'magic',
+        },
+      ];
+      expectResults(snapshot, ...expectedResults);
+
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(1)
+        .select(field('tags').arrayMaximum().as('maxTag'))
+        .execute();
+      expectResults(snapshot, ...expectedResults);
+
+      // Test with empty/null/non-existent and mixed types
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            empty: [],
+            nullVal: null,
+            mixed: [1, '2', 3, '10'], // string > number in Firestore
+          }),
+        )
+        .select(
+          arrayMaximum('empty').as('emptyResult'),
+          arrayMaximum('nullVal').as('nullResult'),
+          arrayMaximum('nonExistent').as('absentResult'),
+          arrayMaximum('mixed').as('mixedResult'),
+        )
+        .execute();
+
+      expectResults(snapshot, {
+        emptyResult: null,
+        nullResult: null,
+        absentResult: null,
+        mixedResult: '2', // "2" > "10" > 3 > 1
+      });
+    });
+
+    it('supports arrayMaximumN', async () => {
+      let snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(1)
+        .select(arrayMaximumN('tags', 2).as('maxTwoTags'))
+        .execute();
+      const expectedResults = [
+        {
+          maxTwoTags: ['magic', 'epic'],
+        },
+      ];
+      expectResults(snapshot, ...expectedResults);
+
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(1)
+        .select(field('tags').arrayMaximumN(2).as('maxTwoTags'))
+        .execute();
+      expectResults(snapshot, ...expectedResults);
+    });
+
+    it('supports arrayMinimum', async () => {
+      let snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(1)
+        .select(arrayMinimum('tags').as('minTag'))
+        .execute();
+      const expectedResults = [
+        {
+          minTag: 'adventure',
+        },
+      ];
+      expectResults(snapshot, ...expectedResults);
+
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(1)
+        .select(field('tags').arrayMinimum().as('minTag'))
+        .execute();
+      expectResults(snapshot, ...expectedResults);
+
+      // Test with empty/null/non-existent and mixed types
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            empty: [],
+            nullVal: null,
+            mixed: [1, '2', 3, '10'], // Strings > Numbers in Firestore
+          }),
+        )
+        .select(
+          arrayMinimum('empty').as('emptyResult'),
+          arrayMinimum('nullVal').as('nullResult'),
+          arrayMinimum('nonExistent').as('absentResult'),
+          arrayMinimum('mixed').as('mixedResult'),
+        )
+        .execute();
+
+      expectResults(snapshot, {
+        emptyResult: null,
+        nullResult: null,
+        absentResult: null,
+        mixedResult: 1, // 1 < 2 < 3 < "10"
+      });
+    });
+
+    it('supports arrayMinimumN', async () => {
+      let snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(1)
+        .select(arrayMinimumN('tags', 2).as('minTwoTags'))
+        .execute();
+      const expectedResults = [
+        {
+          minTwoTags: ['adventure', 'epic'],
+        },
+      ];
+      expectResults(snapshot, ...expectedResults);
+
+      snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(1)
+        .select(field('tags').arrayMinimumN(2).as('minTwoTags'))
+        .execute();
+      expectResults(snapshot, ...expectedResults);
+    });
+
+    it('supports arrayIndexOf', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(1)
+        .select(
+          arrayIndexOf('tags', 'adventure').as('indexFirst'),
+          arrayIndexOf(field('tags'), 'magic').as('indexSecond'),
+          field('tags').arrayIndexOf('adventure').as('indexFirst2'),
+          arrayIndexOf('tags', 'nonexistent').as('indexNone'),
+          arrayIndexOf('empty', 'anything').as('indexEmpty'),
+        )
+        .execute();
+      const expectedResults = [
+        {
+          indexFirst: 0,
+          indexSecond: 1,
+          indexFirst2: 0,
+          indexNone: -1,
+          indexEmpty: null,
+        },
+      ];
+      expectResults(snapshot, ...expectedResults);
+
+      // Test with duplicate values
+      const snapshotDuplicates = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            arr: [1, 2, 3, 2, 1],
+          }),
+        )
+        .select(arrayIndexOf('arr', 2).as('firstIndex'))
+        .execute();
+      expectResults(snapshotDuplicates, {
+        firstIndex: 1,
+      });
+
+      // Test with null values
+      const snapshotNull = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            arr: [1, null, 3, null, 1],
+            nullArr: null,
+          }),
+        )
+        .select(
+          arrayIndexOf('arr', null).as('firstNullIndex'),
+          arrayIndexOf('nullArr', 1).as('nullArrIndex'),
+        )
+        .execute();
+      expectResults(snapshotNull, {
+        firstNullIndex: 1,
+        nullArrIndex: null,
+      });
+    });
+
+    it('supports arrayLastIndexOf', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(1)
+        .select(
+          arrayLastIndexOf('tags', 'adventure').as('lastIndexFirst'),
+          arrayLastIndexOf(field('tags'), 'epic').as('lastIndexLast'),
+          field('tags').arrayLastIndexOf('adventure').as('lastIndexFirst2'),
+          arrayLastIndexOf('tags', 'nonexistent').as('lastIndexNone'),
+          arrayLastIndexOf('empty', 'anything').as('lastIndexEmpty'),
+        )
+        .execute();
+      const expectedResults = [
+        {
+          lastIndexFirst: 0,
+          lastIndexLast: 2,
+          lastIndexFirst2: 0,
+          lastIndexNone: -1,
+          lastIndexEmpty: null,
+        },
+      ];
+      expectResults(snapshot, ...expectedResults);
+
+      // Test with duplicate values
+      const snapshotDuplicates = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            arr: [1, 2, 3, 2, 1],
+          }),
+        )
+        .select(arrayLastIndexOf('arr', 2).as('lastIndex'))
+        .execute();
+      expectResults(snapshotDuplicates, {
+        lastIndex: 3,
+      });
+    });
+
+    it('supports arrayIndexOfAll', async () => {
+      const snapshot = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .sort(field('rating').descending())
+        .limit(1)
+        .select(
+          arrayIndexOfAll('tags', 'adventure').as('indicesFirst'),
+          arrayIndexOfAll(field('tags'), 'epic').as('indicesLast'),
+          field('tags').arrayIndexOfAll('nonexistent').as('indicesNone'),
+          arrayIndexOfAll('empty', 'anything').as('indicesEmpty'),
+        )
+        .execute();
+      const expectedResults = [
+        {
+          indicesFirst: [0],
+          indicesLast: [2],
+          indicesNone: [],
+          indicesEmpty: null,
+        },
+      ];
+      expectResults(snapshot, ...expectedResults);
+
+      // Test with duplicate values
+      const snapshotDuplicates = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            arr: [1, 2, 3, 2, 1],
+          }),
+        )
+        .select(
+          arrayIndexOfAll('arr', 1).as('indices1'),
+          arrayIndexOfAll('arr', 2).as('indices2'),
+        )
+        .execute();
+      expectResults(snapshotDuplicates, {
+        indices1: [0, 4],
+        indices2: [1, 3],
+      });
+
+      // Test with null values
+      const snapshotNull = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .limit(1)
+        .replaceWith(
+          map({
+            arr: [1, null, 3, null, 1],
+            nullArr: null,
+          }),
+        )
+        .select(
+          arrayIndexOfAll('arr', null).as('nullIndices'),
+          arrayIndexOfAll('nullArr', null).as('nullArrIndices'),
+        )
+        .execute();
+      expectResults(snapshotNull, {
+        nullIndices: [1, 3],
+        nullArrIndices: null,
+      });
     });
 
     it('supports map', async () => {
