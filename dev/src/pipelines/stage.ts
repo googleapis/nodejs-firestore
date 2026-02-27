@@ -677,3 +677,96 @@ export class RawStage implements Stage {
     };
   }
 }
+
+export class DeleteStage implements Stage {
+  name = 'delete';
+  readonly optionsUtil = new OptionsUtil({
+    returns: {serverName: 'returns'},
+    transactional: {serverName: 'transactional'},
+  });
+
+  constructor(
+    private target?: firestore.CollectionReference,
+    private rawOptions?: firestore.Pipelines.DeleteStageOptions,
+  ) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    const args: api.IValue[] = [];
+    if (this.target) {
+      args.push({referenceValue: this.target.path});
+    }
+
+    return {
+      name: this.name,
+      args,
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        {},
+        this.rawOptions,
+      ),
+    };
+  }
+}
+
+export class UpsertStage implements Stage {
+  name = 'upsert';
+  readonly optionsUtil = new OptionsUtil({
+    returns: {serverName: 'returns'},
+    conflict_resolution: {serverName: 'conflict_resolution'},
+    transformations: {serverName: 'transformations'},
+    transactional: {serverName: 'transactional'},
+  });
+
+  constructor(
+    private target?: firestore.CollectionReference,
+    private rawOptions?: firestore.Pipelines.UpsertStageOptions,
+  ) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    const args: api.IValue[] = [];
+    if (this.target) {
+      args.push({referenceValue: this.target.path});
+    }
+
+    return {
+      name: this.name,
+      args,
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        {},
+        this.rawOptions,
+      ),
+    };
+  }
+}
+
+export class InsertStage implements Stage {
+  name = 'insert';
+  readonly optionsUtil = new OptionsUtil({
+    returns: {serverName: 'returns'},
+    transformations: {serverName: 'transformations'},
+    transactional: {serverName: 'transactional'},
+  });
+
+  constructor(
+    private target?: firestore.CollectionReference,
+    private rawOptions?: firestore.Pipelines.InsertStageOptions,
+  ) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    const args: api.IValue[] = [];
+    if (this.target) {
+      args.push({referenceValue: this.target.path});
+    }
+
+    return {
+      name: this.name,
+      args,
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        {},
+        this.rawOptions,
+      ),
+    };
+  }
+}
