@@ -170,6 +170,18 @@ function and(first: BooleanExpression, second: BooleanExpression, ...more: Boole
 function array(elements: unknown[]): FunctionExpression;
 
 // @beta
+function arrayAgg(expression: Expression): AggregateFunction;
+
+// @beta
+function arrayAgg(fieldName: string): AggregateFunction;
+
+// @beta
+function arrayAggDistinct(expression: Expression): AggregateFunction;
+
+// @beta
+function arrayAggDistinct(fieldName: string): AggregateFunction;
+
+// @beta
 function arrayConcat(firstArray: Expression, secondArray: Expression | unknown[], ...otherArrays: Array<Expression | unknown[]>): FunctionExpression;
 
 // @beta
@@ -1048,6 +1060,8 @@ export class ExplainResults<T> implements firestore.ExplainResults<T> {
 abstract class Expression implements firestore.Pipelines.Expression, HasUserData {
     abs(): FunctionExpression;
     add(second: firestore.Pipelines.Expression | unknown, ...others: Array<firestore.Pipelines.Expression | unknown>): FunctionExpression;
+    arrayAgg(): AggregateFunction;
+    arrayAggDistinct(): AggregateFunction;
     arrayConcat(secondArray: Expression | unknown[], ...otherArrays: Array<Expression | unknown[]>): FunctionExpression;
     arrayContains(expression: Expression): BooleanExpression;
     arrayContains(value: unknown): BooleanExpression;
@@ -1111,6 +1125,7 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     exp(): FunctionExpression;
     // (undocumented)
     abstract expressionType: firestore.Pipelines.ExpressionType;
+    first(): AggregateFunction;
     floor(): FunctionExpression;
     greaterThan(expression: Expression): BooleanExpression;
     greaterThan(value: unknown): BooleanExpression;
@@ -1125,6 +1140,7 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     isType(type: Type): BooleanExpression;
     join(delimiterExpression: Expression): Expression;
     join(delimiter: string): Expression;
+    last(): AggregateFunction;
     length(): FunctionExpression;
     lessThan(experession: Expression): BooleanExpression;
     lessThan(value: unknown): BooleanExpression;
@@ -1510,6 +1526,12 @@ export { Firestore }
 export default Firestore;
 
 // @beta
+function first(expression: Expression): AggregateFunction;
+
+// @beta
+function first(fieldName: string): AggregateFunction;
+
+// @beta
 function floor(expr: Expression): FunctionExpression;
 
 // @beta
@@ -1634,6 +1656,12 @@ function join(arrayExpression: Expression, delimiter: string): Expression;
 
 // @beta
 function join(arrayFieldName: string, delimiterExpression: Expression): Expression;
+
+// @beta
+function last(expression: Expression): AggregateFunction;
+
+// @beta
+function last(fieldName: string): AggregateFunction;
 
 // @beta
 function length_2(fieldName: string): FunctionExpression;
@@ -2025,6 +2053,10 @@ declare namespace Pipelines {
         Constant,
         sum,
         maximum,
+        first,
+        last,
+        arrayAgg,
+        arrayAggDistinct,
         descending,
         greaterThanOrEqual,
         multiply,
