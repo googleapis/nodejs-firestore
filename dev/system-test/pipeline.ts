@@ -38,6 +38,10 @@ import {
   multiply,
   sum,
   maximum,
+  first,
+  last,
+  arrayAgg,
+  arrayAggDistinct,
   descending,
   FunctionExpression,
   minimum,
@@ -130,6 +134,7 @@ import {
   currentTimestamp,
   arrayConcat,
   type,
+  isType,
   timestampTruncate,
   split,
   // TODO(new-expression): add new expression imports above this line
@@ -1041,6 +1046,51 @@ describe.skipClassic('Pipeline class', () => {
           avgRating: 4.4,
           maxRating: 4.6,
           sumRating: 8.8,
+        });
+      });
+
+      it('returns first and last accumulations', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .sort(field('published').ascending())
+          .aggregate(
+            first('rating').as('firstBookRating'),
+            first('title').as('firstBookTitle'),
+            last('rating').as('lastBookRating'),
+            last('title').as('lastBookTitle'),
+          )
+          .execute();
+        expectResults(snapshot, {
+          firstBookRating: 4.5,
+          firstBookTitle: 'Pride and Prejudice',
+          lastBookRating: 4.1,
+          lastBookTitle: "The Handmaid's Tale",
+        });
+      });
+
+      it('returns arrayAgg accumulations', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .sort(field('published').ascending())
+          .aggregate(arrayAgg('rating').as('allRatings'))
+          .execute();
+        expectResults(snapshot, {
+          allRatings: [4.5, 4.3, 4.0, 4.2, 4.7, 4.2, 4.6, 4.3, 4.2, 4.1],
+        });
+      });
+
+      it('returns arrayAggDistinct accumulations', async () => {
+        const snapshot = await firestore
+          .pipeline()
+          .collection(randomCol.path)
+          .aggregate(arrayAggDistinct('rating').as('allDistinctRatings'))
+          .execute();
+        const data = snapshot.results[0].data();
+        data['allDistinctRatings'].sort((a: number, b: number) => a - b);
+        expect(data).to.deep.equal({
+          allDistinctRatings: [4.0, 4.1, 4.2, 4.3, 4.5, 4.6, 4.7],
         });
       });
 
@@ -4554,6 +4604,74 @@ describe.skipClassic('Pipeline class', () => {
         vector: 'vector',
         map: 'map',
         array: 'array',
+      });
+    });
+
+    it('supports isType', async () => {
+      const result = await firestore
+        .pipeline()
+        .collection(randomCol.path)
+        .replaceWith(
+          map({
+            int: constant(1),
+            float: constant(1.1),
+            str: constant('a string'),
+            bool: constant(true),
+            null: constant(null),
+            geoPoint: constant(new GeoPoint(0.1, 0.2)),
+            timestamp: constant(new Timestamp(123456, 0)),
+            bytes: constant(new Uint8Array([1, 2, 3])),
+            docRef: constant(firestore.doc(`${randomCol.path}/bar`)),
+            vector: constant(FieldValue.vector([1, 2, 3])),
+            map: map({
+              numberK: 1,
+              stringK: 'a string',
+            }),
+            array: array([1, '2', true]),
+          }),
+        )
+        .select(
+          isType(field('int'), 'int64').as('isInt64'),
+          isType(field('int'), 'number').as('isInt64IsNumber'),
+          isType(field('int'), 'decimal128').as('isInt64IsDecimal128'),
+          field('float').isType('float64').as('isFloat64'),
+          field('float').isType('number').as('isFloat64IsNumber'),
+          field('float').isType('decimal128').as('isFloat64IsDecimal128'),
+          isType('str', 'string').as('isStr'),
+          isType('int', 'string').as('isNumStr'),
+          field('bool').isType('boolean').as('isBool'),
+          isType('null', 'null').as('isNull'),
+          field('geoPoint').isType('geo_point').as('isGeoPoint'),
+          isType('timestamp', 'timestamp').as('isTimestamp'),
+          field('bytes').isType('bytes').as('isBytes'),
+          isType('docRef', 'reference').as('isDocRef'),
+          field('vector').isType('vector').as('isVector'),
+          isType('map', 'map').as('isMap'),
+          field('array').isType('array').as('isArray'),
+          field('str').isType('int64').as('isStrNum'),
+        )
+        .limit(1)
+        .execute();
+
+      expectResults(result, {
+        isInt64: true,
+        isInt64IsNumber: true,
+        isInt64IsDecimal128: false,
+        isFloat64: true,
+        isFloat64IsNumber: true,
+        isFloat64IsDecimal128: false,
+        isStr: true,
+        isNumStr: false,
+        isBool: true,
+        isNull: true,
+        isGeoPoint: true,
+        isTimestamp: true,
+        isBytes: true,
+        isDocRef: true,
+        isVector: true,
+        isMap: true,
+        isArray: true,
+        isStrNum: false,
       });
     });
 
