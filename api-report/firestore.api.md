@@ -1152,6 +1152,7 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     log10(): FunctionExpression;
     logicalMaximum(second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
     logicalMinimum(second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
+    ltrim(valueToTrim?: string | Expression | Uint8Array | Buffer): FunctionExpression;
     mapEntries(): FunctionExpression;
     mapGet(subfield: string): FunctionExpression;
     mapKeys(): FunctionExpression;
@@ -1185,6 +1186,7 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     round(): FunctionExpression;
     round(decimalPlaces: number): FunctionExpression;
     round(decimalPlaces: Expression): FunctionExpression;
+    rtrim(valueToTrim?: string | Expression | Uint8Array | Buffer): FunctionExpression;
     split(delimiter: string): FunctionExpression;
     split(delimiter: Expression): FunctionExpression;
     sqrt(): FunctionExpression;
@@ -1193,6 +1195,10 @@ abstract class Expression implements firestore.Pipelines.Expression, HasUserData
     stringConcat(secondString: Expression | string, ...otherStrings: Array<Expression | string>): FunctionExpression;
     stringContains(substring: string): BooleanExpression;
     stringContains(expr: Expression): BooleanExpression;
+    stringIndexOf(search: string | Expression | Uint8Array | Buffer): FunctionExpression;
+    stringRepeat(repetitions: number | Expression): FunctionExpression;
+    stringReplaceAll(find: string | Expression | Uint8Array | Buffer, replacement: string | Expression | Uint8Array | Buffer): FunctionExpression;
+    stringReplaceOne(find: string | Expression | Uint8Array | Buffer, replacement: string | Expression | Uint8Array | Buffer): FunctionExpression;
     stringReverse(): FunctionExpression;
     substring(position: number, length?: number): FunctionExpression;
     substring(position: Expression, length?: Expression): FunctionExpression;
@@ -1730,6 +1736,12 @@ function logicalMinimum(first: Expression, second: Expression | unknown, ...othe
 function logicalMinimum(fieldName: string, second: Expression | unknown, ...others: Array<Expression | unknown>): FunctionExpression;
 
 // @beta
+function ltrim(fieldName: string, valueToTrim?: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
+// @beta
+function ltrim(expression: Expression, valueToTrim?: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
+// @beta
 function map(elements: Record<string, unknown>): FunctionExpression;
 
 // @beta
@@ -2101,7 +2113,13 @@ declare namespace Pipelines {
         isType,
         Type,
         timestampTruncate,
-        split
+        split,
+        ltrim,
+        rtrim,
+        stringIndexOf,
+        stringRepeat,
+        stringReplaceAll,
+        stringReplaceOne
     }
 }
 export { Pipelines }
@@ -2507,6 +2525,12 @@ function round(fieldName: string, decimalPlaces: number | Expression): FunctionE
 // @beta
 function round(expression: Expression, decimalPlaces: number | Expression): FunctionExpression;
 
+// @beta
+function rtrim(fieldName: string, valueToTrim?: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
+// @beta
+function rtrim(expression: Expression, valueToTrim?: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
 // @public
 export function setLogFunction(logger: ((msg: string) => void) | null): void;
 
@@ -2557,6 +2581,30 @@ function stringContains(stringExpression: Expression, substring: string): Boolea
 
 // @beta
 function stringContains(stringExpression: Expression, substring: Expression): BooleanExpression;
+
+// @beta
+function stringIndexOf(fieldName: string, search: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
+// @beta
+function stringIndexOf(expression: Expression, search: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
+// @beta
+function stringRepeat(fieldName: string, repetitions: number | Expression): FunctionExpression;
+
+// @beta
+function stringRepeat(expression: Expression, repetitions: number | Expression): FunctionExpression;
+
+// @beta
+function stringReplaceAll(fieldName: string, find: string | Expression | Uint8Array | Buffer, replacement: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
+// @beta
+function stringReplaceAll(expression: Expression, find: string | Expression | Uint8Array | Buffer, replacement: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
+// @beta
+function stringReplaceOne(fieldName: string, find: string | Expression | Uint8Array | Buffer, replacement: string | Expression | Uint8Array | Buffer): FunctionExpression;
+
+// @beta
+function stringReplaceOne(expression: Expression, find: string | Expression | Uint8Array | Buffer, replacement: string | Expression | Uint8Array | Buffer): FunctionExpression;
 
 // @beta
 function stringReverse(stringExpression: Expression): FunctionExpression;

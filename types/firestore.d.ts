@@ -4297,6 +4297,46 @@ declare namespace FirebaseFirestore {
       ): FunctionExpression;
       /**
        * @beta
+       * Trims whitespace or a specified set of characters/bytes from the beginning of a string or byte array.
+       *
+       * @example
+       * ```typescript
+       * // Trim whitespace from the beginning of the 'userInput' field
+       * field("userInput").ltrim();
+       *
+       * // Trim quotes from the beginning of the 'userInput' field
+       * field("userInput").ltrim('"');
+       * ```
+       *
+       * @param valueToTrim Optional. A string or byte array containing the characters/bytes to trim.
+       * If not specified, whitespace will be trimmed.
+       * @returns A new `Expression` representing the trimmed string.
+       */
+      ltrim(
+        valueToTrim?: string | Expression | Uint8Array | Buffer,
+      ): FunctionExpression;
+      /**
+       * @beta
+       * Trims whitespace or a specified set of characters/bytes from the end of a string or byte array.
+       *
+       * @example
+       * ```typescript
+       * // Trim whitespace from the end of the 'userInput' field
+       * field("userInput").rtrim();
+       *
+       * // Trim quotes from the end of the 'userInput' field
+       * field("userInput").rtrim('"');
+       * ```
+       *
+       * @param valueToTrim Optional. A string or byte array containing the characters/bytes to trim.
+       * If not specified, whitespace will be trimmed.
+       * @returns A new `Expression` representing the trimmed string or byte array.
+       */
+      rtrim(
+        valueToTrim?: string | Expression | Uint8Array | Buffer,
+      ): FunctionExpression;
+      /**
+       * @beta
        * Creates an expression that concatenates string expressions together.
        *
        * @example
@@ -4312,6 +4352,72 @@ declare namespace FirebaseFirestore {
       stringConcat(
         secondString: Expression | string,
         ...otherStrings: Array<Expression | string>
+      ): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that finds the index of the first occurrence of a substring or byte sequence.
+       *
+       * @example
+       * ```typescript
+       * // Find the index of "foo" in the 'text' field
+       * field("text").stringIndexOf("foo");
+       * ```
+       *
+       * @param search The substring or byte sequence to search for.
+       * @returns A new `Expression` representing the index of the first occurrence.
+       */
+      stringIndexOf(
+        search: string | Expression | Uint8Array | Buffer,
+      ): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that repeats a string or byte array a specified number of times.
+       *
+       * @example
+       * ```typescript
+       * // Repeat the 'label' field 3 times
+       * field("label").stringRepeat(3);
+       * ```
+       *
+       * @param repetitions The number of times to repeat the string or byte array.
+       * @returns A new `Expression` representing the repeated string or byte array.
+       */
+      stringRepeat(repetitions: number | Expression): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that replaces all occurrences of a substring or byte sequence with a replacement.
+       *
+       * @example
+       * ```typescript
+       * // Replace all occurrences of "foo" with "bar" in the 'text' field
+       * field("text").stringReplaceAll("foo", "bar");
+       * ```
+       *
+       * @param find The substring or byte sequence to search for.
+       * @param replacement The replacement string or byte sequence.
+       * @returns A new `Expression` representing the string or byte array with replacements.
+       */
+      stringReplaceAll(
+        find: string | Expression | Uint8Array | Buffer,
+        replacement: string | Expression | Uint8Array | Buffer,
+      ): FunctionExpression;
+      /**
+       * @beta
+       * Creates an expression that replaces the first occurrence of a substring or byte sequence with a replacement.
+       *
+       * @example
+       * ```typescript
+       * // Replace the first occurrence of "foo" with "bar" in the 'text' field
+       * field("text").stringReplaceOne("foo", "bar");
+       * ```
+       *
+       * @param find The substring or byte sequence to search for.
+       * @param replacement The replacement string or byte sequence.
+       * @returns A new `Expression` representing the string or byte array with the replacement.
+       */
+      stringReplaceOne(
+        find: string | Expression | Uint8Array | Buffer,
+        replacement: string | Expression | Uint8Array | Buffer,
       ): FunctionExpression;
       /**
        * @beta
