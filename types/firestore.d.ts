@@ -10689,33 +10689,43 @@ declare namespace FirebaseFirestore {
     };
 
     /**
-     * @beta
+     * @internal
      * Defines the possible return types of a DeleteStage.
      */
     export type DeleteReturn = 'EMPTY' | 'DOCUMENT_ID';
 
     /**
      * @beta
-     * Options defining how a DeleteStage is evaluated.
+     * Options defining how a DeleteStage is evaluated. This is currently a placeholder.
      */
-    export type DeleteStageOptions = StageOptions & {
-      returns?: DeleteReturn;
-    };
+    export type DeleteStageOptions = StageOptions & {};
 
     /**
-     * @beta
+     * @internal
+     * Defines the possible return types of an UpdateStage.
+     */
+    export type UpdateReturn = 'EMPTY' | 'DOCUMENT_ID';
+
+    /**
+     * @internal
+     * Options defining how an UpdateStage is evaluated. This is currently a placeholder.
+     */
+    export type UpdateStageOptions = StageOptions & {};
+
+    /**
+     * @internal
      * Defines the possible return types of an UpsertStage.
      */
     export type UpsertReturn = 'EMPTY' | 'DOCUMENT_ID';
 
     /**
-     * @beta
+     * @internal
      * Defines the conflict resolution strategy for an UpsertStage.
      */
     export type ConflictResolution = 'OVERWRITE' | 'MERGE' | 'FAIL' | 'KEEP';
 
     /**
-     * @beta
+     * @internal
      * Options defining how an UpsertStage is evaluated.
      */
     export type UpsertStageOptions = StageOptions & {
@@ -10725,19 +10735,16 @@ declare namespace FirebaseFirestore {
     };
 
     /**
-     * @beta
+     * @internal
      * Defines the possible return types of an InsertStage.
      */
     export type InsertReturn = 'EMPTY' | 'DOCUMENT_ID';
 
     /**
      * @beta
-     * Options defining how an InsertStage is evaluated.
+     * Options defining how an InsertStage is evaluated. This is currently a placeholder.
      */
-    export type InsertStageOptions = StageOptions & {
-      returns?: InsertReturn;
-      transformations?: Record<string, unknown>;
-    };
+    export type InsertStageOptions = StageOptions & {};
     /**
      * @beta
      * Options defining how an AddFieldsStage is evaluated. See {@link Pipeline.addFields}.

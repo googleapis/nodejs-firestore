@@ -98,6 +98,7 @@ import {
   InternalDocumentsStageOptions,
   InternalCollectionGroupStageOptions,
   InternalCollectionStageOptions,
+  UpdateStage,
 } from './stage';
 import {StructuredPipeline} from './structured-pipeline';
 import Selectable = FirebaseFirestore.Pipelines.Selectable;
@@ -1563,6 +1564,50 @@ export class Pipeline implements firestore.Pipelines.Pipeline {
         : undefined
     ) as firestore.Pipelines.DeleteStageOptions | undefined;
     return this._addStage(new DeleteStage(target, options));
+  }
+
+  /**
+   * @beta
+   * Performs an update operation using documents from previous stages.
+   *
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
+  update(): Pipeline;
+  /**
+   * @beta
+   * Performs an update operation using documents from previous stages.
+   *
+   * @param collectionNameOrRef - The collection to update.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
+  update(collectionNameOrRef: string | firestore.CollectionReference): Pipeline;
+  /**
+   * @beta
+   * Performs an update operation using documents from previous stages.
+   *
+   * @param options - The {@code UpdateStageOptions} to apply to the stage.
+   * @return A new {@code Pipeline} object with this stage appended to the stage list.
+   */
+  update(options: firestore.Pipelines.UpdateStageOptions): Pipeline;
+  update(
+    optionsOrCollection?:
+      | string
+      | firestore.CollectionReference
+      | firestore.Pipelines.UpdateStageOptions,
+  ): Pipeline {
+    let target = undefined;
+    if (typeof optionsOrCollection === 'string') {
+      target = this.db.collection(optionsOrCollection);
+    } else if (isCollectionReference(optionsOrCollection)) {
+      target = optionsOrCollection;
+    }
+    const options = (
+      !isCollectionReference(optionsOrCollection) &&
+      typeof optionsOrCollection !== 'string'
+        ? optionsOrCollection
+        : undefined
+    ) as firestore.Pipelines.UpdateStageOptions | undefined;
+    return this._addStage(new UpdateStage(target, options));
   }
 
   /**

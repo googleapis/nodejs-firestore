@@ -314,42 +314,57 @@ describe.skipClassic('Pipeline class', () => {
         const docRef = randomCol.doc('testDelete');
         await docRef.set({foo: 'bar'});
 
-        const ppl = firestore
+        const deletePpl = firestore
           .pipeline()
           .collection(randomCol.path)
-          .where(equal(field('__name__'), 'testDelete'))
+          .where(equal(field('__name__').documentId(), docRef.id))
           .delete();
 
-        const res = await ppl.execute();
-        expect(res.results.length).to.equal(0);
+        const deleteRes = await deletePpl.execute();
+        expectResults(deleteRes, {documents_modified: 1});
 
-        // verify document was deleted
+        // Verify 'testDelete' document was deleted
         const docSnap = await docRef.get();
         expect(docSnap.exists).to.be.false;
       });
 
-      it('can execute delete stage with returns document id', async () => {
+      it('can execute delete stage within a transaction', async () => {
         const docRef = randomCol.doc('testDelete');
         await docRef.set({foo: 'bar'});
+        await firestore.runTransaction(async transaction => {
+          const deletePpl = firestore
+            .pipeline()
+            .collection(randomCol.path)
+            .where(equal(field('__name__').documentId(), docRef.id))
+            .delete();
+
+          const deleteRes = await transaction.execute(deletePpl);
+          expectResults(deleteRes, {documents_modified: 1});
+        });
+
+        // Verify 'testDelete' document was deleted
+        const docSnap = await docRef.get();
+        expect(docSnap.exists).to.be.false;
+      });
+
+      it('can execute update stage', async () => {
+        randomCol.doc('testUpdate');
 
         const ppl = firestore
           .pipeline()
           .collection(randomCol.path)
           .where(equal(field('__name__'), 'testDelete'))
-          .delete({
-            returns: 'DOCUMENT_ID',
-          });
+          .addFields(
+            field('__name__').as('id'),
+            'upserted_value' as unknown as Pipelines.Selectable, // Hardcoded values inside addFields need specific treatment or aren't supported
+          )
+          .update(randomCol.path);
 
-        const res = await ppl.execute();
-        expect(res.results.length).to.equal(0);
-
-        // verify document was deleted
-        const docSnap = await docRef.get();
-        expect(docSnap.exists).to.be.false;
+        await ppl.execute();
       });
 
       it('can execute upsert stage', async () => {
-        const docRef = randomCol.doc('testUpsert');
+        randomCol.doc('testUpsert');
 
         const ppl = firestore
           .pipeline()
@@ -366,7 +381,7 @@ describe.skipClassic('Pipeline class', () => {
       });
 
       it('can execute insert stage', async () => {
-        const docRef = randomCol.doc('testInsert');
+        randomCol.doc('testInsert');
 
         const ppl = firestore
           .pipeline()

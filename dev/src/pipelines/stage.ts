@@ -709,6 +709,40 @@ export class DeleteStage implements Stage {
     };
   }
 }
+/**
+ * Update stage.
+ */
+export class UpdateStage implements Stage {
+  name = 'update';
+  readonly optionsUtil = new OptionsUtil({
+    returns: {serverName: 'returns'},
+    conflict_resolution: {serverName: 'conflict_resolution'},
+    transformations: {serverName: 'transformations'},
+    transactional: {serverName: 'transactional'},
+  });
+
+  constructor(
+    private target?: firestore.CollectionReference,
+    private rawOptions?: firestore.Pipelines.UpdateStageOptions,
+  ) {}
+
+  _toProto(serializer: Serializer): api.Pipeline.IStage {
+    const args: api.IValue[] = [];
+    if (this.target) {
+      args.push({referenceValue: this.target.path});
+    }
+
+    return {
+      name: this.name,
+      args,
+      options: this.optionsUtil.getOptionsProto(
+        serializer,
+        {},
+        this.rawOptions,
+      ),
+    };
+  }
+}
 
 /**
  * Upsert stage.
